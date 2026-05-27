@@ -25,7 +25,7 @@ website:
       All other materials <a href= "https://creativecommons.org/licenses/by-nc/4.0/us/" style="color: #0000FF;"> CC BY-NC 4.0 </a> unless noted otherwise.
     right:
       - icon: github
-        href: https://github.com/opencasestudies/ocs-bio-pycogaps
+        href: https://github.com/opencasestudies/ocs-bio-latent-variable
 
 brand: _brand.yml
 format:
