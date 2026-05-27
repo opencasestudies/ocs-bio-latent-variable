@@ -8,7 +8,7 @@ website:
     search: true
     right:
       - icon: github
-        href: https://github.com/opencasestudies/ocs-bio-pycogaps
+        href: https://github.com/opencasestudies/ocs-bio-latent-variable
   sidebar:
     logo-href: "https://www.opencasestudies.org/"
     logo: "assets/Bio-OCS_Logo.png"
