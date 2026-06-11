@@ -1,40 +1,112 @@
+<!--
+The disclaimer block, license block, and funding info generally will not need updated
+
+Please update the access information (e.g., github link and data access)
+as well as any system or server requirements to work with the data
+-->
+
+::: {.panel-tabset .frontmatter-tabs}
+
+#### Disclaimer
+
 :::{.disclaimer_box}
 ::::{.disclaimer_box_header}
 Disclaimer
 ::::
 ::::{.inner_block}
-The purpose of the [Open Case Studies](https://opencasestudies.github.io){target="_blank"} project is **to demonstrate the use of various data science methods, tools, and software in the context of messy, real-world data**. A given case study does not cover all aspects of the research process, is not claiming to be the most appropriate way to analyze a given data set, and should not be used in the context of making policy decisions without external consultation from scientific experts. In addition, due to size constraints, datasets used within a case study may be subset of the original/full dataset.
+The purpose of the [Open Case Studies](https://opencasestudies.github.io){target="_blank"} project is **to demonstrate the use of various data science methods, tools, and software in the context of messy, real-world data**. A given case study does not cover all aspects of the research process, is not claiming to be the most appropriate way to analyze a given data set, and should not be used in the context of making policy or clinical decisions without external consultation from scientific experts or medical care professionals. In addition, due to size constraints, datasets used within a case study may be subset of the original/full dataset.
 ::::
 :::
+
+#### License 
 
 :::{.license_box}
 ::::{.license_box_header}
 License information
 ::::
 ::::{.inner_block}
-This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 [(CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/deed.en){target="_blank"} United States License.
+This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 [(CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/deed.en){target="_blank"}  United States License.
 ::::
 :::
 
+#### Funding
+
+:::{.funding_box}
+::::{.funding_box_header}
+Funding information
+::::
+::::{.inner_block}
 This work is funded through the National Institutes of Health, specifically the National Institute of General Medical Sciences: Grant Number 1R25GM160622.
+::::
+:::
 
----
+#### Citation
 
-To access the GitHub repository for this case study, see [opencasestudies/ocs-bio-latent-variable](https://github.com/opencasestudies/ocs-bio-latent-variable){target="_blank"}.
+{{< include _cite.qmd >}}
 
-The draft data files included with this first-pass project are cached analysis objects and results derived from a processed PBMC single-cell RNA-seq dataset. The default learner path uses these cached files:
+#### GitHub Repository 
 
-| File | Purpose |
-| --- | --- |
-| `data/processed/preprocessed_cells_hvg3000.h5ad` | Processed cells x genes AnnData object |
-| `data/processed/cogaps_input_genesxcells_hvg3000_float64.h5ad` | Optional cached genes x cells CoGAPS input |
-| `data/results_r_k6_sparse_mt_t4_heavy/cogaps_K6_seed2_iter2000.metrics.json` | Selected R K6 model metadata |
-| `data/results_r_k6_sparse_mt_t4_heavy/pattern_gene_weights.tsv.gz` | Lightweight exported R gene-weight matrix for render-safe fallbacks |
-| `data/results_r_k6_sparse_mt_t4_heavy/pattern_cell_activities.tsv.gz` | Lightweight exported R cell-activity matrix for render-safe fallbacks |
-| `data/results_r_k6_sparse_mt_t4_heavy/pattern_gene_directionality_global.csv` | Targeted R directionality results for top pattern genes |
+<!--
+UPDATE: ACCESS Information (github source and data)
+In this space, provide an open access link to the case study source files.
+This is necessary for users to get access to case study data, at a minimum.
+See the following example from a previous case study (prior to Motivation section): https://www.opencasestudies.org/ocs-bp-co2-emissions/
+-->
 
-The main case-study workflow does not require a cluster. Learners can complete the case study by loading the lightweight selected R K6 pattern tables. If the full R `.rds` or Python `.h5ad` model files are available locally, the same workflow can load those larger files; otherwise the render-safe pattern tables are sufficient for the main interpretation. Running one local CoGAPS model is included as an optional exercise and may take substantial time depending on the learner's computer.
+:::{.github_repo_box}
+::::{.github_repo_box_header}
+GitHub repository
+::::
+::::{.inner_block}
+To access the GitHub repository for this case study see here: {LINK}
+::::
+:::
 
-The full SLURM sweep used to justify the chosen `K` is documented as optional instructor or advanced-user material in the Additional Information section.
+<!--
+If the data isn't in the main github repository, be sure to describe and link to the open source location of the data and how to access it
+-->
 
----
+#### Keywords
+
+:::{.keyword_box}
+::::{.keyword_box_header}
+Keywords
+::::
+::::{.inner_block}
+* Keyword 1
+* Keyword 2
+* Keyword 3
+* ...Keyword n
+
+<!-- Note that keywords should be the types of words that you'd use for a conference abstract or grant submission; focus on the emerging tech or best practice that is being covered as well as the specific part of the task/analysis/visualization that is being shown. Just a quick way to overview what skills/topics are part of the case study -->
+
+::::
+:::
+
+<!--
+Include bioOCSdata package information once ready/applicable
+-->
+:::
+
+## Prerequisites
+
+:::{.prereq_box}
+::::{.prereq_box_header}
+Prerequisites
+::::
+::::{.inner_block}
+Add a list of prerequisites here.
+::::
+:::
+
+
+
+<!--
+UPDATE: SYSTEM, SERVER, or MOCK COMPUTING Information:
+
+In this space, provide any necessary system requirements or instructions on how to access a server (if necessary)
+or submit a mock computing job within the learnr environment in order to receive pre-processed datasets (if necessary).
+In essence this section is useful to provide information to learners on how to work with the data and follow along with this case study.
+This section may not be needed for all case studies and can be removed if not
+-->
+
