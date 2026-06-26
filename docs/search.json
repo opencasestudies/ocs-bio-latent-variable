@@ -1,5 +1,12 @@
 [
   {
+    "objectID": "index.html#prerequisites",
+    "href": "index.html#prerequisites",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Prerequisites",
+    "text": "Prerequisites\n\n\nPrerequisites\n\n\nAdd a list of prerequisites here."
+  },
+  {
     "objectID": "index.html#analysis-packages",
     "href": "index.html#analysis-packages",
     "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
@@ -168,6 +175,13 @@
     "text": "Main Questions Revisited\n\n\n\n\n\n\n\n\n\nQuestion\nCurrent answer\nCaveat\n\n\n\n\nWhat latent transcriptional programs are present?\nThe selected K = 6 model contains six patterns, including a strong IFN-associated pattern and several compartment-linked candidates.\nNot every pattern has a settled biological label.\n\n\nCan CoGAPS distinguish stimulation activity from cell-type-linked structure?\nThe IFN-associated pattern is consistent with a broad activity-like IFN program, while other patterns are more compartment-linked.\nThis is descriptive interpretation, not formal validation of all patterns.\n\n\nWhich genes define the strongest IFN-associated pattern?\nThe IFN-associated pattern is anchored by canonical interferon-stimulated genes.\nEnrichment analysis would strengthen the final biological claim.\n\n\nAre those genes up or down in stimulation?\nMost top IFN-associated pattern genes are up in stimulation; FTH1 is down.\nThis is targeted directionality, not genome-wide differential expression.\n\n\nHow does the IFN-associated pattern vary across cell types?\nIt is broad but non-uniform across PBMC cell types.\nCell-type differences are descriptive unless additional donor-aware inference is added."
   },
   {
+    "objectID": "index.html#advancement-exercises",
+    "href": "index.html#advancement-exercises",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Advancement Exercises",
+    "text": "Advancement Exercises\nUse this section to suggest different levels of exercises that build upon topics from the case study … next steps, tangential skills, diving deeper into a side quest, etc.\nPerhaps explain how the suggested exercises relate to the common next steps.\n\nBeginner\n\n\nIntermediate\n\n\nAdvanced"
+  },
+  {
     "objectID": "index.html#helpful-links",
     "href": "index.html#helpful-links",
     "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
@@ -210,6 +224,20 @@
     "text": "Directionality analysis provenance\nThe directionality analysis used in the main case study was generated with:\n\nscripts/pattern_directionality_analysis_r.R\ndata/results_r_k6_sparse_mt_t4_heavy/pattern_gene_directionality_global.csv\ndata/results_r_k6_sparse_mt_t4_heavy/pattern_gene_directionality_by_celltype.csv\ndata/results_r_k6_sparse_mt_t4_heavy/pattern_direction_summary.csv\n\nIt is a targeted analysis of top CoGAPS pattern genes, not a genome-wide differential-expression analysis."
   },
   {
+    "objectID": "index.html#glossary",
+    "href": "index.html#glossary",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "Glossary",
+    "text": "Glossary\n\n\n\n\nTerm\nDefinition\n\n\nTerm 1\nDefinition of Term 1\n\n\nTerm2\nDefinition of Term 2"
+  },
+  {
+    "objectID": "index.html#references",
+    "href": "index.html#references",
+    "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
+    "section": "References",
+    "text": "References"
+  },
+  {
     "objectID": "index.html#session-info",
     "href": "index.html#session-info",
     "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
@@ -221,6 +249,6 @@
     "href": "index.html#acknowledgments",
     "title": "Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS",
     "section": "Acknowledgments",
-    "text": "Acknowledgments\n\nWe would like to acknowledge the National Institute of General Medical Sciences for funding this work (1R25GM160622).\nThis draft case study uses public PBMC IFN-beta stimulation single-cell RNA-seq data from Kang et al. and builds on the CoGAPS and scCoGAPS method literature. The case-study structure is based on the Biomedical Open Case Studies Quarto template and OTTR infrastructure.\nIcons are from iconpacks."
+    "text": "Acknowledgments\n\n\nWe would also like to acknowledge the National Institute of General Medical Sciences for funding this work (1R25GM160622).\nIcons are from iconpacks."
   }
 ]
