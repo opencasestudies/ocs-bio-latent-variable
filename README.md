@@ -10,7 +10,7 @@ This is not yet a publication-ready case study. It is a full first draft intende
 
 Known items to finalize:
 
-- repository landing page and public documentation polish for `https://github.com/oothomas/ocs-bio-pycogaps-case-study-4`
+- repository landing page and public documentation polish for `https://github.com/opencasestudies/ocs-bio-latent-variable`
 - author list and citation text
 - package/environment instructions beyond the current OpenMP runtime image `othomas2/pycogaps-runtime-guide:0.3.0`
 - final policy for distributing optional full model objects separately from lightweight GitHub artifacts

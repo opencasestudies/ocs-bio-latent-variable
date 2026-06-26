@@ -607,62 +607,54 @@ gtag('config', 'G-TPVRZESY0B', { 'anonymize_ip': true});
 <span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>R_DIRECTION_CELLTYPE_CSV_R <span class="ot">&lt;-</span> <span class="fu">file.path</span>(R_K6_RESULTS_DIR_R, <span class="st">"pattern_gene_directionality_by_celltype.csv"</span>)</span>
 <span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>R_DIRECTION_SUMMARY_CSV_R <span class="ot">&lt;-</span> <span class="fu">file.path</span>(R_K6_RESULTS_DIR_R, <span class="st">"pattern_direction_summary.csv"</span>)</span>
 <span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>PY_CHOSEN_RESULT_H5AD_R <span class="ot">&lt;-</span> <span class="fu">resolve_first_existing_r</span>(</span>
-<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(SELECTED_RESULTS_DIR_R, <span class="st">"cogaps_K6_seed2_iter2000.h5ad"</span>),</span>
-<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(PY_RESULTS_DIR_R, <span class="st">"cogaps_K7_seed2_iter2000.h5ad"</span>),</span>
-<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(LEGACY_RESULTS_DIR_R, <span class="st">"cogaps_K7_seed2_iter2000.h5ad"</span>)</span>
-<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>PY_CHOSEN_METRICS_JSON_R <span class="ot">&lt;-</span> <span class="fu">resolve_first_existing_r</span>(</span>
-<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(SELECTED_RESULTS_DIR_R, <span class="st">"cogaps_K6_seed2_iter2000.metrics.json"</span>),</span>
-<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(PY_RESULTS_DIR_R, <span class="st">"cogaps_K7_seed2_iter2000.metrics.json"</span>),</span>
-<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(LEGACY_RESULTS_DIR_R, <span class="st">"cogaps_K7_seed2_iter2000.metrics.json"</span>)</span>
-<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>PY_CHOSEN_RESULT_H5AD_R <span class="ot">&lt;-</span> <span class="fu">file.path</span>(SELECTED_RESULTS_DIR_R, <span class="st">"cogaps_K6_seed2_iter2000.h5ad"</span>)</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>PY_CHOSEN_METRICS_JSON_R <span class="ot">&lt;-</span> <span class="fu">file.path</span>(SELECTED_RESULTS_DIR_R, <span class="st">"cogaps_K6_seed2_iter2000.metrics.json"</span>)</span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>HAS_R_CHOSEN_RESULT_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_CHOSEN_RESULT_RDS_R)</span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_PATTERN_GENE_WEIGHTS_TSV_GZ_R) <span class="sc">&amp;&amp;</span> <span class="fu">file.exists</span>(R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R)</span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>HAS_R_LIGHTWEIGHT_ACTIVITY_METADATA_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ_R)</span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_TOP_GENES_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_PATTERN_TOP_GENES_CSV_R)</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_CORRELATIONS_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_PATTERN_CORRELATIONS_CSV_R)</span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_ACTIVITY_BY_CELLTYPE_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV_R)</span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_SUMMARY_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_PATTERN_SUMMARY_CSV_R)</span>
 <span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>HAS_R_CHOSEN_RESULT_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_CHOSEN_RESULT_RDS_R)</span>
-<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_PATTERN_GENE_WEIGHTS_TSV_GZ_R) <span class="sc">&amp;&amp;</span> <span class="fu">file.exists</span>(R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R)</span>
-<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>HAS_R_LIGHTWEIGHT_ACTIVITY_METADATA_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ_R)</span>
-<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_TOP_GENES_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_PATTERN_TOP_GENES_CSV_R)</span>
-<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_CORRELATIONS_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_PATTERN_CORRELATIONS_CSV_R)</span>
-<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_ACTIVITY_BY_CELLTYPE_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV_R)</span>
-<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_SUMMARY_R <span class="ot">&lt;-</span> <span class="fu">file.exists</span>(R_PATTERN_SUMMARY_CSV_R)</span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>R_ANALYSIS_MODE_R <span class="ot">&lt;-</span> <span class="cf">if</span> (HAS_R_CHOSEN_RESULT_R) {</span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>  <span class="st">"full_chosen_result"</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> <span class="cf">if</span> (HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R) {</span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>  <span class="st">"lightweight_derived"</span></span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>  <span class="st">"unavailable"</span></span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>R_ANALYSIS_MODE_R <span class="ot">&lt;-</span> <span class="cf">if</span> (HAS_R_CHOSEN_RESULT_R) {</span>
-<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>  <span class="st">"full_chosen_result"</span></span>
-<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> <span class="cf">if</span> (HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R) {</span>
-<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>  <span class="st">"lightweight_derived"</span></span>
-<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>  <span class="st">"unavailable"</span></span>
-<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>pattern_columns_r <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>  pats <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"^Pattern_?[0-9]+$"</span>, x, <span class="at">value =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>  pats[<span class="fu">order</span>(<span class="fu">as.integer</span>(<span class="fu">sub</span>(<span class="st">"^Pattern_?"</span>, <span class="st">""</span>, pats)))]</span>
-<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>canonicalize_pattern_names_r <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sub</span>(<span class="st">"^Pattern_?([0-9]+)$"</span>, <span class="st">"Pattern</span><span class="sc">\\</span><span class="st">1"</span>, x)</span>
-<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>top_genes_from_matrix_r <span class="ot">&lt;-</span> <span class="cf">function</span>(matrix, pattern, <span class="at">n =</span> <span class="dv">15</span>) {</span>
-<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>  ordered <span class="ot">&lt;-</span> <span class="fu">sort</span>(matrix[, pattern], <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>  ordered <span class="ot">&lt;-</span> <span class="fu">head</span>(ordered, n)</span>
-<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
-<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>    <span class="at">gene =</span> <span class="fu">names</span>(ordered),</span>
-<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>    <span class="at">weight =</span> <span class="fu">unname</span>(ordered)</span>
-<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>load_lightweight_pattern_matrices_r <span class="ot">&lt;-</span> <span class="cf">function</span>(weights_path, activities_path) {</span>
-<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>  A <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(weights_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>    tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="st">"gene"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>(<span class="at">check.names =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a>  P <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(activities_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a>    tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="st">"cell_barcode"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>(<span class="at">check.names =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(A) <span class="ot">&lt;-</span> <span class="fu">canonicalize_pattern_names_r</span>(<span class="fu">colnames</span>(A))</span>
-<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(P) <span class="ot">&lt;-</span> <span class="fu">canonicalize_pattern_names_r</span>(<span class="fu">colnames</span>(P))</span>
-<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">A =</span> A, <span class="at">P =</span> P)</span>
-<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>pattern_columns_r <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>  pats <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"^Pattern_?[0-9]+$"</span>, x, <span class="at">value =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>  pats[<span class="fu">order</span>(<span class="fu">as.integer</span>(<span class="fu">sub</span>(<span class="st">"^Pattern_?"</span>, <span class="st">""</span>, pats)))]</span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>canonicalize_pattern_names_r <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sub</span>(<span class="st">"^Pattern_?([0-9]+)$"</span>, <span class="st">"Pattern</span><span class="sc">\\</span><span class="st">1"</span>, x)</span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>top_genes_from_matrix_r <span class="ot">&lt;-</span> <span class="cf">function</span>(matrix, pattern, <span class="at">n =</span> <span class="dv">15</span>) {</span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>  ordered <span class="ot">&lt;-</span> <span class="fu">sort</span>(matrix[, pattern], <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>  ordered <span class="ot">&lt;-</span> <span class="fu">head</span>(ordered, n)</span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>    <span class="at">gene =</span> <span class="fu">names</span>(ordered),</span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>    <span class="at">weight =</span> <span class="fu">unname</span>(ordered)</span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>load_lightweight_pattern_matrices_r <span class="ot">&lt;-</span> <span class="cf">function</span>(weights_path, activities_path) {</span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>  A <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(weights_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>    tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="st">"gene"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>(<span class="at">check.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>  P <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(activities_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>    tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="st">"cell_barcode"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>(<span class="at">check.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(A) <span class="ot">&lt;-</span> <span class="fu">canonicalize_pattern_names_r</span>(<span class="fu">colnames</span>(A))</span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(P) <span class="ot">&lt;-</span> <span class="fu">canonicalize_pattern_names_r</span>(<span class="fu">colnames</span>(P))</span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">A =</span> A, <span class="at">P =</span> P)</span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
@@ -694,190 +686,182 @@ gtag('config', 'G-TPVRZESY0B', { 'anonymize_ip': true});
 <span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>COGAPS_INPUT_H5AD <span class="op">=</span> PROCESSED_DIR <span class="op">/</span> <span class="st">"cogaps_input_genesxcells_hvg3000_float64.h5ad"</span></span>
 <span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>PREPROCESS_CONFIG_JSON <span class="op">=</span> PROCESSED_DIR <span class="op">/</span> <span class="st">"preprocess_config_hvg3000.json"</span></span>
 <span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>PY_CHOSEN_RESULT_H5AD <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"cogaps_K6_seed2_iter2000.h5ad"</span>,</span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"cogaps_K7_seed2_iter2000.h5ad"</span>,</span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"cogaps_K7_seed2_iter2000.h5ad"</span>,</span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>PY_CHOSEN_METRICS_JSON <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"cogaps_K6_seed2_iter2000.metrics.json"</span>,</span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"cogaps_K7_seed2_iter2000.metrics.json"</span>,</span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"cogaps_K7_seed2_iter2000.metrics.json"</span>,</span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>PY_SUMMARY_BY_K_CSV <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    MODEL_SELECTION_DIR <span class="op">/</span> <span class="st">"phase1b_lowerk_long_summary.csv"</span>,</span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"summary_by_K.csv"</span>,</span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"summary_by_K.csv"</span>,</span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>PHASE1_LOWERK_SUMMARY_CSV <span class="op">=</span> MODEL_SELECTION_DIR <span class="op">/</span> <span class="st">"phase1_lowerk_summary.csv"</span></span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>PHASE1B_LOWERK_LONG_SUMMARY_CSV <span class="op">=</span> MODEL_SELECTION_DIR <span class="op">/</span> <span class="st">"phase1b_lowerk_long_summary.csv"</span></span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>PHASE3_HIGHK_SUMMARY_CSV <span class="op">=</span> MODEL_SELECTION_DIR <span class="op">/</span> <span class="st">"phase3_highk_2000_summary.csv"</span></span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>CANDIDATE_PATTERN_SUMMARY_CSV <span class="op">=</span> MODEL_SELECTION_DIR <span class="op">/</span> <span class="st">"candidate_pattern_summary.csv"</span></span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>CANDIDATE_K7_ACTIVITY_MATCHES_CSV <span class="op">=</span> MODEL_SELECTION_DIR <span class="op">/</span> <span class="st">"candidate_best_k7_activity_matches.csv"</span></span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>PY_PER_RUN_METRICS_CSV <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"per_run_metrics.csv"</span>,</span>
-<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"per_run_metrics.csv"</span>,</span>
-<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>PY_DIRECTION_GLOBAL_CSV <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_global.csv"</span>,</span>
-<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_global.csv"</span>,</span>
-<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_global.csv"</span>,</span>
-<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>PY_DIRECTION_CELLTYPE_CSV <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_by_celltype.csv"</span>,</span>
-<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_by_celltype.csv"</span>,</span>
-<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_by_celltype.csv"</span>,</span>
-<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>PY_DIRECTION_SUMMARY_CSV <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_direction_summary.csv"</span>,</span>
-<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_direction_summary.csv"</span>,</span>
-<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_direction_summary.csv"</span>,</span>
-<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_GENE_WEIGHTS_TSV_GZ <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_weights.tsv.gz"</span>,</span>
-<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_weights.tsv.gz"</span>,</span>
-<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_weights.tsv.gz"</span>,</span>
-<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_CELL_ACTIVITIES_TSV_GZ <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities.tsv.gz"</span>,</span>
-<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities.tsv.gz"</span>,</span>
-<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities.tsv.gz"</span>,</span>
-<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities_with_metadata.csv.gz"</span>,</span>
-<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities_with_metadata.csv.gz"</span>,</span>
-<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities_with_metadata.csv.gz"</span>,</span>
-<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_TOP_GENES_CSV <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_top_genes.csv"</span>,</span>
-<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_top_genes.csv"</span>,</span>
-<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_top_genes.csv"</span>,</span>
-<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_CORRELATIONS_CSV <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_correlations.csv"</span>,</span>
-<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_correlations.csv"</span>,</span>
-<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_correlations.csv"</span>,</span>
-<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_celltype_condition.csv"</span>,</span>
-<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_celltype_condition.csv"</span>,</span>
-<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_celltype_condition.csv"</span>,</span>
-<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_replicate_condition.csv"</span>,</span>
-<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_replicate_condition.csv"</span>,</span>
-<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_replicate_condition.csv"</span>,</span>
-<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_SUMMARY_CSV <span class="op">=</span> resolve_first_existing(</span>
-<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_summary.csv"</span>,</span>
-<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_summary.csv"</span>,</span>
-<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_summary.csv"</span>,</span>
-<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>R_CHOSEN_RESULT_RDS <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"cogaps_K6_seed2_iter2000.rds"</span></span>
-<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>R_CHOSEN_METRICS_JSON <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"cogaps_K6_seed2_iter2000.metrics.json"</span></span>
-<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>R_PATTERN_GENE_WEIGHTS_TSV_GZ <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_weights.tsv.gz"</span></span>
-<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>R_PATTERN_CELL_ACTIVITIES_TSV_GZ <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities.tsv.gz"</span></span>
-<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a>R_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities_with_metadata.csv.gz"</span></span>
-<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>R_PATTERN_TOP_GENES_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_top_genes.csv"</span></span>
-<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>R_PATTERN_CORRELATIONS_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_correlations.csv"</span></span>
-<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_celltype_condition.csv"</span></span>
-<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>R_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_replicate_condition.csv"</span></span>
-<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>R_PATTERN_SUMMARY_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_summary.csv"</span></span>
-<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a>R_DIRECTION_GLOBAL_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_global.csv"</span></span>
-<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a>R_DIRECTION_CELLTYPE_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_by_celltype.csv"</span></span>
-<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a>R_DIRECTION_SUMMARY_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_direction_summary.csv"</span></span>
-<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>CHOSEN_K <span class="op">=</span> <span class="dv">6</span></span>
-<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>CHOSEN_SEED <span class="op">=</span> <span class="dv">2</span></span>
-<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>CHOSEN_ITER <span class="op">=</span> <span class="dv">2000</span></span>
-<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>STIM_LABEL <span class="op">=</span> <span class="st">"stim"</span></span>
-<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>HAS_CACHED_COGAPS_INPUT <span class="op">=</span> COGAPS_INPUT_H5AD.exists()</span>
-<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>HAS_PY_CHOSEN_RESULT <span class="op">=</span> PY_CHOSEN_RESULT_H5AD.exists()</span>
-<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a>HAS_PY_LIGHTWEIGHT_PATTERN_MATRICES <span class="op">=</span> (</span>
-<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>    PY_PATTERN_GENE_WEIGHTS_TSV_GZ.exists() <span class="kw">and</span> PY_PATTERN_CELL_ACTIVITIES_TSV_GZ.exists()</span>
-<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>HAS_PY_LIGHTWEIGHT_ACTIVITY_METADATA <span class="op">=</span> PY_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ.exists()</span>
-<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>HAS_PY_PATTERN_TOP_GENES <span class="op">=</span> PY_PATTERN_TOP_GENES_CSV.exists()</span>
-<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a>HAS_PY_PATTERN_CORRELATIONS <span class="op">=</span> PY_PATTERN_CORRELATIONS_CSV.exists()</span>
-<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a>HAS_PY_PATTERN_ACTIVITY_BY_CELLTYPE <span class="op">=</span> PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV.exists()</span>
-<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>HAS_PY_PATTERN_SUMMARY <span class="op">=</span> PY_PATTERN_SUMMARY_CSV.exists()</span>
-<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>HAS_R_CHOSEN_RESULT <span class="op">=</span> R_CHOSEN_RESULT_RDS.exists()</span>
-<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>HAS_R_LIGHTWEIGHT_PATTERN_MATRICES <span class="op">=</span> (</span>
-<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a>    R_PATTERN_GENE_WEIGHTS_TSV_GZ.exists() <span class="kw">and</span> R_PATTERN_CELL_ACTIVITIES_TSV_GZ.exists()</span>
-<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>HAS_R_LIGHTWEIGHT_ACTIVITY_METADATA <span class="op">=</span> R_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ.exists()</span>
-<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_TOP_GENES <span class="op">=</span> R_PATTERN_TOP_GENES_CSV.exists()</span>
-<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_CORRELATIONS <span class="op">=</span> R_PATTERN_CORRELATIONS_CSV.exists()</span>
-<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_ACTIVITY_BY_CELLTYPE <span class="op">=</span> R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV.exists()</span>
-<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_SUMMARY <span class="op">=</span> R_PATTERN_SUMMARY_CSV.exists()</span>
-<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a>PY_ANALYSIS_MODE <span class="op">=</span> (</span>
-<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a>    <span class="st">"full_chosen_result"</span></span>
-<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> HAS_PY_CHOSEN_RESULT</span>
-<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"lightweight_derived"</span></span>
-<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> HAS_PY_LIGHTWEIGHT_PATTERN_MATRICES</span>
-<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"unavailable"</span></span>
-<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a>R_ANALYSIS_MODE <span class="op">=</span> (</span>
-<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a>    <span class="st">"full_chosen_result"</span></span>
-<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> HAS_R_CHOSEN_RESULT</span>
-<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"lightweight_derived"</span></span>
-<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> HAS_R_LIGHTWEIGHT_PATTERN_MATRICES</span>
-<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"unavailable"</span></span>
-<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a><span class="co"># Backward-compatible aliases used by the Python chunks below.</span></span>
-<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a>CHOSEN_RESULT_H5AD <span class="op">=</span> PY_CHOSEN_RESULT_H5AD</span>
-<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a>CHOSEN_METRICS_JSON <span class="op">=</span> PY_CHOSEN_METRICS_JSON</span>
-<span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a>SUMMARY_BY_K_CSV <span class="op">=</span> PY_SUMMARY_BY_K_CSV</span>
-<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a>PER_RUN_METRICS_CSV <span class="op">=</span> PY_PER_RUN_METRICS_CSV</span>
-<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a>DIRECTION_GLOBAL_CSV <span class="op">=</span> PY_DIRECTION_GLOBAL_CSV</span>
-<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a>DIRECTION_CELLTYPE_CSV <span class="op">=</span> PY_DIRECTION_CELLTYPE_CSV</span>
-<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a>DIRECTION_SUMMARY_CSV <span class="op">=</span> PY_DIRECTION_SUMMARY_CSV</span>
-<span id="cb4-172"><a href="#cb4-172" aria-hidden="true" tabindex="-1"></a>PATTERN_GENE_WEIGHTS_TSV_GZ <span class="op">=</span> PY_PATTERN_GENE_WEIGHTS_TSV_GZ</span>
-<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a>PATTERN_CELL_ACTIVITIES_TSV_GZ <span class="op">=</span> PY_PATTERN_CELL_ACTIVITIES_TSV_GZ</span>
-<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a>PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ <span class="op">=</span> PY_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ</span>
-<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a>PATTERN_TOP_GENES_CSV <span class="op">=</span> PY_PATTERN_TOP_GENES_CSV</span>
-<span id="cb4-176"><a href="#cb4-176" aria-hidden="true" tabindex="-1"></a>PATTERN_CORRELATIONS_CSV <span class="op">=</span> PY_PATTERN_CORRELATIONS_CSV</span>
-<span id="cb4-177"><a href="#cb4-177" aria-hidden="true" tabindex="-1"></a>PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV <span class="op">=</span> PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV</span>
-<span id="cb4-178"><a href="#cb4-178" aria-hidden="true" tabindex="-1"></a>PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV <span class="op">=</span> PY_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV</span>
-<span id="cb4-179"><a href="#cb4-179" aria-hidden="true" tabindex="-1"></a>PATTERN_SUMMARY_CSV <span class="op">=</span> PY_PATTERN_SUMMARY_CSV</span>
-<span id="cb4-180"><a href="#cb4-180" aria-hidden="true" tabindex="-1"></a>ANALYSIS_MODE <span class="op">=</span> PY_ANALYSIS_MODE</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>PY_CHOSEN_RESULT_H5AD <span class="op">=</span> SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"cogaps_K6_seed2_iter2000.h5ad"</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>PY_CHOSEN_METRICS_JSON <span class="op">=</span> SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"cogaps_K6_seed2_iter2000.metrics.json"</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>PY_SUMMARY_BY_K_CSV <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    MODEL_SELECTION_DIR <span class="op">/</span> <span class="st">"phase1b_lowerk_long_summary.csv"</span>,</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"summary_by_K.csv"</span>,</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"summary_by_K.csv"</span>,</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>PHASE1_LOWERK_SUMMARY_CSV <span class="op">=</span> MODEL_SELECTION_DIR <span class="op">/</span> <span class="st">"phase1_lowerk_summary.csv"</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>PHASE1B_LOWERK_LONG_SUMMARY_CSV <span class="op">=</span> MODEL_SELECTION_DIR <span class="op">/</span> <span class="st">"phase1b_lowerk_long_summary.csv"</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>PHASE3_HIGHK_SUMMARY_CSV <span class="op">=</span> MODEL_SELECTION_DIR <span class="op">/</span> <span class="st">"phase3_highk_2000_summary.csv"</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>CANDIDATE_PATTERN_SUMMARY_CSV <span class="op">=</span> MODEL_SELECTION_DIR <span class="op">/</span> <span class="st">"candidate_pattern_summary.csv"</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>CANDIDATE_K7_ACTIVITY_MATCHES_CSV <span class="op">=</span> MODEL_SELECTION_DIR <span class="op">/</span> <span class="st">"candidate_best_k7_activity_matches.csv"</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>PY_PER_RUN_METRICS_CSV <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"per_run_metrics.csv"</span>,</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"per_run_metrics.csv"</span>,</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>PY_DIRECTION_GLOBAL_CSV <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_global.csv"</span>,</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_global.csv"</span>,</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_global.csv"</span>,</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>PY_DIRECTION_CELLTYPE_CSV <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_by_celltype.csv"</span>,</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_by_celltype.csv"</span>,</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_by_celltype.csv"</span>,</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>PY_DIRECTION_SUMMARY_CSV <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_direction_summary.csv"</span>,</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_direction_summary.csv"</span>,</span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_direction_summary.csv"</span>,</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_GENE_WEIGHTS_TSV_GZ <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_weights.tsv.gz"</span>,</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_weights.tsv.gz"</span>,</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_weights.tsv.gz"</span>,</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_CELL_ACTIVITIES_TSV_GZ <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities.tsv.gz"</span>,</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities.tsv.gz"</span>,</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities.tsv.gz"</span>,</span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities_with_metadata.csv.gz"</span>,</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities_with_metadata.csv.gz"</span>,</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities_with_metadata.csv.gz"</span>,</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_TOP_GENES_CSV <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_top_genes.csv"</span>,</span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_top_genes.csv"</span>,</span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_top_genes.csv"</span>,</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_CORRELATIONS_CSV <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_correlations.csv"</span>,</span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_correlations.csv"</span>,</span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_correlations.csv"</span>,</span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_celltype_condition.csv"</span>,</span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_celltype_condition.csv"</span>,</span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_celltype_condition.csv"</span>,</span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_replicate_condition.csv"</span>,</span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_replicate_condition.csv"</span>,</span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_replicate_condition.csv"</span>,</span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>PY_PATTERN_SUMMARY_CSV <span class="op">=</span> resolve_first_existing(</span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>    SELECTED_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_summary.csv"</span>,</span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>    PY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_summary.csv"</span>,</span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>    LEGACY_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_summary.csv"</span>,</span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>R_CHOSEN_RESULT_RDS <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"cogaps_K6_seed2_iter2000.rds"</span></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>R_CHOSEN_METRICS_JSON <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"cogaps_K6_seed2_iter2000.metrics.json"</span></span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>R_PATTERN_GENE_WEIGHTS_TSV_GZ <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_weights.tsv.gz"</span></span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>R_PATTERN_CELL_ACTIVITIES_TSV_GZ <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities.tsv.gz"</span></span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>R_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_cell_activities_with_metadata.csv.gz"</span></span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>R_PATTERN_TOP_GENES_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_top_genes.csv"</span></span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>R_PATTERN_CORRELATIONS_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_correlations.csv"</span></span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_celltype_condition.csv"</span></span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>R_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_activity_by_replicate_condition.csv"</span></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>R_PATTERN_SUMMARY_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_summary.csv"</span></span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>R_DIRECTION_GLOBAL_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_global.csv"</span></span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>R_DIRECTION_CELLTYPE_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_gene_directionality_by_celltype.csv"</span></span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a>R_DIRECTION_SUMMARY_CSV <span class="op">=</span> R_K6_RESULTS_DIR <span class="op">/</span> <span class="st">"pattern_direction_summary.csv"</span></span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>CHOSEN_K <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>CHOSEN_SEED <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>CHOSEN_ITER <span class="op">=</span> <span class="dv">2000</span></span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>STIM_LABEL <span class="op">=</span> <span class="st">"stim"</span></span>
+<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a>HAS_CACHED_COGAPS_INPUT <span class="op">=</span> COGAPS_INPUT_H5AD.exists()</span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a>HAS_PY_CHOSEN_RESULT <span class="op">=</span> PY_CHOSEN_RESULT_H5AD.exists()</span>
+<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>HAS_PY_LIGHTWEIGHT_PATTERN_MATRICES <span class="op">=</span> (</span>
+<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>    PY_PATTERN_GENE_WEIGHTS_TSV_GZ.exists() <span class="kw">and</span> PY_PATTERN_CELL_ACTIVITIES_TSV_GZ.exists()</span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>HAS_PY_LIGHTWEIGHT_ACTIVITY_METADATA <span class="op">=</span> PY_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ.exists()</span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>HAS_PY_PATTERN_TOP_GENES <span class="op">=</span> PY_PATTERN_TOP_GENES_CSV.exists()</span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>HAS_PY_PATTERN_CORRELATIONS <span class="op">=</span> PY_PATTERN_CORRELATIONS_CSV.exists()</span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>HAS_PY_PATTERN_ACTIVITY_BY_CELLTYPE <span class="op">=</span> PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV.exists()</span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>HAS_PY_PATTERN_SUMMARY <span class="op">=</span> PY_PATTERN_SUMMARY_CSV.exists()</span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>HAS_R_CHOSEN_RESULT <span class="op">=</span> R_CHOSEN_RESULT_RDS.exists()</span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>HAS_R_LIGHTWEIGHT_PATTERN_MATRICES <span class="op">=</span> (</span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>    R_PATTERN_GENE_WEIGHTS_TSV_GZ.exists() <span class="kw">and</span> R_PATTERN_CELL_ACTIVITIES_TSV_GZ.exists()</span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a>HAS_R_LIGHTWEIGHT_ACTIVITY_METADATA <span class="op">=</span> R_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ.exists()</span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_TOP_GENES <span class="op">=</span> R_PATTERN_TOP_GENES_CSV.exists()</span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_CORRELATIONS <span class="op">=</span> R_PATTERN_CORRELATIONS_CSV.exists()</span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_ACTIVITY_BY_CELLTYPE <span class="op">=</span> R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV.exists()</span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>HAS_R_PATTERN_SUMMARY <span class="op">=</span> R_PATTERN_SUMMARY_CSV.exists()</span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a>PY_ANALYSIS_MODE <span class="op">=</span> (</span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>    <span class="st">"full_chosen_result"</span></span>
+<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> HAS_PY_CHOSEN_RESULT</span>
+<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"lightweight_derived"</span></span>
+<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> HAS_PY_LIGHTWEIGHT_PATTERN_MATRICES</span>
+<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"unavailable"</span></span>
+<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a>R_ANALYSIS_MODE <span class="op">=</span> (</span>
+<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a>    <span class="st">"full_chosen_result"</span></span>
+<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> HAS_R_CHOSEN_RESULT</span>
+<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"lightweight_derived"</span></span>
+<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> HAS_R_LIGHTWEIGHT_PATTERN_MATRICES</span>
+<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> <span class="st">"unavailable"</span></span>
+<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a><span class="co"># Backward-compatible aliases used by the Python chunks below.</span></span>
+<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a>CHOSEN_RESULT_H5AD <span class="op">=</span> PY_CHOSEN_RESULT_H5AD</span>
+<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a>CHOSEN_METRICS_JSON <span class="op">=</span> PY_CHOSEN_METRICS_JSON</span>
+<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a>SUMMARY_BY_K_CSV <span class="op">=</span> PY_SUMMARY_BY_K_CSV</span>
+<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a>PER_RUN_METRICS_CSV <span class="op">=</span> PY_PER_RUN_METRICS_CSV</span>
+<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a>DIRECTION_GLOBAL_CSV <span class="op">=</span> PY_DIRECTION_GLOBAL_CSV</span>
+<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a>DIRECTION_CELLTYPE_CSV <span class="op">=</span> PY_DIRECTION_CELLTYPE_CSV</span>
+<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a>DIRECTION_SUMMARY_CSV <span class="op">=</span> PY_DIRECTION_SUMMARY_CSV</span>
+<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a>PATTERN_GENE_WEIGHTS_TSV_GZ <span class="op">=</span> PY_PATTERN_GENE_WEIGHTS_TSV_GZ</span>
+<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a>PATTERN_CELL_ACTIVITIES_TSV_GZ <span class="op">=</span> PY_PATTERN_CELL_ACTIVITIES_TSV_GZ</span>
+<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a>PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ <span class="op">=</span> PY_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ</span>
+<span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a>PATTERN_TOP_GENES_CSV <span class="op">=</span> PY_PATTERN_TOP_GENES_CSV</span>
+<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a>PATTERN_CORRELATIONS_CSV <span class="op">=</span> PY_PATTERN_CORRELATIONS_CSV</span>
+<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a>PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV <span class="op">=</span> PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV</span>
+<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a>PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV <span class="op">=</span> PY_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV</span>
+<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a>PATTERN_SUMMARY_CSV <span class="op">=</span> PY_PATTERN_SUMMARY_CSV</span>
+<span id="cb4-172"><a href="#cb4-172" aria-hidden="true" tabindex="-1"></a>ANALYSIS_MODE <span class="op">=</span> PY_ANALYSIS_MODE</span>
+<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pattern_columns(df: pd.DataFrame) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
+<span id="cb4-176"><a href="#cb4-176" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sorted</span>(</span>
+<span id="cb4-177"><a href="#cb4-177" aria-hidden="true" tabindex="-1"></a>        [c <span class="cf">for</span> c <span class="kw">in</span> df.columns <span class="cf">if</span> <span class="bu">str</span>(c).startswith(<span class="st">"Pattern"</span>)],</span>
+<span id="cb4-178"><a href="#cb4-178" aria-hidden="true" tabindex="-1"></a>        key<span class="op">=</span><span class="kw">lambda</span> value: <span class="bu">int</span>(<span class="bu">str</span>(value).replace(<span class="st">"Pattern"</span>, <span class="st">""</span>)),</span>
+<span id="cb4-179"><a href="#cb4-179" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-180"><a href="#cb4-180" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-181"><a href="#cb4-181" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-182"><a href="#cb4-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-183"><a href="#cb4-183" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pattern_columns(df: pd.DataFrame) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
-<span id="cb4-184"><a href="#cb4-184" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sorted</span>(</span>
-<span id="cb4-185"><a href="#cb4-185" aria-hidden="true" tabindex="-1"></a>        [c <span class="cf">for</span> c <span class="kw">in</span> df.columns <span class="cf">if</span> <span class="bu">str</span>(c).startswith(<span class="st">"Pattern"</span>)],</span>
-<span id="cb4-186"><a href="#cb4-186" aria-hidden="true" tabindex="-1"></a>        key<span class="op">=</span><span class="kw">lambda</span> value: <span class="bu">int</span>(<span class="bu">str</span>(value).replace(<span class="st">"Pattern"</span>, <span class="st">""</span>)),</span>
-<span id="cb4-187"><a href="#cb4-187" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-182"><a href="#cb4-182" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> top_genes_from_matrix(matrix: pd.DataFrame, pattern: <span class="bu">str</span>, n: <span class="bu">int</span> <span class="op">=</span> <span class="dv">15</span>) <span class="op">-&gt;</span> pd.DataFrame:</span>
+<span id="cb4-183"><a href="#cb4-183" aria-hidden="true" tabindex="-1"></a>    top <span class="op">=</span> matrix[pattern].sort_values(ascending<span class="op">=</span><span class="va">False</span>).head(n)</span>
+<span id="cb4-184"><a href="#cb4-184" aria-hidden="true" tabindex="-1"></a>    top_df <span class="op">=</span> top.rename(<span class="st">"weight"</span>).reset_index()</span>
+<span id="cb4-185"><a href="#cb4-185" aria-hidden="true" tabindex="-1"></a>    top_df.columns <span class="op">=</span> [<span class="st">"gene"</span>, <span class="st">"weight"</span>]</span>
+<span id="cb4-186"><a href="#cb4-186" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> top_df</span>
+<span id="cb4-187"><a href="#cb4-187" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-188"><a href="#cb4-188" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-189"><a href="#cb4-189" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-190"><a href="#cb4-190" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> top_genes_from_matrix(matrix: pd.DataFrame, pattern: <span class="bu">str</span>, n: <span class="bu">int</span> <span class="op">=</span> <span class="dv">15</span>) <span class="op">-&gt;</span> pd.DataFrame:</span>
-<span id="cb4-191"><a href="#cb4-191" aria-hidden="true" tabindex="-1"></a>    top <span class="op">=</span> matrix[pattern].sort_values(ascending<span class="op">=</span><span class="va">False</span>).head(n)</span>
-<span id="cb4-192"><a href="#cb4-192" aria-hidden="true" tabindex="-1"></a>    top_df <span class="op">=</span> top.rename(<span class="st">"weight"</span>).reset_index()</span>
-<span id="cb4-193"><a href="#cb4-193" aria-hidden="true" tabindex="-1"></a>    top_df.columns <span class="op">=</span> [<span class="st">"gene"</span>, <span class="st">"weight"</span>]</span>
-<span id="cb4-194"><a href="#cb4-194" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> top_df</span>
-<span id="cb4-195"><a href="#cb4-195" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-196"><a href="#cb4-196" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-197"><a href="#cb4-197" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_lightweight_pattern_matrices(weights_path: Path, activities_path: Path) <span class="op">-&gt;</span> <span class="bu">tuple</span>[pd.DataFrame, pd.DataFrame]:</span>
-<span id="cb4-198"><a href="#cb4-198" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> pd.read_csv(weights_path, sep<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>, compression<span class="op">=</span><span class="st">"gzip"</span>).set_index(<span class="st">"gene"</span>)</span>
-<span id="cb4-199"><a href="#cb4-199" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> pd.read_csv(activities_path, sep<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>, compression<span class="op">=</span><span class="st">"gzip"</span>).set_index(<span class="st">"cell_barcode"</span>)</span>
-<span id="cb4-200"><a href="#cb4-200" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> A, P</span>
-<span id="cb4-201"><a href="#cb4-201" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-202"><a href="#cb4-202" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-203"><a href="#cb4-203" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_cogaps_input(preprocessed_cells: ad.AnnData) <span class="op">-&gt;</span> ad.AnnData:</span>
-<span id="cb4-204"><a href="#cb4-204" aria-hidden="true" tabindex="-1"></a>    cogaps_input <span class="op">=</span> preprocessed_cells.T.copy()</span>
-<span id="cb4-205"><a href="#cb4-205" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> cogaps_input.X.toarray() <span class="cf">if</span> sparse.issparse(cogaps_input.X) <span class="cf">else</span> cogaps_input.X</span>
-<span id="cb4-206"><a href="#cb4-206" aria-hidden="true" tabindex="-1"></a>    cogaps_input.X <span class="op">=</span> np.asarray(X, dtype<span class="op">=</span>np.float64)</span>
-<span id="cb4-207"><a href="#cb4-207" aria-hidden="true" tabindex="-1"></a>    cogaps_input.var <span class="op">=</span> preprocessed_cells.obs.copy()</span>
-<span id="cb4-208"><a href="#cb4-208" aria-hidden="true" tabindex="-1"></a>    cogaps_input.var_names <span class="op">=</span> preprocessed_cells.obs_names.copy()</span>
-<span id="cb4-209"><a href="#cb4-209" aria-hidden="true" tabindex="-1"></a>    cogaps_input.obs <span class="op">=</span> preprocessed_cells.var.copy()</span>
-<span id="cb4-210"><a href="#cb4-210" aria-hidden="true" tabindex="-1"></a>    cogaps_input.obs_names <span class="op">=</span> preprocessed_cells.var_names.copy()</span>
-<span id="cb4-211"><a href="#cb4-211" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cogaps_input</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-189"><a href="#cb4-189" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_lightweight_pattern_matrices(weights_path: Path, activities_path: Path) <span class="op">-&gt;</span> <span class="bu">tuple</span>[pd.DataFrame, pd.DataFrame]:</span>
+<span id="cb4-190"><a href="#cb4-190" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> pd.read_csv(weights_path, sep<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>, compression<span class="op">=</span><span class="st">"gzip"</span>).set_index(<span class="st">"gene"</span>)</span>
+<span id="cb4-191"><a href="#cb4-191" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> pd.read_csv(activities_path, sep<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span>, compression<span class="op">=</span><span class="st">"gzip"</span>).set_index(<span class="st">"cell_barcode"</span>)</span>
+<span id="cb4-192"><a href="#cb4-192" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> A, P</span>
+<span id="cb4-193"><a href="#cb4-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-194"><a href="#cb4-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-195"><a href="#cb4-195" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_cogaps_input(preprocessed_cells: ad.AnnData) <span class="op">-&gt;</span> ad.AnnData:</span>
+<span id="cb4-196"><a href="#cb4-196" aria-hidden="true" tabindex="-1"></a>    cogaps_input <span class="op">=</span> preprocessed_cells.T.copy()</span>
+<span id="cb4-197"><a href="#cb4-197" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> cogaps_input.X.toarray() <span class="cf">if</span> sparse.issparse(cogaps_input.X) <span class="cf">else</span> cogaps_input.X</span>
+<span id="cb4-198"><a href="#cb4-198" aria-hidden="true" tabindex="-1"></a>    cogaps_input.X <span class="op">=</span> np.asarray(X, dtype<span class="op">=</span>np.float64)</span>
+<span id="cb4-199"><a href="#cb4-199" aria-hidden="true" tabindex="-1"></a>    cogaps_input.var <span class="op">=</span> preprocessed_cells.obs.copy()</span>
+<span id="cb4-200"><a href="#cb4-200" aria-hidden="true" tabindex="-1"></a>    cogaps_input.var_names <span class="op">=</span> preprocessed_cells.obs_names.copy()</span>
+<span id="cb4-201"><a href="#cb4-201" aria-hidden="true" tabindex="-1"></a>    cogaps_input.obs <span class="op">=</span> preprocessed_cells.var.copy()</span>
+<span id="cb4-202"><a href="#cb4-202" aria-hidden="true" tabindex="-1"></a>    cogaps_input.obs_names <span class="op">=</span> preprocessed_cells.var_names.copy()</span>
+<span id="cb4-203"><a href="#cb4-203" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cogaps_input</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -2797,7 +2781,7 @@ No.&nbsp;A high CoGAPS weight means the gene helps define the pattern. To determ
 </div>
 <div class="sourceCode cell-code" id="cb162"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb162-1"><a href="#cb162-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Platform:"</span>, platform.platform())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Platform: Linux-6.17.0-1015-azure-x86_64-with-glibc2.35</code></pre>
+<pre><code>Platform: Linux-6.12.76-linuxkit-x86_64-with-glibc2.35</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb164"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb164-1"><a href="#cb164-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> package_name <span class="kw">in</span> [<span class="st">"anndata"</span>, <span class="st">"pandas"</span>, <span class="st">"numpy"</span>, <span class="st">"scipy"</span>, <span class="st">"matplotlib"</span>]:</span>
 <span id="cb164-2"><a href="#cb164-2" aria-hidden="true" tabindex="-1"></a>    module <span class="op">=</span> <span class="bu">__import__</span>(package_name)</span>
@@ -3284,7 +3268,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>
   </div>
 </footer>
-<script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","openEffect":"zoom","loop":false,"descPosition":"bottom"});
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","openEffect":"zoom","loop":false,"descPosition":"bottom","selector":".lightbox"});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {

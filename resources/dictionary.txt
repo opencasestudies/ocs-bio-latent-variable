@@ -30,6 +30,7 @@ HTTPS
 hw
 iconpacks
 IFN
+ISG
 interpretable
 iter
 Jaccard
@@ -44,6 +45,7 @@ myeloid
 NK
 NonCommercial
 ocs
+opencasestudies
 oothomas
 OTTR
 ottrproject
@@ -61,6 +63,7 @@ scCoGAPS
 SLURM
 stim
 subdir
+tabset
 th
 transcriptional
 www
