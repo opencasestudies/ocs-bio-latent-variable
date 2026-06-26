@@ -85,6 +85,17 @@ execute:
 ## **Session Info**
 ***
 
+```{python}
+import platform
+import sys
+
+print("Python:", sys.version)
+print("Platform:", platform.platform())
+
+for package_name in ["anndata", "pandas", "numpy", "scipy", "matplotlib"]:
+    module = __import__(package_name)
+    print(package_name, getattr(module, "__version__", "unknown"))
+```
 
 ```{r}
 cat("R:", paste(R.version$major, R.version$minor, sep = "."), "\n")
@@ -93,7 +104,6 @@ cat("Platform:", R.version$platform, "\n")
 for (package_name in c("CoGAPS", "zellkonverter", "SingleCellExperiment", "ggplot2", "dplyr")) {
   cat(package_name, as.character(packageVersion(package_name)), "\n")
 }
-
 ```
 
 {{< include _acknowledgements.qmd >}}
