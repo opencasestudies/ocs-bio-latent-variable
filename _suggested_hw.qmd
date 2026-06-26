@@ -1,12 +1,36 @@
-# **Suggested Homework**
+# **Continued Learning**
 ***
 
-1. Recreate the selected R K6 IFN-associated pattern top-gene table and annotate each gene as up or down in stimulation using `pattern_gene_directionality_global.csv`.
-1. Compare the main IFN-associated pattern to the secondary stimulation-associated pattern. Which genes overlap, and which genes make the secondary pattern look more myeloid or inflammatory?
-1. Choose one secondary pattern and write a cautious interpretation that separates strong anchor genes from broad or less specific genes.
-1. Repeat the IFN-associated pattern cell-type summary using medians instead of means. Does the interpretation change?
-1. If compute resources are available, rerun the single-process `K = 6` model with a different seed and compare the top IFN-associated genes.
-1. Advanced: inspect the optional sweep outputs and explain why `K = 6` was chosen for the teaching workflow.
-1. Advanced: perform a pathway enrichment analysis for the IFN-associated pattern and compare it to the targeted directionality result.
+:::{.next_steps_box}
+::::{.next_steps_box_header}
+Common Next Steps
+::::
+::::{.inner_block}
+Discuss common next steps for this type of an analysis in this box. Is there a specific number of steps that you need to do before a specific step? Is a "next step" more of an alternate step?
+::::
+:::
+
+<!--
+## Reinforcement Exercises
+
+Uncomment this section if you're suggesting an exercise that reiterates a large portion of the case study so learners can practice a hard skill again, reinforcing topics from the case study
+-->
+
+
+## Advancement Exercises
+
+Use this section to suggest different levels of exercises that build upon topics from the case study ... next steps, tangential skills, diving deeper into a side quest, etc.
+
+Perhaps explain how the suggested exercises relate to the common next steps.
+
+### Beginner
+
+### Intermediate
+
+### Advanced
+
+<!--
+Example from a previous case study: https://www.opencasestudies.org/ocs-bp-co2-emissions/#Suggested_Homework (though this example doesn't include different levels like Beginner, Intermediate, and Advanced)
+-->
 
 ***
