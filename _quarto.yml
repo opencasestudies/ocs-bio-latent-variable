@@ -8,24 +8,24 @@ website:
     search: true
     right:
       - icon: github
-        href: https://github.com/opencasestudies/ocs-template-quarto
+        href: https://github.com/opencasestudies/bio-latent-variable
   sidebar:
     logo-href: "https://www.opencasestudies.org/"
     logo: "assets/Bio-OCS_Logo.png"
     foreground: "#1B365D"
   google-analytics:
-    tracking-id: "G-5R5B1JFCGE"
+    tracking-id: "G-TPVRZESY0B"
   page-footer:
     left: |
       This book was built with <a href="https://quarto.org/" style="color: #0000FF;">Quarto</a> using
       <a href="https://github.com/opencasestudies/ocs-template-quarto" style="color: #0000FF;">OTTR</a>.
     center: |
-      All illustrations <a href="hhttps://creativecommons.org/licenses/by-nc/4.0/us/" style="color: #0000FF;">CC BY-NC 4.0. </a>
+      All illustrations <a href="https://creativecommons.org/licenses/by-nc/4.0/us/" style="color: #0000FF;">CC BY-NC 4.0. </a>
       <br>
       All other materials <a href= "https://creativecommons.org/licenses/by-nc/4.0/us/" style="color: #0000FF;"> CC BY-NC 4.0 </a> unless noted otherwise.
     right:
       - icon: github
-        href: https://github.com/opencasestudies/ocs-template-quarto
+        href: https://github.com/opencasestudies/ocs-bio-latent-variable
 
 glossary:
   path: glossary.yml
@@ -38,7 +38,7 @@ format:
     code-copy: true
     code-block-bg: true
     grid:
-       sidebar-width: 260px
+      sidebar-width: 260px
     theme: cosmo
     css: styles.css
     sidebar: true

@@ -1,13 +1,16 @@
 ---
-title: "**Biomedical Open Case Studies: {Fill In Title}**"
+title: "**Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS**"
 bibliography: resources/references.bib
 include-sections:
-  stat-los: false
+  stat-los: true
   data-import: true
-  data-exploration: false
+  data-exploration: true
   data-wrangling: true
   data-viz: true
   data-analysis: true
+execute:
+  warning: false
+  message: false
 ---
 
 <!--
@@ -82,8 +85,15 @@ include-sections:
 ## **Session Info**
 ***
 
+
 ```{r}
-devtools::session_info()
+cat("R:", paste(R.version$major, R.version$minor, sep = "."), "\n")
+cat("Platform:", R.version$platform, "\n")
+
+for (package_name in c("CoGAPS", "zellkonverter", "SingleCellExperiment", "ggplot2", "dplyr")) {
+  cat(package_name, as.character(packageVersion(package_name)), "\n")
+}
+
 ```
 
 {{< include _acknowledgements.qmd >}}
