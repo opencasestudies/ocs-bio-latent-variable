@@ -132,16 +132,8 @@ R_DIRECTION_GLOBAL_CSV_R <- file.path(R_K6_RESULTS_DIR_R, "pattern_gene_directio
 R_DIRECTION_CELLTYPE_CSV_R <- file.path(R_K6_RESULTS_DIR_R, "pattern_gene_directionality_by_celltype.csv")
 R_DIRECTION_SUMMARY_CSV_R <- file.path(R_K6_RESULTS_DIR_R, "pattern_direction_summary.csv")
 
-PY_CHOSEN_RESULT_H5AD_R <- resolve_first_existing_r(
-  file.path(SELECTED_RESULTS_DIR_R, "cogaps_K6_seed2_iter2000.h5ad"),
-  file.path(PY_RESULTS_DIR_R, "cogaps_K7_seed2_iter2000.h5ad"),
-  file.path(LEGACY_RESULTS_DIR_R, "cogaps_K7_seed2_iter2000.h5ad")
-)
-PY_CHOSEN_METRICS_JSON_R <- resolve_first_existing_r(
-  file.path(SELECTED_RESULTS_DIR_R, "cogaps_K6_seed2_iter2000.metrics.json"),
-  file.path(PY_RESULTS_DIR_R, "cogaps_K7_seed2_iter2000.metrics.json"),
-  file.path(LEGACY_RESULTS_DIR_R, "cogaps_K7_seed2_iter2000.metrics.json")
-)
+PY_CHOSEN_RESULT_H5AD_R <- file.path(SELECTED_RESULTS_DIR_R, "cogaps_K6_seed2_iter2000.h5ad")
+PY_CHOSEN_METRICS_JSON_R <- file.path(SELECTED_RESULTS_DIR_R, "cogaps_K6_seed2_iter2000.metrics.json")
 
 HAS_R_CHOSEN_RESULT_R <- file.exists(R_CHOSEN_RESULT_RDS_R)
 HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R <- file.exists(R_PATTERN_GENE_WEIGHTS_TSV_GZ_R) && file.exists(R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R)
@@ -220,16 +212,8 @@ PREPROCESSED_H5AD = PROCESSED_DIR / "preprocessed_cells_hvg3000.h5ad"
 COGAPS_INPUT_H5AD = PROCESSED_DIR / "cogaps_input_genesxcells_hvg3000_float64.h5ad"
 PREPROCESS_CONFIG_JSON = PROCESSED_DIR / "preprocess_config_hvg3000.json"
 
-PY_CHOSEN_RESULT_H5AD = resolve_first_existing(
-    SELECTED_RESULTS_DIR / "cogaps_K6_seed2_iter2000.h5ad",
-    PY_RESULTS_DIR / "cogaps_K7_seed2_iter2000.h5ad",
-    LEGACY_RESULTS_DIR / "cogaps_K7_seed2_iter2000.h5ad",
-)
-PY_CHOSEN_METRICS_JSON = resolve_first_existing(
-    SELECTED_RESULTS_DIR / "cogaps_K6_seed2_iter2000.metrics.json",
-    PY_RESULTS_DIR / "cogaps_K7_seed2_iter2000.metrics.json",
-    LEGACY_RESULTS_DIR / "cogaps_K7_seed2_iter2000.metrics.json",
-)
+PY_CHOSEN_RESULT_H5AD = SELECTED_RESULTS_DIR / "cogaps_K6_seed2_iter2000.h5ad"
+PY_CHOSEN_METRICS_JSON = SELECTED_RESULTS_DIR / "cogaps_K6_seed2_iter2000.metrics.json"
 PY_SUMMARY_BY_K_CSV = resolve_first_existing(
     MODEL_SELECTION_DIR / "phase1b_lowerk_long_summary.csv",
     PY_RESULTS_DIR / "summary_by_K.csv",
