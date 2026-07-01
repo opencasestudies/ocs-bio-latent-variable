@@ -8,7 +8,7 @@ ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PROFILE="${1:-full}"
 SPARSITY_MODE="${2:-on}"
 
-PREPROCESSED_H5AD="${ROOT}/data/processed/preprocessed_cells_hvg3000.h5ad"
+PREPROCESSED_H5AD="${ROOT}/data/processed/input/preprocessed_cells_hvg3000.h5ad"
 RUNNER="${ROOT}/scripts/cogaps_run_distributed_r.R"
 
 K=7

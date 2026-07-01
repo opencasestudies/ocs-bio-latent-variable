@@ -1,0 +1,472 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-27T23:34:08+00:00",
+  "case_study_model": {
+    "selected_rank_K": 6,
+    "seed": 2,
+    "nIterations": 2000,
+    "sparseOptimization": true,
+    "primary_implementation": "R/Bioconductor CoGAPS",
+    "parallel_implementation": "Python/PyCoGAPS-compatible saved outputs",
+    "primary_result_dir": "data/processed/selected_model_k6/r",
+    "python_result_dir": "data/processed/selected_model_k6/python"
+  },
+  "publication_policy": {
+    "github_contains": "Teaching subset, precomputed sweep summaries, lightweight K6 model exports, selected diagnostic summaries, and learner-facing selected K6 figures.",
+    "external_or_local_contains": "Optional full selected K6 model objects and dense full-reproduction inputs.",
+    "not_part_of_case_study_release": "Full HPC sweep output archive, large older K7 model objects, exploratory distributed-runtime outputs, and developer dashboard scratch artifacts."
+  },
+  "included_files": [
+    {
+      "path": "data/processed/input/preprocess_config_hvg3000.json",
+      "role": "GitHub-safe analysis input or preprocessing metadata",
+      "size_bytes": 174,
+      "sha256": "b26e56d5b06d178cddea3917c9703fc231d550b96aed7d07589b5ea54e36ef0c",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/input/preprocessed_cells_hvg3000.h5ad",
+      "role": "GitHub-safe analysis input or preprocessing metadata",
+      "size_bytes": 55888818,
+      "sha256": "f26df25334f60d24a95f7e90927bc034b8ecf385731486f39b8183a8fea51e32",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/k_selection/candidate_best_k7_activity_matches.csv",
+      "role": "Precomputed rank-sweep/model-selection summary",
+      "size_bytes": 769,
+      "sha256": "e5d58fe127ede9e786f83d7f104c8ae14159315504643613af3ad81ad64e9bec",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/k_selection/candidate_pattern_summary.csv",
+      "role": "Precomputed rank-sweep/model-selection summary",
+      "size_bytes": 11180,
+      "sha256": "606fa9ff6ac6b131ee5d8f98aede683b9ce9f90ef1621f63622c185b659d7b66",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/k_selection/k_selection_decision_manifest.json",
+      "role": "Precomputed rank-sweep/model-selection summary",
+      "size_bytes": 3023,
+      "sha256": "761998588dc0741b7795ebef14e956b9414f7214ef81b06ca7b43d23b849dff6",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/k_selection/phase1_lowerk_summary.csv",
+      "role": "Precomputed rank-sweep/model-selection summary",
+      "size_bytes": 2017,
+      "sha256": "7917599c4691a39a69652c46da7b02e4d471ecf3039e2abed9c4b10abce93d52",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/k_selection/phase1b_lowerk_long_summary.csv",
+      "role": "Precomputed rank-sweep/model-selection summary",
+      "size_bytes": 4143,
+      "sha256": "cefee55fe6f0935ac9506b9dd6b5d5bea883cc5f3639c08b7d7a8424eca6a40e",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/k_selection/phase3_highk_2000_summary.csv",
+      "role": "Precomputed rank-sweep/model-selection summary",
+      "size_bytes": 2729,
+      "sha256": "92b5c813a523d9e1cd0add66e89b2f719d0f852f91a862065130cab4855505b6",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/README.md",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 2172,
+      "sha256": "266036ea10ab891d6ed849a13fa6c646e1936cd0d4ec3b7ea025c7e43649b4a3",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.diagnostics.json",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 1297,
+      "sha256": "5c1a3b905bbce057292fe47da04add5e6f59717b8e7ea2123bae3c88675355b9",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.mean_pattern_assignment.tsv.gz",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 14822,
+      "sha256": "fde214a0bdd09fb6792c7a9d58054948b6f0891d124d0db849504cf65f103e59",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.metrics.json",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 1299,
+      "sha256": "61c2af53fad1c68bb058435929ba88aa9842459ae68fb9519e3729512ed2aa5d",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.pattern_uncertainty_summary.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 1286,
+      "sha256": "11d5819fae588804789672125ba7f43887b4ef526d7f418069d574f4a5dff893",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.pump_stat.tsv.gz",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 48556,
+      "sha256": "e9e4f14051f545083338fd8e13439531c76ebf079cfa3e9c007b8d65cb98f54a",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.snapshot_summary.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 3658,
+      "sha256": "1361d5cad33794cb43fa19e9397bcc2aa747f8756755538a585d84255d0589d5",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.trace.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 1841,
+      "sha256": "c90b951acaf8b2baa4a059952a72189530ed89fe0c4681355f709d08df5014f3",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_activity_by_celltype_condition.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 7373,
+      "sha256": "2085d33ebd71b6407fe0d019811282682d21d31d53f57f04b5d2428f308f8420",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_activity_by_replicate_condition.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 7361,
+      "sha256": "7f8d6e5cd6f525bdb8ed695c172fe39fd3fa9ad0efcbb61f48fe984b0d56694f",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_cell_activities.tsv.gz",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 1403274,
+      "sha256": "a8fffe42e26f139dc99aa59033477eff48f6ab76455b675ed7012a2937644251",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_cell_activities_with_metadata.csv.gz",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 3113994,
+      "sha256": "6cda2ed3e8309f611607caebdc7c705e92e87eed23f2220e6c64dd5effbc673c",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_cell_activity_sd.tsv.gz",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 1370186,
+      "sha256": "1f06ae2cb26fb9bbad795abc378ab085cf4a160ead4be9654ff73e83a1ac28a2",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_correlations.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 205,
+      "sha256": "a82a27b747b9fec3ecd8293ab15f040886af5e43c28a1304d468541954ed21a2",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_direction_summary.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 794,
+      "sha256": "008010602c8de6422f3182b17085e7c7c669bf83109ed0e78b481c82daf3f9db",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_gene_directionality_by_celltype.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 115197,
+      "sha256": "d0b2ddd676ed8a677346fffe4f724d11904b1d2ce5b33a8fd1261643d3071530",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_gene_directionality_global.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 13669,
+      "sha256": "609d0bab37a63461cf136b2c7c2e51aa7703a28bf16a29fe8d164733edca9e74",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_gene_directionality_heatmap.png",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 222779,
+      "sha256": "3693d4bcf9603d54d7884aa0ae920dda7f50add0bae42457c699f2dd7f624360",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_gene_directionality_pairs_by_celltype.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 317070,
+      "sha256": "d72c5e65da3450bc1d35260e7e0e0a6abbc46ec858680beb4b0ff2ca5f62d82c",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_gene_directionality_pairs_global.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 42451,
+      "sha256": "264a80cec53ea797103ab5169d9b3d53fe9b36ec7f1660c6df4f123e11bba91f",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_gene_weight_sd.tsv.gz",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 163783,
+      "sha256": "f3aecb1024f9751056cc34b17980cfc19cedba4baf7512ed83c24ca608a42aac",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_gene_weights.tsv.gz",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 168731,
+      "sha256": "c5e15eaca1fb8f675ca8166fec835fd83f6d06087e4ccbfa423d984f25ba7f88",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_summary.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 1772,
+      "sha256": "6277a7780e0e82ffffae1660909717cf2a240ed77d42b8dfa7decb2ecdf5dd88",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_top_genes.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 11757,
+      "sha256": "7501591fd39d278b464f41a10f4a6f5938c1eda86beb72b872f247f4b6f2527a",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pattern_top_genes_directionality.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 3498,
+      "sha256": "a4a01091b7e30219b15ece71b14267c4639dbded2e492adcdfe62316e8cdd035",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pseudobulk_counts_by_celltype.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 119942,
+      "sha256": "21dfcb0dc888d2f8bd5455c60f3bc73da73c54138c18b2b42c4a00a3fd522f14",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/r/pseudobulk_counts_global.csv",
+      "role": "Selected K6 R-primary lightweight model artifact",
+      "size_bytes": 21317,
+      "sha256": "6974e9b1b5206ab9b7b79d3df9255b92bcc98f2762f2cddabcb11c17395280bb",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/README.md",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 3654,
+      "sha256": "eeba5a1e385791609607f2bfdf817f06168adf504e622a370b4ece97f6c518d6",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.metrics.json",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 1068,
+      "sha256": "c351955f3c68be9c6cbbe9e8308b7c98b52c6da0209f7b1fdeea131d60d40e09",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_activity_by_celltype_condition.csv",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 7081,
+      "sha256": "71f8bf5e961c147f6d72dd1b61e788f7d4de21230599e6a1e77b98dc9256fc7e",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_activity_by_replicate_condition.csv",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 7063,
+      "sha256": "4dabc86fcc42af9f7423e316daadb8a472aef7de92147a36e9ea8ce6a546b95f",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_cell_activities.tsv.gz",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 1513402,
+      "sha256": "a3da2346ce469fc7cc7b136e7b5039e88e839decb3803e0825c60694597a4920",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_cell_activities_with_metadata.csv.gz",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 2538210,
+      "sha256": "25121a6432b4c9a1b8e1b0fd582bb5ab687d49a81eba19a2a90e33057b920ca6",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_correlations.csv",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 196,
+      "sha256": "051779fd7b5d268a26ccade3fd2ac9edcb72816213364d2b91c4d3bcca0ba5f1",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_direction_summary.csv",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 770,
+      "sha256": "2d416af13ab538a822cef8e5dc27739bf8497821cdd796e1305af6bb06e5fa82",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_gene_directionality_by_celltype.csv",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 114517,
+      "sha256": "db9958b9521d4173ae892e065c7817f333a23922afe399c1dfa258bc62b738d2",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_gene_directionality_global.csv",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 13207,
+      "sha256": "d0899fe6abf1f32cc7c855b496862fb64d38da84f38163bdd95031cf9dbe1a1e",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_gene_directionality_heatmap.png",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 262309,
+      "sha256": "60df71d3613f2368b0c4641ef9698025079a395e9157f8fcd178bedc0a7c086c",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_gene_directionality_pairs_by_celltype.csv",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 320592,
+      "sha256": "f40ae3e7933bbe857c2fb0cb01d903ae4b1348d8666ef8b07fafd96c7326ef4e",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_gene_directionality_pairs_global.csv",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 43987,
+      "sha256": "bd4ed3b3f4f1c279d1c50515cfe4af791697391856f5e08225998208bd18a25c",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_gene_weights.tsv.gz",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 180314,
+      "sha256": "c5e5a0caae650a0c1c7b64312cbf0aca2d4499d20684314d515030220bc0a762",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_summary.csv",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 1765,
+      "sha256": "9911f417e55b131962d452c979616c144bf4e6ff47486bcdadcbcddb478a992b",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pattern_top_genes.csv",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 3260,
+      "sha256": "f013e20eae3eb47238c5306be712b7189deace2dc05df2090351c9b881daeebd",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pseudobulk_counts_by_celltype.csv",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 150322,
+      "sha256": "fe7bb24a777832b42aa036e3858bd4b2b3d4702aa6c2ba7e2050ba49b669ad48",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/python/pseudobulk_counts_global.csv",
+      "role": "Selected K6 Python parallel-tab lightweight model artifact",
+      "size_bytes": 25864,
+      "sha256": "ffb205cd7fc46b33e33b88001c9fd36caa40a0f5768d1c2ccffd25e00f28949b",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/figures/ifn_pattern_by_celltype_all.png",
+      "role": "Learner-facing selected K6 rendered figure asset",
+      "size_bytes": 91775,
+      "sha256": "a78819019b34c331503ba76be3362c0b831a7855b0b9d8dabc226458b36ebb3f",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/figures/ifn_pattern_by_celltype_split_condition.png",
+      "role": "Learner-facing selected K6 rendered figure asset",
+      "size_bytes": 101639,
+      "sha256": "58af5bc74636b3705196d54510a534e76b056268c1fb4dd18c8c0d0b23ab2b61",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/figures/mean_pattern_by_condition.png",
+      "role": "Learner-facing selected K6 rendered figure asset",
+      "size_bytes": 55801,
+      "sha256": "04fc9ed5da2ac0e9aba843ce3d378fbb9b7ef569399d7d520834500fdd49354d",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/figures/pattern_gene_directionality_heatmap.png",
+      "role": "Learner-facing selected K6 rendered figure asset",
+      "size_bytes": 222779,
+      "sha256": "3693d4bcf9603d54d7884aa0ae920dda7f50add0bae42457c699f2dd7f624360",
+      "github_required": true
+    }
+  ],
+  "optional_external_or_local_files": [
+    {
+      "recommended_path": "data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad",
+      "role": "Dense genes x cells matrix for full local Python/PyCoGAPS reruns",
+      "required_for": "Optional full reproduction input",
+      "github_required": false,
+      "recommended_host": "Zenodo or equivalent external artifact host; local-only is sufficient for private full reproduction",
+      "present_locally": true,
+      "size_bytes": 624660894
+    },
+    {
+      "recommended_path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds",
+      "role": "Full selected R CoGAPS result object",
+      "required_for": "Optional full local inspection and derivative regeneration",
+      "github_required": false,
+      "recommended_host": "Zenodo or equivalent external artifact host; local-only is sufficient for private full reproduction",
+      "present_locally": true,
+      "size_bytes": 13093012
+    },
+    {
+      "recommended_path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.checkpoint.out",
+      "role": "R CoGAPS checkpoint from the selected heavy diagnostic run",
+      "required_for": "Optional debugging/resume provenance",
+      "github_required": false,
+      "recommended_host": "Zenodo or equivalent external artifact host; local-only is sufficient for private full reproduction",
+      "present_locally": true,
+      "size_bytes": 4040443
+    },
+    {
+      "recommended_path": "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad",
+      "role": "Full selected Python/PyCoGAPS-compatible model object",
+      "required_for": "Optional full local inspection and derivative regeneration",
+      "github_required": false,
+      "recommended_host": "Zenodo or equivalent external artifact host; local-only is sufficient for private full reproduction",
+      "present_locally": true,
+      "size_bytes": 627158276
+    }
+  ],
+  "explicitly_excluded_from_publication_assets": [
+    {
+      "path_pattern": "SLURM SWEEP/results_cogaps_singleprocess_hpc/**/full model objects",
+      "reason": "The main and full reproduction paths analyze precomputed sweep summaries rather than asking learners to rerun or download the full HPC sweep archive."
+    },
+    {
+      "path_pattern": "data/results*/cogaps_K7_seed2_iter2000.{h5ad,rds}",
+      "reason": "K7 is retained only as compact reference/sensitivity context, not as the selected case-study model."
+    },
+    {
+      "path_pattern": "data/diagnostics_model_comparison/",
+      "reason": "Developer-facing runtime and implementation-comparison dashboard; useful provenance but not a formal learner-path asset."
+    }
+  ]
+}

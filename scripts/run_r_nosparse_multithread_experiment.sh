@@ -6,7 +6,7 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 THREADS="${1:-}"
 MODE="${2:-pilot}"
-PREPROCESSED_H5AD="${PREPROCESSED_H5AD:-${ROOT_DIR}/data/processed/preprocessed_cells_hvg3000.h5ad}"
+PREPROCESSED_H5AD="${PREPROCESSED_H5AD:-${ROOT_DIR}/data/processed/input/preprocessed_cells_hvg3000.h5ad}"
 RUNNER="${ROOT_DIR}/scripts/cogaps_run_one_singleprocess_r.R"
 
 if [[ -z "${THREADS}" ]]; then

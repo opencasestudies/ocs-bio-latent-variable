@@ -181,7 +181,7 @@ def pattern_columns(columns: pd.Index) -> list[str]:
 
 
 def activity_from_h5ad(path: str, run: dict[str, Any]) -> pd.DataFrame:
-    meta = ad.read_h5ad("data/processed/preprocessed_cells_hvg3000.h5ad", backed="r")
+    meta = ad.read_h5ad("data/processed/input/preprocessed_cells_hvg3000.h5ad", backed="r")
     obs = meta.obs[["cell_type", "condition", "replicate"]].copy()
     meta.file.close()
 

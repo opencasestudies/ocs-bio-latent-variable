@@ -1,7 +1,7 @@
-# **Packages**
+# **Packages and Setup**
 ***
 
-This case study uses R as the primary implementation and Python as a parallel secondary implementation. The R path uses `SingleCellExperiment` and Bioconductor `CoGAPS`; the Python path uses `AnnData` and `PyCoGAPS`-compatible saved outputs. The scientific workflow is the same in both languages, but saved CoGAPS outputs are kept separate because the two implementations should be treated as parallel analyses rather than numerically identical reruns.
+This case study uses R as the primary implementation and Python as a parallel implementation in the second tab. The R path uses `SingleCellExperiment` and Bioconductor `CoGAPS`; the Python path uses `AnnData` and `PyCoGAPS`-compatible saved outputs. The scientific workflow is the same in both languages, but saved CoGAPS outputs are kept separate because the two implementations should be treated as parallel analyses rather than numerically identical reruns.
 
 ## Analysis packages
 
@@ -95,22 +95,29 @@ resolve_first_existing_r <- function(...) {
 }
 
 ROOT_R <- find_project_root_r()
+DATA_DIR_R <- file.path(ROOT_R, "data")
 PROCESSED_DIR_R <- file.path(ROOT_R, "data", "processed")
-MODEL_SELECTION_DIR_R <- file.path(ROOT_R, "data", "model_selection")
+INPUT_DIR_R <- file.path(PROCESSED_DIR_R, "input")
+MODEL_SELECTION_DIR_R <- file.path(PROCESSED_DIR_R, "k_selection")
+SELECTED_MODEL_DIR_R <- file.path(PROCESSED_DIR_R, "selected_model_k6")
+FIGURES_DIR_R <- file.path(PROCESSED_DIR_R, "figures")
 LEGACY_RESULTS_DIR_R <- file.path(ROOT_R, "data", "results")
-SELECTED_RESULTS_DIR_R <- file.path(ROOT_R, "data", "results_selected")
+SELECTED_RESULTS_DIR_R <- file.path(SELECTED_MODEL_DIR_R, "python")
+PY_K6_RESULTS_DIR_R <- SELECTED_RESULTS_DIR_R
 PY_RESULTS_DIR_R <- file.path(ROOT_R, "data", "results_python")
 R_RESULTS_DIR_R <- file.path(ROOT_R, "data", "results_r")
-R_K6_RESULTS_DIR_R <- file.path(ROOT_R, "data", "results_r_k6_sparse_mt_t4_heavy")
+R_K6_RESULTS_DIR_R <- file.path(SELECTED_MODEL_DIR_R, "r")
 
 CHOSEN_K_R <- 6L
 CHOSEN_SEED_R <- 2L
 CHOSEN_ITER_R <- 2000L
 STIM_LABEL_R <- "stim"
 
-PREPROCESSED_H5AD_R <- file.path(PROCESSED_DIR_R, "preprocessed_cells_hvg3000.h5ad")
-COGAPS_INPUT_H5AD_R <- file.path(PROCESSED_DIR_R, "cogaps_input_genesxcells_hvg3000_float64.h5ad")
-PREPROCESS_CONFIG_JSON_R <- file.path(PROCESSED_DIR_R, "preprocess_config_hvg3000.json")
+ARTIFACT_MANIFEST_JSON_R <- file.path(DATA_DIR_R, "artifact_manifest.json")
+K_SELECTION_DECISION_JSON_R <- file.path(MODEL_SELECTION_DIR_R, "k_selection_decision_manifest.json")
+PREPROCESSED_H5AD_R <- file.path(INPUT_DIR_R, "preprocessed_cells_hvg3000.h5ad")
+COGAPS_INPUT_H5AD_R <- file.path(INPUT_DIR_R, "cogaps_input_genesxcells_hvg3000_float64.h5ad")
+PREPROCESS_CONFIG_JSON_R <- file.path(INPUT_DIR_R, "preprocess_config_hvg3000.json")
 
 PHASE1_LOWERK_SUMMARY_CSV_R <- file.path(MODEL_SELECTION_DIR_R, "phase1_lowerk_summary.csv")
 PHASE1B_LOWERK_LONG_SUMMARY_CSV_R <- file.path(MODEL_SELECTION_DIR_R, "phase1b_lowerk_long_summary.csv")
@@ -200,17 +207,24 @@ def resolve_first_existing(*candidates: Path) -> Path:
 
 
 ROOT = find_project_root(Path.cwd())
-PROCESSED_DIR = ROOT / "data" / "processed"
-MODEL_SELECTION_DIR = ROOT / "data" / "model_selection"
+DATA_DIR = ROOT / "data"
+PROCESSED_DIR = DATA_DIR / "processed"
+INPUT_DIR = PROCESSED_DIR / "input"
+MODEL_SELECTION_DIR = PROCESSED_DIR / "k_selection"
+SELECTED_MODEL_DIR = PROCESSED_DIR / "selected_model_k6"
+FIGURES_DIR = PROCESSED_DIR / "figures"
 LEGACY_RESULTS_DIR = ROOT / "data" / "results"
-SELECTED_RESULTS_DIR = ROOT / "data" / "results_selected"
+SELECTED_RESULTS_DIR = SELECTED_MODEL_DIR / "python"
+PY_K6_RESULTS_DIR = SELECTED_RESULTS_DIR
 PY_RESULTS_DIR = ROOT / "data" / "results_python"
 R_RESULTS_DIR = ROOT / "data" / "results_r"
-R_K6_RESULTS_DIR = ROOT / "data" / "results_r_k6_sparse_mt_t4_heavy"
+R_K6_RESULTS_DIR = SELECTED_MODEL_DIR / "r"
 
-PREPROCESSED_H5AD = PROCESSED_DIR / "preprocessed_cells_hvg3000.h5ad"
-COGAPS_INPUT_H5AD = PROCESSED_DIR / "cogaps_input_genesxcells_hvg3000_float64.h5ad"
-PREPROCESS_CONFIG_JSON = PROCESSED_DIR / "preprocess_config_hvg3000.json"
+ARTIFACT_MANIFEST_JSON = DATA_DIR / "artifact_manifest.json"
+K_SELECTION_DECISION_JSON = MODEL_SELECTION_DIR / "k_selection_decision_manifest.json"
+PREPROCESSED_H5AD = INPUT_DIR / "preprocessed_cells_hvg3000.h5ad"
+COGAPS_INPUT_H5AD = INPUT_DIR / "cogaps_input_genesxcells_hvg3000_float64.h5ad"
+PREPROCESS_CONFIG_JSON = INPUT_DIR / "preprocess_config_hvg3000.json"
 
 PY_CHOSEN_RESULT_H5AD = SELECTED_RESULTS_DIR / "cogaps_K6_seed2_iter2000.h5ad"
 PY_CHOSEN_METRICS_JSON = SELECTED_RESULTS_DIR / "cogaps_K6_seed2_iter2000.metrics.json"

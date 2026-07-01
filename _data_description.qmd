@@ -1,19 +1,21 @@
 # **What are the data?**
 ***
 
-We will use a processed subset of the PBMC IFN-beta stimulation single-cell RNA-seq dataset from Kang et al. The student-facing analysis object contains 24,673 cells and 3,000 highly variable genes. Each cell has metadata for condition, annotated cell type, and donor/replicate.
+We will use a processed subset of the PBMC IFN-beta stimulation single-cell RNA-seq dataset from Kang et al. The learner-facing analysis object contains 24,673 cells and 3,000 highly variable genes. Each cell has metadata for condition, annotated cell type, and donor/replicate.
 
 Object or variable | Details
 ------------------ | -------
-`preprocessed_cells_hvg3000.h5ad` | Cells x genes AnnData object used for the main learner workflow
+`data/artifact_manifest.json` | Inventory of GitHub-safe and optional full-local artifacts
+`data/processed/k_selection/k_selection_decision_manifest.json` | Current selected-model decision and evidence map
+`data/processed/input/preprocessed_cells_hvg3000.h5ad` | Cells x genes AnnData object used for the main learner workflow
 `condition` | Experimental condition: `ctrl` or `stim`
 `cell_type` | Annotated PBMC cell type
 `replicate` | Donor or patient replicate label
 `.layers["counts"]` | Count layer used for targeted pseudobulk directionality
-`cogaps_input_genesxcells_hvg3000_float64.h5ad` | Optional genes x cells matrix prepared for Python/PyCoGAPS full local runs
-`data/results_r_k6_sparse_mt_t4_heavy/cogaps_K6_seed2_iter2000.metrics.json` | Selected R K6 sparse-on model metadata
-`data/results_r_k6_sparse_mt_t4_heavy/pattern_gene_weights.tsv.gz` | Lightweight exported R CoGAPS gene-weight (`A`) matrix
-`data/results_r_k6_sparse_mt_t4_heavy/pattern_cell_activities.tsv.gz` | Lightweight exported R CoGAPS cell-activity (`P`) matrix
+`data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad` | Optional genes x cells matrix prepared for Python/PyCoGAPS full local runs
+`data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.metrics.json` | Selected R K6 sparse-on model metadata
+`data/processed/selected_model_k6/r/pattern_gene_weights.tsv.gz` | Lightweight exported R CoGAPS gene-weight (`A`) matrix
+`data/processed/selected_model_k6/r/pattern_cell_activities.tsv.gz` | Lightweight exported R CoGAPS cell-activity (`P`) matrix
 `pattern_cell_activities_with_metadata.csv.gz` | Cell-level pattern activities joined to key metadata and embeddings
 `pattern_top_genes.csv` | Top weighted genes per pattern from the chosen model
 `pattern_correlations.csv` | Pattern correlations with the stimulation indicator
@@ -24,6 +26,6 @@ Object or variable | Details
 
 The local processed object is sparse: about 96 percent of entries are zero. This is typical for single-cell RNA-seq and is one reason that careful preprocessing and interpretation are important.
 
-The case study starts from cached files so learners can focus on latent-variable analysis and interpretation rather than full raw-data processing. For GitHub and other lightweight render contexts, the smaller exported pattern tables allow most of the biological interpretation to remain available even when full model objects such as the R `.rds` or Python `.h5ad` files are absent.
+The case study starts from cached files so learners can focus on latent-variable analysis and interpretation rather than full raw-data processing. For GitHub and other lightweight render contexts, the smaller exported pattern tables allow the biological interpretation to remain available even when full model objects such as the R `.rds` or Python `.h5ad` files are absent.
 
 ***

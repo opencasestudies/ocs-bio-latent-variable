@@ -1,4 +1,72 @@
-Term 1: |
-  Definition of Term 1
-Term2: |
-  Definition of Term 2
+Aliquot: |
+  One portion of a sample split from the same original material.
+Autoimmune disease: |
+  A disease in which immune responses are directed against the body's own cells or molecules.
+B cell: |
+  An adaptive immune cell type that can contribute to antibody responses.
+Cell activity: |
+  A CoGAPS value describing how strongly a cell uses a learned pattern.
+Cell metadata: |
+  Information recorded about each cell, such as donor, condition, or cell-type label.
+Cell-type-linked pattern: |
+  A learned pattern whose activity mainly follows annotated immune-cell groups rather than the stimulation condition.
+CoGAPS: |
+  A Bayesian nonnegative matrix factorization method used to learn overlapping gene-expression patterns and cell activities.
+Dendritic cell: |
+  An antigen-presenting immune cell that helps connect innate sensing to adaptive immune responses.
+Demultiplexing: |
+  A computational step that separates pooled single-cell data back into donor- or sample-level assignments.
+Directionality: |
+  Whether expression is higher or lower in one condition compared with another.
+Doublet: |
+  A droplet or cell barcode that likely contains material from more than one cell.
+Flare: |
+  A period when disease signs or symptoms become more active.
+Gene weight: |
+  A CoGAPS value describing how strongly a gene contributes to a learned pattern.
+IFN-beta: |
+  A type I interferon used as the stimulation signal in this case-study dataset.
+IFNAR: |
+  The type I interferon receptor, which receives type I interferon signals at the cell surface.
+IFN-associated pattern: |
+  A learned CoGAPS pattern whose cell activities and top genes are consistent with an interferon response; the numbered pattern label can differ by run.
+Immune complex: |
+  A structure formed when antibodies bind to molecules they recognize; in lupus, immune complexes can include self-derived material and can stimulate immune signaling.
+Immune-cell identity: |
+  The immune-cell type or lineage a cell most resembles, such as a T cell, B cell, monocyte, natural killer cell, or dendritic cell.
+Interferon: |
+  A cytokine signal that helps cells coordinate antiviral and immune responses.
+Interferon gene signature: |
+  A recognizable group of interferon-responsive genes whose expression pattern suggests interferon pathway activity.
+Interferon-stimulated gene: |
+  A gene whose expression can change when a cell responds to interferon signaling.
+JAK-STAT signaling: |
+  A signaling pathway that carries cytokine-receptor signals to transcription factors that can change gene expression.
+Latent pattern: |
+  An inferred gene-expression signal learned from the data rather than directly recorded as metadata.
+Monocyte: |
+  A circulating innate immune cell that can contribute to inflammation and antigen presentation.
+Natural killer cell: |
+  An immune cell type involved in cytotoxic responses against infected or abnormal cells.
+Neutrophil extracellular trap: |
+  A web-like structure released by neutrophils that can contain DNA and proteins; in lupus biology, these can contribute nucleic-acid material that stimulates interferon pathways.
+Non-negative matrix factorization: |
+  A matrix-factorization approach that represents a non-negative data matrix using additive, non-negative patterns and activities.
+Paired design: |
+  A design in which related samples are compared, such as control and stimulated aliquots from the same donor.
+Peripheral blood mononuclear cell: |
+  A blood immune-cell category that includes lymphocytes and monocytes; often abbreviated PBMC.
+Perturbation experiment: |
+  An experiment that deliberately changes a condition so the response can be measured.
+Plasmacytoid dendritic cell: |
+  A dendritic-cell subtype known for producing large amounts of type I interferon after nucleic-acid sensing.
+Single-cell RNA-seq: |
+  A sequencing approach that measures gene expression separately for many individual cells.
+Stimulation-associated activity: |
+  Pattern activity that differs between stimulated cells and control cells.
+Systemic lupus erythematosus: |
+  An autoimmune disease in which the immune system can attack the body's own tissues, causing inflammation that may affect several organ systems.
+T cell: |
+  An adaptive immune cell type involved in coordinating or carrying out immune responses.
+Type I interferon: |
+  A subset of interferon cytokines, including IFN-alpha and IFN-beta, that signals through the type I interferon receptor.

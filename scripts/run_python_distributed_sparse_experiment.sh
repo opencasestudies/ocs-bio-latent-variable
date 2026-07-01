@@ -11,8 +11,8 @@ if [[ -t 1 ]]; then
   DOCKER_TTY=(-t)
 fi
 
-PREPROCESSED_H5AD="${ROOT}/data/processed/preprocessed_cells_hvg3000.h5ad"
-COGAPS_INPUT_H5AD="${ROOT}/data/processed/cogaps_input_genesxcells_hvg3000_float64.h5ad"
+PREPROCESSED_H5AD="${ROOT}/data/processed/input/preprocessed_cells_hvg3000.h5ad"
+COGAPS_INPUT_H5AD="${ROOT}/data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad"
 SHARED_DIR="${ROOT}/data/results_r_distributed_shared"
 EXPLICIT_SETS_RDS="${SHARED_DIR}/cogaps_K7_seed2_iter2000_single_cell.explicit_sets.rds"
 EXPLICIT_SETS_JSON="${SHARED_DIR}/cogaps_K7_seed2_iter2000_single_cell.explicit_sets.python.json"
@@ -39,7 +39,7 @@ docker run --rm "${DOCKER_TTY[@]}" --platform linux/amd64 \
   "${IMAGE}" \
   bash -lc "Rscript scripts/export_distributed_explicit_sets_for_python.R \
     --explicit-sets-rds data/results_r_distributed_shared/cogaps_K7_seed2_iter2000_single_cell.explicit_sets.rds \
-    --preprocessed-h5ad data/processed/preprocessed_cells_hvg3000.h5ad \
+    --preprocessed-h5ad data/processed/input/preprocessed_cells_hvg3000.h5ad \
     --out-json data/results_r_distributed_shared/cogaps_K7_seed2_iter2000_single_cell.explicit_sets.python.json \
     --subset-summary-csv data/results_r_distributed_shared/cogaps_K7_seed2_iter2000_single_cell.explicit_sets.python.summary.csv \
     --label distributed_single_cell_k7_seed2"
@@ -87,9 +87,9 @@ docker run --rm "${DOCKER_TTY[@]}" --platform linux/amd64 \
   -w /workspace/case-study \
   "${IMAGE}" \
   bash -lc "PYTHONWARNINGS=ignore::FutureWarning python scripts/cogaps_run_distributed_python.py \
-    --cogaps-input-h5ad data/processed/cogaps_input_genesxcells_hvg3000_float64.h5ad \
-    --preprocessed-h5ad data/processed/preprocessed_cells_hvg3000.h5ad \
-    --worker-source-h5ad data/processed/preprocessed_cells_hvg3000.h5ad \
+    --cogaps-input-h5ad data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad \
+    --preprocessed-h5ad data/processed/input/preprocessed_cells_hvg3000.h5ad \
+    --worker-source-h5ad data/processed/input/preprocessed_cells_hvg3000.h5ad \
     --worker-source-layout cellsxgenes \
     --explicit-sets-json data/results_r_distributed_shared/cogaps_K7_seed2_iter2000_single_cell.explicit_sets.python.json \
     --outdir ${OUTDIR} \
