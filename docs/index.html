@@ -17,7 +17,7 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
@@ -186,9 +186,9 @@ window.Quarto = {
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/opencasestudies/ocs-bio-latent-variable"> <i class="bi bi-github" role="img">
-</i>
+</i> 
 <span class="menu-text"></span></a>
-  </li>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
@@ -201,7 +201,7 @@ window.Quarto = {
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><strong>Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS</strong></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
   </nav>
@@ -217,7 +217,7 @@ window.Quarto = {
       </div>
     <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
-
+   
   <ul>
   <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link active" data-scroll-target="#prerequisites">Prerequisites</a></li>
   <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation"><strong>Motivation</strong></a></li>
@@ -333,11 +333,11 @@ window.Quarto = {
 
 <div class="quarto-title-meta">
 
-
-
-
+    
+  
+    
   </div>
-
+  
 
 
 </header>
@@ -1570,8 +1570,8 @@ D_{g,c} \approx \sum_{k=1}^{K} A_{g,k} P_{k,c}
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 6
   selected_K  seed nIterations sparseOptimization primary_implementation
-       &lt;int&gt; &lt;int&gt;       &lt;int&gt; &lt;lgl&gt;              &lt;chr&gt;
-1          6     2        2000 TRUE               R/Bioconductor CoGAPS
+       &lt;int&gt; &lt;int&gt;       &lt;int&gt; &lt;lgl&gt;              &lt;chr&gt;                 
+1          6     2        2000 TRUE               R/Bioconductor CoGAPS 
 # ℹ 1 more variable: decision_status &lt;chr&gt;</code></pre>
 </div>
 </div>
@@ -1614,8 +1614,8 @@ D_{g,c} \approx \sum_{k=1}^{K} A_{g,k} P_{k,c}
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>sce_cells <span class="ot">&lt;-</span> zellkonverter<span class="sc">::</span><span class="fu">readH5AD</span>(PREPROCESSED_H5AD_R, <span class="at">reader =</span> <span class="st">"R"</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>sce_cells</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>class: SingleCellExperiment
-dim: 3000 24673
+<pre><code>class: SingleCellExperiment 
+dim: 3000 24673 
 metadata(2): hvg log1p
 assays(2): X counts
 rownames(3000): HES4 ISG15 ... SLC19A1 S100B
@@ -1688,7 +1688,7 @@ AAACATACGATGAA-1      ctrl     CD4 T cells patient_1488</code></pre>
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>adata_cells.obs[[<span class="st">"condition"</span>, <span class="st">"cell_type"</span>, <span class="st">"replicate"</span>]].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                 condition        cell_type     replicate
-index
+index                                                    
 AAACATACATTTCC-1      ctrl  CD14+ Monocytes  patient_1016
 AAACATACCAGAAA-1      ctrl  CD14+ Monocytes  patient_1256
 AAACATACCATGCA-1      ctrl      CD4 T cells  patient_1488
@@ -1707,11 +1707,11 @@ AAACATACCTGGTA-1      ctrl  Dendritic cells  patient_1039</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"R analysis mode:"</span>, R_ANALYSIS_MODE_R, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>R analysis mode: full_chosen_result </code></pre>
+<pre><code>R analysis mode: lightweight_derived </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"R full chosen model available:"</span>, HAS_R_CHOSEN_RESULT_R, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>R full chosen model available: TRUE </code></pre>
+<pre><code>R full chosen model available: FALSE </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"R chosen model metrics available:"</span>, <span class="fu">file.exists</span>(R_CHOSEN_METRICS_JSON_R), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1731,15 +1731,15 @@ AAACATACCTGGTA-1      ctrl  Dendritic cells  patient_1039</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Python analysis mode:"</span>, PY_ANALYSIS_MODE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Python analysis mode: full_chosen_result</code></pre>
+<pre><code>Python analysis mode: lightweight_derived</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Python full chosen model available:"</span>, HAS_PY_CHOSEN_RESULT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Python full chosen model available: True</code></pre>
+<pre><code>Python full chosen model available: False</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Cached dense CoGAPS input available:"</span>, HAS_CACHED_COGAPS_INPUT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Cached dense CoGAPS input available: True</code></pre>
+<pre><code>Cached dense CoGAPS input available: False</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Python chosen model metrics available:"</span>, PY_CHOSEN_METRICS_JSON.exists())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1891,7 +1891,7 @@ AAACATACCTGGTA-1      ctrl  Dendritic cells  patient_1039</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">colData</span>(sce_cells)<span class="sc">$</span>replicate, <span class="fu">colData</span>(sce_cells)<span class="sc">$</span>condition)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>
+<pre><code>              
                ctrl stim
   patient_101   858 1166
   patient_107   517  525
@@ -1909,7 +1909,7 @@ AAACATACCTGGTA-1      ctrl  Dendritic cells  patient_1039</code></pre>
 <div class="sourceCode cell-code" id="cb66"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>pd.crosstab(adata_cells.obs[<span class="st">"replicate"</span>], adata_cells.obs[<span class="st">"condition"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>condition     ctrl  stim
-replicate
+replicate               
 patient_101    858  1166
 patient_107    517   525
 patient_1015  2738  2352
@@ -2053,12 +2053,8 @@ $created_at
 <span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Cached dense CoGAPS input not available in this render context."</span>)</span>
 <span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Expected genes x cells shape:"</span>, (adata_cells.n_vars, adata_cells.n_obs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>AnnData object with n_obs × n_vars = 3000 × 24673
-    obs: 'name', 'n_cells', 'highly_variable', 'highly_variable_rank', 'means', 'variances', 'variances_norm'
-    var: 'nCount_RNA', 'nFeature_RNA', 'tsne1', 'tsne2', 'label', 'cluster', 'cell_type', 'replicate', 'nCount_SCT', 'nFeature_SCT', 'integrated_snn_res.0.4', 'seurat_clusters', 'condition'
-    uns: 'hvg', 'log1p'
-    varm: 'X_pca', 'X_umap'
-    layers: 'counts'</code></pre>
+<pre><code>Cached dense CoGAPS input not available in this render context.
+Expected genes x cells shape: (3000, 24673)</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -2073,7 +2069,7 @@ $created_at
 <span id="cb90-5"><a href="#cb90-5" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
 <span id="cb90-6"><a href="#cb90-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Skipping dense input validation because the cached genes x cells file is absent."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CoGAPS input shape: (3000, 24673)</code></pre>
+<pre><code>Skipping dense input validation because the cached genes x cells file is absent.</code></pre>
 </div>
 </div>
 </div>
@@ -2388,7 +2384,7 @@ Because the meaning of rows and columns changes across data structures. In R <co
 <span id="cb104-56"><a href="#cb104-56" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb104-57"><a href="#cb104-57" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"R analysis mode:"</span>, analysis_mode_label_r, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>R analysis mode: Full chosen-model RDS </code></pre>
+<pre><code>R analysis mode: Lightweight exported A/P matrices </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb106"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(pattern_names_r) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
 <span id="cb106-2"><a href="#cb106-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"Pattern columns:"</span>, <span class="fu">paste</span>(pattern_names_r, <span class="at">collapse =</span> <span class="st">", "</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
@@ -2396,8 +2392,8 @@ Because the meaning of rows and columns changes across data structures. In R <co
 <span id="cb106-4"><a href="#cb106-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"P matrix shape:"</span>, <span class="fu">paste</span>(<span class="fu">dim</span>(P_r), <span class="at">collapse =</span> <span class="st">" x "</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
 <span id="cb106-5"><a href="#cb106-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Pattern columns: Pattern1, Pattern2, Pattern3, Pattern4, Pattern5, Pattern6
-A matrix shape: 3000 x 6
+<pre><code>Pattern columns: Pattern1, Pattern2, Pattern3, Pattern4, Pattern5, Pattern6 
+A matrix shape: 3000 x 6 
 P matrix shape: 24673 x 6 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb108"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(chosen_metrics_r)) {</span>
@@ -2406,8 +2402,8 @@ P matrix shape: 24673 x 6 </code></pre>
 <span id="cb108-4"><a href="#cb108-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"Runtime in original environment, minutes:"</span>, <span class="fu">round</span>(chosen_metrics_r<span class="sc">$</span>runtime_sec <span class="sc">/</span> <span class="dv">60</span>, <span class="dv">1</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
 <span id="cb108-5"><a href="#cb108-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>IFN-associated pattern from metrics: Pattern4
-IFN correlation: 0.7536
+<pre><code>IFN-associated pattern from metrics: Pattern4 
+IFN correlation: 0.7536 
 Runtime in original environment, minutes: 15.9 </code></pre>
 </div>
 </div>
@@ -2439,7 +2435,7 @@ Runtime in original environment, minutes: 15.9 </code></pre>
 <span id="cb110-23"><a href="#cb110-23" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb110-24"><a href="#cb110-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Python analysis mode:"</span>, analysis_mode_label)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Python analysis mode: Full chosen-model H5AD</code></pre>
+<pre><code>Python analysis mode: Lightweight exported A/P matrices</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb112"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Pattern columns:"</span>, pattern_names)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -2566,7 +2562,7 @@ AAACATACGATGAA-1 7.924040e-05 7.009170e-03 8.359792e-06 3.485500e-01</code></pre
 <span id="cb128-11"><a href="#cb128-11" aria-hidden="true" tabindex="-1"></a>adata_with_patterns.obs[[<span class="st">"condition"</span>, <span class="st">"cell_type"</span>, <span class="op">*</span>pattern_names]].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                 condition        cell_type  ...  Pattern5  Pattern6
-index                                        ...
+index                                        ...                    
 AAACATACATTTCC-1      ctrl  CD14+ Monocytes  ...  0.000112  0.321977
 AAACATACCAGAAA-1      ctrl  CD14+ Monocytes  ...  0.000027  0.039157
 AAACATACCATGCA-1      ctrl      CD4 T cells  ...  0.000094  0.000033
@@ -2606,7 +2602,7 @@ AAACATACCTGGTA-1      ctrl  Dendritic cells  ...  0.055975  0.557565
 <span id="cb130-16"><a href="#cb130-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"R pattern correlations are unavailable because the R result artifacts are missing.</span><span class="sc">\n</span><span class="st">"</span>)</span>
 <span id="cb130-17"><a href="#cb130-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>    Pattern4     Pattern5     Pattern1     Pattern3     Pattern6     Pattern2
+<pre><code>    Pattern4     Pattern5     Pattern1     Pattern3     Pattern6     Pattern2 
  0.753632351  0.366354946  0.035373712  0.002648932 -0.210740663 -0.278438106 </code></pre>
 </div>
 </div>
@@ -3690,7 +3686,7 @@ Stein-O’Brien, Genevieve L., Brian S. Clark, Thomas Sherman, Cristina Zibetti,
 </div>
 <div class="sourceCode cell-code" id="cb178"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb178-1"><a href="#cb178-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Platform:"</span>, platform.platform())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Platform: Linux-6.12.76-linuxkit-x86_64-with-glibc2.35</code></pre>
+<pre><code>Platform: Linux-6.17.0-1018-azure-x86_64-with-glibc2.35</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb180"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb180-1"><a href="#cb180-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> package_name <span class="kw">in</span> [<span class="st">"anndata"</span>, <span class="st">"pandas"</span>, <span class="st">"numpy"</span>, <span class="st">"scipy"</span>, <span class="st">"matplotlib"</span>]:</span>
 <span id="cb180-2"><a href="#cb180-2" aria-hidden="true" tabindex="-1"></a>    module <span class="op">=</span> <span class="bu">__import__</span>(package_name)</span>
@@ -3716,10 +3712,10 @@ matplotlib 3.7.3</code></pre>
 <span id="cb186-2"><a href="#cb186-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(package_name, <span class="fu">as.character</span>(<span class="fu">packageVersion</span>(package_name)), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
 <span id="cb186-3"><a href="#cb186-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CoGAPS 3.22.0
-zellkonverter 1.12.1
-SingleCellExperiment 1.24.0
-ggplot2 4.0.3
+<pre><code>CoGAPS 3.22.0 
+zellkonverter 1.12.1 
+SingleCellExperiment 1.24.0 
+ggplot2 4.0.3 
 dplyr 1.1.4 </code></pre>
 </div>
 </div>
@@ -3757,7 +3753,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       toggleBodyColorMode(bsSheetEl);
     }
   }
-  toggleBodyColorPrimary();
+  toggleBodyColorPrimary();  
   const icon = "";
   const anchorJS = new window.AnchorJS();
   anchorJS.options = {
@@ -3767,7 +3763,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   anchorJS.add('.anchored');
   const isCodeAnnotation = (el) => {
     for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {
+      if (clz.startsWith('code-annotation-')) {                     
         return true;
       }
     }
@@ -3787,11 +3783,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       button.setAttribute("data-bs-toggle", "tooltip");
       button.setAttribute("data-bs-placement", "left");
       button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button,
-        { trigger: "manual",
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
           customClass: "code-copy-button-tooltip",
           offset: [0, -8]});
-      tooltip.show();
+      tooltip.show();    
     }
     setTimeout(function() {
       if (tooltip) {
@@ -3869,7 +3865,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     if (onUntriggerFn) {
       config.onUntrigger = onUntriggerFn;
     }
-    window.tippy(el, config);
+    window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
   for (var i=0; i<noterefs.length; i++) {
@@ -3945,7 +3941,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     tippyHover(xref, undefined, function(instance) {
       instance.disable();
       let url = xref.getAttribute('href');
-      let hash = undefined;
+      let hash = undefined; 
       if (url.startsWith('#')) {
         hash = url;
       } else {
@@ -3973,7 +3969,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             if (note !== null) {
               const html = processXRef(id, note);
               instance.setContent(html);
-            }
+            } 
           }).finally(() => {
             instance.enable();
             instance.show();
@@ -3997,7 +3993,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             const html = processXRef(null, note);
             instance.setContent(html);
-          }
+          } 
         }).finally(() => {
           instance.enable();
           instance.show();
@@ -4037,7 +4033,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             height = bottom - top;
           }
           if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it
+            // cook up a div (if necessary) and position it 
             let div = window.document.getElementById("code-annotation-line-highlight");
             if (div === null) {
               div = window.document.createElement("div");
@@ -4163,7 +4159,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   <div class="nav-footer">
     <div class="nav-footer-left">
 <p>This book was built with <a href="https://quarto.org/" style="color: #0000FF;">Quarto</a> using <a href="https://github.com/opencasestudies/ocs-template-quarto" style="color: #0000FF;">OTTR</a>.</p>
-</div>
+</div>   
     <div class="nav-footer-center">
 <p>All illustrations <a href="https://creativecommons.org/licenses/by-nc/4.0/us/" style="color: #0000FF;">CC BY-NC 4.0. </a> <br> All other materials <a href="https://creativecommons.org/licenses/by-nc/4.0/us/" style="color: #0000FF;"> CC BY-NC 4.0 </a> unless noted otherwise.</p>
 </div>
@@ -4172,14 +4168,14 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/opencasestudies/ocs-bio-latent-variable">
       <i class="bi bi-github" role="img">
-</i>
+</i> 
     </a>
-  </li>
+  </li>  
 </ul>
     </div>
   </div>
 </footer>
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","selector":".lightbox","descPosition":"bottom","openEffect":"zoom","loop":false});
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {
@@ -4197,18 +4193,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             slideConfig.href = srcAttr;
           }
         }
-      }
+      } 
     });
-
+  
     lightboxQuarto.on('slide_after_load', (data) => {
       const { slideIndex, slideNode, slideConfig, player, trigger } = data;
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(slideNode);
       }
     });
-
+  
   };
-
+  
 })();
           </script>
 
