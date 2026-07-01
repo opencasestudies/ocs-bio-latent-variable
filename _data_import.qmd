@@ -1,7 +1,52 @@
 # **Data Import**
 ***
 
-We will start from a cached processed single-cell object. This keeps the focus of the case study on latent-variable analysis and interpretation rather than on rebuilding every preprocessing step from the original source files.
+We start by reading the artifact manifests. These files tell us which inputs and saved model outputs belong to the main learner path, which files are optional for full local reproduction, and which rank was selected for the case study.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+artifact_manifest_r <- jsonlite::read_json(ARTIFACT_MANIFEST_JSON_R, simplifyVector = TRUE)
+k_selection_decision_r <- jsonlite::read_json(K_SELECTION_DECISION_JSON_R, simplifyVector = TRUE)
+
+tibble::tibble(
+  selected_K = k_selection_decision_r$selected_model$K,
+  seed = k_selection_decision_r$selected_model$seed,
+  nIterations = k_selection_decision_r$selected_model$nIterations,
+  sparseOptimization = k_selection_decision_r$selected_model$sparseOptimization,
+  primary_implementation = k_selection_decision_r$selected_model$primary_implementation,
+  decision_status = k_selection_decision_r$decision_status
+)
+```
+
+### Python
+
+```{python}
+with open(ARTIFACT_MANIFEST_JSON) as f:
+    artifact_manifest = json.load(f)
+
+with open(K_SELECTION_DECISION_JSON) as f:
+    k_selection_decision = json.load(f)
+
+pd.DataFrame(
+    [{
+        "selected_K": k_selection_decision["selected_model"]["K"],
+        "seed": k_selection_decision["selected_model"]["seed"],
+        "nIterations": k_selection_decision["selected_model"]["nIterations"],
+        "sparseOptimization": k_selection_decision["selected_model"]["sparseOptimization"],
+        "primary_implementation": k_selection_decision["selected_model"]["primary_implementation"],
+        "decision_status": k_selection_decision["decision_status"],
+    }]
+)
+```
+
+:::
+
+This table confirms the model-selection contract before any pattern interpretation begins. The selected model is `K = 6`, but the pattern labels are still run-specific; the R selected run labels the IFN-associated pattern as `Pattern4`, while the Python saved output labels the corresponding signal as `Pattern5`.
+
+The next import step loads the cached processed single-cell object. This keeps the focus of the case study on latent-variable analysis and interpretation rather than on rebuilding every preprocessing step from the original source files.
 
 ::: {.panel-tabset}
 
@@ -57,7 +102,7 @@ adata_cells.obs[["condition", "cell_type", "replicate"]].head()
 
 :::
 
-The default path in this case study uses saved R-primary CoGAPS artifacts. If the full R result is available, the case study can load it directly; otherwise it uses lightweight exported matrices and summaries that are suitable for GitHub and classroom rendering. The Python implementation follows the same cooking-show pattern in the secondary tab: full `.h5ad` support is preserved for local review, but lightweight Python exports are sufficient when that larger file is absent.
+The default path in this case study uses saved R-primary CoGAPS artifacts. If the full R result is available, the case study can load it directly; otherwise it uses lightweight exported matrices and summaries that are suitable for GitHub and classroom rendering. The Python tab follows the same cooking-show pattern: full `.h5ad` support is preserved for local review, but lightweight Python exports are sufficient when that larger file is absent.
 
 ::: {.panel-tabset}
 
@@ -83,5 +128,7 @@ print("Python lightweight pattern summary available:", HAS_PY_PATTERN_SUMMARY)
 ```
 
 :::
+
+You should see that the lightweight R and Python pattern summaries are available even if the optional full model objects are not. That is the intended learner path: analyze the selected model and model-selection summaries without requiring a long CoGAPS rerun.
 
 ***

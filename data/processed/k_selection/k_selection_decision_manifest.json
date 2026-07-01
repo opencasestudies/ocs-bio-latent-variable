@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-27T23:34:08+00:00",
+  "selected_model": {
+    "K": 6,
+    "seed": 2,
+    "nIterations": 2000,
+    "sparseOptimization": true,
+    "primary_implementation": "R/Bioconductor CoGAPS",
+    "primary_ifn_associated_pattern_label": "Pattern4",
+    "python_parallel_ifn_associated_pattern_label": "Pattern5",
+    "older_k7_reference_ifn_label": "Pattern2",
+    "pattern_label_caution": "Pattern labels are run-specific; prose should use IFN-associated pattern unless describing a specific saved run."
+  },
+  "decision_status": "Leading selected model pending CoGAPS team feedback",
+  "decision_summary": "K6 is selected because it preserves the dominant IFN/ISG program, retains more non-IFN structure than K4, remains parsimonious relative to K7 and high-K models, and has practical runtime under sparse optimization.",
+  "evidence_files": {
+    "lower_k_sweep": "data/processed/k_selection/phase1_lowerk_summary.csv",
+    "long_iteration_lower_k_sweep": "data/processed/k_selection/phase1b_lowerk_long_summary.csv",
+    "candidate_pattern_structure": "data/processed/k_selection/candidate_pattern_summary.csv",
+    "k6_vs_k7_pattern_matching": "data/processed/k_selection/candidate_best_k7_activity_matches.csv",
+    "high_k_sweep": "data/processed/k_selection/phase3_highk_2000_summary.csv",
+    "selected_r_metrics": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.metrics.json",
+    "selected_python_metrics": "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.metrics.json"
+  },
+  "rank_interpretation": [
+    {
+      "K": 4,
+      "status": "sensitivity comparator, not selected",
+      "interpretation": "Fast and strong for the IFN program, but biologically compressed because it merges more non-IFN structure."
+    },
+    {
+      "K": 5,
+      "status": "sensitivity comparator, not selected",
+      "interpretation": "Intermediate lower-rank model; useful for checking whether the K6 decision depends on one extra pattern."
+    },
+    {
+      "K": 6,
+      "status": "selected for the learner path",
+      "interpretation": "Best current compromise between parsimony, IFN/ISG recovery, secondary pattern interpretability, and runtime."
+    },
+    {
+      "K": 7,
+      "status": "older reference/sensitivity model",
+      "interpretation": "Useful historical reference, but no longer the selected case-study model."
+    },
+    {
+      "K": "14-80",
+      "status": "not supported by current sweep evidence",
+      "interpretation": "Higher ranks increased runtime without improving the IFN signal or cross-seed stability enough to justify selection."
+    }
+  ],
+  "learner_path_policy": {
+    "main_path": "Analyze saved K6 artifacts and precomputed sweep summaries.",
+    "full_reproduction_path": "Optionally rerun the selected K6 model locally in R or Python if large inputs and sufficient compute are available.",
+    "hpc_sweep_policy": "Analyze precomputed sweep summaries; do not ask learners to rerun the full HPC sweep."
+  }
+}

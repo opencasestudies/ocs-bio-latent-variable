@@ -16,10 +16,11 @@ ROOT = Path(__file__).resolve().parents[1]
 RESULTS_DIR = Path(
     os.environ.get(
         "COGAPS_SELECTED_RESULTS_DIR",
-        ROOT / "data/results_r_k6_sparse_mt_t4_heavy",
+        ROOT / "data/processed/selected_model_k6/r",
     )
 )
-IMG_DIR = ROOT / "img"
+IMG_DIR = Path(os.environ.get("COGAPS_FIGURES_DIR", ROOT / "data/processed/figures"))
+LEGACY_IMG_DIR = ROOT / "img"
 METRICS_JSON = RESULTS_DIR / "cogaps_K6_seed2_iter2000.metrics.json"
 CELL_ACTIVITIES = RESULTS_DIR / "pattern_cell_activities_with_metadata.csv.gz"
 DIRECTIONALITY_HEATMAP = RESULTS_DIR / "pattern_gene_directionality_heatmap.png"
@@ -154,6 +155,7 @@ def save_mean_pattern_by_condition(df: pd.DataFrame) -> None:
 
 def main() -> None:
     IMG_DIR.mkdir(parents=True, exist_ok=True)
+    LEGACY_IMG_DIR.mkdir(parents=True, exist_ok=True)
     df = pd.read_csv(CELL_ACTIVITIES)
     ifn_pattern = selected_ifn_pattern()
     save_ifn_by_celltype_split(df, ifn_pattern)
@@ -162,6 +164,8 @@ def main() -> None:
     if DIRECTIONALITY_HEATMAP.exists():
         target = IMG_DIR / "pattern_gene_directionality_heatmap.png"
         target.write_bytes(DIRECTIONALITY_HEATMAP.read_bytes())
+        legacy_target = LEGACY_IMG_DIR / "pattern_gene_directionality_heatmap.png"
+        legacy_target.write_bytes(DIRECTIONALITY_HEATMAP.read_bytes())
     print(f"Selected K6 IFN-associated pattern: {ifn_pattern}")
     print(f"Wrote figures to {IMG_DIR}")
 

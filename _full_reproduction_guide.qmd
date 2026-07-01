@@ -1,0 +1,130 @@
+# **Full Reproduction Guide**
+***
+
+The main learner path uses saved model-selection summaries and lightweight exports from the selected `K = 6` model. This guide is optional. It is for learners, reviewers, or instructors who want to regenerate selected-model outputs after obtaining the larger local files and a compatible CoGAPS environment.
+
+This guide does not ask you to rerun the full HPC sweep. The sweep is represented in the case study by precomputed summaries under `data/processed/k_selection/`.
+
+## What this reproduces
+
+The selected-model reproduction path reruns or regenerates artifacts for:
+
+- `K = 6`
+- `seed = 2`
+- `n_iter = 2000`
+- `sparseOptimization = TRUE`
+- R/Bioconductor CoGAPS as the primary implementation
+- Python/PyCoGAPS-compatible output as a parallel implementation
+
+The R selected run used heavier diagnostics: trace output, checkpoints, snapshots, and pump samples. The Python path supports the same biological interpretation, but some diagnostic features differ because PyCoGAPS does not expose every R diagnostic in the same way.
+
+## Required and optional files
+
+The GitHub-safe case study includes the files needed to render and interpret the selected model. Full reruns require additional local files and enough compute time.
+
+File | Required for main learner path? | Required for full local rerun?
+--- | --- | ---
+`data/processed/input/preprocessed_cells_hvg3000.h5ad` | Yes | Yes
+`data/processed/k_selection/*.csv` | Yes | No
+`data/processed/selected_model_k6/r/*.csv`, `.tsv.gz`, `.json` | Yes | Regenerated output
+`data/processed/selected_model_k6/python/*.csv`, `.tsv.gz`, `.json` | Yes for Python tabs | Regenerated output
+`data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad` | No | Python rerun only
+`data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds` | No | R full-result inspection/regeneration
+`data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad` | No | Python full-result inspection/regeneration
+
+The optional full-local files may be supplied from Zenodo, another artifact host, or private local storage. They should not be committed to ordinary GitHub history.
+
+## Run inside the validated image
+
+The case study is validated against the OpenMP-enabled runtime image used during development:
+
+```bash
+docker run --rm --platform linux/amd64 \
+  -v "$PWD:/workspace/case-study" \
+  -w /workspace/case-study \
+  othomas2/pycogaps-runtime-guide:0.3.0 \
+  bash
+```
+
+After the shell opens, run the selected-model scripts from `/workspace/case-study`. If you are fitting a model, run it in a visible Terminal so you can watch progress and stop it if runtime becomes impractical.
+
+## R selected-model reproduction
+
+The R path is the primary reproduction route. It reruns the selected K6 sparse-on model with the diagnostic settings used for the local selected R result.
+
+```bash
+bash scripts/reproduction/run_selected_model_r.sh
+```
+
+The script writes outputs to:
+
+```text
+data/processed/selected_model_k6/r/
+```
+
+If a full R model object is already present, the wrapper will stop before overwriting it. To intentionally rerun the selected model, use:
+
+```bash
+FORCE_RERUN=1 bash scripts/reproduction/run_selected_model_r.sh
+```
+
+After the model finishes, regenerate lightweight R artifacts:
+
+```bash
+Rscript scripts/export_cogaps_diagnostics_r.R
+Rscript scripts/export_lightweight_cogaps_derivatives_r.R
+Rscript scripts/pattern_directionality_analysis_r.R
+```
+
+These commands refresh the trace, summary tables, exported `A` and `P` matrices, activity summaries, top genes, and targeted directionality outputs used in the main narrative.
+
+## Python selected-model reproduction
+
+The Python path is a parallel implementation. It is useful for learners who want to compare the same conceptual workflow in Python, but it is not the primary implementation for this case study.
+
+```bash
+bash scripts/reproduction/run_selected_model_python.sh
+```
+
+The script writes outputs to:
+
+```text
+data/processed/selected_model_k6/python/
+```
+
+If a full Python model object is already present, the wrapper will stop before overwriting it. To intentionally rerun it, use:
+
+```bash
+FORCE_RERUN=1 bash scripts/reproduction/run_selected_model_python.sh
+```
+
+After the model finishes, regenerate lightweight Python artifacts:
+
+```bash
+python scripts/export_lightweight_cogaps_derivatives.py
+python scripts/pattern_directionality_analysis.py
+```
+
+The selected Python output may use different pattern labels from the R output. In the current saved artifacts, the R selected run labels the IFN-associated pattern `Pattern4`, while the Python saved output labels the corresponding signal `Pattern5`.
+
+## Regenerate learner-facing figures
+
+After refreshing selected-model outputs, regenerate the selected K6 figures:
+
+```bash
+python scripts/build_selected_k6_figures.py
+```
+
+The render-ready copies live under:
+
+```text
+data/processed/figures/
+```
+
+## What not to rerun here
+
+The full HPC sweep is intentionally outside the ordinary reproduction path. It requires cluster-specific job scripts, many array tasks, and longer runtime. For this case study, learners analyze the sweep summaries that are already included under `data/processed/k_selection/`.
+
+If a reviewer wants to audit the full sweep, treat that as a separate HPC provenance exercise rather than part of the main case-study workflow.
+
+***

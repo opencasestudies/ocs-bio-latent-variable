@@ -32,8 +32,6 @@ execute:
 
 {{< include _los.qmd >}}
 
-{{< include _packages.qmd >}}
-
 {{< include _context.qmd >}}
 
 {{< include _data_description.qmd >}}
@@ -41,6 +39,8 @@ execute:
 {{< include _limitations.qmd >}}
 
 {{< include _bioethics.qmd >}}
+
+{{< include _packages.qmd >}}
 
 ::: {.content-hidden unless-meta="include-sections.data-import"}
 
@@ -75,6 +75,8 @@ execute:
 {{< include _summary.qmd >}}
 
 {{< include _suggested_hw.qmd >}}
+
+{{< include _full_reproduction_guide.qmd >}}
 
 {{< include _additional_info.qmd >}}
 

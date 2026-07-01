@@ -1,5 +1,5 @@
 #### {.outline }
 
-![](img/ifn_pattern_by_celltype_split_condition.png){fig-alt="Boxplots of selected R K6 IFN-associated CoGAPS pattern activity across PBMC cell types, split by control and IFN-beta stimulated conditions." width=800 .lightbox}
+![](img/opening_roadmap_main_user_provided_20260628.png){fig-alt="Roadmap figure showing how the case study turns PBMC data into CoGAPS evidence, from biological setting through model resolution, activity patterns, identity comparison, and response evidence." width=900 .lightbox}
 
 ####

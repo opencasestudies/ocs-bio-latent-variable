@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 IMAGE="${COGAPS_RUNTIME_IMAGE:-othomas2/pycogaps-runtime-guide:0.3.0}"
-OUTDIR="data/results_r_k6_sparse_mt_t4_heavy"
+OUTDIR="data/processed/selected_model_k6/r"
 TAG="K6_seed2_iter2000"
 
 cd "${ROOT}"
@@ -23,8 +23,8 @@ docker run --rm --platform linux/amd64 \
     export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
     Rscript -e "cat(\"R CoGAPS OpenMP support:\", CoGAPS::compiledWithOpenMPSupport(), \"\n\")"
     Rscript scripts/cogaps_run_one_singleprocess_r.R \
-      --preprocessed-h5ad data/processed/preprocessed_cells_hvg3000.h5ad \
-      --outdir data/results_r_k6_sparse_mt_t4_heavy \
+      --preprocessed-h5ad data/processed/input/preprocessed_cells_hvg3000.h5ad \
+      --outdir data/processed/selected_model_k6/r \
       --k 6 \
       --seed 2 \
       --n-iter 2000 \
