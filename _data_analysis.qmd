@@ -1,12 +1,12 @@
 # **Data Analysis**
 ***
 
-This section is the core of the case study. We use the selected R K6 CoGAPS model, inspect the pattern matrices, identify the IFN-associated pattern, and connect pattern genes to stimulation directionality. Python is included as a secondary implementation in the second tab.
+This section is the core of the case study. We use the selected R K6 CoGAPS model, inspect the pattern matrices, identify the IFN-associated pattern, and connect pattern genes to stimulation directionality. Python is included as a parallel implementation in the second tab.
 
 The R and Python analyses follow the same scientific path, but they use separately saved outputs:
 
-- selected R/Bioconductor artifacts live under `data/results_r_k6_sparse_mt_t4_heavy/`
-- selected Python/PyCoGAPS-compatible artifacts live under `data/results_selected/`
+- selected R/Bioconductor artifacts live under `data/processed/selected_model_k6/r/`
+- selected Python/PyCoGAPS-compatible artifacts live under `data/processed/selected_model_k6/python/`
 - older K7 artifacts are retained only as reference or sensitivity outputs
 
 ## Why use `K = 6`?
@@ -35,7 +35,7 @@ The lower-rank and long-iteration sweeps showed that K4, K5, and K6 all recovere
 
 ## Load the chosen CoGAPS result or lightweight pattern exports
 
-The default GitHub-friendly path uses lightweight exported R pattern matrices and summary tables. If a learner or reviewer has the full R `.rds` result locally, the same code can load it directly and derive the matrices from the full model object. The Python tab follows the same cooking-show pattern: the full Python `.h5ad` is supported for full-local work, but the secondary Python interpretation can render from the lightweight exports in `data/results_selected/` when that larger file is absent.
+The default GitHub-friendly path uses lightweight exported R pattern matrices and summary tables. If a learner or reviewer has the full R `.rds` result locally, the same code can load it directly and derive the matrices from the full model object. The Python tab follows the same cooking-show pattern: the full Python `.h5ad` is supported for full-local work, but the Python interpretation can render from the lightweight exports in `data/processed/selected_model_k6/python/` when that larger file is absent.
 
 ::: {.panel-tabset}
 
@@ -458,7 +458,7 @@ pattern_summary
 
 :::
 
-The selected K6 model also contains a secondary stimulation-associated pattern with interferon-related genes. We interpret this as a secondary stimulation-associated candidate, not as a fully validated distinct biological program. Other K6 patterns have interpretable myeloid, T-cell-associated, or antigen-presentation anchors; those labels should remain cautious.
+The selected K6 model also contains an additional stimulation-associated pattern with interferon-related genes. We interpret this as a stimulation-associated candidate, not as a fully validated distinct biological program. Other K6 patterns have interpretable myeloid, T-cell-associated, or antigen-presentation anchors; those labels should remain cautious.
 
 ## IFN-associated pattern across cell types
 

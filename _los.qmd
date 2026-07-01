@@ -1,20 +1,33 @@
 # **Learning Objectives**
 ***
 
-In this case study, we will use a processed single-cell RNA-seq dataset from PBMCs exposed to IFN-beta stimulation to learn how latent-variable methods can identify gene-expression programs that are not captured by cell-type labels alone.
+By the end of this case study, you will be able to use a {{< glossary "Peripheral blood mononuclear cell" display="PBMC" >}} {{< glossary "IFN-beta" display="IFN-beta" >}} stimulation dataset to interpret {{< glossary "Latent pattern" display="latent transcriptional patterns" >}} learned by {{< glossary "CoGAPS" display="CoGAPS" >}}. You will inspect the data, follow evidence for the model resolution used later in the analysis, connect {{< glossary "Gene weight" display="gene weights" >}} and {{< glossary "Cell activity" display="cell activities" >}} to biological interpretation, and evaluate whether one learned pattern is consistent with a broad interferon-associated response.
 
-We will load and inspect an AnnData object, prepare a CoGAPS input matrix, use the selected `K = 6` model, interpret pattern activities and gene weights, and perform a targeted directionality check for genes that define the main IFN-associated pattern.
+The main learner path uses included data summaries and saved CoGAPS results so you can focus on interpretation rather than waiting for a long model run. The Full Reproduction Guide at the end of the case study shows how the larger files and selected-model outputs can be regenerated in the validated Docker image.
 
-The skills, methods, and concepts that students will be familiar with by the end of this case study are:
+The objectives are organized into data analysis and programming skills, latent-variable and CoGAPS modeling skills, and biological interpretation skills. Together, they prepare you to answer the four main questions introduced above.
 
 {{< include _data_science_los.qmd >}}
 
-::: {.content-hidden unless-meta="include-sections.stat-los"}
-
 {{< include _statistical_los.qmd >}}
 
-:::
-
 {{< include _biological_los.qmd >}}
+
+::: {.callout-note collapse="true" title="Objectives map: where each skill is used"}
+
+| Learning goal | What this helps you do | Where it appears |
+| --- | --- | --- |
+| Understand the biological setting | Explain why lupus PBMCs exposed to IFN-beta are useful for studying interferon-response structure. | [Motivation](#motivation); [Context](#context); [What are the data?](#what-are-the-data) |
+| Trace the main learner path | Use included files and saved CoGAPS results while knowing where optional full reproduction belongs. | [Packages and Setup](#packages-and-setup); [Data Import](#data-import); [Full Reproduction Guide](#full-reproduction-guide) |
+| Inspect data and metadata | Check cells, genes, conditions, donors, and annotated cell types before interpreting patterns. | [Data Import](#data-import); [Data Exploration](#data-exploration) |
+| Prepare CoGAPS-ready data | Understand genes-by-cells orientation and the difference between the R and Python data representations. | [Data Wrangling](#data-wrangling); [Full Reproduction Guide](#full-reproduction-guide) |
+| Evaluate model resolution | Explain how the case study uses rank-selection evidence to choose the model resolution inspected later, without treating that choice as universal. | [Data Import](#data-import); [Data Analysis](#data-analysis); [Limitations](#limitations) |
+| Interpret latent patterns | Connect gene weights and cell activities to pattern summaries without treating numbered pattern labels as portable across runs. | [Data Analysis](#data-analysis); [Summary](#summary) |
+| Connect patterns to IFN biology | Use stimulation association, top genes, and interferon-stimulated genes to support the IFN-associated interpretation. | [Data Visualization](#data-visualization); [Data Analysis](#data-analysis); [Summary](#summary) |
+| Check expression direction | Compare gene weights with higher-or-lower expression after stimulation so pattern membership is not confused with regulation. | [Data Visualization](#data-visualization); [Data Analysis](#data-analysis) |
+| Compare activity across cell types | Ask whether the IFN-associated pattern is broad, cell-type-linked, or mixed across annotated PBMC cell types. | [Data Visualization](#data-visualization); [Data Analysis](#data-analysis) |
+| State limits clearly | Separate descriptive latent-pattern evidence from formal disease mechanism, pathway validation, or treatment claims. | [Limitations](#limitations); [Summary](#summary); [Continued Learning](#continued-learning) |
+
+:::
 
 ***

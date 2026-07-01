@@ -3,8 +3,8 @@ from __future__ import annotations
 """Export lightweight Python/PyCoGAPS cooking-show artifacts.
 
 The full selected Python `.h5ad` is a local-only input for this script. The
-outputs written to `data/results_selected/` are the GitHub/render-friendly
-artifacts used by the secondary Python tab when the full model object is not
+outputs written to `data/processed/selected_model_k6/python/` are the
+GitHub/render-friendly artifacts used by the parallel Python tab when the full model object is not
 present.
 """
 
@@ -19,16 +19,16 @@ ROOT = Path(__file__).resolve().parents[1]
 PREPROCESSED_H5AD = Path(
     os.environ.get(
         "COGAPS_PREPROCESSED_H5AD",
-        ROOT / "data/processed/preprocessed_cells_hvg3000.h5ad",
+        ROOT / "data/processed/input/preprocessed_cells_hvg3000.h5ad",
     )
 )
 CHOSEN_RESULT_H5AD = Path(
     os.environ.get(
         "COGAPS_RESULT_H5AD",
-        ROOT / "data/results_selected/cogaps_K6_seed2_iter2000.h5ad",
+        ROOT / "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad",
     )
 )
-OUT_DIR = Path(os.environ.get("COGAPS_OUT_DIR", ROOT / "data/results_selected"))
+OUT_DIR = Path(os.environ.get("COGAPS_OUT_DIR", ROOT / "data/processed/selected_model_k6/python"))
 
 PATTERN_GENE_WEIGHTS_TSV_GZ = OUT_DIR / "pattern_gene_weights.tsv.gz"
 PATTERN_CELL_ACTIVITIES_TSV_GZ = OUT_DIR / "pattern_cell_activities.tsv.gz"

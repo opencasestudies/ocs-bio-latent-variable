@@ -10,13 +10,13 @@ if [[ -t 1 ]]; then
   DOCKER_TTY=(-t)
 fi
 
-INPUT_H5AD="${ROOT}/data/processed/cogaps_input_genesxcells_hvg3000_float64.h5ad"
-PREPROCESSED_H5AD="${ROOT}/data/processed/preprocessed_cells_hvg3000.h5ad"
+INPUT_H5AD="${ROOT}/data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad"
+PREPROCESSED_H5AD="${ROOT}/data/processed/input/preprocessed_cells_hvg3000.h5ad"
 
 COMMON_ARGS=(
-  --cogaps-input-h5ad "data/processed/cogaps_input_genesxcells_hvg3000_float64.h5ad"
-  --preprocessed-h5ad "data/processed/preprocessed_cells_hvg3000.h5ad"
-  --k 7
+  --cogaps-input-h5ad "data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad"
+  --preprocessed-h5ad "data/processed/input/preprocessed_cells_hvg3000.h5ad"
+  --k 6
   --seed 2
   --n-iter 2000
   --top-genes 50
@@ -31,7 +31,7 @@ COMMON_ARGS=(
 
 case "${MODE}" in
   sparse)
-    OUTDIR="data/results_python_sparse_light_local"
+    OUTDIR="data/processed/selected_model_k6/python"
     SPARSE_ARG="--use-sparse-opt"
     ;;
   nosparse)

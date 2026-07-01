@@ -14,7 +14,7 @@ as well as any system or server requirements to work with the data
 Disclaimer
 ::::
 ::::{.inner_block}
-The purpose of the [Open Case Studies](https://opencasestudies.github.io){target="_blank"} project is **to demonstrate the use of various data science methods, tools, and software in the context of messy, real-world data**. A given case study does not cover all aspects of the research process, is not claiming to be the most appropriate way to analyze a given data set, and should not be used in the context of making policy or clinical decisions without external consultation from scientific experts or medical care professionals. In addition, due to size constraints, datasets used within a case study may be subset of the original/full dataset.
+The purpose of the [Open Case Studies](https://opencasestudies.github.io){target="_blank"} project is **to demonstrate the use of various data science methods, tools, and software in the context of messy, real-world data**. A given case study does not cover all aspects of the research process, is not claiming to be the most appropriate way to analyze a given data set, and should not be used in the context of making policy or clinical decisions without external consultation from scientific experts or medical care professionals. In addition, due to size constraints, datasets used within a case study may be a subset of the original/full dataset.
 ::::
 :::
 
@@ -25,7 +25,7 @@ The purpose of the [Open Case Studies](https://opencasestudies.github.io){target
 License information
 ::::
 ::::{.inner_block}
-This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 [(CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/deed.en){target="_blank"}  United States License.
+This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 [(CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/deed.en){target="_blank"} United States License unless otherwise noted.
 ::::
 :::
 
@@ -58,7 +58,9 @@ See the following example from a previous case study (prior to Motivation sectio
 GitHub repository
 ::::
 ::::{.inner_block}
-To access the GitHub repository for this case study see here: {LINK}
+The source files for this case study are available in the [opencasestudies/ocs-bio-latent-variable GitHub repository](https://github.com/opencasestudies/ocs-bio-latent-variable){target="_blank"}.
+
+The repository contains the Quarto case-study files, scripts, figures, and GitHub-safe teaching artifacts needed for the main learner path. Optional large files for full local reproduction are documented separately and are not required to follow the rendered case study.
 ::::
 :::
 
@@ -73,10 +75,18 @@ If the data isn't in the main github repository, be sure to describe and link to
 Keywords
 ::::
 ::::{.inner_block}
-* Keyword 1
-* Keyword 2
-* Keyword 3
-* ...Keyword n
+* Systemic lupus erythematosus
+* IFN-beta stimulation
+* Peripheral blood mononuclear cells (PBMCs)
+* Single-cell RNA-seq
+* CoGAPS
+* Bayesian non-negative matrix factorization
+* Latent expression patterns
+* Model rank selection
+* Interferon-stimulated genes
+* Gene-expression directionality
+* R and Python reproducible workflows
+* Reproducible biomedical data science
 
 <!-- Note that keywords should be the types of words that you'd use for a conference abstract or grant submission; focus on the emerging tech or best practice that is being covered as well as the specific part of the task/analysis/visualization that is being shown. Just a quick way to overview what skills/topics are part of the case study -->
 
@@ -89,6 +99,10 @@ Include bioOCSdata package information once ready/applicable
 :::
 
 ## Prerequisites
+
+::: {.aside}
+**Draft note:** Revisit this prerequisites section after the main narrative, learner path, and reproduction workflow are finalized.
+:::
 
 :::{.prereq_box}
 ::::{.prereq_box_header}
@@ -109,4 +123,3 @@ or submit a mock computing job within the learnr environment in order to receive
 In essence this section is useful to provide information to learners on how to work with the data and follow along with this case study.
 This section may not be needed for all case studies and can be removed if not
 -->
-

@@ -79,9 +79,9 @@ The older K7 Jaccard figure is retained only as historical/reference context. Th
 The directionality analysis used in the main case study was generated with:
 
 - `scripts/pattern_directionality_analysis_r.R`
-- `data/results_r_k6_sparse_mt_t4_heavy/pattern_gene_directionality_global.csv`
-- `data/results_r_k6_sparse_mt_t4_heavy/pattern_gene_directionality_by_celltype.csv`
-- `data/results_r_k6_sparse_mt_t4_heavy/pattern_direction_summary.csv`
+- `data/processed/selected_model_k6/r/pattern_gene_directionality_global.csv`
+- `data/processed/selected_model_k6/r/pattern_gene_directionality_by_celltype.csv`
+- `data/processed/selected_model_k6/r/pattern_direction_summary.csv`
 
 It is a targeted analysis of top CoGAPS pattern genes, not a genome-wide differential-expression analysis.
 

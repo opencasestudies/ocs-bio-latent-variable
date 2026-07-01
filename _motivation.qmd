@@ -1,34 +1,52 @@
 # **Motivation**
 ***
 
-Single-cell RNA-seq lets us measure gene expression in thousands of individual immune cells. That resolution is powerful, but it also creates a challenge: each cell reflects both what type of cell it is and what biological processes are active inside it.
+{{< glossary "Systemic lupus erythematosus" display="Systemic lupus erythematosus" >}}, often shortened to lupus or SLE, is an {{< glossary "Autoimmune disease" display="autoimmune disease" >}} in which immune activity can be directed against the body's own tissues. Lupus can look very different from one person to another. Some people experience fatigue, fever, painful or swollen joints, mouth sores, hair loss, or a rash that worsens with sun exposure; others may develop inflammation involving the kidneys, blood cells, brain, or the lining around the heart and lungs [@niams_lupus_overview]. Symptoms can also come and go in flares, which makes lupus challenging to study from a single clinical measurement.
 
-In this case study, we work with peripheral blood mononuclear cells (PBMCs) measured in control and IFN-beta stimulated conditions. IFN-beta stimulation is expected to activate interferon-stimulated genes, but the response does not happen in a vacuum. B cells, T cells, NK cells, monocytes, dendritic cells, and other PBMC populations all have their own baseline identities.
+Lupus also matters as a public-health problem. In the United States, more than 200,000 people are estimated to have SLE, and the burden is not distributed evenly: SLE is much more common among women and affects several racial and ethnic groups more often than others [@cdc_lupus_data_research]. Those clinical and epidemiological patterns are not the main outcome of this case study, but they explain why lupus is a meaningful setting for learning how immune signals appear in molecular data. Because lupus is a systemic immune disease, blood immune cells can carry information about immune activation even when the affected tissue is elsewhere in the body.
 
-This creates a motivating question: can we find latent gene-expression programs that separate a broad stimulation response from cell-type-linked structure?
+Before looking at the dataset, it helps to know the main immune-cell players. {{< glossary "Peripheral blood mononuclear cell" display="Peripheral blood mononuclear cells" >}}, or PBMCs, are blood immune cells that include several broad populations. T cells help coordinate or carry out adaptive immune responses. B cells can contribute to antibody responses. Natural killer cells participate in cytotoxic responses against infected or abnormal cells. Monocytes are circulating innate immune cells that can contribute to inflammation and antigen presentation, and dendritic cells help connect early immune sensing to later adaptive responses.
 
-We will use CoGAPS, a Bayesian non-negative matrix factorization method, to represent the data as patterns. Each pattern has genes that define it and cells where it is active. We will then ask whether the strongest IFN-associated pattern is supported by the genes we expect, and whether those genes are up or down in stimulation.
+One recurring molecular theme in lupus is the interferon response. {{< glossary "Interferon" display="Interferons" >}} are cytokine signals that help immune cells coordinate antiviral and danger-response programs. {{< glossary "Type I interferon" display="Type I interferons" >}} include IFN-alpha and {{< glossary "IFN-beta" display="IFN-beta" >}}. When cells respond to interferon signaling, many {{< glossary "Interferon-stimulated gene" display="interferon-stimulated genes" >}} can change expression, leaving a recognizable molecular signature. In lupus research, that signature is important because interferon signaling can be connected to immune complexes, dendritic cells, T cells, B cells, natural killer cells, macrophages, neutrophil-associated signals, and inflammatory feedback loops [@chyuan2019interferons].
+
+The figure below is not a result from the case-study dataset. It is a biological orientation map for why interferon signaling is worth paying attention to in lupus. In the diagram, self nucleic acids and {{< glossary "Immune complex" display="immune complexes" >}} can stimulate plasmacytoid dendritic cells, an immune-cell type that can produce large amounts of type I interferon. {{< glossary "Neutrophil extracellular trap" display="Neutrophil extracellular traps" >}} can add nucleic-acid material that further stimulates interferon pathways. Interferons can then influence myeloid dendritic cells, T cells, B cells, natural killer cells, and macrophages. You do not need to memorize every arrow. The main takeaway is that interferon biology can cut across several immune-cell populations, so an analysis should keep both shared interferon activity and cell identity visible.
+
+![Type I and type III interferon biology in systemic lupus erythematosus. The diagram summarizes how self nucleic acids, immune complexes, neutrophil extracellular traps, interferons, and several immune-cell populations can participate in lupus-associated inflammatory feedback. Figure reproduced from Chyuan, Tzeng, and Chen (2019), Cells 8(9):963, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). No content changes were made; the image is displayed at reduced size for teaching.](img/ifn_sle_pathogenesis_chyuan_2019_figure3.png){#fig-sle-ifn-pathogenesis fig-alt="Diagram of type I and type III interferon roles in systemic lupus erythematosus, including immune complexes, plasmacytoid dendritic cells, myeloid dendritic cells, T cells, B cells, NK cells, macrophages, neutrophil extracellular traps, and inflammatory feedback." width=850 .lightbox}
+
+::: {.aside}
+**Draft note:** Redraw and replace this lupus/interferon orientation figure before publication.
+:::
+
+This case study uses a public single-cell RNA-seq perturbation study by Kang and colleagues to turn that biological motivation into a concrete data-analysis problem [@kang2018multiplexed]. Kang et al. studied PBMCs from eight lupus donors. For each donor, the researchers split the cell sample into matched portions, called {{< glossary "Aliquot" display="aliquots" >}}. One aliquot was left untreated as a control, and the other was exposed to IFN-beta for six hours before profiling.
+
+That setup is a {{< glossary "Paired design" display="paired" >}} {{< glossary "Perturbation experiment" display="perturbation experiment" >}}. "Perturbation" means that the experiment deliberately changes one condition so the response can be measured. "Paired" means that control and stimulated cells come from the same donors, rather than from unrelated people. This matters because donor-to-donor differences can be large in immune data. By comparing matched control and IFN-beta-stimulated aliquots, the source study gives us a clearer way to ask how cells respond to an interferon signal while keeping donor background and cell identity in view.
+
+The data were generated with {{< glossary "Single-cell RNA-seq" display="droplet single-cell RNA-seq" >}}. In plain language, this technology measures RNA molecules from many individual cells, so each cell receives its own gene-expression profile. The output is a large table of genes by cells, plus metadata such as condition, donor, and annotated immune-cell identity. This is different from a bulk RNA-seq experiment, where measurements are averaged across many cells before the analyst sees them. Single-cell data let you ask whether different immune-cell populations share a response, but they also create a harder interpretation problem.
+
+The problem is that each cell carries more than one kind of information. A stimulated monocyte should still look like a monocyte. At the same time, that monocyte may share an interferon-response signal with stimulated T cells, B cells, natural killer cells, or dendritic cells. A cell can therefore contain a relatively stable identity signal, a stimulation-associated signal, donor-specific variation, and technical noise all at once. Clustering can help label groups of similar cells, but clustering alone does not automatically separate a shared response from the cell identities that response crosses.
+
+This is where {{< glossary "Latent pattern" display="latent patterns" >}} become useful. A latent pattern is an inferred signal: it is learned from the gene-expression data rather than recorded directly as a metadata label. A helpful way to think about this is that a latent-variable model does not have to ask every cell to belong to exactly one group. Instead, it can represent each cell as a mixture of patterns, so a cell can be both "monocyte-like" and "interferon-response-like" to different degrees.
+
+Later in the case study, you will use {{< glossary "CoGAPS" >}} to learn these latent transcriptional patterns from the PBMC dataset [@fertig2010cogaps]. CoGAPS gives each pattern two linked views. The {{< glossary "Gene weight" display="gene weights" >}} tell you which genes contribute strongly to a pattern. The {{< glossary "Cell activity" display="cell activities" >}} tell you which cells use that pattern strongly. Those two views let you ask whether one pattern is broadly associated with IFN-beta stimulation while other patterns capture immune-cell identity or other structure.
+
+One more interpretation step is important. CoGAPS pattern weights identify genes that are associated with a pattern, but they do not by themselves say whether those genes are higher or lower after stimulation. For that, you will also examine {{< glossary "Directionality" display="directionality" >}}: whether expression is higher or lower in IFN-beta-stimulated cells compared with matched controls. This distinction matters because a pattern can highlight important genes, while a condition comparison tells you which way those genes move.
+
+The opening roadmap at the top of the case study previews the evidence path you will follow. First, you will start from the paired IFN-beta perturbation design. Next, you will inspect how PBMC identities are arranged in the teaching data object. Then you will learn latent patterns, compare their activity between control and stimulated cells, and connect the genes that define a pattern to expression direction. The roadmap is a map of the analysis, not a demand that you accept a pattern label or model choice before seeing the evidence.
+
+The puzzle for the rest of the case study is therefore not simply whether IFN-beta changes gene expression. It is whether you can recover an interpretable interferon-associated signal inside a mixed immune-cell population while still respecting the fact that a monocyte, a T cell, and a B cell begin from different biological identities.
 
 :::{.definition_box}
 ::::{.definition_box_header}
-Latent program
+Key terms
 ::::
 ::::{.inner_block}
-A hidden pattern of coordinated gene expression inferred from the data. In this case study, a latent program may reflect immune-cell identity, stimulation-associated activity, or a mixture of both.
+
+- **PBMCs:** Peripheral blood mononuclear cells, a mixed sample of blood immune cells.
+- **IFN-beta stimulation:** The controlled perturbation used to create an interferon-response signal.
+- **Latent pattern:** An inferred gene-expression signal learned from the data.
+- **Cell activity:** A score showing where a learned pattern is strongest across cells.
+- **Gene weights and directionality:** Pattern weights rank genes; directionality tells whether those genes rise or fall after stimulation.
 ::::
 :::
-
-:::{.definition_box}
-::::{.definition_box_header}
-Directionality
-::::
-::::{.inner_block}
-Whether a gene has higher or lower expression in one condition compared with another. CoGAPS pattern weights identify genes associated with a pattern, but expression direction must be estimated separately from the count data.
-::::
-:::
-
-The figure at the top of the page previews one of the main results: a CoGAPS pattern associated with IFN-beta stimulation is active across several PBMC cell types, but the activity is not uniform. The rest of this case study shows how we get to that result, how we interpret it, and where we need to be cautious.
-
-This dataset tests IFN-beta stimulation in PBMCs. If these genes are discussed in relation to dengue or other viral contexts, that interpretation should be framed as relevance to interferon and inflammatory biology, not as direct evidence of dengue infection in this dataset.
 
 ***

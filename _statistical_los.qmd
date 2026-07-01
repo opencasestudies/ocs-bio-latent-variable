@@ -1,7 +1,6 @@
-<u>**Statistical Learning Objectives:**</u>
+<u>**Latent-Variable and CoGAPS Learning Objectives:**</u>
 
-1. Describe how latent-factor methods can represent each cell as a mixture of multiple transcriptional programs.
-1. Explain why rank choice matters and how `K = 6` was selected from a limited sweep.
-1. Distinguish CoGAPS pattern membership from expression directionality.
-1. Interpret paired pseudobulk log2 fold-change summaries for targeted pattern genes.
-1. Separate descriptive evidence from formal hypothesis testing and pathway validation.
+1. Describe how CoGAPS represents each cell as a mixture of latent transcriptional patterns.
+1. Use precomputed rank-selection evidence to explain why model resolution matters, without treating the selected resolution as universally optimal.
+1. Identify an IFN-associated pattern using cell activities, stimulation association, and top-gene evidence while treating numbered pattern labels as run-specific.
+1. Interpret gene weights together with expression directionality, recognizing that a high pattern weight does not by itself mean a gene is up-regulated.

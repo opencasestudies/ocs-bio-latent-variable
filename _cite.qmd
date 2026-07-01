@@ -3,8 +3,8 @@
 To cite this case study, please use:
 ::::
 ::::{.inner_block}
-{Authors to be finalized}. {(YEAR)}. Finding latent immune-response programs in single-cell RNA-seq with CoGAPS. {Final GitHub source URL}. {Version}.
+Thomas, Oshane O. and Wright, Carrie. (2026). [https://github.com/opencasestudies/ocs-bio-latent-variable](https://github.com/opencasestudies/ocs-bio-latent-variable){target="_blank"}. Finding latent immune-response programs in single-cell RNA-seq with CoGAPS (Version 0.1.0).
 ::::
 :::
 
-This draft case study uses the PBMC IFN-beta stimulation single-cell RNA-seq dataset from Kang et al. and introduces CoGAPS using the CoGAPS and scCoGAPS method literature. Full citation metadata should be finalized before publication.
+This case study uses the PBMC IFN-beta stimulation single-cell RNA-seq dataset from Kang et al. and introduces latent-pattern analysis with CoGAPS using R/Bioconductor CoGAPS as the primary implementation and Python/PyCoGAPS-compatible artifacts as a parallel implementation.

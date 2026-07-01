@@ -6,8 +6,8 @@ the CoGAPS A matrix identifies genes that define each pattern, but expression
 direction needs to be estimated from the underlying count data.
 
 The selected Python `.h5ad` is a full-local input. The directionality tables and
-heatmap written to `data/results_selected/` are lightweight cooking-show
-artifacts used by the secondary Python tab when the full model object is absent.
+heatmap written to `data/processed/selected_model_k6/python/` are lightweight
+cooking-show artifacts used by the parallel Python tab when the full model object is absent.
 
 The analysis uses replicate-aware pseudobulk summaries:
 
@@ -36,16 +36,16 @@ ROOT = Path(__file__).resolve().parents[1]
 PREPROCESSED_H5AD = Path(
     os.environ.get(
         "COGAPS_PREPROCESSED_H5AD",
-        ROOT / "data/processed/preprocessed_cells_hvg3000.h5ad",
+        ROOT / "data/processed/input/preprocessed_cells_hvg3000.h5ad",
     )
 )
 CHOSEN_RESULT_H5AD = Path(
     os.environ.get(
         "COGAPS_RESULT_H5AD",
-        ROOT / "data/results_selected/cogaps_K6_seed2_iter2000.h5ad",
+        ROOT / "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad",
     )
 )
-OUT_DIR = Path(os.environ.get("COGAPS_OUT_DIR", ROOT / "data/results_selected"))
+OUT_DIR = Path(os.environ.get("COGAPS_OUT_DIR", ROOT / "data/processed/selected_model_k6/python"))
 IFN_PATTERN = os.environ.get("COGAPS_IFN_PATTERN", "").strip()
 
 TOP_N_GENES = 15

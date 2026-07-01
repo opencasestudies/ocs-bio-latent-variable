@@ -12,12 +12,20 @@
 # Keep the lightweight teaching/render artifacts in git, but exclude the large
 # local-only H5AD files that are not intended for GitHub distribution.
 data/processed/cogaps_input_genesxcells_hvg3000_float64.h5ad
+data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad
 data/results/cogaps_K7_seed2_iter2000.h5ad
 data/results_python/cogaps_K7_seed2_iter2000.h5ad
 data/results_r/cogaps_K7_seed2_iter2000.rds
 data/results_selected/cogaps_K6_seed2_iter2000.h5ad
 data/results_r_k6_sparse_mt_t4_heavy/cogaps_K6_seed2_iter2000.rds
 data/results_r_k6_sparse_mt_t4_heavy/cogaps_K6_seed2_iter2000.checkpoint.out
+data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds
+data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.checkpoint.out
+data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad
+data/external/reproduction_archive/
+data/external/*.h5ad
+data/external/*.rds
+data/external/*.out
 data/results_python_distributed_sparse_on_light_full/*.h5ad
 data/results_python_sparse_instrumented/runs/*.h5ad
 data/results_python_sparse_light_local/runs/*.h5ad
