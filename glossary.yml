@@ -1,13 +1,21 @@
 Aliquot: |
   One portion of a sample split from the same original material.
+AnnData: |
+  A Python data structure for annotated single-cell data, commonly used by Scanpy and PyCoGAPS workflows.
+Artifact manifest: |
+  A small record that lists which data files and saved outputs are included, optional, or intentionally excluded from the case-study repository.
 Autoimmune disease: |
   A disease in which immune responses are directed against the body's own cells or molecules.
 B cell: |
   An adaptive immune cell type that can contribute to antibody responses.
+Biological compression: |
+  A situation where a lower-resolution model captures a strong broad signal but merges other biologically useful structure into too few patterns.
 Cell activity: |
   A CoGAPS value describing how strongly a cell uses a learned pattern.
 Cell metadata: |
   Information recorded about each cell, such as donor, condition, or cell-type label.
+Cell barcode: |
+  A cell- or droplet-level identifier assigned during single-cell sequencing and processing. It is used as a lookup key to keep one profiled cell linked to its expression values, metadata, and later model outputs.
 Cell-type-linked pattern: |
   A learned pattern whose activity mainly follows annotated immune-cell groups rather than the stimulation condition.
 CoGAPS: |
@@ -16,6 +24,10 @@ Dendritic cell: |
   An antigen-presenting immune cell that helps connect innate sensing to adaptive immune responses.
 Demultiplexing: |
   A computational step that separates pooled single-cell data back into donor- or sample-level assignments.
+Decision manifest: |
+  A small record that stores selected model settings and the evidence files used to support that decision.
+Diagnostic trace: |
+  A saved record of model behavior over iterations, such as chi-square or atom-count values, used to check whether a run behaved as expected.
 Directionality: |
   Whether expression is higher or lower in one condition compared with another.
 Doublet: |
@@ -24,8 +36,16 @@ Flare: |
   A period when disease signs or symptoms become more active.
 Gene weight: |
   A CoGAPS value describing how strongly a gene contributes to a learned pattern.
+GEO accession: |
+  A stable identifier for a dataset record in the NCBI Gene Expression Omnibus.
+Gene Expression Omnibus: |
+  A public NCBI repository for functional genomics data, often abbreviated GEO.
+Highly variable gene: |
+  A gene selected because its expression varies enough across cells to be informative for downstream analysis.
 IFN-beta: |
   A type I interferon used as the stimulation signal in this case-study dataset.
+IFN correlation: |
+  A summary of how strongly a learned pattern's cell activity tracks the control-versus-IFN-beta stimulation label.
 IFNAR: |
   The type I interferon receptor, which receives type I interferon signals at the cell surface.
 IFN-associated pattern: |
@@ -44,6 +64,18 @@ JAK-STAT signaling: |
   A signaling pathway that carries cytokine-receptor signals to transcription factors that can change gene expression.
 Latent pattern: |
   An inferred gene-expression signal learned from the data rather than directly recorded as metadata.
+Library-size normalization: |
+  A preprocessing step that scales each cell's expression values to a common total so cells with different sequencing depths can be compared more fairly.
+Log transformation: |
+  A transformation that compresses large expression values and makes expression differences easier to summarize after normalization.
+Long format: |
+  A table layout where each row stores one measurement for one observational unit, such as one cell-pattern activity value.
+Matrix orientation: |
+  The meaning assigned to matrix rows and columns. For CoGAPS input in this case study, rows should represent genes and columns should represent cells.
+Metadata join: |
+  A table operation that uses a shared identifier, such as a cell barcode, to attach metadata or model outputs to the correct cells.
+Model resolution: |
+  The number of latent patterns a CoGAPS model is asked to learn; this setting is often written as K.
 Monocyte: |
   A circulating innate immune cell that can contribute to inflammation and antigen presentation.
 Natural killer cell: |
@@ -60,13 +92,31 @@ Perturbation experiment: |
   An experiment that deliberately changes a condition so the response can be measured.
 Plasmacytoid dendritic cell: |
   A dendritic-cell subtype known for producing large amounts of type I interferon after nucleic-acid sensing.
+Pseudobulk: |
+  A summary that combines single-cell counts within a group, such as donor and condition, so expression differences can be compared at a grouped-sample level.
+Quality control: |
+  Checks and filters used to remove measurements that are too unreliable for the intended analysis.
+Rank sweep: |
+  A planned set of model runs that compares several values of K, usually across multiple seeds or iteration counts, before selecting one model resolution.
+Selected-model outputs: |
+  Saved files from the CoGAPS model used for the main case-study analysis, such as metrics, pattern activities, gene weights, and top-gene tables.
+SingleCellExperiment: |
+  A Bioconductor data structure for annotated single-cell data, commonly used in R workflows.
 Single-cell RNA-seq: |
   A sequencing approach that measures gene expression separately for many individual cells.
+Sparse optimization: |
+  A CoGAPS implementation option that uses a sparse data representation to improve runtime on sparse single-cell RNA-seq matrices.
 Stimulation-associated activity: |
   Pattern activity that differs between stimulated cells and control cells.
 Systemic lupus erythematosus: |
   An autoimmune disease in which the immune system can attack the body's own tissues, causing inflammation that may affect several organ systems.
 T cell: |
   An adaptive immune cell type involved in coordinating or carrying out immune responses.
+Top-gene Jaccard: |
+  A stability score based on how much two top-gene lists overlap; values closer to 1 mean the lists are more similar.
 Type I interferon: |
   A subset of interferon cytokines, including IFN-alpha and IFN-beta, that signals through the type I interferon receptor.
+UMAP: |
+  A two-dimensional view that places cells with similar expression profiles near one another so broad structure can be inspected visually.
+Wide format: |
+  A table layout where related measurements are spread across multiple columns, such as one column per CoGAPS pattern.

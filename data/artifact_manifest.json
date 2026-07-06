@@ -419,6 +419,15 @@
   ],
   "optional_external_or_local_files": [
     {
+      "recommended_path": "data/source/kang_counts_25k.h5ad",
+      "role": "Larger source PBMC IFN-beta single-cell count file used to recreate the prepared HVG single-cell dataset",
+      "required_for": "Optional full preprocessing reproduction",
+      "github_required": false,
+      "recommended_host": "Zenodo or equivalent external artifact host; local-only is sufficient for private full reproduction",
+      "present_locally": false,
+      "size_bytes": null
+    },
+    {
       "recommended_path": "data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad",
       "role": "Dense genes x cells matrix for full local Python/PyCoGAPS reruns",
       "required_for": "Optional full reproduction input",
