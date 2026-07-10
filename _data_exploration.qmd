@@ -111,7 +111,7 @@ Single-cell RNA-seq data are useful because each cell keeps its own expression p
 
 - `condition`, which records whether the cell came from the control or IFN-beta-stimulated aliquot;
 - `cell_type`, which records the annotated PBMC identity; and
-- `replicate`, which records the donor or sample replicate.
+- `replicate`, which records which individual the sample cane from
 
 The code below creates a small preview table. In R, `colData(sce_cells)` retrieves cell metadata, and `rownames_to_column()` turns the cell names into an explicit `cell_barcode` column. In Python, `.obs` stores the same cell metadata, and `reset_index()` turns the AnnData index into a visible cell-barcode column.
 
