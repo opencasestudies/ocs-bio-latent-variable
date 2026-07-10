@@ -46,7 +46,7 @@ Rows do not mean the same thing in every file. A row might represent one cell, o
 
 ## Columns you will see often
 
-You do not need to memorize every column name now. Think of this table as a trail map for the first few imports: it names the columns that will keep reappearing as you move from cells, to patterns, to genes.
+You do not need to memorize every column name now, but this overview, can help you get familiar with the data. Think of this table as a trail map for the first few imports: it names the columns that will keep reappearing as you move from cells, to patterns, to genes.
 
 ::: {.table-responsive}
 | Column or term | What it means | How to use it |
