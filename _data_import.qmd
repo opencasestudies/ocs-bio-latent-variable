@@ -1,52 +1,757 @@
 # **Data Import**
 ***
 
-We start by reading the artifact manifests. These files tell us which inputs and saved model outputs belong to the main learner path, which files are optional for full local reproduction, and which rank was selected for the case study.
+In this section, you will import the files that later sections use for model checking, visualization, and interpretation. Import means reading a file into an R or Python object so you can inspect it in your working session.
+
+This section also includes the first major modeling checkpoint in the case study: choosing the CoGAPS model resolution. In CoGAPS, {{< glossary "Model resolution" display="model resolution" >}} means the number of latent patterns the model is asked to learn. This setting is usually written as `K`.
+
+Rather than asking you to rerun a long model sweep, the case study gives you precomputed sweep summaries. You will inspect those summaries, decide why `K = 6` is carried forward for the main learner path, and then import the prepared single-cell data and saved CoGAPS outputs for that selected model.
+
+:::{.definition_box}
+::::{.definition_box_header}
+Run these chunks before continuing
+::::
+::::{.inner_block}
+Later sections reuse the objects created here. In R, the prepared single-cell object is called `sce_cells`. In Python, the same prepared data are called `adata_cells`. The selected-model checks and imported file paths are also reused when you inspect CoGAPS activities, genes, diagnostics, and directionality.
+::::
+:::
+
+## Start With The File Record
+
+The main learner path uses included teaching files and saved model evidence so you can focus on inspecting, checking, and interpreting the analysis. Larger files are optional and are only needed if you want to rebuild selected outputs or audit larger model objects locally.
+
+The small file that records this distinction is the {{< glossary "Artifact manifest" display="file manifest" >}}. It tells you which files are included in the repository, which files are optional, and which files are intentionally excluded from the normal learner path.
+
+In the next chunk, the code reads `data/artifact_manifest.json`. A JSON file stores structured information as named fields. In R, `jsonlite::read_json()` turns that file into R lists and data frames. In Python, `json.load()` reads the same file into dictionaries and lists. The Python tab also defines a small `render_table()` helper so pandas tables appear as readable HTML tables in the case study.
 
 ::: {.panel-tabset}
 
 ### R
 
 ```{r}
-artifact_manifest_r <- jsonlite::read_json(ARTIFACT_MANIFEST_JSON_R, simplifyVector = TRUE)
-k_selection_decision_r <- jsonlite::read_json(K_SELECTION_DECISION_JSON_R, simplifyVector = TRUE)
+artifact_manifest_r <- jsonlite::read_json(
+  ARTIFACT_MANIFEST_JSON_R,
+  simplifyVector = TRUE
+)
 
-tibble::tibble(
-  selected_K = k_selection_decision_r$selected_model$K,
-  seed = k_selection_decision_r$selected_model$seed,
-  nIterations = k_selection_decision_r$selected_model$nIterations,
-  sparseOptimization = k_selection_decision_r$selected_model$sparseOptimization,
-  primary_implementation = k_selection_decision_r$selected_model$primary_implementation,
-  decision_status = k_selection_decision_r$decision_status
+manifest_group_summary_r <- tibble::tibble(
+  file_group = c(
+    "Included in the repository",
+    "Optional external or local files",
+    "Intentionally excluded from repository assets"
+  ),
+  n_files = c(
+    nrow(artifact_manifest_r$included_files),
+    nrow(artifact_manifest_r$optional_external_or_local_files),
+    nrow(artifact_manifest_r$explicitly_excluded_from_publication_assets)
+  ),
+  what_it_means = c(
+    "Files used in the main learner path.",
+    "Large files for full local rebuilding or deeper inspection.",
+    "Files kept out of GitHub because they are too large or regenerated."
+  ),
+  learner_action = c(
+    "Use these files while working through the case study.",
+    "Add these only if you are doing full local reproduction.",
+    "Do not expect these files to be present in a normal repository clone."
+  )
+)
+
+knitr::kable(
+  manifest_group_summary_r,
+  col.names = c("File group", "Files", "What it means", "Learner action")
 )
 ```
 
 ### Python
 
 ```{python}
+#| results: asis
+def render_table(data_frame):
+    """Render a pandas DataFrame as a readable HTML table in Quarto."""
+    return data_frame.to_html(
+        index=False,
+        escape=False,
+        border=0,
+        classes="table table-sm table-striped"
+    )
+
 with open(ARTIFACT_MANIFEST_JSON) as f:
     artifact_manifest = json.load(f)
 
-with open(K_SELECTION_DECISION_JSON) as f:
-    k_selection_decision = json.load(f)
-
-pd.DataFrame(
-    [{
-        "selected_K": k_selection_decision["selected_model"]["K"],
-        "seed": k_selection_decision["selected_model"]["seed"],
-        "nIterations": k_selection_decision["selected_model"]["nIterations"],
-        "sparseOptimization": k_selection_decision["selected_model"]["sparseOptimization"],
-        "primary_implementation": k_selection_decision["selected_model"]["primary_implementation"],
-        "decision_status": k_selection_decision["decision_status"],
-    }]
+manifest_group_summary = pd.DataFrame(
+    {
+        "File group": [
+            "Included in the repository",
+            "Optional external or local files",
+            "Intentionally excluded from repository assets",
+        ],
+        "Files": [
+            len(artifact_manifest["included_files"]),
+            len(artifact_manifest["optional_external_or_local_files"]),
+            len(artifact_manifest["explicitly_excluded_from_publication_assets"]),
+        ],
+        "What it means": [
+            "Files used in the main learner path.",
+            "Large files for full local rebuilding or deeper inspection.",
+            "Files kept out of GitHub because they are too large or regenerated.",
+        ],
+        "Learner action": [
+            "Use these files while working through the case study.",
+            "Add these only if you are doing full local reproduction.",
+            "Do not expect these files to be present in a normal repository clone.",
+        ],
+    }
 )
+
+print(render_table(manifest_group_summary))
 ```
 
 :::
 
-This table confirms the model-selection contract before any pattern interpretation begins. The selected model is `K = 6`, but the pattern labels are still run-specific; the R selected run labels the IFN-associated pattern as `Pattern4`, while the Python saved output labels the corresponding signal as `Pattern5`.
+The main point is that you do not need to rerun the full CoGAPS sweep to work through the case study. The repository includes the prepared teaching data, model-selection summaries, and lightweight selected-model outputs. Optional large files are useful for auditing or rebuilding selected outputs, but they are not required for the main analysis path.
 
-The next import step loads the cached processed single-cell object. This keeps the focus of the case study on latent-variable analysis and interpretation rather than on rebuilding every preprocessing step from the original source files.
+## Use The Decision Manifest As An Evidence Map
+
+The second record is the {{< glossary "Decision manifest" display="decision manifest" >}}. It stores the current selected model settings and points to the evidence files behind that choice.
+
+Do not treat the manifest as a substitute for reasoning. Its job is to keep the selected settings reproducible. Your job in this section is to inspect the evidence that makes those settings reasonable for the case-study goal.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+k_selection_decision_r <- jsonlite::fromJSON(K_SELECTION_DECISION_JSON_R)
+selected_model_r <- k_selection_decision_r$selected_model
+
+evidence_file_table_r <- tibble::tibble(
+  evidence_key = names(k_selection_decision_r$evidence_files),
+  path = unlist(k_selection_decision_r$evidence_files, use.names = FALSE)
+) |>
+  dplyr::filter(evidence_key != "k6_vs_k7_pattern_matching") |>
+  dplyr::mutate(
+    evidence = dplyr::recode(
+      evidence_key,
+      lower_k_sweep = "Lower-K sweep",
+      long_iteration_lower_k_sweep = "Longer lower-K sweep",
+      candidate_pattern_structure = "Candidate pattern structure",
+      high_k_sweep = "High-K sweep",
+      selected_r_metrics = "Selected R model metrics",
+      selected_python_metrics = "Selected Python model metrics"
+    ),
+    `what you inspect` = dplyr::recode(
+      evidence_key,
+      lower_k_sweep = "IFN recovery at smaller K",
+      long_iteration_lower_k_sweep = "Longer-run stability",
+      candidate_pattern_structure = "Pattern structure",
+      high_k_sweep = "High-K runtime and stability",
+      selected_r_metrics = "Selected R run settings",
+      selected_python_metrics = "Selected Python run settings"
+    )
+) |>
+  dplyr::mutate(
+    file = basename(path),
+    available = file.exists(file.path(ROOT_R, path))
+  )
+
+knitr::kable(
+  evidence_file_table_r |>
+    dplyr::select(evidence, file, `what you inspect`, available),
+  col.names = c("Evidence", "File", "What you inspect", "Available")
+)
+```
+
+### Python
+
+```{python}
+#| results: asis
+with open(K_SELECTION_DECISION_JSON) as f:
+    k_selection_decision = json.load(f)
+
+selected_model = k_selection_decision["selected_model"]
+
+evidence_labels = {
+    "lower_k_sweep": ("Lower-K sweep", "IFN recovery at smaller K"),
+    "long_iteration_lower_k_sweep": (
+        "Longer lower-K sweep",
+        "Longer-run stability",
+    ),
+    "candidate_pattern_structure": (
+        "Candidate pattern structure",
+        "Pattern structure",
+    ),
+    "high_k_sweep": ("High-K sweep", "High-K runtime and stability"),
+    "selected_r_metrics": ("Selected R model metrics", "Selected R run settings"),
+    "selected_python_metrics": (
+        "Selected Python model metrics",
+        "Selected Python run settings",
+    ),
+}
+
+evidence_records = [
+    (key, path)
+    for key, path in k_selection_decision["evidence_files"].items()
+    if key != "k6_vs_k7_pattern_matching"
+]
+
+evidence_file_table = pd.DataFrame(
+    {
+        "Evidence file": [evidence_labels[key][0] for key, _ in evidence_records],
+        "Path": [path for _, path in evidence_records],
+        "What you inspect": [evidence_labels[key][1] for key, _ in evidence_records],
+    }
+)
+evidence_file_table["Available"] = evidence_file_table["Path"].map(
+    lambda path: (ROOT / path).exists()
+)
+evidence_file_table["File"] = evidence_file_table["Path"].map(
+    lambda path: Path(path).name
+)
+
+print(render_table(
+    evidence_file_table[
+        ["Evidence file", "File", "What you inspect", "Available"]
+    ].rename(columns={"Evidence file": "Evidence"})
+))
+```
+
+:::
+
+Every row should be available in the main learner path. If a row is missing, stop and resolve the file-location problem before continuing.
+
+## Understand What The Sweep Tested Before Choosing K
+
+The model-selection evidence comes from a precomputed {{< glossary "Rank sweep" display="rank sweep" >}}. A rank sweep is a set of model runs that asks how the interpretation changes when CoGAPS is allowed to learn different numbers of latent patterns. In this case study, the goal is not simply to find the model with the largest IFN-beta signal. The goal is to choose a model that recovers a stable IFN-associated pattern while still preserving useful immune-cell and non-IFN structure.
+
+You will not rerun the full sweep here. Instead, you will inspect saved summary files from the sweep and use them as evidence for which selected-model outputs should be imported for the rest of the case study.
+
+::: {.aside}
+**Draft note:** In the full reproduction section, explain how sweep-derived summary files such as `CANDIDATE_PATTERN_SUMMARY_CSV_R`, `PHASE1B_LOWERK_LONG_SUMMARY_CSV_R`, and the related Python paths were created. We do not need to walk through every line of HPC sweep code, but learners should see enough detail to understand the sweep design, how individual CoGAPS runs were summarized, how those run-level outputs became decision tables, and how they might design comparable sweep summaries for their own data.
+:::
+
+| Sweep component | What varied | Why it matters here |
+|---|---|---|
+| Candidate rank `K` | Lower-rank candidates, selected-rank candidates, and higher-K extensions | `K` controls how many latent patterns CoGAPS can learn. Too few patterns can compress biology; too many can fragment signal and increase runtime. |
+| Random seed | Multiple seeds where available | Checks whether the IFN-associated signal and top genes reappear from different starting points. |
+| Iteration count | Broad 2,000-iteration runs, plus longer lower-K follow-up runs | Checks whether the lower-rank candidates remain stable when the sampler runs longer. |
+| IFN-associated evidence | IFN correlation and top-gene stability | Tests whether a pattern consistently tracks IFN-beta stimulation and recovers interferon-stimulated genes. |
+| Broader model evidence | Pattern matching across candidate models, {{< glossary "Biological compression" display="biological compression" >}} checks, runtime, and high-K diagnostics | Helps separate "strong IFN signal" from "good overall model for this teaching analysis." |
+
+Before looking at the numbers, ask: would you choose the model with the strongest IFN correlation if it collapsed several immune-cell-linked signals into one broad pattern? The next few tables use that question to motivate why the selected model balances IFN recovery, biological resolution, stability, and runtime.
+
+## What Does IFN Correlation Measure?
+
+The first model-selection metric to understand is {{< glossary "IFN correlation" display="IFN correlation" >}}. For each CoGAPS pattern, the sweep compared that pattern's cell activity with the control-versus-IFN-beta stimulation label. A high positive value means that cells with stronger activity for that pattern tend to be IFN-beta-stimulated cells.
+
+This is useful because the dataset comes from a paired perturbation experiment. If CoGAPS learns an interferon-response pattern, that pattern should be more active in stimulated cells than in control cells. But IFN correlation is only a screening metric. By itself, it does not prove that the pattern is biologically interpretable, that the same top genes are stable across seeds, or that the model preserves non-IFN immune-cell structure.
+
+The next table shows the strongest stimulation-associated candidate in nearby lower-rank models. The pattern number is included only as a run-specific label. Do not memorize it as the name of the biology.
+
+The code below does four things. First, it reads the saved candidate-pattern summary table. Second, it keeps only the candidate values of `K` that are being compared at this checkpoint. Third, within each run, it keeps the pattern with the highest IFN correlation. Finally, it formats a smaller table so you can compare the stimulation signal, average activity in each condition, and IFN-related gene support side by side.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+# Read the saved sweep summary for candidate patterns.
+candidate_patterns_r <- readr::read_csv(
+  CANDIDATE_PATTERN_SUMMARY_CSV_R,
+  show_col_types = FALSE
+)
+
+ifn_candidate_preview_r <- candidate_patterns_r |>
+  # Keep the nearby lower-rank candidates considered in this checkpoint.
+  dplyr::filter(K %in% c(4, 5, 6)) |>
+  # Within each run, keep the pattern most associated with stimulation.
+  dplyr::group_by(K, model) |>
+  dplyr::slice_max(corr_with_stim, n = 1, with_ties = FALSE) |>
+  dplyr::ungroup() |>
+  # Display only the columns learners need for the decision.
+  dplyr::transmute(
+    K,
+    `Representative run` = model,
+    `Run-specific label` = pattern,
+    `IFN correlation` = round(corr_with_stim, 3),
+    `Mean control activity` = round(mean_activity_ctrl, 3),
+    `Mean stimulated activity` = round(mean_activity_stim, 3),
+    `ISG markers in top 25` = ifn_marker_count_top25,
+    `Top genes, first 6` = vapply(
+      strsplit(top_genes_top10, ", "),
+      function(x) paste(head(x, 6), collapse = ", "),
+      character(1)
+    )
+  )
+
+knitr::kable(ifn_candidate_preview_r)
+```
+
+### Python
+
+```{python}
+#| results: asis
+# Read the saved sweep summary for candidate patterns.
+candidate_patterns = pd.read_csv(CANDIDATE_PATTERN_SUMMARY_CSV)
+
+ifn_candidate_preview = (
+    # Keep the nearby lower-rank candidates considered in this checkpoint.
+    candidate_patterns.query("K in [4, 5, 6]")
+    # Put the most stimulation-associated pattern first within each run.
+    .sort_values(["K", "corr_with_stim"], ascending=[True, False])
+    # Within each run, keep only that top stimulation-associated pattern.
+    .groupby(["K", "model"], as_index=False)
+    .head(1)
+    # Format the values that will be shown to learners.
+    .assign(
+        **{
+            "IFN correlation": lambda df: df["corr_with_stim"].round(3),
+            "Mean control activity": lambda df: df["mean_activity_ctrl"].round(3),
+            "Mean stimulated activity": lambda df: df["mean_activity_stim"].round(3),
+            "Top genes, first 6": lambda df: df["top_genes_top10"].map(
+                lambda value: ", ".join(str(value).split(", ")[:6])
+            ),
+        }
+    )
+    .rename(
+        columns={
+            "model": "Representative run",
+            "pattern": "Run-specific label",
+            "ifn_marker_count_top25": "ISG markers in top 25",
+        }
+    )
+    [
+        [
+            "K",
+            "Representative run",
+            "Run-specific label",
+            "IFN correlation",
+            "Mean control activity",
+            "Mean stimulated activity",
+            "ISG markers in top 25",
+            "Top genes, first 6",
+        ]
+    ]
+)
+
+print(render_table(ifn_candidate_preview))
+```
+
+:::
+
+Read this table column by column:
+
+- `K` is the model resolution being checked. It tells you how many latent patterns CoGAPS was asked to learn.
+- `Representative run` identifies the saved run summarized in that row.
+- `Run-specific label` is the pattern label inside that specific model fit. It is useful for tracking files, but it is not a biological name.
+- `IFN correlation` measures how strongly that pattern's cell activity tracks the control-versus-IFN-beta stimulation label.
+- `Mean control activity` and `Mean stimulated activity` are average CoGAPS activity scores for that pattern in control cells and stimulated cells. A larger stimulated mean than control mean is what you would expect for an IFN-associated pattern.
+- `ISG markers in top 25` counts how many known interferon-stimulated genes appear among the top 25 genes for that pattern. This helps check whether the pattern's gene weights match interferon biology, not just the condition label.
+- `Top genes, first 6` gives a quick preview of the most highly weighted genes for the pattern.
+
+The activity columns and gene columns answer related but different questions. Activity tells you where the pattern is used across cells. Gene weights tell you which genes define the pattern. Neither one alone tells you whether each gene is up- or down-regulated in stimulation; later sections add expression-direction checks for that.
+
+The table should show the main biological signal you expect: a strong stimulation-associated pattern whose top genes include interferon-stimulated genes such as `ISG15`, `ISG20`, `IFI6`, `IFIT3`, and `LY6E`. That is encouraging, but it is not the whole model-selection decision.
+
+:::{.definition_box}
+::::{.definition_box_header}
+Pattern labels are not biological names
+::::
+::::{.inner_block}
+A row may refer to `Pattern4`, `Pattern5`, or another number, depending on the run. Those labels are bookkeeping labels inside a specific model fit. The biological question is whether the pattern's activity and genes support an interferon-associated interpretation.
+::::
+:::
+
+## Compare K4, K5, And K6 Candidate Models
+
+The next checkpoint asks whether the IFN-associated signal is reproducible across seeds and whether the candidate model resolutions behave similarly. Here you will inspect K4, K5, and K6 at 2,000, 10,000, and 20,000 iterations.
+
+The column named {{< glossary "Top-gene Jaccard" display="top-gene Jaccard" >}} summarizes overlap among top-gene lists across seeds. Values closer to 1 mean the same top genes are repeatedly recovered. This matters because a pattern is easier to trust when its defining genes are not changing dramatically from seed to seed.
+
+The code below turns a full sweep-summary file into a smaller decision table. This is a useful programming pattern: read a data file, keep only the rows relevant to the current question, rename technical columns into readable labels, round numeric values, and display only the columns the learner needs. In R, this uses the pipe operator `|>`, row filtering with `dplyr::filter()`, and column construction with `dplyr::transmute()`. In Python, the same idea uses pandas method chaining with `.query()`, `.assign()`, `.rename()`, and final column selection.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+# Read the long-run lower-K sweep summary.
+lower_rank_long_r <- readr::read_csv(
+  PHASE1B_LOWERK_LONG_SUMMARY_CSV_R,
+  show_col_types = FALSE
+)
+
+lower_rank_evidence_r <- lower_rank_long_r |>
+  # Keep the candidate model resolutions being compared here.
+  dplyr::filter(K %in% c(4, 5, 6)) |>
+  # Build a compact learner-facing table with rounded values.
+  dplyr::transmute(
+    K,
+    iterations = n_iter,
+    seeds = n_ok,
+    `Mean runtime (min)` = round(runtime_min_mean, 1),
+    `Mean IFN correlation` = round(ifn_corr_mean, 3),
+    `IFN correlation SD` = round(ifn_corr_std, 4),
+    `Mean top-gene Jaccard` = round(jaccard_mean, 3),
+    `Minimum top-gene Jaccard` = round(jaccard_min, 3)
+  )
+
+knitr::kable(lower_rank_evidence_r)
+```
+
+### Python
+
+```{python}
+#| results: asis
+# Read the long-run lower-K sweep summary.
+lower_rank_long = pd.read_csv(PHASE1B_LOWERK_LONG_SUMMARY_CSV)
+
+lower_rank_evidence = (
+    # Keep the candidate model resolutions being compared here.
+    lower_rank_long.query("K in [4, 5, 6]")
+    # Build rounded learner-facing columns.
+    .assign(
+        **{
+            "Mean runtime (min)": lambda df: df["runtime_min_mean"].round(1),
+            "Mean IFN correlation": lambda df: df["ifn_corr_mean"].round(3),
+            "IFN correlation SD": lambda df: df["ifn_corr_std"].round(4),
+            "Mean top-gene Jaccard": lambda df: df["jaccard_mean"].round(3),
+            "Minimum top-gene Jaccard": lambda df: df["jaccard_min"].round(3),
+        }
+    )
+    # Rename technical source columns for display.
+    .rename(
+        columns={
+            "n_iter": "iterations",
+            "n_ok": "seeds",
+        }
+    )
+    # Display only the columns needed for this checkpoint.
+    [
+        [
+            "K",
+            "iterations",
+            "seeds",
+            "Mean runtime (min)",
+            "Mean IFN correlation",
+            "IFN correlation SD",
+            "Mean top-gene Jaccard",
+            "Minimum top-gene Jaccard",
+        ]
+    ]
+)
+
+print(render_table(lower_rank_evidence))
+```
+
+:::
+
+Read this table as a stability and practicality check:
+
+- `K` is the number of latent patterns in the candidate model.
+- `iterations` is the number of CoGAPS iterations used for that group of runs.
+- `seeds` is the number of successful random seeds summarized.
+- `Mean runtime (min)` shows the average runtime across those seeds.
+- `Mean IFN correlation` summarizes how strongly the IFN-associated pattern tracks stimulation.
+- `IFN correlation SD` shows how much that IFN correlation varies across seeds. Smaller values mean the stimulation association is more consistent.
+- `Mean top-gene Jaccard` and `Minimum top-gene Jaccard` summarize whether the same top genes are recovered across seeds. The minimum is useful because it flags the weakest seed-to-seed agreement, not only the average.
+
+This table gives an important clue: K4, K5, and K6 all recover a stable IFN-associated gene program. K4 has the strongest mean IFN correlation, and K6 has especially strong top-gene agreement across seeds. If the case study only needed to recover one broad interferon signal, K4 would be tempting.
+
+But the case study asks a harder question. It asks whether CoGAPS can recover an interferon-associated signal while still respecting other immune-cell-linked structure in the same PBMC mixture. That means stability and IFN correlation are necessary, but not sufficient.
+
+## Check For Biological Compression
+
+A lower `K` model has fewer patterns available. That can make the model compact and stable, but it can also cause {{< glossary "Biological compression" display="biological compression" >}}: several useful sources of structure are forced into too few patterns.
+
+To check that risk in the main learner path, inspect the pattern inventory for representative K4, K5, and K6 candidate runs. The point is not to name every pattern yet. The point is to ask how much room each model leaves for non-IFN structure after it has recovered the broad IFN-associated signal.
+
+The code below turns a pattern-level table into a model-level inventory. This is a useful data-analysis move: when a table has one row per pattern, you can group those rows by model and ask what the model as a whole is doing.
+
+In R, the pipe operator `|>` passes the table from one `dplyr` step to the next. `dplyr::filter()` keeps only one representative run for each candidate `K`. `dplyr::group_by(K, model)` tells R that the next summaries should be calculated separately for each candidate model. Inside `dplyr::summarise()`, `dplyr::n()` counts total patterns, `sum(candidate_label == "IFN/ISG candidate")` counts patterns that meet a logical condition, and `dplyr::n_distinct(dominant_cell_type)` counts how many different dominant cell-type labels appear. The expression `unique()` removes repeated labels, and `paste(..., collapse = ", ")` turns those labels into a short readable preview.
+
+In Python, the pandas code follows the same logic. `.query()` keeps the representative K4, K5, and K6 runs, and `.copy()` creates a separate working table. A first `.groupby()` plus `.agg()` builds the non-IFN preview by collecting distinct `dominant_cell_type` values with `pd.unique()`. Then `.assign()` creates an `is_ifn` helper column, where `True` marks IFN/ISG candidate patterns. The second `.groupby(["K", "model"]).agg(...)` counts total patterns, IFN-labeled patterns, non-IFN-labeled patterns, and distinct dominant cell types. Finally, `.merge()` joins the readable preview back onto the model-level summary.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+pattern_inventory_r <- candidate_patterns_r |>
+  # Keep one representative candidate run for each model resolution.
+  dplyr::filter(model %in% c("K4_s2_i2000", "K5_s1_i2000", "K6_s2_i2000")) |>
+  # Summarize from one row per pattern to one row per model.
+  dplyr::group_by(K, model) |>
+  dplyr::summarise(
+    `Total patterns` = dplyr::n(),
+    # Count patterns labeled as IFN/ISG candidates versus other patterns.
+    `IFN/ISG-labeled patterns` = sum(candidate_label == "IFN/ISG candidate"),
+    `Non-IFN-labeled patterns` = sum(candidate_label != "IFN/ISG candidate"),
+    # Count and preview the cell-type-linked structure outside the IFN label.
+    `Dominant cell types represented` = dplyr::n_distinct(dominant_cell_type),
+    `Non-IFN signal preview` = paste(
+      unique(dominant_cell_type[candidate_label != "IFN/ISG candidate"]),
+      collapse = ", "
+    ),
+    .groups = "drop"
+  ) |>
+  dplyr::arrange(K)
+
+knitr::kable(pattern_inventory_r)
+```
+
+### Python
+
+```{python}
+#| results: asis
+# Keep one representative candidate run for each model resolution.
+pattern_inventory_source = candidate_patterns.query(
+    "model in ['K4_s2_i2000', 'K5_s1_i2000', 'K6_s2_i2000']"
+).copy()
+
+# Build a short text preview of non-IFN-dominant cell-type labels.
+non_ifn_preview = (
+    pattern_inventory_source
+    .query("candidate_label != 'IFN/ISG candidate'")
+    .groupby(["K", "model"], as_index=False)["dominant_cell_type"]
+    .agg(lambda values: ", ".join(pd.unique(values)))
+    .rename(columns={"dominant_cell_type": "Non-IFN signal preview"})
+)
+
+pattern_inventory = (
+    pattern_inventory_source
+    # Create a logical helper column that marks IFN/ISG candidate patterns.
+    .assign(
+        is_ifn=lambda df: df["candidate_label"].eq("IFN/ISG candidate")
+    )
+    # Summarize from one row per pattern to one row per model.
+    .groupby(["K", "model"], as_index=False)
+    .agg(
+        **{
+            "Total patterns": ("pattern", "count"),
+            "IFN/ISG-labeled patterns": ("is_ifn", "sum"),
+            "Non-IFN-labeled patterns": ("is_ifn", lambda x: int((~x).sum())),
+            "Dominant cell types represented": ("dominant_cell_type", "nunique"),
+        }
+    )
+    # Add the readable non-IFN preview back to the model-level summary.
+    .merge(non_ifn_preview, on=["K", "model"], how="left")
+)
+
+print(render_table(pattern_inventory))
+```
+
+:::
+
+Read this table as a model-capacity check:
+
+- `K` is the candidate model resolution.
+- `model` identifies the representative saved run summarized in that row.
+- `Total patterns` is the number of patterns available to describe the PBMC data at that `K`.
+- `IFN/ISG-labeled patterns` counts patterns whose gene and activity summaries look interferon-associated in the candidate-pattern table.
+- `Non-IFN-labeled patterns` counts the remaining patterns. These are important because the dataset contains mixed immune-cell identities, not only stimulation status.
+- `Dominant cell types represented` counts how many annotated PBMC cell-type labels appear as dominant labels among the model's patterns. This is a coarse sign of whether the model has room to represent cell-type-linked structure.
+- `Non-IFN signal preview` lists the dominant cell-type labels among the non-IFN patterns, so you can see what kind of non-IFN structure remains visible.
+
+The labels in this table are summaries, not final biological names. A pattern can be useful even if it is not labeled IFN/ISG here. The compression question is whether a small `K` leaves enough patterns for both the stimulation response and the immune-cell structure that you will inspect later.
+
+This table is the reason the decision is not simply "choose the smallest model with a high IFN correlation." K4 recovers the broad IFN signal, but it only has four patterns to describe the full PBMC mixture. K6 remains compact, while giving the model more room to retain non-IFN structure that will matter later when you compare stimulation-associated activity with cell-type-linked activity.
+
+## Check The High-K Extension
+
+The sweep also tested higher values of `K`. Higher rank gives the model more patterns, but more patterns are not automatically better. They can increase runtime, split a signal into smaller pieces, and make interpretation harder.
+
+The code below reads the high-K sweep summary and compresses it into a small diagnostic table. This is different from the previous checkpoint: instead of comparing a few candidate rows directly, this chunk summarizes a wider exploratory range by reporting key extremes.
+
+In R, `readr::read_csv()` loads the high-K summary file. `dplyr::slice_max()` finds the row with the largest mean IFN correlation and the row with the largest mean runtime, while `dplyr::slice_min()` finds the row with the weakest minimum top-gene Jaccard value. The `min()` and `max()` functions then summarize ranges across all high-K ranks, and `tibble::tibble()` collects the results into a two-column table.
+
+In Python, `pd.read_csv()` loads the same summary file. `.idxmax()` and `.idxmin()` find the row positions for the largest or smallest diagnostic values. The code then uses `.loc[]` to pull out those rows, and `min()`, `max()`, and a small `pd.DataFrame()` build the same learner-facing table.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+high_k_summary_r <- readr::read_csv(
+  PHASE3_HIGHK_SUMMARY_CSV_R,
+  show_col_types = FALSE
+)
+
+best_high_k_ifn_r <- high_k_summary_r |>
+  dplyr::slice_max(ifn_corr_mean, n = 1, with_ties = FALSE)
+
+slowest_high_k_r <- high_k_summary_r |>
+  dplyr::slice_max(runtime_min_mean, n = 1, with_ties = FALSE)
+
+weakest_high_k_jaccard_r <- high_k_summary_r |>
+  dplyr::slice_min(jaccard_min, n = 1, with_ties = FALSE)
+
+high_k_takeaway_r <- tibble::tibble(
+  summary = c(
+    "Ranks tested",
+    "Seeds per rank",
+    "Runtime range",
+    "Slowest mean runtime",
+    "Mean IFN-correlation range",
+    "Best high-K mean IFN correlation",
+    "Minimum top-gene Jaccard range",
+    "Weakest top-gene stability"
+  ),
+  value = c(
+    paste0(min(high_k_summary_r$K), " to ", max(high_k_summary_r$K)),
+    paste(unique(high_k_summary_r$n_ok), collapse = ", "),
+    paste0(
+      round(min(high_k_summary_r$runtime_min_mean), 1),
+      " to ",
+      round(max(high_k_summary_r$runtime_min_mean), 1),
+      " min"
+    ),
+    paste0(
+      "K = ",
+      slowest_high_k_r$K,
+      " (",
+      round(slowest_high_k_r$runtime_min_mean, 1),
+      " min)"
+    ),
+    paste0(
+      round(min(high_k_summary_r$ifn_corr_mean), 3),
+      " to ",
+      round(max(high_k_summary_r$ifn_corr_mean), 3)
+    ),
+    paste0(
+      "K = ",
+      best_high_k_ifn_r$K,
+      " (",
+      round(best_high_k_ifn_r$ifn_corr_mean, 3),
+      ")"
+    ),
+    paste0(
+      round(min(high_k_summary_r$jaccard_min), 3),
+      " to ",
+      round(max(high_k_summary_r$jaccard_min), 3)
+    ),
+    paste0(
+      "K = ",
+      weakest_high_k_jaccard_r$K,
+      " (",
+      round(weakest_high_k_jaccard_r$jaccard_min, 3),
+      ")"
+    )
+  )
+)
+
+knitr::kable(high_k_takeaway_r)
+```
+
+### Python
+
+```{python}
+#| results: asis
+high_k_summary = pd.read_csv(PHASE3_HIGHK_SUMMARY_CSV)
+
+best_high_k_ifn = high_k_summary.loc[
+    high_k_summary["ifn_corr_mean"].idxmax()
+]
+slowest_high_k = high_k_summary.loc[
+    high_k_summary["runtime_min_mean"].idxmax()
+]
+weakest_high_k_jaccard = high_k_summary.loc[
+    high_k_summary["jaccard_min"].idxmin()
+]
+
+high_k_takeaway = pd.DataFrame(
+    {
+        "summary": [
+            "Ranks tested",
+            "Seeds per rank",
+            "Runtime range",
+            "Slowest mean runtime",
+            "Mean IFN-correlation range",
+            "Best high-K mean IFN correlation",
+            "Minimum top-gene Jaccard range",
+            "Weakest top-gene stability",
+        ],
+        "value": [
+            f"{high_k_summary['K'].min()} to {high_k_summary['K'].max()}",
+            ", ".join(str(x) for x in high_k_summary["n_ok"].unique()),
+            (
+                f"{high_k_summary['runtime_min_mean'].min():.1f} to "
+                f"{high_k_summary['runtime_min_mean'].max():.1f} min"
+            ),
+            (
+                f"K = {int(slowest_high_k['K'])} "
+                f"({slowest_high_k['runtime_min_mean']:.1f} min)"
+            ),
+            (
+                f"{high_k_summary['ifn_corr_mean'].min():.3f} to "
+                f"{high_k_summary['ifn_corr_mean'].max():.3f}"
+            ),
+            (
+                f"K = {int(best_high_k_ifn['K'])} "
+                f"({best_high_k_ifn['ifn_corr_mean']:.3f})"
+            ),
+            (
+                f"{high_k_summary['jaccard_min'].min():.3f} to "
+                f"{high_k_summary['jaccard_min'].max():.3f}"
+            ),
+            (
+                f"K = {int(weakest_high_k_jaccard['K'])} "
+                f"({weakest_high_k_jaccard['jaccard_min']:.3f})"
+            ),
+        ],
+    }
+)
+
+print(render_table(high_k_takeaway))
+```
+
+:::
+
+Read this table as a guardrail against overfitting the case study to a very large rank:
+
+- `Ranks tested` shows that the high-K extension covered a wide range, from K14 through K80.
+- `Seeds per rank` confirms that each high-K value summarized here had five successful seeds, so the comparison is not based on a single lucky run.
+- `Runtime range` shows the practical cost. Even the fastest high-K mean runtime is about 72 minutes, while the slowest high-K mean runtime is about 380 minutes. By comparison, the K6 2,000-iteration runs in the previous checkpoint averaged about 37 minutes.
+- `Mean IFN-correlation range` shows that larger `K` values did not strengthen the stimulation-associated signal. The best high-K mean IFN correlation is about 0.744, while the K6 2,000-iteration mean IFN correlation in the previous table is about 0.750.
+- `Minimum top-gene Jaccard range` is the strongest warning sign. High-K models have much weaker worst-case top-gene agreement across seeds, with minimum Jaccard values between about 0.235 and 0.587. In the lower-rank comparison, K6 had a minimum top-gene Jaccard of 1.000 across seeds.
+
+The interpretation is not that high-K models are always bad. A larger `K` can be useful when the scientific goal is to separate many subtle cell states or rare signals. Here, however, the high-K extension does not improve the IFN-associated signal, costs much more runtime, and makes the top-gene signal less stable across seeds. For this case study, those tradeoffs argue against moving the main analysis path to a much larger model.
+
+## Decision Checkpoint: Which K Should We Import?
+
+Pause here and use the evidence you just imported. A good model for this case study should satisfy three scientific checks:
+
+1. It should recover a clear IFN-associated signal.
+1. Its top IFN genes should be stable across seeds.
+1. It should keep enough model resolution to inspect non-IFN immune-cell structure.
+
+The current evidence supports `K = 6` as the selected model for the main learner path.
+
+:::{.reference_box}
+::::{.reference_box_header}
+Model imported for the main learner path
+::::
+::::{.inner_block}
+Use the R/Bioconductor CoGAPS model with `K = 6`, `seed = 2`, `nIterations = 2000`, and {{< glossary "Sparse optimization" display="sparse optimization" >}} enabled. Treat K4 and K5 as lower-rank sensitivity comparators, and treat high-K models as unsupported for the main learner path by the current sweep evidence.
+::::
+:::
+
+This does not mean `K = 6` is universally optimal for every PBMC or interferon dataset. It means that, for this case-study dataset and learning goal, K6 is the strongest current balance of parsimony, IFN/ISG recovery, and non-IFN structure. Runtime remains useful context for reproduction planning, but it is not the scientific reason for importing the K6 model.
+
+The next chunks import the prepared single-cell data and the saved K6 model outputs.
+
+## Load The Prepared Single-Cell Data
+
+Now load the prepared PBMC single-cell data. This object is the shared reference point for the rest of the case study: it contains the cells, the 3,000 highly variable genes used for the teaching analysis, the control-versus-IFN-beta condition labels, the annotated PBMC cell types, donor/replicate information, and the UMAP coordinates used for visualization. Later, when you inspect CoGAPS pattern activity, you will need these cell labels to ask whether a pattern follows stimulation, immune-cell identity, donor structure, or some combination of these signals.
+
+Loading the prepared object also keeps the section focused on import and model selection. You will revisit preprocessing choices in the data wrangling section, but at this point the main task is to confirm that the analysis-ready cell-by-gene data and metadata are available before importing the saved K6 CoGAPS outputs.
+
+This file is stored as `.h5ad`, a common single-cell format originally associated with Python workflows. The R tab uses `zellkonverter::readH5AD()` to read the file into a {{< glossary "SingleCellExperiment" display="SingleCellExperiment" >}} object. The Python tab uses `anndata.read_h5ad()` to read the same file into an {{< glossary "AnnData" display="AnnData" >}} object.
+
+Those two containers organize the same information in slightly different ways:
+
+- In R, `SingleCellExperiment` stores cells in `colData()`, genes in `rowData()`, and expression values in assays.
+- In Python, `AnnData` stores cells in `.obs`, genes in `.var`, and expression values in `.X` or named layers.
 
 ::: {.panel-tabset}
 
@@ -54,81 +759,459 @@ The next import step loads the cached processed single-cell object. This keeps t
 
 ```{r}
 sce_cells <- zellkonverter::readH5AD(PREPROCESSED_H5AD_R, reader = "R")
-sce_cells
+
+sce_import_summary_r <- tibble::tibble(
+  item = c(
+    "Genes",
+    "Cells",
+    "Cell metadata columns",
+    "Gene metadata columns",
+    "Assays",
+    "Reduced dimensions"
+  ),
+  value = c(
+    format(nrow(sce_cells), big.mark = ","),
+    format(ncol(sce_cells), big.mark = ","),
+    ncol(colData(sce_cells)),
+    ncol(rowData(sce_cells)),
+    paste(assayNames(sce_cells), collapse = ", "),
+    paste(reducedDimNames(sce_cells), collapse = ", ")
+  )
+)
+
+knitr::kable(
+  sce_import_summary_r,
+  col.names = c("Item", "Value")
+)
 ```
 
 ### Python
 
 ```{python}
+#| results: asis
 adata_cells = ad.read_h5ad(PREPROCESSED_H5AD)
-adata_cells
+
+adata_import_summary = pd.DataFrame(
+    {
+        "Item": [
+            "Cells",
+            "Genes",
+            "Cell metadata columns",
+            "Gene metadata columns",
+            "Layers",
+            "Embeddings",
+        ],
+        "Value": [
+            f"{adata_cells.n_obs:,}",
+            f"{adata_cells.n_vars:,}",
+            len(adata_cells.obs.columns),
+            len(adata_cells.var.columns),
+            ", ".join(adata_cells.layers.keys()),
+            ", ".join(adata_cells.obsm.keys()),
+        ],
+    }
+)
+
+print(render_table(adata_import_summary))
 ```
 
 :::
 
-We need three metadata columns for the rest of the case study:
+The imported object should contain 24,673 cells and 3,000 highly variable genes. The exact orientation differs by language: the Python `AnnData` object is cells by genes, while the R `SingleCellExperiment` view reports genes by cells. That orientation difference is normal and will matter later when we prepare inputs for CoGAPS.
 
-1. `condition`, so we can compare control and IFN-beta stimulated cells
-1. `cell_type`, so we can summarize patterns across immune compartments
-1. `replicate`, so we can perform paired donor-aware summaries
+## Check The Cell Metadata
+
+The next code chunk checks the columns that later sections rely on. This is a defensive programming habit: before using a column such as `condition`, the code verifies that the column is present. If a required column is missing, the chunk stops early with a clear error instead of failing later in a harder-to-interpret place.
 
 ::: {.panel-tabset}
 
 ### R
 
 ```{r}
-required_obs_r <- c("condition", "cell_type", "replicate")
-missing_obs_r <- setdiff(required_obs_r, colnames(colData(sce_cells)))
+required_cell_metadata_r <- c("condition", "cell_type", "replicate")
+missing_cell_metadata_r <- setdiff(
+  required_cell_metadata_r,
+  colnames(colData(sce_cells))
+)
 
-if (length(missing_obs_r) > 0) {
-  stop(sprintf("Missing required metadata columns: %s", paste(missing_obs_r, collapse = ", ")))
+if (length(missing_cell_metadata_r) > 0) {
+  stop(
+    "Missing required cell metadata columns: ",
+    paste(missing_cell_metadata_r, collapse = ", ")
+  )
 }
 
-as.data.frame(colData(sce_cells)[, required_obs_r]) |>
-  head()
+metadata_preview_r <- as.data.frame(
+  colData(sce_cells)[, required_cell_metadata_r]
+) |>
+  tibble::rownames_to_column("cell_barcode") |>
+  dplyr::slice_head(n = 6)
+
+knitr::kable(metadata_preview_r)
+```
+
+```{r}
+condition_counts_r <- as.data.frame(
+  table(colData(sce_cells)$condition),
+  stringsAsFactors = FALSE
+)
+colnames(condition_counts_r) <- c("condition", "n_cells")
+
+condition_counts_r <- condition_counts_r |>
+  dplyr::mutate(
+    share = sprintf("%.1f%%", 100 * n_cells / sum(n_cells))
+  ) |>
+  dplyr::arrange(dplyr::desc(n_cells))
+
+knitr::kable(condition_counts_r)
 ```
 
 ### Python
 
 ```{python}
-required_obs = {"condition", "cell_type", "replicate"}
-missing_obs = required_obs.difference(adata_cells.obs.columns)
+#| results: asis
+required_cell_metadata = ["condition", "cell_type", "replicate"]
+missing_cell_metadata = [
+    column for column in required_cell_metadata
+    if column not in adata_cells.obs.columns
+]
 
-if missing_obs:
-    raise ValueError(f"Missing required metadata columns: {sorted(missing_obs)}")
+if missing_cell_metadata:
+    raise ValueError(
+        "Missing required cell metadata columns: "
+        + ", ".join(missing_cell_metadata)
+    )
 
-adata_cells.obs[["condition", "cell_type", "replicate"]].head()
+metadata_preview = (
+    adata_cells.obs[required_cell_metadata]
+    .head(6)
+    .reset_index(names="cell_barcode")
+)
+
+print(render_table(metadata_preview))
+```
+
+```{python}
+#| results: asis
+condition_counts = (
+    adata_cells.obs["condition"]
+    .value_counts()
+    .rename_axis("condition")
+    .reset_index(name="n_cells")
+)
+condition_counts["share"] = (
+    100 * condition_counts["n_cells"] / condition_counts["n_cells"].sum()
+).round(1).astype(str) + "%"
+
+print(render_table(condition_counts))
 ```
 
 :::
 
-The default path in this case study uses saved R-primary CoGAPS artifacts. If the full R result is available, the case study can load it directly; otherwise it uses lightweight exported matrices and summaries that are suitable for GitHub and classroom rendering. The Python tab follows the same cooking-show pattern: full `.h5ad` support is preserved for local review, but lightweight Python exports are sufficient when that larger file is absent.
+The preview confirms that each cell has the three labels needed later:
+
+- `condition`, for comparing control and IFN-beta-stimulated cells;
+- `cell_type`, for asking whether a pattern follows annotated immune-cell identities; and
+- `replicate`, for keeping donor-level pairing visible in summaries.
+
+## Import The Selected-Model Outputs
+
+The main learner path does not fit CoGAPS again. Instead, it imports {{< glossary "Selected-model outputs" display="selected-model outputs" >}} saved from the selected K6 run. These files let you inspect pattern activity, gene weights, top genes, directionality, and model diagnostics without asking every learner to spend compute time rerunning the model.
+
+The next chunks do two things. First, they check that the expected files exist. Second, they read the saved metrics and pattern summary so you can confirm that the imported files match the selected model.
 
 ::: {.panel-tabset}
 
 ### R
 
 ```{r}
-cat("R analysis mode:", R_ANALYSIS_MODE_R, "\n")
-cat("R full chosen model available:", HAS_R_CHOSEN_RESULT_R, "\n")
-cat("R chosen model metrics available:", file.exists(R_CHOSEN_METRICS_JSON_R), "\n")
-cat("R lightweight pattern matrices available:", HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R, "\n")
-cat("R lightweight pattern summary available:", HAS_R_PATTERN_SUMMARY_R, "\n")
+r_selected_files <- tibble::tibble(
+  evidence = c(
+    "Run metrics",
+    "Pattern summary",
+    "Gene weights",
+    "Cell activities",
+    "Cell activities with metadata",
+    "Top genes",
+    "Global directionality",
+    "Cell-type directionality"
+  ),
+  path = c(
+    R_CHOSEN_METRICS_JSON_R,
+    R_PATTERN_SUMMARY_CSV_R,
+    R_PATTERN_GENE_WEIGHTS_TSV_GZ_R,
+    R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R,
+    R_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ_R,
+    R_PATTERN_TOP_GENES_CSV_R,
+    R_DIRECTION_GLOBAL_CSV_R,
+    R_DIRECTION_CELLTYPE_CSV_R
+  ),
+  used_later_for = c(
+    "runtime and model-setting checks",
+    "pattern-level overview",
+    "gene-weight interpretation",
+    "cell-activity interpretation",
+    "activity summaries by cell metadata",
+    "top-gene interpretation",
+    "stimulation direction across genes",
+    "cell-type-aware direction checks"
+  )
+) |>
+  dplyr::mutate(
+    file = basename(path),
+    available = file.exists(path)
+  ) |>
+  dplyr::select(evidence, file, available, used_later_for)
+
+knitr::kable(
+  r_selected_files,
+  col.names = c("Evidence", "File", "Available", "Used later for")
+)
+```
+
+```{r}
+r_required_selected_files <- c(
+  R_CHOSEN_METRICS_JSON_R,
+  R_PATTERN_SUMMARY_CSV_R,
+  R_PATTERN_GENE_WEIGHTS_TSV_GZ_R,
+  R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R
+)
+
+if (!all(file.exists(r_required_selected_files))) {
+  stop("One or more required R selected-model files are missing.")
+}
+
+r_model_metrics <- jsonlite::read_json(
+  R_CHOSEN_METRICS_JSON_R,
+  simplifyVector = TRUE
+)
+r_pattern_summary <- readr::read_csv(
+  R_PATTERN_SUMMARY_CSV_R,
+  show_col_types = FALSE
+)
+
+r_metric_check <- tibble::tibble(
+  check = c(
+    "Stored model resolution",
+    "Seed",
+    "Iterations",
+    "Sparse optimization",
+    "Runtime of saved local run",
+    "Stored patterns",
+    "IFN-associated pattern label in this R run"
+  ),
+  value = c(
+    paste0("K = ", r_model_metrics$nPatterns),
+    r_model_metrics$seed,
+    r_model_metrics$nIterations,
+    ifelse(r_model_metrics$sparseOptimization, "TRUE", "FALSE"),
+    paste0(round(r_model_metrics$runtime_sec / 60, 1), " minutes"),
+    nrow(r_pattern_summary),
+    r_model_metrics$ifn_pattern
+  )
+)
+
+knitr::kable(
+  r_metric_check,
+  col.names = c("Check", "Value")
+)
 ```
 
 ### Python
 
 ```{python}
-print("Python analysis mode:", PY_ANALYSIS_MODE)
-print("Python full chosen model available:", HAS_PY_CHOSEN_RESULT)
-print("Cached dense CoGAPS input available:", HAS_CACHED_COGAPS_INPUT)
-print("Python chosen model metrics available:", PY_CHOSEN_METRICS_JSON.exists())
-print("Python lightweight pattern matrices available:", HAS_PY_LIGHTWEIGHT_PATTERN_MATRICES)
-print("Python lightweight pattern summary available:", HAS_PY_PATTERN_SUMMARY)
+#| results: asis
+python_selected_files = pd.DataFrame(
+    {
+        "Evidence": [
+            "Run metrics",
+            "Pattern summary",
+            "Gene weights",
+            "Cell activities",
+            "Cell activities with metadata",
+            "Top genes",
+            "Global directionality",
+            "Cell-type directionality",
+        ],
+        "Path": [
+            PY_CHOSEN_METRICS_JSON,
+            PY_PATTERN_SUMMARY_CSV,
+            PY_PATTERN_GENE_WEIGHTS_TSV_GZ,
+            PY_PATTERN_CELL_ACTIVITIES_TSV_GZ,
+            PY_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ,
+            PY_PATTERN_TOP_GENES_CSV,
+            PY_DIRECTION_GLOBAL_CSV,
+            PY_DIRECTION_CELLTYPE_CSV,
+        ],
+        "Used later for": [
+            "runtime and model-setting checks",
+            "pattern-level overview",
+            "gene-weight interpretation",
+            "cell-activity interpretation",
+            "activity summaries by cell metadata",
+            "top-gene interpretation",
+            "stimulation direction across genes",
+            "cell-type-aware direction checks",
+        ],
+    }
+)
+python_selected_files["File"] = python_selected_files["Path"].map(lambda path: path.name)
+python_selected_files["Available"] = python_selected_files["Path"].map(lambda path: path.exists())
+python_selected_files = python_selected_files[
+    ["Evidence", "File", "Available", "Used later for"]
+]
+
+print(render_table(python_selected_files))
+```
+
+```{python}
+#| results: asis
+python_required_selected_files = [
+    PY_CHOSEN_METRICS_JSON,
+    PY_PATTERN_SUMMARY_CSV,
+    PY_PATTERN_GENE_WEIGHTS_TSV_GZ,
+    PY_PATTERN_CELL_ACTIVITIES_TSV_GZ,
+]
+
+if not all(path.exists() for path in python_required_selected_files):
+    raise FileNotFoundError(
+        "One or more required Python selected-model files are missing."
+    )
+
+with open(PY_CHOSEN_METRICS_JSON) as f:
+    python_model_metrics = json.load(f)
+
+python_pattern_summary = pd.read_csv(PY_PATTERN_SUMMARY_CSV)
+
+python_metric_check = pd.DataFrame(
+    {
+        "Check": [
+            "Stored model resolution",
+            "Seed",
+            "Iterations",
+            "Sparse optimization",
+            "Runtime of saved run",
+            "Stored patterns",
+            "IFN-associated pattern label in this Python run",
+        ],
+        "Value": [
+            f"K = {python_model_metrics.get('K', python_model_metrics.get('nPatterns'))}",
+            python_model_metrics["seed"],
+            python_model_metrics.get("n_iter", python_model_metrics.get("nIterations")),
+            str(selected_model["sparseOptimization"]),
+            f"{python_model_metrics['runtime_sec'] / 60:.1f} minutes",
+            len(python_pattern_summary),
+            python_model_metrics["ifn_pattern"],
+        ],
+    }
+)
+
+print(render_table(python_metric_check))
 ```
 
 :::
 
-You should see that the lightweight R and Python pattern summaries are available even if the optional full model objects are not. That is the intended learner path: analyze the selected model and model-selection summaries without requiring a long CoGAPS rerun.
+The R tab is the primary implementation for the case study. The Python tab imports parallel saved outputs so learners can see how the same analysis ideas transfer to a Python-style workflow. The two implementations do not have to use the same pattern numbers; what matters is whether the activity, genes, and diagnostics support the same biological interpretation.
+
+## Import Checkpoint
+
+The final import check gathers the objects and files that later sections need. This style of checklist is useful when adapting the workflow to a new dataset: it turns a long sequence of assumptions into a small table of checks.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+import_checkpoint_r <- tibble::tibble(
+  requirement = c(
+    "Model-resolution evidence inspected",
+    "Prepared single-cell data loaded",
+    "Required cell metadata present",
+    "K-selection decision loaded",
+    "R selected-model metrics available",
+    "R pattern matrices available",
+    "R directionality summaries available"
+  ),
+  status = c(
+    all(c(
+      exists("ifn_candidate_preview_r"),
+      exists("lower_rank_evidence_r"),
+      exists("pattern_inventory_r"),
+      exists("high_k_takeaway_r")
+    )),
+    exists("sce_cells"),
+    length(missing_cell_metadata_r) == 0,
+    exists("k_selection_decision_r"),
+    file.exists(R_CHOSEN_METRICS_JSON_R),
+    HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R,
+    file.exists(R_DIRECTION_GLOBAL_CSV_R) && file.exists(R_DIRECTION_CELLTYPE_CSV_R)
+  ),
+  why_it_matters = c(
+    "Needed to justify which model outputs are imported.",
+    "Needed for metadata summaries and UMAP plots.",
+    "Needed for condition, cell-type, and donor-aware comparisons.",
+    "Needed to keep the selected model settings explicit.",
+    "Needed for runtime and model-setting checks.",
+    "Needed to inspect CoGAPS gene weights and cell activities.",
+    "Needed to connect pattern genes to up- or down-regulation."
+  )
+)
+
+knitr::kable(
+  import_checkpoint_r,
+  col.names = c("Requirement", "Ready", "Why it matters")
+)
+```
+
+### Python
+
+```{python}
+#| results: asis
+import_checkpoint = pd.DataFrame(
+    {
+        "Requirement": [
+            "Model-resolution evidence inspected",
+            "Prepared single-cell data loaded",
+            "Required cell metadata present",
+            "K-selection decision loaded",
+            "Python selected-model metrics available",
+            "Python pattern matrices available",
+            "Python directionality summaries available",
+        ],
+        "Ready": [
+            all(
+                name in globals()
+                for name in [
+                    "ifn_candidate_preview",
+                    "lower_rank_evidence",
+                    "pattern_inventory",
+                    "high_k_takeaway",
+                ]
+            ),
+            "adata_cells" in globals(),
+            len(missing_cell_metadata) == 0,
+            "k_selection_decision" in globals(),
+            PY_CHOSEN_METRICS_JSON.exists(),
+            HAS_PY_LIGHTWEIGHT_PATTERN_MATRICES,
+            PY_DIRECTION_GLOBAL_CSV.exists() and PY_DIRECTION_CELLTYPE_CSV.exists(),
+        ],
+        "Why it matters": [
+            "Needed to justify which model outputs are imported.",
+            "Needed for metadata summaries and UMAP plots.",
+            "Needed for condition, cell-type, and donor-aware comparisons.",
+            "Needed to keep the selected model settings explicit.",
+            "Needed for runtime and model-setting checks.",
+            "Needed to inspect CoGAPS gene weights and cell activities.",
+            "Needed to connect pattern genes to up- or down-regulation.",
+        ],
+    }
+)
+
+print(render_table(import_checkpoint))
+```
+
+:::
+
+At this point, you have imported the model-selection evidence, made the K6 decision explicit, loaded the prepared PBMC data, and checked that the saved CoGAPS outputs are available. The next section uses these imported objects to explore the data before you interpret any latent patterns.
 
 ***
