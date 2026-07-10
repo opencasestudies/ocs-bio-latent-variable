@@ -53,7 +53,7 @@ You do not need to memorize every column name now, but this overview, can help y
 | --- | --- | --- |
 | `condition` | Whether a cell came from the untreated control or the IFN-beta-stimulated aliquot. | Use it to ask whether pattern activity or gene expression shifts after stimulation. |
 | `cell_type` | The annotated PBMC identity, such as CD4 T cells, B cells, NK cells, monocytes, or dendritic cells. | Use it to keep immune-cell identity visible while interpreting response patterns. |
-| `replicate` | The donor or patient replicate label retained in the teaching dataset. | Use it when summaries need to respect the paired donor structure. |
+| `replicate` | The donor/patient replicate label retained in the teaching dataset. | Use it when we need to know which samples came from the same individual that received interferon stimulation or not. |
 | `UMAP1`, `UMAP2` | Two-dimensional coordinates used for visualization. | Use them to plot cells; do not treat distance on the plot as a direct biological measurement. |
 | `n_cells` and `fraction` | Counts and proportions for a summarized group of cells. | Use them to check how much cell-level evidence contributes to a summary. |
 | pattern-activity columns | CoGAPS activity values for learned patterns. | Larger values mean a cell or group uses that pattern more strongly. |
