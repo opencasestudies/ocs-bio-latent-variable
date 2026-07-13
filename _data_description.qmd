@@ -1,31 +1,89 @@
 # **What are the data?**
 ***
 
-We will use a processed subset of the PBMC IFN-beta stimulation single-cell RNA-seq dataset from Kang et al. The learner-facing analysis object contains 24,673 cells and 3,000 highly variable genes. Each cell has metadata for condition, annotated cell type, and donor/replicate.
+Before you read any files into R or Python, pause to ask what kind of evidence each file contains. Some files describe the public source study. Some files describe the prepared single-cell dataset used in this case study. Some files summarize CoGAPS runs that have already been completed. Keeping those layers separate will help you avoid common mistakes, such as treating every cell as a separate patient or reading a CoGAPS gene weight as if it were already an up-or-down expression result.
 
-Object or variable | Details
------------------- | -------
-`data/artifact_manifest.json` | Inventory of GitHub-safe and optional full-local artifacts
-`data/processed/k_selection/k_selection_decision_manifest.json` | Current selected-model decision and evidence map
-`data/processed/input/preprocessed_cells_hvg3000.h5ad` | Cells x genes AnnData object used for the main learner workflow
-`condition` | Experimental condition: `ctrl` or `stim`
-`cell_type` | Annotated PBMC cell type
-`replicate` | Donor or patient replicate label
-`.layers["counts"]` | Count layer used for targeted pseudobulk directionality
-`data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad` | Optional genes x cells matrix prepared for Python/PyCoGAPS full local runs
-`data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.metrics.json` | Selected R K6 sparse-on model metadata
-`data/processed/selected_model_k6/r/pattern_gene_weights.tsv.gz` | Lightweight exported R CoGAPS gene-weight (`A`) matrix
-`data/processed/selected_model_k6/r/pattern_cell_activities.tsv.gz` | Lightweight exported R CoGAPS cell-activity (`P`) matrix
-`pattern_cell_activities_with_metadata.csv.gz` | Cell-level pattern activities joined to key metadata and embeddings
-`pattern_top_genes.csv` | Top weighted genes per pattern from the chosen model
-`pattern_correlations.csv` | Pattern correlations with the stimulation indicator
-`pattern_activity_by_celltype_condition.csv` | Mean and median pattern activity summaries by cell type and condition
-`pattern_summary.csv` | Compact per-pattern interpretation table for lightweight renders
-`pattern_gene_directionality_global.csv` | Targeted global stim-vs-ctrl directionality for top pattern genes
-`pattern_gene_directionality_by_celltype.csv` | Targeted cell-type directionality for top pattern genes
+The public source data come from Kang et al. 2018, a multiplexed droplet single-cell RNA-seq study of {{< glossary "Peripheral blood mononuclear cell" display="PBMC" >}} responses to {{< glossary "IFN-beta" display="IFN-beta" >}} stimulation [@kang2018multiplexed]. The source record is {{< glossary "Gene Expression Omnibus" display="NCBI Gene Expression Omnibus" >}} Series [GSE96583](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE96583){target="_blank"}, the public {{< glossary "GEO accession" display="GEO accession" >}} for the Kang study data.
 
-The local processed object is sparse: about 96 percent of entries are zero. This is typical for single-cell RNA-seq and is one reason that careful preprocessing and interpretation are important.
+The GEO record contains the series description, sample records, processed supplementary files, and links to raw sequencing data in the Sequence Read Archive. For this case study, the relevant sample records are the batch 2 control and batch 2 IFN-beta-stimulated PBMC samples; the record also includes batch 1 samples used in the source paper's broader demultiplexing demonstration. The source files were downloaded from that NCBI GEO record and then processed into the teaching dataset described below.
 
-The case study starts from cached files so learners can focus on latent-variable analysis and interpretation rather than full raw-data processing. For GitHub and other lightweight render contexts, the smaller exported pattern tables allow the biological interpretation to remain available even when full model objects such as the R `.rds` or Python `.h5ad` files are absent.
+In the part of the study used here, PBMCs from eight lupus donors were split into matched {{< glossary "Aliquot" display="aliquots" >}}. One aliquot was left as an untreated control, and the other was stimulated with IFN-beta for six hours before single-cell profiling.
+
+That design is useful because the same donor background appears in both conditions. It does not make the data simple, though. Each cell still carries several kinds of information at once: immune-cell identity, donor context, technical measurement noise, and response to stimulation. The purpose of this section is to show what the case-study files represent before those signals are modeled.
+
+## The teaching dataset
+
+The main analysis starts from a prepared teaching dataset derived from the Kang PBMC IFN-beta study. It contains **24,673 cells** and **3,000 {{< glossary "Highly variable gene" display="highly variable genes" >}}**. Each cell has a condition label, an annotated PBMC cell type, a donor or patient replicate label, and low-dimensional coordinates used later for visualization.
+
+The preparation step keeps the scale of the single-cell experiment large enough to be realistic while making the analysis manageable for a case study. Rather than using every measured gene, the workflow keeps genes that are informative across cells. The frozen preprocessing record for this dataset indicates that genes were filtered by minimum cell count, expression values were normalized to a common library size, log-transformed, and then reduced to 3,000 highly variable genes. You will return to these preprocessing choices in **Data Wrangling**, where the case study explains why filtering, normalization, transformation, and gene selection matter for the matrix used by CoGAPS. The prepared dataset also keeps a count layer so later sections can compare expression direction for selected genes.
+
+The cell dataset is nearly balanced by condition: **12,315 control cells** and **12,358 IFN-beta-stimulated cells**. It is not balanced by cell type, because the goal is to preserve the actual composition of PBMC cell types present in the samples. The majority of cells were identified by Kang et al. as CD4 T cells, followed by CD14+ monocytes, B cells, NK cells, CD8 T cells, FCGR3A+ monocytes, dendritic cells, and megakaryocytes. This gets to the core questions of the case study: How do different cell types respond to interferon? Which cell types seem impacted and how much?
+
+## Data files you will encounter
+
+The table below is a map, not a workflow. Exact filenames and optional large-file setup are handled in **Packages and Setup** and in the **Full Reproduction Guide**. Here, focus on what each file family means.
+
+| File family | What it represents | How to read it carefully |
+| --- | --- | --- |
+| Public GEO record | The NCBI GEO Series record for Kang et al. 2018, including sample records, supplementary processed files, and links to raw SRA data. | This is the public source record; the case study uses a processed teaching dataset derived from it. |
+| Prepared single-cell dataset | Cells, genes, condition labels, donor labels, cell-type labels, and visualization coordinates for the PBMC IFN-beta teaching dataset. | This is the starting dataset for the main analysis, not the complete raw GEO archive. |
+| Model-resolution summaries | Precomputed summaries from candidate CoGAPS runs used to decide how detailed the model should be. | These summaries support a rank decision; they do not give biological names to patterns by themselves. |
+| Saved CoGAPS outputs | Pattern activities, gene weights, top-gene summaries, and diagnostic summaries from the selected model loaded later. | Pattern labels are run-specific, and gene weights do not say whether expression is higher or lower after stimulation. |
+| Directionality summaries | Targeted stimulation-versus-control expression contrasts for genes used in pattern interpretation. | These summaries help determine direction of change for selected genes; they are not a genome-wide differential-expression analysis. |
+| Optional reproduction files | Larger inputs and full model files used to rebuild or audit the workflow outside the main narrative. | These are useful for full reproduction, but they are not required to follow the main narrative. |
+
+## What one row means
+
+Rows do not mean the same thing in every file. A row might represent one cell, one gene linked to one pattern, one cell-type summary, or one model run. Reading the row meaning first will make later tables much easier to interpret.
+
+| File group | One row usually represents | What that row helps you ask |
+| --- | --- | --- |
+| Cell metadata | One cell barcode and its labels. | Which condition, donor, and annotated PBMC cell type does this cell belong to? |
+| Cell activity tables | One cell, or one summarized cell group, with CoGAPS pattern activities. | Where is a learned pattern most active? |
+| Gene-weight and top-gene tables | One gene's contribution to one CoGAPS pattern. | Which genes help define a pattern? |
+| Directionality tables | One gene contrast between IFN-beta-stimulated and control cells. | Is the gene higher or lower after stimulation? |
+| Diagnostic or model-summary tables | One saved trace point, candidate model, or run-level summary. | Did the model run behave reasonably, and how does it compare with alternatives? |
+
+## Columns you will see often
+
+You do not need to memorize every column name now, but this overview, can help you get familiar with the data. Think of this table as a trail map for the first few imports: it names the columns that will keep reappearing as you move from cells, to patterns, to genes.
+
+::: {.table-responsive}
+| Column or term | What it means | How to use it |
+| --- | --- | --- |
+| `condition` | Whether a cell came from the untreated control or the IFN-beta-stimulated aliquot. | Use it to ask whether pattern activity or gene expression shifts after stimulation. |
+| `cell_type` | The annotated PBMC identity, such as CD4 T cells, B cells, NK cells, monocytes, or dendritic cells. | Use it to keep immune-cell identity visible while interpreting response patterns. |
+| `replicate` | The donor/patient replicate label retained in the teaching dataset. | Use it when we need to know which samples came from the same individual that received interferon stimulation or not. |
+| `UMAP1`, `UMAP2` | Two-dimensional coordinates used for visualization of similarity of samples. | Use them to explore the cell populations; do not treat distance on the plot as a direct biological measurement. |
+| `n_cells` and `fraction` | Counts and proportions for a summarized group of cells. | Use them to check how much cell-level evidence contributes to a summary. |
+| pattern-activity columns | CoGAPS activity values for learned patterns. | Larger values mean a cell or group uses that pattern more strongly. |
+| `pattern` | A run-specific pattern label in long-format summaries. | Use it to compare patterns, but wait for evidence before assigning biological meaning. |
+| `gene` and `weight` | A gene symbol and its CoGAPS contribution to a pattern. | Use them to ask which genes help define a pattern. |
+| `log2FC` and `direction` | Directionality summaries comparing IFN-beta stimulation with control. | Use them to check whether selected genes are higher or lower after stimulation. |
+:::
+
+Later sections will introduce a few additional diagnostic columns only when they become useful. For now, the main habit is simple: check whether a table is about **cells**, **patterns**, **genes**, or **model behavior** before interpreting a number.
+
+:::{.think_question}
+::::{.think_question_header}
+Checkpoint
+::::
+::::{.inner_block}
+Before importing files, ask yourself: would this table help identify **where a pattern is active**, **which genes define it**, or **which direction those genes move after stimulation**?
+
+<details>
+<summary>Show answer</summary>
+
+Cell activity tables help identify where a pattern is active. Gene-weight and top-gene tables help identify which genes define a pattern. Directionality tables are needed to tell whether those genes are higher or lower in IFN-beta-stimulated cells compared with controls.
+
+</details>
+::::
+:::
+
+## Boundaries for interpretation
+
+These data are well suited for learning how to interpret latent patterns in a mixed single-cell immune dataset. They are not, by themselves, a clinical test of lupus severity, a therapy study, or proof that one pathway causes disease. The source experiment gives a controlled IFN-beta perturbation in PBMCs from lupus donors. The case study then asks a data-analysis question: can CoGAPS recover interpretable patterns while keeping stimulation response, cell identity, and gene directionality distinct?
+
+You now have a map of the data layers. Next, the **Limitations** and **Bioethics** sections set the interpretation boundaries before **Packages and Setup** and **Data Import** begin the executable workflow.
 
 ***

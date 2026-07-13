@@ -1,128 +1,769 @@
 # **Data Exploration**
 ***
 
-Before running or interpreting a model, we should inspect what is in the processed single-cell object.
+Now that you have imported the model-selection evidence, the prepared PBMC data, and the selected-model files, pause before interpreting any CoGAPS pattern biologically. Data exploration asks a simpler question: what information is actually in front of us?
+
+This section checks four things:
+
+1. the size and structure of the prepared single-cell data,
+2. whether the paired control and IFN-beta conditions are represented across donors,
+3. which PBMC cell types dominate the dataset, and
+4. what the saved CoGAPS output tables contain before we name any pattern.
+
+These checks are not the final analysis. They are the evidence map you need before deciding whether a later pattern is stimulation-associated, cell-type-linked, donor-influenced, or some combination of those signals.
+
+## Check The Prepared Single-Cell Data
+
+The prepared data are stored in a single-cell data container. In R, that container is a {{< glossary "SingleCellExperiment" display="SingleCellExperiment" >}} called `sce_cells`. In Python, the same data are stored in an {{< glossary "AnnData" display="AnnData" >}} object called `adata_cells`.
+
+The two languages organize the same information with different names:
+
+| Information | R `SingleCellExperiment` | Python `AnnData` | What it means |
+|---|---|---|---|
+| Cells | columns and `colData()` | rows and `.obs` | Each profiled cell has metadata such as condition, cell type, and donor. |
+| Genes | rows and `rowData()` | columns and `.var` | Each retained gene has gene-level annotations. |
+| Expression matrix | assay, such as `"X"` | `.X` or named layers | Gene-expression values used for downstream summaries. |
+| Two-dimensional coordinates | `reducedDims()` or metadata columns | `.obsm` or metadata columns | Coordinates used for UMAP plots. |
+
+The next chunk turns those containers into a compact structure check. Notice that the R and Python shape reports are reversed. That is normal: R reports genes by cells, while Python reports cells by genes.
 
 ::: {.panel-tabset}
 
 ### R
 
 ```{r}
-cat("Shape:", paste(dim(sce_cells), collapse = " x "), "\n")
-cat("colData columns:", paste(colnames(colData(sce_cells)), collapse = ", "), "\n")
-cat("rowData columns:", paste(colnames(rowData(sce_cells)), collapse = ", "), "\n")
-cat("Assays:", paste(assayNames(sce_cells), collapse = ", "), "\n")
+exploration_structure_r <- tibble::tibble(
+  check = c(
+    "Genes retained",
+    "Cells retained",
+    "Cell metadata columns",
+    "Gene metadata columns",
+    "Expression assays",
+    "Reduced dimensions"
+  ),
+  value = c(
+    format(nrow(sce_cells), big.mark = ","),
+    format(ncol(sce_cells), big.mark = ","),
+    ncol(colData(sce_cells)),
+    ncol(rowData(sce_cells)),
+    paste(assayNames(sce_cells), collapse = ", "),
+    paste(reducedDimNames(sce_cells), collapse = ", ")
+  ),
+  why_it_matters = c(
+    "Defines the gene space used for the teaching analysis.",
+    "Defines the cells available for condition and cell-type summaries.",
+    "Stores condition, donor, and cell-type labels.",
+    "Stores gene-level annotations.",
+    "Stores expression values that later code can summarize.",
+    "Stores low-dimensional coordinates for visual exploration."
+  )
+)
+
+knitr::kable(
+  exploration_structure_r,
+  col.names = c("Check", "Value", "Why it matters")
+)
 ```
 
 ### Python
 
 ```{python}
-print("Shape:", adata_cells.shape)
-print("Observation columns:", list(adata_cells.obs.columns))
-print("Variable columns:", list(adata_cells.var.columns))
-print("Layers:", list(adata_cells.layers.keys()))
+#| results: asis
+exploration_structure = pd.DataFrame(
+    {
+        "Check": [
+            "Cells retained",
+            "Genes retained",
+            "Cell metadata columns",
+            "Gene metadata columns",
+            "Expression layers",
+            "Embeddings",
+        ],
+        "Value": [
+            f"{adata_cells.n_obs:,}",
+            f"{adata_cells.n_vars:,}",
+            len(adata_cells.obs.columns),
+            len(adata_cells.var.columns),
+            ", ".join(adata_cells.layers.keys()),
+            ", ".join(adata_cells.obsm.keys()),
+        ],
+        "Why it matters": [
+            "Defines the cells available for condition and cell-type summaries.",
+            "Defines the gene space used for the teaching analysis.",
+            "Stores condition, donor, and cell-type labels.",
+            "Stores gene-level annotations.",
+            "Stores expression values that later code can summarize.",
+            "Stores low-dimensional coordinates for visual exploration.",
+        ],
+    }
+)
+
+print(render_table(exploration_structure))
 ```
 
 :::
 
-The object has genes as rows and cells as columns in the R `SingleCellExperiment` representation. That is the orientation expected by the R `CoGAPS` workflow. In the Python `AnnData` representation, the same processed object is cells by genes, so the Python CoGAPS input must be transposed before model fitting.
+This confirms the working scale of the case study: 24,673 cells and 3,000 highly variable genes. The 3,000-gene subset keeps the analysis manageable while preserving genes that vary enough across cells to be informative. You will revisit how that prepared matrix was created in **Data Wrangling**. For exploration, the important point is that the prepared cell-level metadata and UMAP coordinates are present.
 
-## Condition and cell-type summaries
+## Inspect The Cell Metadata
+
+Single-cell RNA-seq data are useful because each cell keeps its own expression profile. But the expression profile is only interpretable when it stays connected to the right {{< glossary "Cell metadata" display="cell metadata" >}}. Here, the three most important metadata columns are:
+
+- `condition`, which records whether the cell came from the control or IFN-beta-stimulated aliquot;
+- `cell_type`, which records the annotated PBMC identity; and
+- `replicate`, which records which individual the sample cane from
+
+The code below creates a small preview table. In R, `colData(sce_cells)` retrieves cell metadata, and `rownames_to_column()` turns the cell names into an explicit `cell_barcode` column. In Python, `.obs` stores the same cell metadata, and `reset_index()` turns the AnnData index into a visible cell-barcode column.
 
 ::: {.panel-tabset}
 
 ### R
 
 ```{r}
-condition_counts_r <- as.data.frame(table(colData(sce_cells)$condition), stringsAsFactors = FALSE)
-colnames(condition_counts_r) <- c("condition", "n_cells")
-condition_counts_r[order(condition_counts_r$n_cells, decreasing = TRUE), ]
-```
+cell_metadata_r <- as.data.frame(colData(sce_cells)) |>
+  tibble::rownames_to_column("cell_barcode")
 
-```{r}
-celltype_counts_r <- as.data.frame(table(colData(sce_cells)$cell_type), stringsAsFactors = FALSE)
-colnames(celltype_counts_r) <- c("cell_type", "n_cells")
-celltype_counts_r[order(celltype_counts_r$n_cells, decreasing = TRUE), ]
+cell_metadata_preview_r <- cell_metadata_r |>
+  dplyr::select(cell_barcode, condition, cell_type, replicate) |>
+  dplyr::slice_head(n = 6)
+
+knitr::kable(cell_metadata_preview_r)
 ```
 
 ### Python
 
 ```{python}
+#| results: asis
+cell_metadata = adata_cells.obs.reset_index(names="cell_barcode").copy()
+
+metadata_preview = (
+    cell_metadata.loc[:, ["cell_barcode", "condition", "cell_type", "replicate"]]
+    .head(6)
+)
+
+print(render_table(metadata_preview))
+```
+
+:::
+
+Each row is one profiled cell. In single-cell RNA-seq, a {{< glossary "Cell barcode" display="cell barcode" >}} is the identifier assigned to a captured cell or droplet during sequencing and processing. It is not a gene and it is not a cell-type label. Instead, it acts like a lookup key: it keeps one cell's expression values connected to that cell's condition, donor, annotated immune-cell identity, and UMAP coordinates. In this prepared dataset, the barcode is stored as the row name or index, so the code makes it visible as a `cell_barcode` column before previewing the metadata. Later, CoGAPS activity scores will be joined to these same cell barcodes so you can ask whether a pattern follows stimulation, cell identity, or both.
+
+## Check The Paired Perturbation Design
+
+The source study used a {{< glossary "Paired design" display="paired design" >}}: PBMCs from the same donor were split into control and IFN-beta-stimulated aliquots. Before interpreting stimulation-associated patterns, check whether both conditions are represented and whether each donor contributes cells to both conditions.
+
+The first summary counts cells by condition. In R, `dplyr::count()` counts the rows in each condition group, and `mutate()` adds a percentage column. In Python, `value_counts()` performs the same count, and then a new percentage column is calculated from the total.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+condition_counts_r <- cell_metadata_r |>
+  dplyr::count(condition, name = "n_cells") |>
+  dplyr::mutate(
+    share_of_cells = sprintf("%.1f%%", 100 * n_cells / sum(n_cells))
+  ) |>
+  dplyr::arrange(dplyr::desc(n_cells))
+
+knitr::kable(
+  condition_counts_r,
+  col.names = c("Condition", "Cells", "Share of cells")
+)
+```
+
+### Python
+
+```{python}
+#| results: asis
 condition_counts = (
-    adata_cells.obs["condition"]
+    cell_metadata["condition"]
     .value_counts()
     .rename_axis("condition")
     .reset_index(name="n_cells")
 )
+condition_counts["share_of_cells"] = (
+    100 * condition_counts["n_cells"] / condition_counts["n_cells"].sum()
+).round(1).astype(str) + "%"
 
+print(render_table(
+    condition_counts.rename(
+        columns={
+            "condition": "Condition",
+            "n_cells": "Cells",
+            "share_of_cells": "Share of cells",
+        }
+    )
+))
+```
+
+:::
+
+The control and stimulated conditions are nearly balanced. That does not prove the later model will be easy to interpret, but it removes one obvious concern: the stimulation comparison is not dominated by a large difference in total cell counts.
+
+Next, check donor coverage. This chunk makes a donor-by-condition table. In R, `count()` first counts cells by `replicate` and `condition`, then `tidyr::pivot_wider()` turns condition values into separate columns. In Python, `pd.crosstab()` builds the same wide table directly.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+replicate_condition_counts_r <- cell_metadata_r |>
+  dplyr::count(replicate, condition, name = "n_cells") |>
+  tidyr::pivot_wider(
+    names_from = condition,
+    values_from = n_cells,
+    values_fill = 0
+  ) |>
+  dplyr::mutate(total_cells = ctrl + stim) |>
+  dplyr::arrange(dplyr::desc(total_cells))
+
+knitr::kable(
+  replicate_condition_counts_r,
+  col.names = c("Replicate", "Control cells", "Stimulated cells", "Total cells")
+)
+```
+
+### Python
+
+```{python}
+#| results: asis
+replicate_condition_counts = pd.crosstab(
+    cell_metadata["replicate"],
+    cell_metadata["condition"],
+)
+replicate_condition_counts["total_cells"] = replicate_condition_counts.sum(axis=1)
+replicate_condition_counts = (
+    replicate_condition_counts
+    .sort_values("total_cells", ascending=False)
+    .reset_index()
+)
+
+print(render_table(
+    replicate_condition_counts.rename(
+        columns={
+            "replicate": "Replicate",
+            "ctrl": "Control cells",
+            "stim": "Stimulated cells",
+            "total_cells": "Total cells",
+        }
+    )
+))
+```
+
+:::
+
+Every donor has cells in both conditions. The counts are not identical, which is expected in single-cell data, but the paired structure is visible. This matters because a later stimulation-associated pattern should be interpreted against donor and cell-type context, not as if all cells were unrelated measurements.
+
+:::{.think_question}
+::::{.think_question_header}
+Checkpoint
+::::
+::::{.inner_block}
+Why is it not enough to check only the total number of control and stimulated cells?
+
+<details>
+<summary>Show answer</summary>
+
+A balanced total can still hide imbalance within donors or cell types. For example, if one donor contributed mostly stimulated cells and another contributed mostly control cells, a stimulation-associated pattern could be partly confounded with donor differences. The replicate-by-condition table checks that each donor contributes both conditions.
+
+</details>
+::::
+:::
+
+## Inspect The PBMC Cell-Type Mixture
+
+PBMCs are a mixture of immune-cell populations. A learned pattern can be interesting because it follows IFN-beta stimulation, because it follows {{< glossary "Immune-cell identity" display="immune-cell identity" >}}, or because both are true. That is why the next exploration step checks cell-type composition before looking at any CoGAPS pattern.
+
+The first table asks which annotated cell types are most common. In both languages, the code groups by `cell_type`, counts cells, and calculates a percent of all cells.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+celltype_counts_r <- cell_metadata_r |>
+  dplyr::count(cell_type, name = "n_cells") |>
+  dplyr::mutate(
+    percent_of_cells = round(100 * n_cells / sum(n_cells), 1)
+  ) |>
+  dplyr::arrange(dplyr::desc(n_cells))
+
+knitr::kable(
+  celltype_counts_r,
+  col.names = c("Cell type", "Cells", "Percent of cells")
+)
+```
+
+### Python
+
+```{python}
+#| results: asis
 celltype_counts = (
-    adata_cells.obs["cell_type"]
+    cell_metadata["cell_type"]
     .value_counts()
     .rename_axis("cell_type")
     .reset_index(name="n_cells")
 )
+celltype_counts["percent_of_cells"] = (
+    100 * celltype_counts["n_cells"] / celltype_counts["n_cells"].sum()
+).round(1)
 
-condition_counts
-```
-
-```{python}
-celltype_counts
+print(render_table(
+    celltype_counts.rename(
+        columns={
+            "cell_type": "Cell type",
+            "n_cells": "Cells",
+            "percent_of_cells": "Percent of cells",
+        }
+    )
+))
 ```
 
 :::
 
-We can also check whether every donor or replicate has cells in both conditions.
+The dataset is not equally divided among cell types. CD4 T cells are the largest group, followed by CD14+ monocytes, B cells, NK cells, CD8 T cells, FCGR3A+ monocytes, dendritic cells, and a small megakaryocyte group. Uneven cell-type abundance is normal for PBMC data. The key teaching point is that a common cell type can strongly influence summaries, so later pattern interpretation should always keep cell type visible.
+
+Now compare cell types across condition. The R code again uses `count()` and `pivot_wider()` to make one row per cell type with separate control and stimulation columns. The Python code uses `pd.crosstab()` for the same purpose. The `stim_share` column is not a test statistic; it is a quick visual aid for whether a cell type is represented similarly across conditions.
 
 ::: {.panel-tabset}
 
 ### R
 
 ```{r}
-table(colData(sce_cells)$replicate, colData(sce_cells)$condition)
+celltype_condition_counts_r <- cell_metadata_r |>
+  dplyr::count(cell_type, condition, name = "n_cells") |>
+  tidyr::pivot_wider(
+    names_from = condition,
+    values_from = n_cells,
+    values_fill = 0
+  ) |>
+  dplyr::mutate(
+    total_cells = ctrl + stim,
+    stim_share = round(stim / total_cells, 3)
+  ) |>
+  dplyr::arrange(dplyr::desc(total_cells))
+
+knitr::kable(
+  celltype_condition_counts_r,
+  col.names = c("Cell type", "Control cells", "Stimulated cells", "Total cells", "Stimulated share")
+)
 ```
 
 ### Python
 
 ```{python}
-pd.crosstab(adata_cells.obs["replicate"], adata_cells.obs["condition"])
+#| results: asis
+celltype_condition_counts = pd.crosstab(
+    cell_metadata["cell_type"],
+    cell_metadata["condition"],
+)
+celltype_condition_counts["total_cells"] = celltype_condition_counts.sum(axis=1)
+celltype_condition_counts["stim_share"] = (
+    celltype_condition_counts["stim"] / celltype_condition_counts["total_cells"]
+).round(3)
+celltype_condition_counts = (
+    celltype_condition_counts
+    .sort_values("total_cells", ascending=False)
+    .reset_index()
+)
+
+print(render_table(
+    celltype_condition_counts.rename(
+        columns={
+            "cell_type": "Cell type",
+            "ctrl": "Control cells",
+            "stim": "Stimulated cells",
+            "total_cells": "Total cells",
+            "stim_share": "Stimulated share",
+        }
+    )
+))
 ```
 
 :::
 
-## Sparsity
+This table is reassuring for the main perturbation question. Each annotated cell type has cells in both conditions, and the stimulated share is close to one half for every group. That means later differences in pattern activity are less likely to be explained by a cell type existing only in one condition.
 
-Single-cell RNA-seq matrices often contain many zeros. We can measure sparsity directly.
+The same comparison is easier to read as a plot. Each bar shows how many cells of one annotated PBMC type came from the control or stimulated aliquot.
 
 ::: {.panel-tabset}
 
 ### R
 
 ```{r}
-X_r <- assay(sce_cells, "X")
-nnz_r <- if (inherits(X_r, "sparseMatrix")) Matrix::nnzero(X_r) else sum(X_r != 0)
-total_r <- nrow(sce_cells) * ncol(sce_cells)
-sparsity_r <- 1 - (nnz_r / total_r)
+celltype_condition_long_r <- cell_metadata_r |>
+  dplyr::count(cell_type, condition, name = "n_cells") |>
+  dplyr::mutate(
+    cell_type = factor(cell_type, levels = rev(celltype_counts_r$cell_type))
+  )
 
-cat("Nonzero entries:", format(nnz_r, big.mark = ","), "\n")
-cat("Total entries:", format(total_r, big.mark = ","), "\n")
-cat(sprintf("Sparsity: %.4f%%\n", 100 * sparsity_r))
+ggplot(celltype_condition_long_r, aes(x = n_cells, y = cell_type, fill = condition)) +
+  geom_col(position = "dodge", width = 0.75) +
+  labs(
+    title = "PBMC cell types are represented in both conditions",
+    subtitle = "Cell counts by annotated cell type and control-versus-IFN-beta condition",
+    x = "Number of cells",
+    y = NULL,
+    fill = "Condition"
+  ) +
+  theme_minimal(base_size = 12)
 ```
 
 ### Python
 
 ```{python}
-X = adata_cells.X
-nnz = X.nnz if sparse.issparse(X) else np.count_nonzero(X)
-total = adata_cells.n_obs * adata_cells.n_vars
-sparsity = 1 - (nnz / total)
+plot_df = (
+    cell_metadata
+    .groupby(["cell_type", "condition"])
+    .size()
+    .reset_index(name="n_cells")
+)
+celltype_order = celltype_counts["cell_type"].tolist()
 
-print(f"Nonzero entries: {nnz:,}")
-print(f"Total entries: {total:,}")
-print(f"Sparsity: {sparsity:.4%}")
+fig, ax = plt.subplots(figsize=(8.5, 4.8))
+bar_height = 0.36
+y_positions = np.arange(len(celltype_order))
+
+for offset, condition in [(-bar_height / 2, "ctrl"), (bar_height / 2, "stim")]:
+    condition_values = (
+        plot_df.loc[plot_df["condition"] == condition]
+        .set_index("cell_type")
+        .reindex(celltype_order)["n_cells"]
+        .fillna(0)
+    )
+    ax.barh(
+        y_positions + offset,
+        condition_values,
+        height=bar_height,
+        label=condition,
+    )
+
+ax.set_yticks(y_positions)
+ax.set_yticklabels(celltype_order)
+ax.invert_yaxis()
+ax.set_xlabel("Number of cells")
+ax.set_title("PBMC cell types are represented in both conditions")
+ax.legend(title="Condition")
+plt.tight_layout()
+plt.show()
 ```
 
 :::
 
-The processed object is about 96 percent zeros. This sparse structure is one reason that we use methods designed for high-dimensional single-cell data and interpret individual genes carefully.
+The plot reinforces the same lesson as the table: cell types are uneven in abundance, but the control and IFN-beta groups are both represented within each annotated cell type. This is the structure you want before asking whether a CoGAPS pattern is broad across PBMC identities or concentrated in one immune-cell population.
+
+## Map Cell Identity Before Pattern Interpretation
+
+The next figure uses {{< glossary "UMAP" display="UMAP" >}} coordinates to show how cells are arranged in a two-dimensional view. UMAP is an exploratory visualization: it places cells with similar expression profiles near one another, but the exact axes do not have a direct biological unit. The goal here is not to prove a result. The goal is to orient yourself to the major cell neighborhoods before adding CoGAPS pattern activity in later sections.
+
+The code below first finds UMAP coordinates. Some single-cell files store coordinates as metadata columns such as `umap_1` and `umap_2`; others store them in a reduced-dimension slot such as `X_umap`. The chunk checks both places, then plots the same cells colored by annotated cell type.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+if (all(c("umap_1", "umap_2") %in% colnames(cell_metadata_r))) {
+  umap_data_r <- cell_metadata_r |>
+    dplyr::transmute(
+      cell_barcode,
+      condition,
+      cell_type,
+      replicate,
+      UMAP1 = umap_1,
+      UMAP2 = umap_2
+    )
+} else if ("X_umap" %in% reducedDimNames(sce_cells)) {
+  umap_matrix_r <- as.data.frame(reducedDim(sce_cells, "X_umap"))
+  colnames(umap_matrix_r)[seq_len(2)] <- c("UMAP1", "UMAP2")
+  umap_data_r <- dplyr::bind_cols(cell_metadata_r, umap_matrix_r[, c("UMAP1", "UMAP2")])
+} else {
+  stop("No UMAP coordinates were found in the prepared single-cell data.")
+}
+
+umap_data_r$cell_type <- factor(umap_data_r$cell_type, levels = celltype_counts_r$cell_type)
+
+ggplot(umap_data_r, aes(x = UMAP1, y = UMAP2, color = cell_type)) +
+  geom_point(size = 0.18, alpha = 0.75) +
+  coord_equal() +
+  labs(
+    title = "Annotated PBMC identities form visible neighborhoods",
+    subtitle = "Each point is one cell; color shows the annotated immune-cell type",
+    x = "UMAP 1",
+    y = "UMAP 2",
+    color = "Cell type"
+  ) +
+  guides(
+    color = guide_legend(
+      override.aes = list(size = 4, alpha = 1)
+    )
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid = element_blank(),
+    legend.position = "right"
+  )
+```
+
+### Python
+
+```{python}
+if {"umap_1", "umap_2"}.issubset(cell_metadata.columns):
+    umap_data = cell_metadata.loc[
+        :, ["cell_barcode", "condition", "cell_type", "replicate", "umap_1", "umap_2"]
+    ].rename(columns={"umap_1": "UMAP1", "umap_2": "UMAP2"})
+elif "X_umap" in adata_cells.obsm:
+    umap_data = cell_metadata.loc[
+        :, ["cell_barcode", "condition", "cell_type", "replicate"]
+    ].copy()
+    umap_data["UMAP1"] = adata_cells.obsm["X_umap"][:, 0]
+    umap_data["UMAP2"] = adata_cells.obsm["X_umap"][:, 1]
+else:
+    raise ValueError("No UMAP coordinates were found in the prepared single-cell data.")
+
+fig, ax = plt.subplots(figsize=(7.2, 5.6))
+colors = plt.cm.tab10(np.linspace(0, 1, len(celltype_order)))
+
+for color, cell_type in zip(colors, celltype_order):
+    subset = umap_data.loc[umap_data["cell_type"] == cell_type]
+    ax.scatter(
+        subset["UMAP1"],
+        subset["UMAP2"],
+        s=2,
+        alpha=0.75,
+        color=color,
+        label=cell_type,
+        linewidths=0,
+    )
+
+ax.set_aspect("equal", adjustable="box")
+ax.set_xlabel("UMAP 1")
+ax.set_ylabel("UMAP 2")
+ax.set_title("Annotated PBMC identities form visible neighborhoods")
+ax.legend(
+    title="Cell type",
+    markerscale=8,
+    bbox_to_anchor=(1.02, 1),
+    loc="upper left",
+    frameon=False,
+)
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+This plot gives you two things to carry forward. First, several annotated cell types occupy distinct neighborhoods, which means immune-cell identity is a strong part of the data structure. Second, the plot does not tell you which CoGAPS pattern is stimulation-associated. Later visualizations will return to these same cells and coordinates, but will recolor them by pattern activity rather than by cell type.
+
+## Preview The CoGAPS Output Structure
+
+The selected-model files include CoGAPS outputs, but the numbered patterns are still just labels. Before interpreting any one pattern, inspect what the output tables represent.
+
+::: {.aside}
+**Draft note:** In the full reproduction section, explain how the lightweight selected-model tables used here are created from the full R and Python CoGAPS outputs. Include enough detail for learners to understand how gene-weight tables, cell-activity tables, pattern summaries, top-gene tables, and metadata-joined activity tables are exported from a fitted model without rerunning the whole analysis in the main learner path.
+:::
+
+CoGAPS stores two linked views of each {{< glossary "Latent pattern" display="latent pattern" >}}:
+
+- {{< glossary "Gene weight" display="Gene weights" >}} describe which genes help define a pattern.
+- {{< glossary "Cell activity" display="Cell activities" >}} describe where that pattern is used across cells.
+
+The code below reads the lightweight selected-model tables and reports their dimensions. It does not name a final IFN-associated pattern yet. The goal is to understand what kind of evidence each table will provide later.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+r_gene_weights_table <- readr::read_tsv(
+  R_PATTERN_GENE_WEIGHTS_TSV_GZ_R,
+  show_col_types = FALSE
+)
+r_cell_activities_table <- readr::read_tsv(
+  R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R,
+  show_col_types = FALSE
+)
+
+r_gene_pattern_columns <- grep("^Pattern", colnames(r_gene_weights_table), value = TRUE)
+r_cell_pattern_columns <- grep("^Pattern", colnames(r_cell_activities_table), value = TRUE)
+
+selected_output_structure_r <- tibble::tibble(
+  table = c("Pattern summary", "Gene weights", "Cell activities"),
+  rows = c(nrow(r_pattern_summary), nrow(r_gene_weights_table), nrow(r_cell_activities_table)),
+  pattern_columns = c(
+    sum(grepl("^Pattern", colnames(r_pattern_summary))),
+    length(r_gene_pattern_columns),
+    length(r_cell_pattern_columns)
+  ),
+  one_row_represents = c(
+    "one learned pattern",
+    "one gene",
+    "one cell"
+  ),
+  used_later_for = c(
+    "screening pattern-level summaries",
+    "ranking genes within a pattern",
+    "summarizing where a pattern is active"
+  )
+)
+
+knitr::kable(
+  selected_output_structure_r,
+  col.names = c("Table", "Rows", "Pattern columns", "One row represents", "Used later for")
+)
+```
+
+### Python
+
+```{python}
+#| results: asis
+python_gene_weights_table = pd.read_csv(PY_PATTERN_GENE_WEIGHTS_TSV_GZ, sep="\t")
+python_cell_activities_table = pd.read_csv(PY_PATTERN_CELL_ACTIVITIES_TSV_GZ, sep="\t")
+
+python_gene_pattern_columns = [
+    column for column in python_gene_weights_table.columns
+    if column.startswith("Pattern")
+]
+python_cell_pattern_columns = [
+    column for column in python_cell_activities_table.columns
+    if column.startswith("Pattern")
+]
+
+selected_output_structure = pd.DataFrame(
+    {
+        "Table": ["Pattern summary", "Gene weights", "Cell activities"],
+        "Rows": [
+            len(python_pattern_summary),
+            len(python_gene_weights_table),
+            len(python_cell_activities_table),
+        ],
+        "Pattern columns": [
+            sum(column.startswith("Pattern") for column in python_pattern_summary.columns),
+            len(python_gene_pattern_columns),
+            len(python_cell_pattern_columns),
+        ],
+        "One row represents": [
+            "one learned pattern",
+            "one gene",
+            "one cell",
+        ],
+        "Used later for": [
+            "screening pattern-level summaries",
+            "ranking genes within a pattern",
+            "summarizing where a pattern is active",
+        ],
+    }
+)
+
+print(render_table(selected_output_structure))
+```
+
+:::
+
+This is the bridge from data exploration to model interpretation. The prepared PBMC data tell you what each cell is and where it came from. The CoGAPS tables tell you how learned patterns connect genes and cells. Later sections combine both views: a pattern will be interpreted by checking its cell activities, top genes, directionality, and diagnostic support.
+
+The pattern summary table has several columns that are useful as a first-pass guide. The next small dictionary explains how to read those columns without treating any one metric as a final answer.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+pattern_summary_dictionary_r <- tibble::tibble(
+  column = c(
+    "pattern",
+    "corr_with_stim",
+    "dominant_cell_type",
+    "mean_activity_ctrl / mean_activity_stim",
+    "top_genes_top8 / top_genes_top15"
+  ),
+  meaning = c(
+    "Run-specific pattern label.",
+    "Correlation between cell activity and the stimulation label.",
+    "Cell type with the highest mean activity for that pattern.",
+    "Average pattern activity in control and IFN-beta-stimulated cells.",
+    "Highest-weight genes for the pattern."
+  ),
+  caution = c(
+    "Pattern numbers can change across implementations or reruns.",
+    "Useful for screening, but not enough by itself for biological naming.",
+    "A dominant cell type can indicate identity-linked structure.",
+    "Condition differences should be read with cell type and donor context.",
+    "Gene weights do not by themselves tell whether expression is up or down."
+  )
+)
+
+knitr::kable(
+  pattern_summary_dictionary_r,
+  col.names = c("Column", "Meaning", "Caution")
+)
+```
+
+### Python
+
+```{python}
+#| results: asis
+pattern_summary_dictionary = pd.DataFrame(
+    {
+        "Column": [
+            "pattern",
+            "corr_with_stim",
+            "dominant_cell_type",
+            "mean_activity_ctrl / mean_activity_stim",
+            "top_genes_top8 / top_genes_top15",
+        ],
+        "Meaning": [
+            "Run-specific pattern label.",
+            "Correlation between cell activity and the stimulation label.",
+            "Cell type with the highest mean activity for that pattern.",
+            "Average pattern activity in control and IFN-beta-stimulated cells.",
+            "Highest-weight genes for the pattern.",
+        ],
+        "Caution": [
+            "Pattern numbers can change across implementations or reruns.",
+            "Useful for screening, but not enough by itself for biological naming.",
+            "A dominant cell type can indicate identity-linked structure.",
+            "Condition differences should be read with cell type and donor context.",
+            "Gene weights do not by themselves tell whether expression is up or down.",
+        ],
+    }
+)
+
+print(render_table(pattern_summary_dictionary))
+```
+
+:::
+
+## Exploration Checkpoint
+
+At the end of data exploration, you should be able to describe the dataset without naming a final biological pattern yet.
+
+| What you checked | What the check shows | Why it matters for the next section |
+|---|---|---|
+| Prepared data size | The teaching data contain 24,673 cells and 3,000 highly variable genes. | Later summaries operate on a realistic single-cell dataset, not a toy matrix. |
+| Condition coverage | Control and IFN-beta-stimulated cells are nearly balanced overall. | Stimulation comparisons start from a reasonable sample structure. |
+| Donor coverage | Each replicate has cells in both conditions. | The paired perturbation design remains visible. |
+| Cell-type mixture | PBMC cell types are uneven in abundance but represented in both conditions. | Pattern interpretation must distinguish stimulation activity from immune-cell identity. |
+| UMAP identity structure | Annotated immune-cell types occupy visible neighborhoods. | Later pattern UMAPs should be read against this identity map. |
+| CoGAPS output structure | Gene weights and cell activities are linked by pattern labels. | Later sections can connect genes, cells, activity, and directionality. |
+
+:::{.think_question}
+::::{.think_question_header}
+Checkpoint
+::::
+::::{.inner_block}
+If a later CoGAPS pattern is more active in stimulated cells, what else should you check before calling it an IFN-associated pattern?
+
+<details>
+<summary>Show answer</summary>
+
+Check whether the pattern is also tied to one cell type, whether its top genes include interferon-stimulated genes, whether those genes are up or down in stimulation, and whether model diagnostics support using the selected result. Stimulation association is important, but it is only one part of the interpretation.
+
+</details>
+::::
+:::
+
+The next section uses this explored structure to prepare model inputs and connect the data container to the CoGAPS matrix orientation. Then the later visualization and analysis sections return to the UMAP and pattern tables with biological interpretation in view.
 
 ***

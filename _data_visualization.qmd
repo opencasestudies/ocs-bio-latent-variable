@@ -1,80 +1,827 @@
 # **Data Visualization**
 ***
 
-Visualizations help us check the structure of the dataset before interpreting model results.
+The previous sections prepared the data, checked the cell metadata, and loaded saved CoGAPS outputs from the selected model. This section turns those tables into visual evidence. The goal is not to prove the final interpretation from one picture. The goal is to learn how to read several complementary views of the same model:
 
-## Cell types by condition
+1. which pattern is most associated with IFN-beta stimulation,
+1. whether that association appears across paired donors,
+1. whether the activity is broad across PBMC identities or limited to one cell type,
+1. how other patterns behave across cell types, and
+1. which top genes define a pattern and which direction question is appropriate for that pattern.
+
+Throughout this section, remember the distinction between {{< glossary "Cell activity" display="cell activity" >}}, {{< glossary "Gene weight" display="gene weight" >}}, and {{< glossary "Directionality" display="directionality" >}}. Cell activity tells you where a learned pattern is used. Gene weights tell you which genes help define that pattern. Directionality asks whether those genes are higher or lower in IFN-beta-stimulated cells compared with matched controls.
+
+## Start From Small Visualization Tables
+
+The figures below are built from lightweight source tables, not from the full CoGAPS model object. This lets you inspect the visual evidence directly: each plot starts from a table, chooses the columns needed for the question, and maps those columns to axes, colors, or panels.
+
+The R and Python tabs read parallel source tables from the selected saved outputs for each implementation. In R, `readr::read_csv()` imports each comma-separated table. In Python, `pandas.read_csv()` does the same job. The small inventory table confirms that each source table is available before you start plotting.
 
 ::: {.panel-tabset}
 
 ### R
 
 ```{r}
-celltype_condition_r <- as.data.frame(table(
-  cell_type = colData(sce_cells)$cell_type,
-  condition = colData(sce_cells)$condition
-), stringsAsFactors = FALSE)
-colnames(celltype_condition_r) <- c("cell_type", "condition", "n_cells")
-head(celltype_condition_r)
-```
+#| label: visualization-source-tables-r
+#| message: false
+#| warning: false
+source_table_dir_r <- "data/processed/figures/source_tables/r"
 
-```{r}
-ggplot(celltype_condition_r, aes(x = cell_type, y = n_cells, fill = condition)) +
-  geom_col(position = "dodge") +
-  labs(
-    title = "Cells per annotated cell type and condition",
-    x = "Cell type",
-    y = "Number of cells"
-  ) +
-  theme_minimal(base_size = 11) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+pattern_condition_source_r <- file.path(source_table_dir_r, "figure_viz_pattern_condition_overview_source.csv")
+pattern_umap_source_r <- file.path(source_table_dir_r, "figure_viz_umap_pattern_activity_pairs_source.csv.gz")
+replicate_pairs_source_r <- file.path(source_table_dir_r, "figure_viz_ifn_replicate_pairs_source.csv")
+celltype_condition_source_r <- file.path(source_table_dir_r, "figure_viz_ifn_celltype_condition_source.csv")
+pattern_celltype_shift_source_r <- file.path(source_table_dir_r, "figure_viz_pattern_celltype_shift_source.csv")
+top_gene_direction_source_r <- file.path(source_table_dir_r, "figure_viz_top_gene_directionality_source.csv")
+identity_gene_direction_source_r <- file.path(source_table_dir_r, "figure_viz_identity_pattern_directionality_source.csv")
+
+pattern_condition_r <- readr::read_csv(pattern_condition_source_r, show_col_types = FALSE)
+pattern_umap_r <- readr::read_csv(pattern_umap_source_r, show_col_types = FALSE)
+replicate_pairs_r <- readr::read_csv(replicate_pairs_source_r, show_col_types = FALSE)
+celltype_condition_r <- readr::read_csv(celltype_condition_source_r, show_col_types = FALSE)
+pattern_celltype_shift_r <- readr::read_csv(pattern_celltype_shift_source_r, show_col_types = FALSE)
+top_gene_direction_r <- readr::read_csv(top_gene_direction_source_r, show_col_types = FALSE)
+identity_gene_direction_r <- readr::read_csv(identity_gene_direction_source_r, show_col_types = FALSE)
+
+ifn_pattern_for_visuals_r <- pattern_condition_r |>
+  dplyr::filter(is_ifn_candidate) |>
+  dplyr::pull(pattern)
+
+viz_source_inventory_r <- tibble::tibble(
+  `Source table` = c(
+    "pattern-condition overview",
+    "UMAP pattern activity",
+    "paired donor activity",
+    "cell-type condition activity",
+    "pattern-by-cell-type shifts",
+    "IFN top-gene directionality",
+    "identity-pattern directionality"
+  ),
+  rows = c(
+    nrow(pattern_condition_r),
+    nrow(pattern_umap_r),
+    nrow(replicate_pairs_r),
+    nrow(celltype_condition_r),
+    nrow(pattern_celltype_shift_r),
+    nrow(top_gene_direction_r),
+    nrow(identity_gene_direction_r)
+  ),
+  `Used for` = c(
+    "screening patterns by stimulation association",
+    "comparing pattern activity with annotated PBMC neighborhoods",
+    "checking paired donor shifts",
+    "comparing IFN-associated activity across PBMC identities",
+    "comparing condition shifts across all patterns",
+    "linking IFN-pattern genes to stimulation direction",
+    "checking whether identity-pattern genes mark a cell identity or condition"
+  )
+)
+
+knitr::kable(
+  viz_source_inventory_r,
+  col.names = c("Source table", "Rows", "Used for")
+)
 ```
 
 ### Python
 
 ```{python}
-celltype_condition = (
-    adata_cells.obs.groupby(["cell_type", "condition"], observed=True)
-    .size()
-    .reset_index(name="n_cells")
+#| label: visualization-source-tables-python
+#| results: asis
+source_table_dir = "data/processed/figures/source_tables/python"
+
+pattern_condition_source = f"{source_table_dir}/figure_viz_pattern_condition_overview_source.csv"
+pattern_umap_source = f"{source_table_dir}/figure_viz_umap_pattern_activity_pairs_source.csv.gz"
+replicate_pairs_source = f"{source_table_dir}/figure_viz_ifn_replicate_pairs_source.csv"
+celltype_condition_source = f"{source_table_dir}/figure_viz_ifn_celltype_condition_source.csv"
+pattern_celltype_shift_source = f"{source_table_dir}/figure_viz_pattern_celltype_shift_source.csv"
+top_gene_direction_source = f"{source_table_dir}/figure_viz_top_gene_directionality_source.csv"
+identity_gene_direction_source = f"{source_table_dir}/figure_viz_identity_pattern_directionality_source.csv"
+
+pattern_condition = pd.read_csv(pattern_condition_source)
+pattern_umap = pd.read_csv(pattern_umap_source)
+replicate_pairs = pd.read_csv(replicate_pairs_source)
+celltype_condition = pd.read_csv(celltype_condition_source)
+pattern_celltype_shift = pd.read_csv(pattern_celltype_shift_source)
+top_gene_direction = pd.read_csv(top_gene_direction_source)
+identity_gene_direction = pd.read_csv(identity_gene_direction_source)
+
+ifn_pattern_for_visuals = pattern_condition.loc[
+    pattern_condition["is_ifn_candidate"], "pattern"
+].iloc[0]
+
+viz_source_inventory = pd.DataFrame(
+    {
+        "Source table": [
+            "pattern-condition overview",
+            "UMAP pattern activity",
+            "paired donor activity",
+            "cell-type condition activity",
+            "pattern-by-cell-type shifts",
+            "IFN top-gene directionality",
+            "identity-pattern directionality",
+        ],
+        "rows": [
+            len(pattern_condition),
+            len(pattern_umap),
+            len(replicate_pairs),
+            len(celltype_condition),
+            len(pattern_celltype_shift),
+            len(top_gene_direction),
+            len(identity_gene_direction),
+        ],
+        "Used for": [
+            "screening patterns by stimulation association",
+            "comparing pattern activity with annotated PBMC neighborhoods",
+            "checking paired donor shifts",
+            "comparing IFN-associated activity across PBMC identities",
+            "comparing condition shifts across all patterns",
+            "linking IFN-pattern genes to stimulation direction",
+            "checking whether identity-pattern genes mark a cell identity or condition",
+        ],
+    }
 )
 
-celltype_condition.head()
+def render_table(data_frame):
+    """Render a pandas DataFrame as a readable HTML table in Quarto."""
+    return data_frame.to_html(
+        index=False,
+        escape=False,
+        border=0,
+        classes="table table-sm table-striped"
+    )
+
+print(render_table(viz_source_inventory))
 ```
 
-```{python}
-pivot_counts = (
-    celltype_condition
-    .pivot(index="cell_type", columns="condition", values="n_cells")
-    .fillna(0)
-    .sort_values(by=["ctrl", "stim"], ascending=False)
-)
+:::
 
-ax = pivot_counts.plot(kind="bar", figsize=(9, 4))
-ax.set_ylabel("Number of cells")
-ax.set_xlabel("Cell type")
-ax.set_title("Cells per annotated cell type and condition")
-plt.xticks(rotation=45, ha="right")
+The IFN-associated pattern label is read from each implementation's source table rather than typed by hand. The saved R result labels the IFN-associated pattern `Pattern4`; the saved Python-compatible result labels the corresponding signal `Pattern5`. The static figure files displayed in the narrative use the selected R model as the primary evidence source, but the R and Python code tabs below read their own implementation-specific source tables.
+
+Pattern numbers are therefore run-specific. The source tables also carry cautious working labels, such as "IFN-associated stimulation" or "monocyte-linked." Treat those labels as interpretation guides to check, not as names that were known before the analysis.
+
+## Screen Patterns Before Naming Them
+
+Start with a pattern-level screen. The left panel compares each pattern's activity with the control-versus-IFN-beta stimulation label. The right panel asks the same question in a more concrete way: for each pattern, how far apart are the average control and stimulated activities?
+
+This is a useful first look because it prevents you from naming a pattern only by its top genes. If a pattern is truly stimulation-associated, you should also see its cell activity shift toward IFN-beta-stimulated cells.
+
+![Pattern-level screen for the selected R model. The left panel compares each pattern's cell activity with the IFN-beta stimulation label, and the right panel compares mean activity in control and stimulated cells. Pattern 4 has the strongest positive stimulation association in this run, while other patterns show weaker positive, near-zero, or negative shifts. Use this plot as a guide for which pattern to inspect next, not as a complete biological interpretation by itself.](img/figure_viz_pattern_condition_overview.png){#fig-viz-pattern-condition-overview fig-alt="Two-panel plot of selected R K6 CoGAPS patterns. The first panel shows correlation between each pattern's cell activity and IFN-beta stimulation. The second panel shows mean control and IFN-beta-stimulated activity for each pattern. Pattern4 is highlighted as the IFN-associated pattern in this selected R run." width="100%" .lightbox}
+
+The code below reconstructs the first panel from the source table. In R, `arrange()` orders the rows by the stimulation correlation, and `mutate()` creates a learner-facing y-axis label that combines the pattern number with its working interpretation. In Python, `sort_values()` performs the same ordering step, and a new `pattern_display` column provides the same combined label. The plotting code then draws a line from zero to each correlation value, with the IFN-associated candidate highlighted.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+#| label: plot-pattern-screen-r
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 4.8
+pattern_screen_r <- pattern_condition_r |>
+  dplyr::arrange(corr_with_stim) |>
+  dplyr::mutate(
+    pattern_display = paste0(pattern, "\n", working_label),
+    pattern_display = factor(pattern_display, levels = pattern_display)
+  )
+
+ggplot(
+  pattern_screen_r,
+  aes(x = corr_with_stim, y = pattern_display, color = is_ifn_candidate)
+) +
+  geom_vline(xintercept = 0, color = "grey80") +
+  geom_segment(aes(x = 0, xend = corr_with_stim, yend = pattern_display), linewidth = 1.4) +
+  geom_point(size = 3.5) +
+  scale_color_manual(values = c("FALSE" = "#64748B", "TRUE" = "#E76F51"), guide = "none") +
+  labs(
+    title = "Pattern activity compared with IFN-beta stimulation",
+    x = "Correlation with stimulation",
+    y = NULL
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+### Python
+
+```{python}
+#| label: plot-pattern-screen-python
+plot_data = pattern_condition.sort_values("corr_with_stim")
+plot_data = plot_data.assign(
+    pattern_display=plot_data["pattern"] + "\n" + plot_data["working_label"]
+)
+colors = plot_data["is_ifn_candidate"].map({True: "#E76F51", False: "#64748B"})
+
+fig, ax = plt.subplots(figsize=(8, 4.8))
+ax.axvline(0, color="0.8")
+ax.hlines(
+    y=plot_data["pattern_display"],
+    xmin=0,
+    xmax=plot_data["corr_with_stim"],
+    color=colors,
+    linewidth=4,
+)
+ax.scatter(plot_data["corr_with_stim"], plot_data["pattern_display"], color=colors, s=80)
+ax.set_xlabel("Correlation with stimulation")
+ax.set_ylabel("")
+ax.set_title("Pattern activity compared with IFN-beta stimulation")
+ax.grid(axis="x", alpha=0.25)
 plt.tight_layout()
 plt.show()
 ```
 
 :::
 
-The conditions are nearly balanced overall and within major cell types. That makes it easier to compare pattern activity between control and stimulated cells, although donor-aware summaries are still important.
+The screen points to one strong positive stimulation-associated pattern in each saved implementation: `Pattern4` in the selected R run and `Pattern5` in the saved Python-compatible run. A second pattern also has positive association with stimulation, but the IFN-associated candidate is much stronger by this metric. You should still avoid treating this plot as a final answer. It tells you where to look next.
 
-## Preview of the main CoGAPS pattern
+## Compare Pattern Activity With Cell Neighborhoods
 
-The next plot was generated from the selected R K6 CoGAPS model. We will rebuild the pieces behind this interpretation in the Data Analysis section.
+The pattern screen tells you which pattern is most associated with stimulation, but it does not show where the activity sits in the cell population. For that, it helps to use the {{< glossary "UMAP" display="UMAP" >}} as a reference map. A UMAP is not the CoGAPS model itself; it is a two-dimensional layout of the cells that you can recolor in different ways.
 
-![](img/ifn_pattern_by_celltype_split_condition.png){fig-alt="Selected R K6 IFN-associated pattern activity split by PBMC cell type and control or IFN-beta stimulated condition." width=800 .lightbox}
+In the paired UMAPs below, the left panel is always the same annotated PBMC identity map. The right panel recolors those same cells by one CoGAPS pattern. This lets you ask a visual question that a summary table cannot answer as directly: does the activity appear across several PBMC neighborhoods, or is it concentrated in one immune-cell region?
 
-## Preview of pattern-gene directionality
+The IFN-associated pattern is included, but it is not the only pattern worth inspecting. Some patterns are more identity-linked, meaning their strongest activity sits mainly in one annotated neighborhood such as monocytes or T cells. The caption for each figure gives a cautious working interpretation based on the selected-model summaries. Comparing several patterns side by side teaches an important habit: a latent-variable model should be read as a collection of partially overlapping signals, not as a single treatment-response plot.
 
-CoGAPS tells us which genes define a pattern. It does not directly tell us whether those genes are up or down in stimulation. For that, we performed a targeted paired pseudobulk directionality check.
+::: {.panel-tabset}
 
-![](img/pattern_gene_directionality_heatmap.png){fig-alt="Heatmap showing mean paired stim-versus-control log2 fold changes for top CoGAPS pattern genes from the selected R K6 model." width=600 .lightbox}
+### Pattern 1
 
-We will inspect the directionality tables directly in the analysis section for both the R and Python saved results.
+![Pattern 1 is interpreted cautiously as an FCGR3A+ monocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 1 activity. Activity is strongest in the FCGR3A+ monocyte neighborhood, stimulation association is weak, and high-weight genes include TIMP1, FTH1, MS4A7, FCGR3A, and SOD2.](img/figure_viz_umap_pattern1_identity_activity.png){#fig-viz-umap-pattern1 fig-alt="Paired UMAP comparison for Pattern 1, labeled as an FCGR3A positive monocyte-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 1 activity." width="100%" .lightbox}
+
+### Pattern 2
+
+![Pattern 2 is interpreted cautiously as a CD14+ monocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 2 activity. Activity is strongest in CD14+ monocytes, is lower after IFN-beta stimulation, and high-weight genes include FTH1, FTL, TIMP1, S100A11, and SH3BGRL3.](img/figure_viz_umap_pattern2_identity_activity.png){#fig-viz-umap-pattern2 fig-alt="Paired UMAP comparison for Pattern 2, labeled as a CD14 positive monocyte-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 2 activity." width="100%" .lightbox}
+
+### Pattern 3
+
+![Pattern 3 is interpreted cautiously as a dendritic and antigen-presentation-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 3 activity. High-weight HLA genes and dendritic-cell activity point to antigen-presentation structure; top genes include CD74, HLA-DRA, HLA-DRB1, HLA-DPA1, and HLA-DPB1.](img/figure_viz_umap_pattern3_identity_activity.png){#fig-viz-umap-pattern3 fig-alt="Paired UMAP comparison for Pattern 3, labeled as a dendritic and antigen-presentation-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 3 activity." width="100%" .lightbox}
+
+### Pattern 4
+
+![Pattern 4 is the IFN-associated stimulation pattern in the selected R run. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 4 activity. Canonical interferon-stimulated genes and strong positive stimulation correlation mark the main IFN response; top genes include ISG15, ISG20, IFI6, IFIT3, and LY6E.](img/figure_viz_umap_pattern4_identity_activity.png){#fig-viz-umap-pattern4 fig-alt="Paired UMAP comparison for Pattern 4, labeled as the IFN-associated stimulation pattern in the selected R run. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 4 activity." width="100%" .lightbox}
+
+### Pattern 5
+
+![Pattern 5 is interpreted cautiously as a candidate secondary IFN and myeloid-response pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 5 activity. Positive stimulation association and CXCL10/APOBEC3A genes suggest a second myeloid response signal; top genes include CXCL10, ISG15, APOBEC3A, IFITM3, and FTL.](img/figure_viz_umap_pattern5_identity_activity.png){#fig-viz-umap-pattern5 fig-alt="Paired UMAP comparison for Pattern 5, labeled as a candidate secondary IFN and myeloid-response pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 5 activity." width="100%" .lightbox}
+
+### Pattern 6
+
+![Pattern 6 is interpreted cautiously as a T-cell and baseline lymphocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 6 activity. Activity is strongest in T-cell neighborhoods, is lower after stimulation, and high-weight genes include FTH1, FTL, ACTB, PFN1, and SH3BGRL3.](img/figure_viz_umap_pattern6_identity_activity.png){#fig-viz-umap-pattern6 fig-alt="Paired UMAP comparison for Pattern 6, labeled as a T-cell and baseline lymphocyte-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 6 activity." width="100%" .lightbox}
+
+:::
+
+The code below shows how one paired UMAP comparison is built from the long UMAP source table. The first plot maps `cell_type` to color, so you can see the annotated PBMC neighborhoods. The second plot keeps the same `umap_1` and `umap_2` coordinates but maps `activity` to color for one CoGAPS pattern.
+
+In R, `filter()` keeps one pattern at a time, and `arrange(activity)` draws low-activity cells first so high-activity cells are not hidden underneath them. In Python, the same logic uses Boolean filtering and `sort_values()`. In both languages, the useful programming idea is the same: once the data are in a tidy table, changing the color variable changes the biological layer you are viewing without changing the cell positions.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+#| label: plot-umap-one-pattern-r
+#| message: false
+#| warning: false
+#| fig-width: 7.4
+#| fig-height: 5.8
+pattern_to_map_r <- ifn_pattern_for_visuals_r
+
+umap_one_pattern_r <- pattern_umap_r |>
+  dplyr::filter(pattern == pattern_to_map_r) |>
+  dplyr::arrange(activity)
+
+cell_type_colors_r <- c(
+  "CD4 T cells" = "#2A9D8F",
+  "CD14+ Monocytes" = "#457B9D",
+  "B cells" = "#E9C46A",
+  "NK cells" = "#7E68B1",
+  "CD8 T cells" = "#52B788",
+  "FCGR3A+ Monocytes" = "#F4A261",
+  "Dendritic cells" = "#5B6770",
+  "Megakaryocytes" = "#D1495B"
+)
+
+identity_umap_r <- ggplot(
+  umap_one_pattern_r,
+  aes(x = umap_1, y = umap_2, color = cell_type)
+) +
+  geom_point(size = 0.45, alpha = 0.72) +
+  coord_equal() +
+  scale_color_manual(
+    values = cell_type_colors_r,
+    name = "Cell type",
+    guide = guide_legend(override.aes = list(size = 4, alpha = 1))
+  ) +
+  labs(
+    title = "Identity reference",
+    subtitle = "Each point is one cell; color shows the annotated PBMC identity.",
+    x = "UMAP 1",
+    y = "UMAP 2"
+  ) +
+  theme_minimal(base_size = 13)
+
+activity_umap_r <- ggplot(
+  umap_one_pattern_r,
+  aes(x = umap_1, y = umap_2, color = activity)
+) +
+  geom_point(size = 0.45, alpha = 0.72) +
+  coord_equal() +
+  scale_color_gradientn(
+    colors = c("#1F2937", "#6D3A9C", "#E76F51", "#FDE68A"),
+    name = "Pattern activity"
+  ) +
+  labs(
+    title = paste(pattern_to_map_r, "activity on the PBMC UMAP"),
+    subtitle = "The same UMAP coordinates can be recolored by any CoGAPS pattern.",
+    x = "UMAP 1",
+    y = "UMAP 2"
+  ) +
+  theme_minimal(base_size = 13)
+
+identity_umap_r
+activity_umap_r
+```
+
+### Python
+
+```{python}
+#| label: plot-umap-one-pattern-python
+pattern_to_map = ifn_pattern_for_visuals
+
+umap_one_pattern = (
+    pattern_umap.loc[pattern_umap["pattern"].eq(pattern_to_map)]
+    .sort_values("activity")
+)
+
+cell_type_colors = {
+    "CD4 T cells": "#2A9D8F",
+    "CD14+ Monocytes": "#457B9D",
+    "B cells": "#E9C46A",
+    "NK cells": "#7E68B1",
+    "CD8 T cells": "#52B788",
+    "FCGR3A+ Monocytes": "#F4A261",
+    "Dendritic cells": "#5B6770",
+    "Megakaryocytes": "#D1495B",
+}
+
+fig, axes = plt.subplots(nrows=2, figsize=(7.4, 9.6), constrained_layout=True)
+
+for cell_type, group in umap_one_pattern.groupby("cell_type"):
+    axes[0].scatter(
+        group["umap_1"],
+        group["umap_2"],
+        color=cell_type_colors.get(cell_type, "0.6"),
+        s=3,
+        alpha=0.72,
+        linewidths=0,
+        label=cell_type,
+    )
+axes[0].set_title("Identity reference")
+axes[0].set_xlabel("UMAP 1")
+axes[0].set_ylabel("UMAP 2")
+axes[0].set_aspect("equal", adjustable="box")
+axes[0].legend(
+    title="Cell type",
+    loc="center left",
+    bbox_to_anchor=(1.02, 0.5),
+    frameon=False,
+    markerscale=3,
+)
+
+scatter = axes[1].scatter(
+    umap_one_pattern["umap_1"],
+    umap_one_pattern["umap_2"],
+    c=umap_one_pattern["activity"],
+    cmap="magma",
+    s=3,
+    alpha=0.72,
+    linewidths=0,
+)
+axes[1].set_aspect("equal", adjustable="box")
+axes[1].set_xlabel("UMAP 1")
+axes[1].set_ylabel("UMAP 2")
+axes[1].set_title(f"{pattern_to_map} activity on the PBMC UMAP")
+fig.colorbar(scatter, ax=axes[1], label="Pattern activity")
+plt.show()
+```
+
+:::
+
+The paired UMAPs show why it would be too narrow to visualize only the IFN-associated pattern. Pattern 4 has broad stimulation-associated activity, but other patterns are visibly concentrated in particular immune-cell neighborhoods. That does not automatically name those patterns biologically; it gives you a visual hypothesis to test later with cell-type summaries, top genes, and directionality.
+
+## Check Whether The Shift Is Paired Across Donors
+
+The source study used a {{< glossary "Paired design" display="paired design" >}}: each donor contributed control and IFN-beta-stimulated aliquots. A useful visualization should respect that design. Instead of treating all control cells and all stimulated cells as unrelated groups, the next figure computes a within-donor difference:
+
+`mean stimulated activity - mean control activity`
+
+Positive values mean that the IFN-associated pattern is more active in the stimulated aliquot from that same donor.
+
+![Paired donor check for the IFN-associated pattern. Each row compares one donor's stimulated aliquot with that same donor's control aliquot, using mean stimulated activity minus mean control activity. All eight donor pairs are positive, which supports the interpretation that the stimulation-associated increase is not driven by only one donor. This is a visual donor-aware check, not a substitute for a formal donor-level statistical model.](img/figure_viz_ifn_replicate_pairs.png){#fig-viz-ifn-replicate-pairs fig-alt="Horizontal donor-level difference plot showing the mean IFN-associated pattern activity shift for each matched donor pair. Each row is one donor, and the x-axis shows IFN-beta mean activity minus matched control mean activity." width="82%" .lightbox}
+
+The code uses a wide table with one row per donor and separate columns for control and stimulated mean activity. The important programming move is creating and plotting `stim_minus_ctrl`, a new column that stores the paired difference. In R, `geom_segment()` draws each difference from zero to its observed value. In Python, `ax.hlines()` does the same thing.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+#| label: plot-paired-donor-activity-r
+#| message: false
+#| warning: false
+#| fig-width: 7.5
+#| fig-height: 4.8
+ggplot(replicate_pairs_r) +
+  geom_segment(
+    aes(x = 0, xend = stim_minus_ctrl, y = donor_label, yend = donor_label),
+    color = "#F2B7A4",
+    linewidth = 3.2
+  ) +
+  geom_point(aes(x = stim_minus_ctrl, y = donor_label), color = "#E76F51", size = 3.5) +
+  geom_vline(xintercept = mean(replicate_pairs_r$stim_minus_ctrl), linetype = "dashed") +
+  labs(
+    title = "Donor-paired shifts in IFN-associated activity",
+    x = "Mean activity difference (IFN-beta - control)",
+    y = "Matched donor pair"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+### Python
+
+```{python}
+#| label: plot-paired-donor-activity-python
+fig, ax = plt.subplots(figsize=(7.5, 4.8))
+y = np.arange(len(replicate_pairs))
+ax.axvline(0, color="0.8")
+ax.hlines(
+    y,
+    xmin=0,
+    xmax=replicate_pairs["stim_minus_ctrl"],
+    color="#F2B7A4",
+    linewidth=6,
+)
+ax.scatter(replicate_pairs["stim_minus_ctrl"], y, color="#E76F51", s=70)
+ax.axvline(replicate_pairs["stim_minus_ctrl"].mean(), color="#0B2239", linestyle="--")
+ax.set_yticks(y)
+ax.set_yticklabels(replicate_pairs["donor_label"])
+ax.invert_yaxis()
+ax.set_xlabel("Mean activity difference (IFN-beta - control)")
+ax.set_ylabel("Matched donor pair")
+ax.set_title("Donor-paired shifts in IFN-associated activity")
+ax.grid(axis="x", alpha=0.25)
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+The paired view is reassuring because the stimulation-associated increase is not driven by a single donor. In both saved implementations, each donor has higher mean activity after IFN-beta stimulation than in the matched control aliquot for the implementation-specific IFN-associated pattern. This does not replace a formal donor-aware statistical model, but it is an important visual check before making a biological interpretation.
+
+## Compare Activity Across PBMC Identities
+
+PBMCs contain several immune-cell types, so the next question is whether the IFN-associated pattern is only a marker of one annotated identity or whether it cuts across the mixture. The plot below summarizes mean activity by annotated PBMC identity and condition.
+
+![Mean IFN-associated activity by annotated PBMC identity and condition. Each line connects the control mean to the IFN-beta-stimulated mean for one immune-cell type. The upward shift appears across most annotated PBMC identities, which supports a broad stimulation-associated signal, but the stimulated means are not identical across cell types. This combination is common in single-cell data: a shared response can still have different strength in different immune-cell populations.](img/figure_viz_ifn_celltype_condition.png){#fig-viz-ifn-celltype-condition fig-alt="Dumbbell plot showing mean IFN-associated pattern activity for each annotated PBMC identity in control and IFN-beta-stimulated cells. Most cell types show higher mean activity in stimulation, with different activity levels across cell types." width="86%" .lightbox}
+
+The source table has one row per cell type and columns for the mean control activity, mean stimulated activity, and the difference. The R code orders cell types by stimulated activity so the strongest stimulated groups appear at the top. The Python code uses the same ordering and draws a horizontal line from control to stimulated activity for each cell type.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+#| label: plot-ifn-celltype-condition-r
+#| message: false
+#| warning: false
+#| fig-width: 8.5
+#| fig-height: 5.2
+celltype_plot_r <- celltype_condition_r |>
+  dplyr::arrange(stim) |>
+  dplyr::mutate(cell_type = factor(cell_type, levels = cell_type))
+
+ggplot(celltype_plot_r, aes(y = cell_type)) +
+  geom_segment(aes(x = ctrl, xend = stim, yend = cell_type), color = "grey82", linewidth = 1.3) +
+  geom_point(aes(x = ctrl), color = "#64748B", size = 3) +
+  geom_point(aes(x = stim), color = "#E76F51", size = 3) +
+  labs(
+    title = "IFN-associated activity by PBMC identity",
+    x = "Mean pattern activity",
+    y = NULL
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+### Python
+
+```{python}
+#| label: plot-ifn-celltype-condition-python
+celltype_plot = celltype_condition.sort_values("stim")
+
+fig, ax = plt.subplots(figsize=(8.5, 5.2))
+y = np.arange(len(celltype_plot))
+ax.hlines(y, celltype_plot["ctrl"], celltype_plot["stim"], color="0.82", linewidth=3)
+ax.scatter(celltype_plot["ctrl"], y, color="#64748B", s=70, label="control")
+ax.scatter(celltype_plot["stim"], y, color="#E76F51", s=70, label="IFN-beta, 6 h")
+ax.set_yticks(y)
+ax.set_yticklabels(celltype_plot["cell_type"])
+ax.set_xlabel("Mean pattern activity")
+ax.set_title("IFN-associated activity by PBMC identity")
+ax.legend(frameon=False)
+ax.grid(axis="x", alpha=0.25)
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+Most annotated PBMC identities show higher mean activity in IFN-beta-stimulated cells, which supports a broad stimulation-associated interpretation. The heights are not identical, however. FCGR3A+ monocytes, B cells, NK cells, and dendritic cells show especially high stimulated activity, while megakaryocytes remain low. That is the kind of pattern you should expect in single-cell data: a shared response can still vary by cell type.
+
+## Look For Shared And Cell-Type-Linked Structure
+
+The IFN-associated pattern is only one part of the selected model. Other patterns may track monocytes, antigen-presentation structure, baseline lymphocyte structure, or other sources of variation. A heatmap is useful here because it lets you scan all patterns and cell types at once.
+
+The color scale below shows one subtraction for each pattern and annotated PBMC identity: mean activity in IFN-beta-stimulated cells minus mean activity in control cells. A positive value means that pattern is stronger, on average, after stimulation; those tiles are red. A negative value means that pattern is stronger, on average, in the matched control cells; those tiles are blue. Values close to zero are pale because the two conditions have similar mean activity for that pattern and cell type.
+
+![Condition shifts for every selected-model pattern across annotated PBMC identities. Each tile is computed as mean activity in IFN-beta-stimulated cells minus mean activity in control cells for one pattern and one cell type. Red positive values mean the pattern is stronger after stimulation. Blue negative values mean the pattern is stronger in control cells. The IFN-associated pattern shows positive shifts across several cell types, while other patterns show more cell-type-linked or negative behavior, reinforcing that the model is separating multiple overlapping sources of variation.](img/figure_viz_pattern_celltype_shift_heatmap.png){#fig-viz-pattern-celltype-shift fig-alt="Heatmap of mean activity differences between IFN-beta-stimulated and control cells for each CoGAPS pattern and annotated PBMC identity. Each tile shows stimulated mean activity minus control mean activity; positive red values indicate higher activity in stimulated cells and negative blue values indicate higher activity in controls." width="100%" .lightbox}
+
+The code uses the same source table as the heatmap. In R, `geom_tile()` maps one shift value to one heatmap cell, and `geom_text()` prints the rounded shift value on top of each tile. In Python, `pivot()` reshapes the table so rows are patterns, columns are cell types, and values are condition shifts; the loop after `imshow()` then writes the rounded value into each tile. Those printed numbers are useful because color shows direction and strength quickly, while the value tells you the actual size of the shift.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+#| label: plot-pattern-celltype-shift-r
+#| message: false
+#| warning: false
+#| fig-width: 9
+#| fig-height: 5.2
+ggplot(
+  pattern_celltype_shift_r,
+  aes(x = cell_type, y = pattern, fill = stim_minus_ctrl)
+) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = round(stim_minus_ctrl, 2)), size = 3) +
+  scale_fill_gradient2(
+    low = "#2B8CBE",
+    mid = "white",
+    high = "#E76F51",
+    midpoint = 0,
+    name = "stim - control"
+  ) +
+  labs(
+    title = "Condition shifts by pattern and cell type",
+    x = "Annotated PBMC identity",
+    y = "CoGAPS pattern"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1))
+```
+
+### Python
+
+```{python}
+#| label: plot-pattern-celltype-shift-python
+heatmap_matrix = pattern_celltype_shift.pivot(
+    index="pattern",
+    columns="cell_type",
+    values="stim_minus_ctrl",
+)
+
+fig, ax = plt.subplots(figsize=(9, 5.2))
+vmax = np.abs(heatmap_matrix.to_numpy()).max()
+im = ax.imshow(heatmap_matrix, cmap="RdBu_r", vmin=-vmax, vmax=vmax, aspect="auto")
+for row_idx in range(heatmap_matrix.shape[0]):
+    for col_idx in range(heatmap_matrix.shape[1]):
+        value = heatmap_matrix.iloc[row_idx, col_idx]
+        label = "0.00" if abs(value) < 0.005 else f"{value:.2f}"
+        text_color = "white" if abs(value) > vmax * 0.65 else "#0B2239"
+        ax.text(col_idx, row_idx, label, ha="center", va="center", color=text_color, fontsize=9)
+ax.set_xticks(np.arange(heatmap_matrix.shape[1]))
+ax.set_xticklabels(heatmap_matrix.columns, rotation=35, ha="right")
+ax.set_yticks(np.arange(heatmap_matrix.shape[0]))
+ax.set_yticklabels(heatmap_matrix.index)
+ax.set_title("Condition shifts by pattern and cell type")
+ax.set_xlabel("Annotated PBMC identity")
+ax.set_ylabel("CoGAPS pattern")
+fig.colorbar(im, ax=ax, label="stim - control")
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+This view helps separate broad stimulation structure from more cell-type-linked behavior. Read each row as one CoGAPS pattern and each column as one annotated PBMC identity. If a row is red across many columns, that pattern is broadly stronger after stimulation. If a row has strong color in only one or two columns, that pattern may be more tied to particular immune-cell identities. Negative blue values are not "bad" model behavior; they tell you that the pattern's mean activity is higher in controls for that cell type. That contrast is important because CoGAPS is learning multiple overlapping patterns, not a single treatment-versus-control axis.
+
+## Connect Top Genes To Direction
+
+The last visualization combines two pieces of evidence that are easy to confuse. A high CoGAPS gene weight means a gene helps define a pattern. It does not say whether the gene is higher in stimulation. For that, you need a separate expression-direction summary.
+
+The saved figure below shows the selected R run, where the IFN-associated pattern is `Pattern4`. The Python tab below uses the same check for the Python saved output, where the corresponding IFN-associated pattern is `Pattern5`.
+
+![Top-gene and directionality check for `Pattern4`, the IFN-associated pattern in the selected R run. The left panel ranks genes by CoGAPS weight, which tells you which genes most help define the pattern. The right panel checks whether those same genes are higher or lower in IFN-beta-stimulated cells compared with controls. Most top genes are canonical interferon-stimulated genes that are higher in stimulation, while FTH1 is a useful reminder that a high pattern weight does not automatically mean up-regulation.](img/figure_viz_top_gene_directionality.png){#fig-viz-top-gene-directionality fig-alt="Two-panel plot for Pattern4, the IFN-associated pattern in the selected R run. The first panel ranks top genes by CoGAPS weight. The second panel shows mean log2 fold-change for IFN-beta-stimulated versus control cells, with most top genes higher in stimulation and FTH1 lower in stimulation." width="88%" .lightbox}
+
+The R code below uses `ifelse()` to choose a color from the direction column. The Python code uses `map()` for the same purpose. Both versions show the key idea: first rank genes by pattern weight, then check whether each gene rises or falls in the stimulation contrast.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+#| label: plot-top-gene-directionality-r
+#| message: false
+#| warning: false
+#| fig-width: 8
+#| fig-height: 5.6
+gene_direction_plot_r <- top_gene_direction_r |>
+  dplyr::arrange(desc(rank)) |>
+  dplyr::mutate(
+    gene = factor(gene, levels = gene),
+    direction_color = ifelse(direction == "up_in_stim", "higher in stimulation", "lower in stimulation")
+  )
+
+ggplot(gene_direction_plot_r, aes(x = mean_log2fc_stim_vs_ctrl, y = gene, fill = direction_color)) +
+  geom_vline(xintercept = 0, color = "grey80") +
+  geom_col() +
+  scale_fill_manual(
+    values = c("higher in stimulation" = "#E76F51", "lower in stimulation" = "#2B8CBE"),
+    name = NULL
+  ) +
+  labs(
+    title = "Direction of top pattern genes",
+    x = "Mean log2 fold-change: IFN-beta vs control",
+    y = NULL
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+### Python
+
+```{python}
+#| label: plot-top-gene-directionality-python
+gene_direction_plot = top_gene_direction.sort_values("rank", ascending=False)
+direction_colors = gene_direction_plot["direction"].map(
+    {"up_in_stim": "#E76F51", "down_in_stim": "#2B8CBE"}
+)
+
+fig, ax = plt.subplots(figsize=(8, 5.6))
+ax.axvline(0, color="0.8")
+ax.barh(
+    gene_direction_plot["gene"],
+    gene_direction_plot["mean_log2fc_stim_vs_ctrl"],
+    color=direction_colors,
+)
+ax.set_xlabel("Mean log2 fold-change: IFN-beta vs control")
+ax.set_ylabel("")
+ax.set_title("Direction of top pattern genes")
+ax.grid(axis="x", alpha=0.25)
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+Most top genes for the implementation-specific IFN-associated pattern are higher in IFN-beta-stimulated cells. The top list includes canonical interferon-stimulated genes such as `ISG15`, `ISG20`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `IFIT2`, `IRF7`, `OAS1`, `PLSCR1`, and `BST2`. The main exception among the top genes is `FTH1`, which has a high pattern weight but is lower in stimulation in this targeted summary. That exception is useful: it reminds you not to translate "top pattern gene" into "up-regulated gene" without checking directionality.
+
+## Compare Directionality For An Identity-Linked Pattern
+
+The IFN-associated pattern is not the only pattern worth visualizing. Some patterns are more closely tied to {{< glossary "Immune-cell identity" display="immune-cell identity" >}} than to stimulation. For those patterns, a stimulation-versus-control contrast is not always the most informative first direction check.
+
+The next figure uses a dendritic / antigen-presentation-linked pattern as a teaching contrast. In the selected R run, this is `Pattern3`. In the saved Python-compatible output, the corresponding dendritic / antigen-presentation-linked pattern is `Pattern6`. The exact number changes across implementations, but the interpretation question is the same: do the top genes mark a PBMC identity, a stimulation response, or both?
+
+To answer that, the figure uses two expression contrasts. The middle panel asks whether top genes are higher in the dominant annotated cell identity than in other PBMC identities. The right panel asks whether those same genes are higher after IFN-beta stimulation. That comparison keeps {{< glossary "Gene weight" display="gene weights" >}} separate from {{< glossary "Directionality" display="directionality" >}} and also keeps cell identity separate from condition.
+
+![Directionality check for `Pattern3`, the dendritic / antigen-presentation-linked pattern in the selected R run. The left panel ranks top genes by CoGAPS weight. The middle panel compares expression in dendritic cells with other PBMC identities. The right panel compares IFN-beta stimulation with control. CD74 and HLA genes help define the pattern and are higher in dendritic cells, while most of those genes are not higher after IFN-beta stimulation.](img/figure_viz_identity_pattern_directionality.png){#fig-viz-identity-pattern-directionality fig-alt="Three-panel directionality check for Pattern3, the dendritic and antigen-presentation-linked pattern in the selected R run. The top genes include CD74 and HLA genes. These genes are higher in dendritic cells than in other PBMC identities, while most are lower in IFN-beta stimulation compared with control." width="96%" .lightbox}
+
+The code below builds the same type of figure from the implementation-specific source table. In R, `pivot_longer()` turns two contrast columns into one plotting column so `facet_wrap()` can place the contrasts side by side. In Python, `plt.subplots()` creates the two side-by-side axes and a short loop draws one bar chart per contrast. Both versions practice the same programming idea: reshape the data so that the contrast you want to compare becomes a plotting variable.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+#| label: plot-identity-pattern-directionality-r
+#| message: false
+#| warning: false
+#| fig-width: 9
+#| fig-height: 5.6
+identity_pattern_label_r <- unique(identity_gene_direction_r$pattern)
+dominant_identity_r <- unique(identity_gene_direction_r$dominant_cell_type)
+
+identity_direction_long_r <- identity_gene_direction_r |>
+  dplyr::arrange(desc(rank)) |>
+  dplyr::mutate(gene = factor(gene, levels = gene)) |>
+  tidyr::pivot_longer(
+    cols = c(identity_log2fc_dominant_vs_other, stim_log2fc_stim_vs_ctrl),
+    names_to = "contrast",
+    values_to = "mean_log2fc"
+  ) |>
+  dplyr::mutate(
+    contrast = dplyr::recode(
+      contrast,
+      identity_log2fc_dominant_vs_other = paste0(dominant_identity_r, " vs other PBMCs"),
+      stim_log2fc_stim_vs_ctrl = "IFN-beta vs control"
+    ),
+    direction_label = dplyr::case_when(
+      contrast == paste0(dominant_identity_r, " vs other PBMCs") & mean_log2fc >= 0 ~ paste0("higher in ", dominant_identity_r),
+      contrast == paste0(dominant_identity_r, " vs other PBMCs") & mean_log2fc < 0 ~ "higher in other PBMCs",
+      contrast == "IFN-beta vs control" & mean_log2fc >= 0 ~ "higher in stimulation",
+      TRUE ~ "higher in control"
+    )
+  )
+
+identity_direction_colors_r <- c("#168477", "#7E68B1", "#E76F51", "#2B8CBE")
+names(identity_direction_colors_r) <- c(
+  paste0("higher in ", dominant_identity_r),
+  "higher in other PBMCs",
+  "higher in stimulation",
+  "higher in control"
+)
+
+ggplot(identity_direction_long_r, aes(x = mean_log2fc, y = gene, fill = direction_label)) +
+  geom_vline(xintercept = 0, color = "grey80") +
+  geom_col() +
+  facet_wrap(~ contrast, ncol = 2, scales = "free_x") +
+  scale_fill_manual(
+    values = identity_direction_colors_r,
+    name = NULL
+  ) +
+  labs(
+    title = paste0(identity_pattern_label_r, ": direction checks for an identity-linked pattern"),
+    x = "Mean log2 fold-change",
+    y = NULL
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "bottom")
+```
+
+### Python
+
+```{python}
+#| label: plot-identity-pattern-directionality-python
+identity_direction_plot = identity_gene_direction.sort_values("rank", ascending=False).copy()
+identity_pattern_label = identity_direction_plot["pattern"].iloc[0]
+dominant_identity = identity_direction_plot["dominant_cell_type"].iloc[0]
+
+plot_specs = [
+    (
+        f"{dominant_identity} vs other PBMCs",
+        "identity_log2fc_dominant_vs_other",
+        "#168477",
+        "#7E68B1",
+    ),
+    (
+        "IFN-beta vs control",
+        "stim_log2fc_stim_vs_ctrl",
+        "#E76F51",
+        "#2B8CBE",
+    ),
+]
+
+fig, axes = plt.subplots(ncols=2, figsize=(9, 5.6), sharey=True)
+y_positions = np.arange(len(identity_direction_plot))
+
+for ax, (title, value_column, positive_color, negative_color) in zip(axes, plot_specs):
+    values = identity_direction_plot[value_column]
+    colors = np.where(values >= 0, positive_color, negative_color)
+    ax.axvline(0, color="0.8")
+    ax.barh(y_positions, values, color=colors)
+    ax.set_title(title)
+    ax.set_xlabel("Mean log2 fold-change")
+    ax.grid(axis="x", alpha=0.25)
+
+axes[0].set_yticks(y_positions)
+axes[0].set_yticklabels(identity_direction_plot["gene"])
+axes[0].set_ylabel("")
+fig.suptitle(f"{identity_pattern_label}: direction checks for an identity-linked pattern")
+legend_handles = [
+    plt.Line2D([0], [0], color="#168477", lw=8, label=f"higher in {dominant_identity}"),
+    plt.Line2D([0], [0], color="#7E68B1", lw=8, label="higher in other PBMCs"),
+    plt.Line2D([0], [0], color="#E76F51", lw=8, label="higher in stimulation"),
+    plt.Line2D([0], [0], color="#2B8CBE", lw=8, label="higher in control"),
+]
+fig.legend(handles=legend_handles, loc="lower center", ncol=2, frameon=False)
+plt.tight_layout(rect=[0, 0.1, 1, 0.96])
+plt.show()
+```
+
+:::
+
+The identity-linked direction check changes the interpretation. The top genes for this pattern are not mainly canonical IFN-response genes. They include `CD74` and several HLA genes, which are consistent with antigen presentation and dendritic-cell-linked structure. Those genes are higher in dendritic cells than in other PBMC identities, while most are not higher after IFN-beta stimulation in this summary. That is exactly why this second direction check matters: a meaningful CoGAPS pattern does not have to be a stimulation-response pattern.
+
+## Visualization Checkpoint
+
+By the end of this section, you should be able to read the selected-model visual evidence as a set of linked checks:
+
+- The pattern screen identifies the strongest stimulation-associated candidate in each saved implementation.
+- The paired donor plot checks whether the stimulation shift appears across matched donor aliquots.
+- The cell-type plot asks whether the same pattern is broad across PBMC identities.
+- The heatmap shows that other patterns have different condition and cell-type behavior.
+- The gene-direction plot connects top CoGAPS genes to whether those genes rise or fall after IFN-beta stimulation.
+- The identity-linked direction plot shows that some top genes mark an immune-cell identity rather than a stimulation response.
+
+The next section moves from visual inspection to model interpretation. You will inspect the same CoGAPS outputs more directly, identify the IFN-associated pattern from the saved metrics and pattern tables, and connect activity, top genes, and directionality into a cautious biological interpretation.
 
 ***

@@ -24,6 +24,7 @@ The GitHub-safe case study includes the files needed to render and interpret the
 
 File | Required for main learner path? | Required for full local rerun?
 --- | --- | ---
+`data/source/kang_counts_25k.h5ad` | No | Yes, only if rebuilding the prepared PBMC dataset from source counts
 `data/processed/input/preprocessed_cells_hvg3000.h5ad` | Yes | Yes
 `data/processed/k_selection/*.csv` | Yes | No
 `data/processed/selected_model_k6/r/*.csv`, `.tsv.gz`, `.json` | Yes | Regenerated output
@@ -33,6 +34,36 @@ File | Required for main learner path? | Required for full local rerun?
 `data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad` | No | Python full-result inspection/regeneration
 
 The optional full-local files may be supplied from Zenodo, another artifact host, or private local storage. They should not be committed to ordinary GitHub history.
+
+## Recreate the prepared single-cell dataset
+
+Most learners should skip this step. The main case study starts from the prepared file:
+
+```text
+data/processed/input/preprocessed_cells_hvg3000.h5ad
+```
+
+Full local reproduction starts earlier, from the larger source count file. That source file is planned as a Zenodo/local artifact because it is not needed for the main learner path and should not be stored in ordinary GitHub history.
+
+The preprocessing script records the same preparation choices discussed in Data Wrangling:
+
+- keep genes detected in at least three cells,
+- normalize each cell to a common library-size target of 10,000,
+- log-transform the normalized expression values,
+- select 3,000 highly variable genes using the recorded HVG method, and
+- write both the prepared cells-by-genes `.h5ad` file and the optional dense genes-by-cells PyCoGAPS input.
+
+Run this only after the larger source file is available locally:
+
+```bash
+python scripts/reproduction/prepare_preprocessed_hvg3000.py \
+  --source-h5ad data/source/kang_counts_25k.h5ad \
+  --out-h5ad data/processed/input/preprocessed_cells_hvg3000.h5ad \
+  --cogaps-input-h5ad data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad \
+  --config-json data/processed/input/preprocess_config_hvg3000.json
+```
+
+This step is intentionally separated from model fitting. It rebuilds the analysis-ready single-cell file and the CoGAPS input matrix; it does not choose `K`, run the rank sweep, or fit the selected model.
 
 ## Run inside the validated image
 

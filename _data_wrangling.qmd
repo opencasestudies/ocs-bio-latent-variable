@@ -1,31 +1,191 @@
 # **Data Wrangling**
 ***
 
-The processed object was generated before this case study. The frozen preprocessing steps include filtering genes by minimum cell count, library-size normalization, log transformation, and selection of 3,000 highly variable genes.
+Data Import brought in the selected-model evidence and Data Exploration checked the structure of the prepared PBMC data. Data Wrangling now asks a practical question: how do we turn those imported files and tables into the tidy tables that later visualizations and analyses need?
+
+In this case study, wrangling has two roles. First, it makes the preprocessing decisions visible so you understand what happened before the prepared PBMC dataset was saved. Second, it connects the selected CoGAPS outputs to cell metadata, reshapes pattern activities, and keeps gene weights separate from expression direction. Those steps prepare you to interpret patterns without confusing stimulation, cell identity, matrix orientation, or gene directionality.
+
+:::{.disclaimer_box}
+::::{.disclaimer_box_header}
+How to use this section
+::::
+::::{.inner_block}
+- **Main learner path:** run the chunks in this section. They use the prepared PBMC data and lightweight selected-model files already imported in earlier sections.
+- **Full reproduction path:** read the preprocessing explanation here, then use the full reproduction guide if you want to rebuild the prepared `.h5ad`, dense CoGAPS input, or selected-model exports from larger local or Zenodo-hosted files.
+- **Model fitting:** this section does not fit CoGAPS. It prepares and checks the data structures used for visualization and analysis.
+::::
+:::
+
+## Follow The Preprocessing Trail
+
+The prepared PBMC dataset did not start as a 3,000-gene matrix. It traces back to the Kang et al. GEO record, where the batch 2 control and IFN-beta-stimulated PBMC samples are available as Matrix Market count files and barcode files. Those GEO files were converted into the larger local source count file, then filtered, normalized, transformed, and reduced to highly variable genes before the prepared case-study dataset was saved. Those choices matter because CoGAPS can only learn patterns from the cells, genes, and expression scale it is given.
+
+The flow map below shows the preprocessing path. Read it from top to bottom. The first nodes name the public GEO record and the batch 2 input files. The highlighted green node marks the prepared PBMC file that the main learner path actually loads. The steps after that check that the saved files can support CoGAPS interpretation without rerunning a model in this section.
+
+```{mermaid}
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "18px"}} }%%
+flowchart TB
+  classDef source fill:#eaf3ff,stroke:#2d6da3,stroke-width:2px,color:#102a43
+  classDef process fill:#f7f9fb,stroke:#6b7c8f,stroke-width:1.5px,color:#102a43
+  classDef decision fill:#fff4df,stroke:#b36b00,stroke-width:2px,color:#102a43
+  classDef output fill:#e9f7ef,stroke:#2f855a,stroke-width:2px,color:#102a43
+  classDef prepared fill:#d7f5df,stroke:#1b7f43,stroke-width:4px,color:#102a43
+  classDef optional fill:#f3eefc,stroke:#6b46c1,stroke-width:1.5px,color:#102a43
+
+  A["NCBI GEO GSE96583<br/>Kang et al. PBMC IFN-beta study"]:::source
+  B["Batch 2 GEO inputs<br/>GSM2560248_2.1.mtx.gz<br/>GSM2560248_barcodes.tsv.gz<br/>GSM2560249_2.2.mtx.gz<br/>GSM2560249_barcodes.tsv.gz"]:::source
+  C["Local source count file<br/>data/source/kang_counts_25k.h5ad<br/>cells + genes + metadata"]:::source
+  D{{"Keep genes detected<br/>in at least 3 cells"}}:::decision
+  E["Normalize each cell<br/>to 10,000 total counts"]:::process
+  F["Log-transform<br/>normalized expression"]:::process
+  G{{"Select 3,000<br/>highly variable genes"}}:::decision
+  H["Prepared PBMC dataset<br/>data/processed/input/preprocessed_cells_hvg3000.h5ad<br/>24,673 cells x 3,000 genes + counts layer"]:::prepared
+  I["R selected-model input<br/>genes x cells"]:::output
+  J["Optional Python dense input<br/>genes x cells"]:::optional
+  K["Lightweight CoGAPS tables<br/>gene weights + cell activities"]:::output
+
+  A --> B --> C --> D --> E --> F --> G --> H --> I --> K
+  H --> J --> K
+```
+
+The main learner path starts at the highlighted prepared PBMC dataset, `data/processed/input/preprocessed_cells_hvg3000.h5ad`. You do not need the larger GEO-derived source file to continue. The full reproduction path starts earlier, at the GEO and local source-count-file steps, and rebuilds the prepared dataset from the recorded preprocessing settings.
+
+::: {.aside}
+**Draft note:** In the full reproduction guide, keep enough detail to show how the source count file, preprocessing settings, and selected-model exports are regenerated. The larger source and dense model-input files should be listed as Zenodo/local files rather than ordinary GitHub assets.
+:::
+
+## Quality Control Protects The Input Signal
+
+Quality control is not about making the dataset look cleaner for its own sake. It protects the latent-pattern analysis from learning patterns that mostly reflect unreliable measurements. In a single-cell PBMC perturbation study, that matters because a technical artifact can be mistaken for an immune-response signal if the model is allowed to learn from unstable cells or nearly empty genes.
+
+The case-study preprocessing record starts from a larger source count file that already contains the PBMC cells used for this lesson. Within the documented local preprocessing step, the visible quality-control rule is gene-level filtering: a gene must be detected in at least three cells to remain in the prepared dataset. This rule removes genes with too little evidence to support stable pattern interpretation. If a learner were starting from raw 10x files, additional cell-level quality-control checks would usually be needed upstream; those upstream raw-data decisions are not rerun in the main learner path.
+
+The programming idea is a filter. A filter asks a yes/no question for each row or column: does this gene pass the detection rule? Genes that pass stay in the matrix; genes that fail are removed before normalization and model fitting. That simple decision changes the biological search space, because CoGAPS cannot recover a pattern from genes that were excluded.
+
+## Normalization Makes Cells More Comparable
+
+After filtering, cells can still differ in total sequencing depth. One cell may have many more captured transcripts than another, even when the biological state is similar. {{< glossary "Library-size normalization" display="Library-size normalization" >}} reduces this scale difference by rescaling each cell to a common total. In this case study, the target total is 10,000 counts per cell.
+
+Normalization does not make every cell identical, and it does not remove all donor, batch, or cell-type structure. Its purpose is narrower: it keeps a cell with more captured RNA from automatically looking more active across many genes. That matters for CoGAPS because a latent pattern should reflect coordinated expression structure, not just a larger library size.
+
+In the full-reproduction Python script, this is the step performed by `scanpy.pp.normalize_total()`. The main learner path does not ask you to rerun that command, but the preprocessing record lets you see that the prepared PBMC dataset was built from normalized expression values before the selected CoGAPS outputs were exported.
+
+## Log Transformation Reduces Scale Dominance
+
+Even after library-size normalization, expression values can have a long right tail: a small number of genes can have much larger values than most others. A {{< glossary "Log transformation" display="log transformation" >}} compresses that scale. Large values still remain large, but they no longer dominate summaries as strongly.
+
+For this case study, the prepared CoGAPS input is based on normalized, log-transformed expression values. That choice makes the model input more suitable for comparing variation across genes and cells. It also means that later pattern activity should be interpreted as activity learned from this prepared expression scale, not as raw molecule counts.
+
+The original count information is still important. The prepared dataset keeps a count layer so later directionality summaries can ask whether selected genes are higher or lower in IFN-beta-stimulated cells. This separation is intentional: normalized log expression supports pattern learning, while count-based summaries support expression-direction checks.
+
+## Highly Variable Genes Define The Modeled Gene Space
+
+Single-cell RNA-seq measures many genes, but not every measured gene is equally informative for a case-study model. Some genes are nearly constant across cells, and others vary too little to help separate stimulation-associated activity from immune-cell identity. {{< glossary "Highly variable gene" display="Highly variable gene" >}} selection keeps genes with stronger cell-to-cell variation.
+
+The prepared PBMC dataset keeps 3,000 highly variable genes using the recorded `seurat_v3` method. This is a modeling decision, not a statement that all other genes are biologically unimportant. It defines the expression space that CoGAPS is allowed to learn from. Interferon-stimulated genes may be included because they vary with stimulation, but immune-cell identity genes may also be included because PBMC cell types differ strongly from one another.
+
+That is why later sections do not interpret a CoGAPS pattern from one number alone. They compare pattern activity with condition, cell type, top genes, directionality, and diagnostics. HVG selection gives the model an informative starting matrix; it does not by itself decide which pattern is the IFN-associated pattern.
+
+## Inspect The Preprocessing Record
+
+The preprocessing record is a small JSON file. It does not contain the expression matrix itself. It records the settings used to create the prepared PBMC dataset: the source count file name, the minimum cell-detection threshold for genes, the normalization target, the highly-variable-gene method, and the final number of genes kept.
+
+The next chunk turns that JSON record into a readable table. In R, `jsonlite::read_json()` reads the settings, and `tibble::tribble()` builds a compact display table. In Python, `json.load()` reads the same settings into a dictionary, and `pd.DataFrame()` turns selected fields into a table.
 
 ::: {.panel-tabset}
 
 ### R
 
 ```{r}
-preprocess_config_r <- jsonlite::read_json(PREPROCESS_CONFIG_JSON_R, simplifyVector = TRUE)
-preprocess_config_r
+preprocess_config_r <- jsonlite::read_json(
+  PREPROCESS_CONFIG_JSON_R,
+  simplifyVector = TRUE
+)
+
+preprocess_settings_r <- tibble::tribble(
+  ~setting, ~value, ~what_it_did, ~why_it_matters,
+  "Source count file",
+  preprocess_config_r$raw_h5ad,
+  "Recorded the larger single-cell count file used to create the prepared dataset.",
+  "Keeps the prepared dataset connected to its source data.",
+  "Minimum cells per gene",
+  as.character(preprocess_config_r$min_cells),
+  "Removed genes detected in too few cells.",
+  "Reduces unstable rare-gene noise before model fitting.",
+  "Library-size target",
+  format(preprocess_config_r$target_sum, big.mark = ","),
+  "Scaled cells to a common total expression level.",
+  "Makes cells more comparable when sequencing depth differs.",
+  "HVG method",
+  preprocess_config_r$hvg_flavor,
+  "Used a highly-variable-gene selection rule.",
+  "Focuses CoGAPS on genes with informative variation.",
+  "Number of HVGs",
+  format(preprocess_config_r$n_top_genes, big.mark = ","),
+  "Kept 3,000 genes for the prepared dataset.",
+  "Keeps the case study realistic while making rendering and analysis manageable."
+)
+
+knitr::kable(
+  preprocess_settings_r,
+  col.names = c("Setting", "Value", "What it did", "Why it matters")
+)
 ```
 
 ### Python
 
 ```{python}
+#| results: asis
 with open(PREPROCESS_CONFIG_JSON) as f:
     preprocess_config = json.load(f)
 
-preprocess_config
+preprocess_settings = pd.DataFrame(
+    {
+        "Setting": [
+            "Source count file",
+            "Minimum cells per gene",
+            "Library-size target",
+            "HVG method",
+            "Number of HVGs",
+        ],
+        "Value": [
+            preprocess_config["raw_h5ad"],
+            preprocess_config["min_cells"],
+            f'{preprocess_config["target_sum"]:,.0f}',
+            preprocess_config["hvg_flavor"],
+            f'{preprocess_config["n_top_genes"]:,}',
+        ],
+        "What it did": [
+            "Recorded the larger single-cell count file used to create the prepared dataset.",
+            "Removed genes detected in too few cells.",
+            "Scaled cells to a common total expression level.",
+            "Used a highly-variable-gene selection rule.",
+            "Kept 3,000 genes for the prepared dataset.",
+        ],
+        "Why it matters": [
+            "Keeps the prepared dataset connected to its source data.",
+            "Reduces unstable rare-gene noise before model fitting.",
+            "Makes cells more comparable when sequencing depth differs.",
+            "Focuses CoGAPS on genes with informative variation.",
+            "Keeps the case study realistic while making rendering and analysis manageable.",
+        ],
+    }
+)
+
+print(render_table(preprocess_settings))
 ```
 
 :::
 
-## Preparing a CoGAPS input
+Each row in the table corresponds to one decision you just read about. The source count file connects the prepared dataset back to its larger input. The minimum-cells rule records the gene filter. The library-size target and HVG method record how the expression scale and gene space were constructed. The number of HVGs records the final modeling space: 3,000 genes.
 
-In the primary R workflow, `zellkonverter::readH5AD()` imports the processed `.h5ad` into a `SingleCellExperiment` with genes in rows and cells in columns. That means the matrix is already in the orientation expected by Bioconductor `CoGAPS`.
+These steps do not make the data perfect. They make a documented, reproducible analysis input. That distinction matters: when you later interpret a CoGAPS pattern, you should remember that the pattern was learned from this prepared 3,000-gene view of the PBMC data.
+
+## The Saved Files Must Be CoGAPS-Ready
+
+Single-cell containers do not always store matrices in the orientation that a modeling function expects. In this case study, the prepared Python `AnnData` object is cells by genes, while the R `SingleCellExperiment` object presents genes by cells. CoGAPS expects a genes-by-cells expression matrix for the selected-model fitting workflow, so {{< glossary "Matrix orientation" display="matrix orientation" >}} has to be checked explicitly.
+
+This check is the bridge between preprocessing and modeling. The saved files must keep cells, genes, expression values, and labels aligned. They must also make the model-input orientation explicit. This chunk does not fit a model; it only checks that the expression matrix can be interpreted correctly as genes and cells.
 
 ::: {.panel-tabset}
 
@@ -33,55 +193,459 @@ In the primary R workflow, `zellkonverter::readH5AD()` imports the processed `.h
 
 ```{r}
 cogaps_input_r <- assay(sce_cells, "X")
-cat("R CoGAPS input shape (genes x cells):", paste(dim(cogaps_input_r), collapse = " x "), "\n")
-```
 
-```{r}
-#| eval: false
-# If you want an explicit dense matrix object for a full local R CoGAPS run:
-cogaps_input_dense_r <- as.matrix(assay(sce_cells, "X"))
-storage.mode(cogaps_input_dense_r) <- "double"
+orientation_check_r <- tibble::tibble(
+  item = c("Prepared SingleCellExperiment", "R CoGAPS input matrix"),
+  rows = c(nrow(sce_cells), nrow(cogaps_input_r)),
+  columns = c(ncol(sce_cells), ncol(cogaps_input_r)),
+  row_meaning = c("genes", "genes"),
+  column_meaning = c("cells", "cells"),
+  ready_for_cogaps = c("yes", "yes")
+)
+
+knitr::kable(
+  orientation_check_r,
+  col.names = c("Data structure", "Rows", "Columns", "Rows mean", "Columns mean", "Ready for CoGAPS?")
+)
 ```
 
 ### Python
 
 ```{python}
-if HAS_CACHED_COGAPS_INPUT:
-    cogaps_input = ad.read_h5ad(COGAPS_INPUT_H5AD)
-    cogaps_input
-else:
-    cogaps_input = None
-    print("Cached dense CoGAPS input not available in this render context.")
-    print("Expected genes x cells shape:", (adata_cells.n_vars, adata_cells.n_obs))
+#| results: asis
+orientation_check = pd.DataFrame(
+    {
+        "Object": [
+            "Prepared AnnData data structure",
+            "Expected PyCoGAPS input",
+            "Cached dense PyCoGAPS input file",
+        ],
+        "Rows": [
+            adata_cells.n_obs,
+            adata_cells.n_vars,
+            "available" if HAS_CACHED_COGAPS_INPUT else "not included",
+        ],
+        "Columns": [
+            adata_cells.n_vars,
+            adata_cells.n_obs,
+            "available" if HAS_CACHED_COGAPS_INPUT else "not included",
+        ],
+        "Rows mean": ["cells", "genes", "genes"],
+        "Columns mean": ["genes", "cells", "cells"],
+        "Ready for CoGAPS?": [
+            "no; transpose first",
+            "yes",
+            "yes if supplied locally",
+        ],
+    }
+)
+
+print(render_table(orientation_check))
 ```
 
 ```{python}
 #| eval: false
+# Full local reproduction only:
+# build_cogaps_input() transposes cells x genes into genes x cells,
+# stores the dense matrix as float64, and preserves cell and gene labels.
 cogaps_input_from_cells = build_cogaps_input(adata_cells)
 cogaps_input_from_cells.write_h5ad(COGAPS_INPUT_H5AD)
 ```
 
+:::
+
+The R workflow is already in the orientation needed for CoGAPS. The Python workflow needs an explicit transposition step before fitting. That is why the optional dense Python input file is treated as a full-reproduction asset rather than a file that every learner needs to load.
+
+:::{.think_question}
+::::{.think_question_header}
+Checkpoint
+::::
+::::{.inner_block}
+Why is matrix orientation a scientific issue, not just a programming detail?
+
+<details>
+<summary>Show answer</summary>
+
+If rows and columns are interpreted incorrectly, the model can treat cells as features or genes as samples. That would make gene weights, cell activities, and pattern labels meaningless. Checking orientation protects the biological interpretation of the model output.
+
+</details>
+::::
+:::
+
+## Join Pattern Activities To Cell Metadata
+
+The selected model has two main tables. The gene-weight table tells you how strongly each gene contributes to each pattern. The cell-activity table tells you how strongly each cell uses each pattern. To ask whether a pattern follows stimulation or immune-cell identity, the cell activities have to be joined to the cell metadata.
+
+The shared key is `cell_barcode`. A {{< glossary "Metadata join" display="metadata join" >}} uses that barcode to match rows from two tables. In R, `inner_join()` keeps only barcodes that appear in both tables. In Python, `merge(..., validate="one_to_one")` performs the same join and checks that each barcode appears only once in each table.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+r_lightweight_matrices <- load_lightweight_pattern_matrices_r(
+  R_PATTERN_GENE_WEIGHTS_TSV_GZ_R,
+  R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R
+)
+
+r_gene_weights_wide <- r_lightweight_matrices$A |>
+  as.data.frame(check.names = FALSE) |>
+  tibble::rownames_to_column("gene")
+
+r_cell_activities_wide <- r_lightweight_matrices$P |>
+  as.data.frame(check.names = FALSE) |>
+  tibble::rownames_to_column("cell_barcode")
+
+r_pattern_cols_wrangled <- pattern_columns_r(colnames(r_cell_activities_wide))
+
+wrangled_cell_metadata_r <- as.data.frame(colData(sce_cells)) |>
+  tibble::rownames_to_column("cell_barcode")
+
+r_cell_activity_metadata <- wrangled_cell_metadata_r |>
+  dplyr::inner_join(r_cell_activities_wide, by = "cell_barcode")
+
+join_check_r <- tibble::tibble(
+  check = c(
+    "Cells in metadata",
+    "Cells in activity table",
+    "Cells after metadata join",
+    "Pattern activity columns",
+    "Metadata rows without activity"
+  ),
+  value = c(
+    nrow(wrangled_cell_metadata_r),
+    nrow(r_cell_activities_wide),
+    nrow(r_cell_activity_metadata),
+    length(r_pattern_cols_wrangled),
+    nrow(dplyr::anti_join(wrangled_cell_metadata_r, r_cell_activities_wide, by = "cell_barcode"))
+  )
+)
+
+knitr::kable(join_check_r, col.names = c("Check", "Value"))
+```
+
+### Python
+
 ```{python}
-if cogaps_input is not None:
-    assert cogaps_input.n_obs == adata_cells.n_vars
-    assert cogaps_input.n_vars == adata_cells.n_obs
-    print("CoGAPS input shape:", cogaps_input.shape)
-else:
-    print("Skipping dense input validation because the cached genes x cells file is absent.")
+#| results: asis
+python_gene_weights_wide, python_cell_activities_wide = load_lightweight_pattern_matrices(
+    PY_PATTERN_GENE_WEIGHTS_TSV_GZ,
+    PY_PATTERN_CELL_ACTIVITIES_TSV_GZ,
+)
+
+python_pattern_cols_wrangled = pattern_columns(python_cell_activities_wide)
+
+wrangled_cell_metadata = adata_cells.obs.reset_index(names="cell_barcode").copy()
+
+python_cell_activity_metadata = wrangled_cell_metadata.merge(
+    python_cell_activities_wide.reset_index(),
+    on="cell_barcode",
+    how="inner",
+    validate="one_to_one",
+)
+
+metadata_without_activity = set(wrangled_cell_metadata["cell_barcode"]) - set(
+    python_cell_activities_wide.index
+)
+
+join_check = pd.DataFrame(
+    {
+        "Check": [
+            "Cells in metadata",
+            "Cells in activity table",
+            "Cells after metadata join",
+            "Pattern activity columns",
+            "Metadata rows without activity",
+        ],
+        "Value": [
+            len(wrangled_cell_metadata),
+            len(python_cell_activities_wide),
+            len(python_cell_activity_metadata),
+            len(python_pattern_cols_wrangled),
+            len(metadata_without_activity),
+        ],
+    }
+)
+
+print(render_table(join_check))
 ```
 
 :::
 
+The join should keep all cells and all selected-model pattern columns. If the joined table had fewer rows than the metadata table, you would need to investigate missing or mismatched cell barcodes before making pattern-activity plots. Here, the check confirms that the selected-model activities can be interpreted with the same condition, donor, cell-type, and UMAP labels explored earlier.
+
+## Reshape Cell Activities For Summaries
+
+The joined activity table is in {{< glossary "Wide format" display="wide format" >}}: one row per cell and one column per pattern. That format is convenient for storing model output. For plotting and summaries, {{< glossary "Long format" display="long format" >}} is often easier: one row contains one cell, one pattern, and one activity value.
+
+The next chunk practices that reshaping step. In R, `tidyr::pivot_longer()` moves the pattern columns into two columns named `pattern` and `activity`. In Python, `melt()` performs the same transformation. After reshaping, the code groups by `pattern` and `condition` to make a compact activity summary.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+r_pattern_activity_long <- r_cell_activity_metadata |>
+  dplyr::select(
+    cell_barcode,
+    condition,
+    cell_type,
+    replicate,
+    dplyr::all_of(r_pattern_cols_wrangled)
+  ) |>
+  tidyr::pivot_longer(
+    cols = dplyr::all_of(r_pattern_cols_wrangled),
+    names_to = "pattern",
+    values_to = "activity"
+  )
+
+r_activity_by_condition <- r_pattern_activity_long |>
+  dplyr::group_by(pattern, condition) |>
+  dplyr::summarise(
+    mean_activity = mean(activity),
+    median_activity = median(activity),
+    n_cells = dplyr::n(),
+    .groups = "drop"
+  ) |>
+  dplyr::arrange(pattern, condition)
+
+knitr::kable(
+  r_activity_by_condition,
+  digits = 4,
+  col.names = c("Pattern", "Condition", "Mean activity", "Median activity", "Cells")
+)
+```
+
+### Python
+
+```{python}
+#| results: asis
+python_pattern_activity_long = python_cell_activity_metadata.melt(
+    id_vars=["cell_barcode", "condition", "cell_type", "replicate"],
+    value_vars=python_pattern_cols_wrangled,
+    var_name="pattern",
+    value_name="activity",
+)
+
+python_activity_by_condition = (
+    python_pattern_activity_long
+    .groupby(["pattern", "condition"], observed=True)
+    .agg(
+        mean_activity=("activity", "mean"),
+        median_activity=("activity", "median"),
+        n_cells=("activity", "size"),
+    )
+    .reset_index()
+    .sort_values(["pattern", "condition"])
+)
+
+print(render_table(
+    python_activity_by_condition.rename(
+        columns={
+            "pattern": "Pattern",
+            "condition": "Condition",
+            "mean_activity": "Mean activity",
+            "median_activity": "Median activity",
+            "n_cells": "Cells",
+        }
+    )
+))
+```
+
+:::
+
+This summary is not the final biological interpretation. It is a wrangled table that makes later visualization possible. If a pattern has higher mean activity in stimulated cells, that pattern becomes a candidate for stimulation-associated interpretation. You will still need gene weights, directionality, cell-type summaries, and diagnostics before naming it biologically.
+
+## Reshape Gene Weights Without Confusing Direction
+
+Gene weights answer a different question from expression direction. A high CoGAPS weight means the gene helps define a pattern. It does not, by itself, say whether the gene is higher in stimulated cells or higher in control cells. That is why this section prepares gene-weight tables separately from directionality tables.
+
+The gene-weight table also starts in wide format: one row per gene and one column per pattern. The next chunk reshapes it to long format and previews the highest-weight genes for each pattern. In R, `arrange()` sorts the rows and `slice_head()` keeps the top few rows within each pattern. In Python, `sort_values()` and `groupby(...).head()` do the same job.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+r_gene_weights_long <- r_gene_weights_wide |>
+  tidyr::pivot_longer(
+    cols = dplyr::all_of(r_pattern_cols_wrangled),
+    names_to = "pattern",
+    values_to = "weight"
+  )
+
+r_top_weight_preview <- r_gene_weights_long |>
+  dplyr::arrange(pattern, dplyr::desc(weight)) |>
+  dplyr::group_by(pattern) |>
+  dplyr::slice_head(n = 3) |>
+  dplyr::ungroup()
+
+knitr::kable(
+  r_top_weight_preview,
+  digits = 4,
+  col.names = c("Gene", "Pattern", "Weight")
+)
+```
+
+### Python
+
+```{python}
+#| results: asis
+python_gene_weights_long = (
+    python_gene_weights_wide
+    .reset_index()
+    .melt(
+        id_vars="gene",
+        value_vars=python_pattern_cols_wrangled,
+        var_name="pattern",
+        value_name="weight",
+    )
+)
+
+python_top_weight_preview = (
+    python_gene_weights_long
+    .sort_values(["pattern", "weight"], ascending=[True, False])
+    .groupby("pattern", observed=True)
+    .head(3)
+)
+
+print(render_table(
+    python_top_weight_preview.rename(
+        columns={"gene": "Gene", "pattern": "Pattern", "weight": "Weight"}
+    )
+))
+```
+
+:::
+
+This preview shows how a pattern can be connected to genes, but it deliberately does not call those genes up- or down-regulated. Later, the analysis section will combine these weights with paired pseudobulk directionality summaries so that gene importance and expression direction are interpreted together.
+
+## Prepare Directionality Inputs For Later
+
+The case study includes targeted directionality summaries for selected-model pattern genes. These were created from count-based {{< glossary "Pseudobulk" display="pseudobulk" >}} comparisons: cells are summarized within replicate and condition groups before stimulated and control expression are compared. That approach is different from CoGAPS itself. CoGAPS learns patterns; the directionality summaries help interpret whether high-weight genes tend to be higher or lower after IFN-beta stimulation.
+
+This chunk checks that the directionality and pseudobulk files are available. It does not perform a full differential-expression analysis.
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+r_direction_summary_wrangled <- readr::read_csv(
+  R_DIRECTION_SUMMARY_CSV_R,
+  show_col_types = FALSE
+)
+
+safe_nrow_r <- function(path) {
+  if (file.exists(path)) {
+    nrow(readr::read_csv(path, show_col_types = FALSE))
+  } else {
+    NA_integer_
+  }
+}
+
+r_direction_file_check <- tibble::tibble(
+  file = c(
+    "pattern_direction_summary.csv",
+    "pattern_gene_directionality_global.csv",
+    "pattern_gene_directionality_by_celltype.csv",
+    "pseudobulk_counts_global.csv",
+    "pseudobulk_counts_by_celltype.csv"
+  ),
+  role = c(
+    "One-row summary per pattern",
+    "Global stim-versus-control direction for top pattern genes",
+    "Cell-type-specific direction summaries",
+    "Count summaries used for global directionality",
+    "Count summaries used for cell-type directionality"
+  ),
+  rows = c(
+    nrow(r_direction_summary_wrangled),
+    safe_nrow_r(R_DIRECTION_GLOBAL_CSV_R),
+    safe_nrow_r(R_DIRECTION_CELLTYPE_CSV_R),
+    safe_nrow_r(file.path(R_K6_RESULTS_DIR_R, "pseudobulk_counts_global.csv")),
+    safe_nrow_r(file.path(R_K6_RESULTS_DIR_R, "pseudobulk_counts_by_celltype.csv"))
+  )
+)
+
+knitr::kable(r_direction_file_check, col.names = c("File", "Role", "Rows"))
+```
+
+### Python
+
+```{python}
+#| results: asis
+from pathlib import Path
+
+python_direction_summary_wrangled = pd.read_csv(PY_DIRECTION_SUMMARY_CSV)
+
+def safe_nrow(path):
+    path = Path(path)
+    if path.exists():
+        return len(pd.read_csv(path))
+    return None
+
+python_direction_file_check = pd.DataFrame(
+    {
+        "File": [
+            "pattern_direction_summary.csv",
+            "pattern_gene_directionality_global.csv",
+            "pattern_gene_directionality_by_celltype.csv",
+            "pseudobulk_counts_global.csv",
+            "pseudobulk_counts_by_celltype.csv",
+        ],
+        "Role": [
+            "One-row summary per pattern",
+            "Global stim-versus-control direction for top pattern genes",
+            "Cell-type-specific direction summaries",
+            "Count summaries used for global directionality",
+            "Count summaries used for cell-type directionality",
+        ],
+        "Rows": [
+            len(python_direction_summary_wrangled),
+            safe_nrow(PY_DIRECTION_GLOBAL_CSV),
+            safe_nrow(PY_DIRECTION_CELLTYPE_CSV),
+            safe_nrow(SELECTED_PYTHON_RESULTS_DIR / "pseudobulk_counts_global.csv"),
+            safe_nrow(SELECTED_PYTHON_RESULTS_DIR / "pseudobulk_counts_by_celltype.csv"),
+        ],
+    }
+)
+
+print(render_table(python_direction_file_check))
+```
+
+:::
+
+The important distinction is now in place. Pattern weights tell you which genes define a CoGAPS pattern. Directionality summaries tell you whether those genes tend to be higher or lower in IFN-beta-stimulated cells. The analysis section will put those two pieces of evidence together.
+
+## Wrangling Checkpoint
+
+At the end of this section, you have not changed the selected model. You have prepared the tables and named variables needed to inspect it carefully.
+
+| Object or idea | What it means | Used next for |
+|---|---|---|
+| `cogaps_input_r` | R genes-by-cells expression matrix from the prepared PBMC dataset | Explaining model input orientation |
+| `r_cell_activity_metadata` / `python_cell_activity_metadata` | Cell activities joined to condition, donor, cell type, and embeddings | Pattern activity plots and summaries |
+| `r_pattern_activity_long` / `python_pattern_activity_long` | One row per cell-pattern activity value | Grouped summaries by condition and cell type |
+| `r_gene_weights_long` / `python_gene_weights_long` | One row per gene-pattern weight | Ranking genes that define patterns |
+| Directionality tables | Count-based stim-versus-control summaries for pattern genes | Interpreting whether pattern genes rise or fall with stimulation |
+
 :::{.think_question}
 ::::{.think_question_header}
-Question opportunity
+Checkpoint
 ::::
 ::::{.inner_block}
-Why do we need to track matrix orientation carefully across Python and R?
-<details><summary>Answer</summary>
-Because the meaning of rows and columns changes across data structures. In R `SingleCellExperiment`, genes live in rows and cells in columns, so the imported matrix is already aligned to the CoGAPS expectation. In Python `AnnData`, the processed object is cells x genes, so we transpose to get the genes x cells matrix used by CoGAPS.
+Why should gene weights and expression directionality be kept as separate evidence until the analysis section?
+
+<details>
+<summary>Show answer</summary>
+
+CoGAPS gene weights show which genes help define a pattern, but they do not state whether those genes are higher in stimulated cells or control cells. Directionality requires a separate expression comparison. Keeping the two pieces separate prevents a common mistake: treating a high pattern weight as if it automatically means up-regulation.
+
 </details>
 ::::
 :::
+
+The next section uses the wrangled cell-activity and gene-weight tables to build visual summaries. Those figures will make it easier to see which patterns track stimulation, which patterns are tied to PBMC identity, and which genes give a pattern biological meaning.
 
 ***
