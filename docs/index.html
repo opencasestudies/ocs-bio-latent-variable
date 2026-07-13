@@ -1024,7 +1024,7 @@ D_{g,c} \approx \sum_{k=1}^{K} A_{g,k} P_{k,c}
 <h2 class="anchored" data-anchor-id="the-teaching-dataset">The teaching dataset</h2>
 <p>The main analysis starts from a prepared teaching dataset derived from the Kang PBMC IFN-beta study. It contains <strong>24,673 cells</strong> and <strong>3,000 <button class="glossary"><span class="def">A gene selected because its expression varies enough across cells to be informative for downstream analysis.</span>highly variable genes</button></strong>. Each cell has a condition label, an annotated PBMC cell type, a donor or patient replicate label, and low-dimensional coordinates used later for visualization.</p>
 <p>The preparation step keeps the scale of the single-cell experiment large enough to be realistic while making the analysis manageable for a case study. Rather than using every measured gene, the workflow keeps genes that are informative across cells. The frozen preprocessing record for this dataset indicates that genes were filtered by minimum cell count, expression values were normalized to a common library size, log-transformed, and then reduced to 3,000 highly variable genes. You will return to these preprocessing choices in <strong>Data Wrangling</strong>, where the case study explains why filtering, normalization, transformation, and gene selection matter for the matrix used by CoGAPS. The prepared dataset also keeps a count layer so later sections can compare expression direction for selected genes.</p>
-<p>The cell set is close to balanced by condition: <strong>12,315 control cells</strong> and <strong>12,358 IFN-beta-stimulated cells</strong>. It is not balanced by cell type, because the goal is to preserve the mixed PBMC composition present in the prepared data. The largest annotated group is CD4 T cells, followed by CD14+ monocytes, B cells, NK cells, CD8 T cells, FCGR3A+ monocytes, dendritic cells, and megakaryocytes. That mixture is the biological setting for the case study: an interferon response may be shared across PBMC populations, but it may also vary in strength across cell types.</p>
+<p>The cell dataset is nearly balanced by condition: <strong>12,315 control cells</strong> and <strong>12,358 IFN-beta-stimulated cells</strong>. It is not balanced by cell type, because the goal is to preserve the actual composition of PBMC cell types present in the samples. The majority of cells were identified by Kang et al.&nbsp;as CD4 T cells, followed by CD14+ monocytes, B cells, NK cells, CD8 T cells, FCGR3A+ monocytes, dendritic cells, and megakaryocytes. This gets to the core questions of the case study: How do different cell types respond to interferon? Which cell types seem impacted and how much?</p>
 </section>
 <section id="data-files-you-will-encounter" class="level2">
 <h2 class="anchored" data-anchor-id="data-files-you-will-encounter">Data files you will encounter</h2>
@@ -1123,7 +1123,7 @@ D_{g,c} \approx \sum_{k=1}^{K} A_{g,k} P_{k,c}
 </section>
 <section id="columns-you-will-see-often" class="level2">
 <h2 class="anchored" data-anchor-id="columns-you-will-see-often">Columns you will see often</h2>
-<p>You do not need to memorize every column name now. Think of this table as a trail map for the first few imports: it names the columns that will keep reappearing as you move from cells, to patterns, to genes.</p>
+<p>You do not need to memorize every column name now, but this overview, can help you get familiar with the data. Think of this table as a trail map for the first few imports: it names the columns that will keep reappearing as you move from cells, to patterns, to genes.</p>
 <div class="table-responsive">
 <table class="caption-top table">
 <colgroup>
@@ -1151,13 +1151,13 @@ D_{g,c} \approx \sum_{k=1}^{K} A_{g,k} P_{k,c}
 </tr>
 <tr class="odd">
 <td><code>replicate</code></td>
-<td>The donor or patient replicate label retained in the teaching dataset.</td>
-<td>Use it when summaries need to respect the paired donor structure.</td>
+<td>The donor/patient replicate label retained in the teaching dataset.</td>
+<td>Use it when we need to know which samples came from the same individual that received interferon stimulation or not.</td>
 </tr>
 <tr class="even">
 <td><code>UMAP1</code>, <code>UMAP2</code></td>
-<td>Two-dimensional coordinates used for visualization.</td>
-<td>Use them to plot cells; do not treat distance on the plot as a direct biological measurement.</td>
+<td>Two-dimensional coordinates used for visualization of similarity of samples.</td>
+<td>Use them to explore the cell populations; do not treat distance on the plot as a direct biological measurement.</td>
 </tr>
 <tr class="odd">
 <td><code>n_cells</code> and <code>fraction</code></td>
@@ -5014,7 +5014,7 @@ Stores low-dimensional coordinates for visual exploration.
 <ul>
 <li><code>condition</code>, which records whether the cell came from the control or IFN-beta-stimulated aliquot;</li>
 <li><code>cell_type</code>, which records the annotated PBMC identity; and</li>
-<li><code>replicate</code>, which records the donor or sample replicate.</li>
+<li><code>replicate</code>, which records which individual the sample cane from</li>
 </ul>
 <p>The code below creates a small preview table. In R, <code>colData(sce_cells)</code> retrieves cell metadata, and <code>rownames_to_column()</code> turns the cell names into an explicit <code>cell_barcode</code> column. In Python, <code>.obs</code> stores the same cell metadata, and <code>reset_index()</code> turns the AnnData index into a visible cell-barcode column.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
@@ -6291,7 +6291,7 @@ Megakaryocytes
 </div>
 </div>
 </div>
-<p>This plot gives you two things to carry forward. First, several annotated cell types occupy distinct neighborhoods, which means immune-cell identity is a strong part of the data structure. Second, the plot does not tell you which CoGAPS pattern is stimulation-associated. Later visualizations will return to these same cells and coordinates, but recolor them by pattern activity rather than by cell type.</p>
+<p>This plot gives you two things to carry forward. First, several annotated cell types occupy distinct neighborhoods, which means immune-cell identity is a strong part of the data structure. Second, the plot does not tell you which CoGAPS pattern is stimulation-associated. Later visualizations will return to these same cells and coordinates, but will recolor them by pattern activity rather than by cell type.</p>
 </section>
 <section id="preview-the-cogaps-output-structure" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="preview-the-cogaps-output-structure">Preview The CoGAPS Output Structure</h2>
@@ -7235,10 +7235,10 @@ yes
 Cached dense PyCoGAPS input file
 </td>
 <td>
-available
+not included
 </td>
 <td>
-available
+not included
 </td>
 <td>
 genes
@@ -9111,7 +9111,7 @@ Figure&nbsp;11: Pattern 6 is interpreted cautiously as a T-cell and baseline lym
 <span id="cb82-55"><a href="#cb82-55" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="ss">f"</span><span class="sc">{</span>pattern_to_map<span class="sc">}</span><span class="ss"> activity on the PBMC UMAP"</span>)</span>
 <span id="cb82-56"><a href="#cb82-56" aria-hidden="true" tabindex="-1"></a>fig.colorbar(scatter, ax<span class="op">=</span>axes[<span class="dv">1</span>], label<span class="op">=</span><span class="st">"Pattern activity"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;matplotlib.colorbar.Colorbar object at 0x7fffb64d0fd0&gt;</code></pre>
+<pre><code>&lt;matplotlib.colorbar.Colorbar object at 0x7fb27d1bb8e0&gt;</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb84"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -9354,7 +9354,7 @@ Figure&nbsp;14: Condition shifts for every selected-model pattern across annotat
 <span id="cb90-22"><a href="#cb90-22" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"CoGAPS pattern"</span>)</span>
 <span id="cb90-23"><a href="#cb90-23" aria-hidden="true" tabindex="-1"></a>fig.colorbar(im, ax<span class="op">=</span>ax, label<span class="op">=</span><span class="st">"stim - control"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;matplotlib.colorbar.Colorbar object at 0x7fffb62c0e80&gt;</code></pre>
+<pre><code>&lt;matplotlib.colorbar.Colorbar object at 0x7fb27cf710f0&gt;</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb92"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -9789,7 +9789,7 @@ Figure&nbsp;16: Directionality check for <code>Pattern3</code>, the dendritic / 
 <span id="cb101-56"><a href="#cb101-56" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb101-57"><a href="#cb101-57" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"R analysis mode:"</span>, analysis_mode_label_r, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>R analysis mode: Full chosen-model RDS </code></pre>
+<pre><code>R analysis mode: Lightweight exported A/P matrices </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(pattern_names_r) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
 <span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"Pattern columns:"</span>, <span class="fu">paste</span>(pattern_names_r, <span class="at">collapse =</span> <span class="st">", "</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
@@ -9840,7 +9840,7 @@ Runtime in original environment, minutes: 15.9 </code></pre>
 <span id="cb107-23"><a href="#cb107-23" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb107-24"><a href="#cb107-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Python analysis mode:"</span>, analysis_mode_label)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Python analysis mode: Full chosen-model H5AD</code></pre>
+<pre><code>Python analysis mode: Lightweight exported A/P matrices</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb109"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Pattern columns:"</span>, pattern_names)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -11213,11 +11213,11 @@ Stein-O’Brien, Genevieve L., Brian S. Clark, Thomas Sherman, Cristina Zibetti,
 <span id="cb175-3"><a href="#cb175-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb175-4"><a href="#cb175-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Python:"</span>, sys.version)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Python: 3.10.12 (main, Jan 26 2026, 14:55:28) [GCC 11.4.0]</code></pre>
+<pre><code>Python: 3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb177"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb177-1"><a href="#cb177-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Platform:"</span>, platform.platform())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Platform: Linux-6.12.76-linuxkit-x86_64-with-glibc2.35</code></pre>
+<pre><code>Platform: Linux-6.17.0-1018-azure-x86_64-with-glibc2.35</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb179"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb179-1"><a href="#cb179-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> package_name <span class="kw">in</span> [<span class="st">"anndata"</span>, <span class="st">"pandas"</span>, <span class="st">"numpy"</span>, <span class="st">"scipy"</span>, <span class="st">"matplotlib"</span>]:</span>
 <span id="cb179-2"><a href="#cb179-2" aria-hidden="true" tabindex="-1"></a>    module <span class="op">=</span> <span class="bu">__import__</span>(package_name)</span>
@@ -11706,7 +11706,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>
   </div>
 </footer>
-<script>var lightboxQuarto = GLightbox({"loop":false,"selector":".lightbox","descPosition":"bottom","openEffect":"zoom","closeEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"descPosition":"bottom","selector":".lightbox","closeEffect":"zoom","loop":false,"openEffect":"zoom"});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {
