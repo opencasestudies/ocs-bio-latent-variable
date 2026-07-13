@@ -2,10 +2,14 @@ Aliquot: |
   One portion of a sample split from the same original material.
 AnnData: |
   A Python data structure for annotated single-cell data, commonly used by Scanpy and PyCoGAPS workflows.
+Antigen presentation: |
+  An immune process in which cells display peptide fragments on major histocompatibility complex molecules so T cells can inspect them.
 Artifact manifest: |
   A small record that lists which data files and saved outputs are included, optional, or intentionally excluded from the case-study repository.
 Autoimmune disease: |
   A disease in which immune responses are directed against the body's own cells or molecules.
+Bayesian model: |
+  A model that uses probability to describe plausible explanations for the data and to represent uncertainty in learned quantities.
 B cell: |
   An adaptive immune cell type that can contribute to antibody responses.
 Biological compression: |
@@ -18,24 +22,42 @@ Cell barcode: |
   A cell- or droplet-level identifier assigned during single-cell sequencing and processing. It is used as a lookup key to keep one profiled cell linked to its expression values, metadata, and later model outputs.
 Cell-type-linked pattern: |
   A learned pattern whose activity mainly follows annotated immune-cell groups rather than the stimulation condition.
+Chi-square: |
+  A model-fit diagnostic that summarizes reconstruction error. Lower values generally indicate better reconstruction, but values can fluctuate during CoGAPS sampling.
 CoGAPS: |
   A Bayesian nonnegative matrix factorization method used to learn overlapping gene-expression patterns and cell activities.
+Coefficient of variation: |
+  A variability measure that divides the standard deviation by the mean, so uncertainty can be interpreted relative to the size of the value being estimated.
+Data stewardship: |
+  Responsible management and use of data across its full life cycle, including respect for participants, privacy, provenance, access conditions, and future reuse.
 Dendritic cell: |
   An antigen-presenting immune cell that helps connect innate sensing to adaptive immune responses.
 Demultiplexing: |
   A computational step that separates pooled single-cell data back into donor- or sample-level assignments.
 Decision manifest: |
   A small record that stores selected model settings and the evidence files used to support that decision.
+De-identification: |
+  Removal or masking of direct identifiers to reduce the chance that data can be linked to a person. De-identification lowers risk but may not remove it completely.
 Diagnostic trace: |
   A saved record of model behavior over iterations, such as chi-square or atom-count values, used to check whether a run behaved as expected.
 Directionality: |
   Whether expression is higher or lower in one condition compared with another.
 Doublet: |
   A droplet or cell barcode that likely contains material from more than one cell.
+Equilibration: |
+  The early phase of a CoGAPS run when the sampler moves away from its starting state before final model summaries are collected.
+Experimental unit: |
+  The independent biological unit that receives a condition or contributes a comparison. In this case study, the donor rather than each individual cell is the main experimental unit.
 Flare: |
   A period when disease signs or symptoms become more active.
 Gene weight: |
   A CoGAPS value describing how strongly a gene contributes to a learned pattern.
+Generalizability: |
+  How far a result can reasonably be applied beyond the people, samples, conditions, and measurements included in a study.
+Gene-set enrichment: |
+  A check for whether genes from a biological reference set appear more often in a selected gene list than expected by chance.
+Genomic privacy: |
+  Protection of DNA, RNA, and related molecular information that could reveal a person's identity, biological relationships, or sensitive traits.
 GEO accession: |
   A stable identifier for a dataset record in the NCBI Gene Expression Omnibus.
 Gene Expression Omnibus: |
@@ -74,6 +96,8 @@ Matrix orientation: |
   The meaning assigned to matrix rows and columns. For CoGAPS input in this case study, rows should represent genes and columns should represent cells.
 Metadata join: |
   A table operation that uses a shared identifier, such as a cell barcode, to attach metadata or model outputs to the correct cells.
+Mixed model: |
+  A statistical model that estimates an overall effect while accounting for grouped or repeated measurements, such as control and stimulated samples from the same donor.
 Model resolution: |
   The number of latent patterns a CoGAPS model is asked to learn; this setting is often written as K.
 Monocyte: |
@@ -94,18 +118,30 @@ Plasmacytoid dendritic cell: |
   A dendritic-cell subtype known for producing large amounts of type I interferon after nucleic-acid sensing.
 Pseudobulk: |
   A summary that combines single-cell counts within a group, such as donor and condition, so expression differences can be compared at a grouped-sample level.
+Posterior uncertainty: |
+  Variation in sampled model summaries that helps indicate how stable a pattern, activity, or gene weight is.
+Proxy measure: |
+  An observed quantity used as a stand-in for a concept that is difficult to measure directly. A proxy can mislead when it does not represent that concept equally across people or settings.
 Quality control: |
   Checks and filters used to remove measurements that are too unreliable for the intended analysis.
 Rank sweep: |
   A planned set of model runs that compares several values of K, usually across multiple seeds or iteration counts, before selecting one model resolution.
 Selected-model outputs: |
   Saved files from the CoGAPS model used for the main case-study analysis, such as metrics, pattern activities, gene weights, and top-gene tables.
+Sign test: |
+  A simple paired test that counts how often the direction of change is the same across matched pairs.
 SingleCellExperiment: |
   A Bioconductor data structure for annotated single-cell data, commonly used in R workflows.
 Single-cell RNA-seq: |
   A sequencing approach that measures gene expression separately for many individual cells.
+Sampling phase: |
+  The phase of a CoGAPS run used to summarize the final pattern matrices after equilibration.
+Secondary data: |
+  Data collected by another person or research team for an earlier purpose and reused to answer a new question.
 Sparse optimization: |
   A CoGAPS implementation option that uses a sparse data representation to improve runtime on sparse single-cell RNA-seq matrices.
+Spearman correlation: |
+  A rank-based correlation that compares whether two measurements order observations similarly.
 Stimulation-associated activity: |
   Pattern activity that differs between stimulated cells and control cells.
 Systemic lupus erythematosus: |

@@ -1,88 +1,33 @@
 # **Additional Information**
 ***
 
-## **Helpful Links**
-***
+## Helpful Links
 
-<u>Terms and concepts covered:</u>
+- [GEO accession GSE96583](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE96583){target="_blank"}
+- [Kang et al. source study](https://doi.org/10.1038/nbt.4042){target="_blank"}
+- [Open Case Studies Guide](https://www.opencasestudies.org/OCS_Guide/){target="_blank"}
+- [CoGAPS Bioconductor package](https://bioconductor.org/packages/CoGAPS){target="_blank"}
+- [PyCoGAPS GitHub repository](https://github.com/FertigLab/pycogaps){target="_blank"}
+- [SingleCellExperiment documentation](https://bioconductor.org/packages/SingleCellExperiment){target="_blank"}
+- [AnnData documentation](https://anndata.readthedocs.io/){target="_blank"}
 
-- AnnData
-- PBMC
-- IFN-beta
-- interferon-stimulated gene
-- latent variable
-- non-negative matrix factorization
-- CoGAPS
-- `A` matrix
-- `P` matrix
-- pseudobulk
-- log2 fold-change
+The Open Case Studies approach is described in the OCS model paper [@wright2023openCaseStudies]. The biological, methodological, and software sources used in this case study are cited where they support a specific claim and are collected in the References section below.
 
-<u>Packages used in this case study:</u>
+## Concepts Covered
 
-- `anndata`
-- `pandas`
-- `numpy`
-- `scipy`
-- `matplotlib`
-- `PyCoGAPS`
-
-## Optional HPC Appendix: How `K = 6` Was Selected
-***
-
-This section is for instructors and advanced users. Learners do not need to run the sweep to complete the case study.
-
-The main analysis uses a saved `K = 6` CoGAPS result. K6 was selected after an initial K7-centered sweep, a lower-K extension, longer-iteration checks, and a candidate pattern-structure comparison. The sweep evaluated IFN-pattern correlation, top-gene overlap stability, runtime, and whether lower-rank models preserved biologically useful non-IFN structure.
-
-The final teaching workflow uses:
-
-- `K = 6`
-- `seed = 2`
-- `n_iter = 2000`
-- one non-distributed chosen-model result
-
-## Sweep summary
-
-```{python}
-summary_by_k = pd.read_csv(PHASE1B_LOWERK_LONG_SUMMARY_CSV)
-summary_by_k.sort_values(["K", "n_iter"])
-```
-
-For `K = 6`, `n_iter = 2000`, the available sweep summary has strong IFN-correlation stability, perfect top-gene overlap across seeds in the lower-K screen, and better preservation of non-IFN structure than K4 or K5. The selected setting should be described as the best choice under this local case-study rule, not as a universal optimum.
-
-## Optional command-line workflow
-
-The original project used SLURM scripts and helper Python scripts. These scripts are preserved in the source analysis folder and selected scripts are copied into this draft under `scripts/` for provenance.
-
-```bash
-# Generate jobs table
-python make_cogaps_jobs_tsv.py
-
-# Prepare cached inputs and jobs on a cluster
-sbatch prep_cogaps_cache_and_jobs_rhino_light.sbatch
-
-# Run the array sweep
-sbatch cogaps_sweep_array_singleprocess_rhino_light.sbatch
-
-# Aggregate sweep results
-sbatch aggregate_cogaps_results_rhino_light.sbatch
-```
-
-This is cluster-specific workflow provenance. It is not intended to be a turnkey cross-cluster deployment guide.
-
-## Figures for model-selection context
-
-The older K7 Jaccard figure is retained only as historical/reference context. The selected-model decision is now based on the lower-K and candidate-structure follow-up analyses.
-
-## Directionality analysis provenance
-
-The directionality analysis used in the main case study was generated with:
-
-- `scripts/pattern_directionality_analysis_r.R`
-- `data/processed/selected_model_k6/r/pattern_gene_directionality_global.csv`
-- `data/processed/selected_model_k6/r/pattern_gene_directionality_by_celltype.csv`
-- `data/processed/selected_model_k6/r/pattern_direction_summary.csv`
-
-It is a targeted analysis of top CoGAPS pattern genes, not a genome-wide differential-expression analysis.
+- systemic lupus erythematosus and type I interferon biology
+- paired IFN-beta stimulation of PBMCs
+- single-cell RNA-seq data and immune-cell annotations
+- latent transcriptional patterns
+- non-negative and Bayesian matrix factorization
+- CoGAPS gene weights and cell activities
+- model resolution (`K`), rank sweeps, and pattern stability
+- convergence and posterior-uncertainty diagnostics
+- stimulation-associated and cell-type-linked patterns
+- donor-paired comparisons and mixed-effects modeling
+- interferon-stimulated genes and targeted gene-set support
+- pseudobulk expression directionality
+- pattern matching across R and Python implementations
+- reproducible analysis with included files and optional full rebuilding
 
 ***

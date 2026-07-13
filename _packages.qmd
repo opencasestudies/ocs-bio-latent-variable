@@ -121,6 +121,7 @@ suppressPackageStartupMessages({
   library(dplyr)
   library(tibble)
   library(readr)
+  library(nlme)
 })
 ```
 
@@ -133,6 +134,7 @@ Package | Use
 `jsonlite` | Read saved metrics JSON files
 `ggplot2` | Plot figures in the R workflow
 `dplyr`, `tibble`, `readr` | Summaries and lightweight artifact I/O
+`nlme` | Optional donor-aware mixed-model check
 
 ### Python
 
@@ -150,6 +152,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy import sparse
+import statsmodels.formula.api as smf
 ```
 
 Package | Use
@@ -158,6 +161,7 @@ Package | Use
 [`pandas`](https://pandas.pydata.org/){target="_blank"} | Summarize metadata, pattern tables, and directionality outputs
 [`numpy`](https://numpy.org/){target="_blank"} | Matrix and numerical operations
 [`scipy`](https://scipy.org/){target="_blank"} | Sparse matrix handling and statistical summaries
+[`statsmodels`](https://www.statsmodels.org/){target="_blank"} | Optional donor-aware mixed-model check
 [`matplotlib`](https://matplotlib.org/){target="_blank"} | Plot figures used in the case study
 [`PyCoGAPS`](https://github.com/FertigLab/pycogaps){target="_blank"} | Optional local CoGAPS model execution in Python
 
@@ -186,7 +190,8 @@ r_runtime_packages <- c(
   "ggplot2",
   "dplyr",
   "tibble",
-  "readr"
+  "readr",
+  "nlme"
 )
 
 data.frame(
@@ -215,8 +220,9 @@ data.frame(
 #| label: runtime-check-python
 import importlib.util
 import scipy
+import statsmodels
 
-python_runtime_packages = ["anndata", "matplotlib", "numpy", "pandas", "scipy"]
+python_runtime_packages = ["anndata", "matplotlib", "numpy", "pandas", "scipy", "statsmodels"]
 
 pd.DataFrame(
     {
@@ -233,6 +239,7 @@ pd.DataFrame(
             np.__version__,
             pd.__version__,
             scipy.__version__,
+            statsmodels.__version__,
             "installed" if importlib.util.find_spec("PyCoGAPS") is not None else "optional/not installed",
         ],
     }
