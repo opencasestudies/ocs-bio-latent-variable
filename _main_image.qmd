@@ -1,5 +1,1 @@
-#### {.outline }
-
-![](img/opening_roadmap_main_user_provided_20260628.png){fig-alt="Roadmap figure showing how the case study turns PBMC data into CoGAPS evidence, from biological setting through model resolution, activity patterns, identity comparison, and response evidence." width=900 .lightbox}
-
-####
+![](img/opening_pattern_atlas_main_user_provided_20260713.png){fig-alt="Opening figure summarizing the paired IFN-beta PBMC experiment and the selected R CoGAPS pattern atlas. Eight donors contribute matched control and six-hour IFN-beta aliquots, producing a prepared dataset of 24,673 cells and 3,000 highly variable genes. A central cell-identity UMAP is surrounded by six activity maps; Pattern 4 is highlighted as a broad IFN-associated response, while the other patterns show monocyte-, dendritic-, myeloid-, and lymphocyte-linked structure." width=900 .lightbox}

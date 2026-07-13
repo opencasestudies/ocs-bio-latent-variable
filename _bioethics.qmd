@@ -1,13 +1,53 @@
 # **Ethical Considerations**
 ***
 
-There are some important ethical considerations when working with data relating to this case study's main questions.
+This case study reuses publicly available human single-cell RNA-seq data rather than collecting new samples. Public access makes research more transparent and allows new questions to be studied without placing additional burdens on participants. It does not make the data ethically neutral. The cells, expression measurements, and donor labels still come from people who contributed to biomedical research.
 
-1. These data come from human immune cells, so learners should treat donor metadata carefully even when the dataset is public and de-identified.
-1. Public case-study repositories should not include protected health information or unnecessary sensitive metadata.
-1. Reproducible workflows improve transparency, but they also make it important to document what data were processed, subset, or cached.
-1. This case study is educational and should not be used for clinical decision-making.
+The previous section described limits on what the experiment and model can establish. This section asks a different question: what responsibilities remain when you reuse, analyze, and share human molecular data?
 
-The processed files in this draft project use donor or patient replicate labels only for analysis structure. We will not attempt to infer private donor attributes from these labels.
+## Public availability does not end ethical responsibility
+
+The Kang et al. data were deposited in the NCBI Gene Expression Omnibus so other researchers could inspect and reuse them [@kang2018multiplexed]. In this case study, they are {{< glossary "Secondary data" display="secondary data" >}}: data collected by another research team for an earlier study and reused here to answer a new analysis question.
+
+Responsible reuse begins with the source. You should identify the original study, preserve its experimental context, cite the investigators and repository accession, and check whether your proposed use is consistent with the repository record and any stated access conditions. A file being downloadable does not mean that every possible use, linkage, or redistribution is appropriate. Ethical {{< glossary "Data stewardship" display="data stewardship" >}} continues after the original study ends because new tools and new linked datasets can create risks that were not obvious when the data were first shared [@fredHutchEthicalDataHandling].
+
+The history of Henrietta Lacks provides an important reminder. Her cells were obtained in 1951 without her knowledge or consent and became widely used in biomedical research. Decades later, the NIH and members of the Lacks family established an agreement governing access to HeLa whole-genome sequence data and recognizing the family's privacy and preferences [@nihLacksFamilyAgreement]. This history is not evidence that the Kang study had the same consent problem. It shows why scientific usefulness and public availability are not sufficient ethical justifications by themselves: respect for participants, families, provenance, and the intended conditions of reuse must remain visible.
+
+## Transcriptomic data still deserve privacy protection
+
+Single-cell RNA-seq measures gene expression rather than producing a complete genome sequence. Even so, sequencing reads can contain inherited genetic variants. The source study used natural genetic variation to assign pooled cells back to coded donors, which demonstrates that molecular data can carry information about individual identity [@kang2018multiplexed]. Reviews of {{< glossary "Genomic privacy" display="genomic privacy" >}} describe re-identification and information-leakage risks that cannot be solved by one technical safeguard alone [@wan2022genomicPrivacy].
+
+The case-study files use coded replicate labels and do not include names, contact information, or clinical identifiers. This {{< glossary "De-identification" display="de-identification" >}} reduces risk, but it should not be interpreted as a guarantee that human molecular data can never be linked back to a person. Do not attempt to identify donors, infer ancestry or other private characteristics, or combine these files with external records for that purpose.
+
+Privacy protection also applies when you create new files. Share only the detail needed for the analysis, remove unnecessary participant-level metadata, and inspect files before placing them in GitHub, Zenodo, or another public repository. When a summarized table or figure is sufficient, it may be more appropriate than redistributing a more detailed cell-level or sequence-level file. When source data already have a stable repository home, linking to that record can preserve provenance and access information better than creating an undocumented copy [@fredHutchProactiveDataManagement].
+
+## Data quality is also an ethical responsibility
+
+Poor data quality can lead to misleading conclusions about people or groups. In this case study, filtering, normalization, highly variable gene selection, broad cell-type annotations, donor labels, and condition labels all shape what CoGAPS can learn. Errors or undocumented decisions at any of these steps can be carried into the final patterns.
+
+That is why the analysis checks the prepared data, preserves donor pairing, documents preprocessing, examines model diagnostics, and keeps expression direction separate from CoGAPS gene weights. These are not only technical habits. They reduce the risk of presenting a computational artifact as biological evidence. Unequal cell-type representation and a cohort of eight lupus donors also mean that the results should not be generalized to every person with lupus or every immune-cell population.
+
+## A latent pattern is not a diagnosis or a mechanism
+
+CoGAPS patterns are inferred statistical summaries. They are not directly measured pathways, fixed cell identities, clinical severity scores, or diagnoses. Pattern activity indicates how strongly a learned expression pattern is represented in a cell; it does not tell you how sick a donor is or whether a treatment will work.
+
+The case study therefore interprets a pattern using several kinds of evidence: cell activity, top genes, stimulation association, donor-paired shifts, cell-type location, directionality, targeted gene sets, diagnostics, and relevant literature. A biological name remains a supported interpretation rather than an intrinsic property discovered without uncertainty. Pattern numbers are also run-specific and should never be treated as portable labels for people or biological states.
+
+## Ask what a proxy actually measures
+
+A {{< glossary "Proxy measure" display="proxy measure" >}} is an observed quantity used as a stand-in for something that cannot be measured directly. Proxies can be useful, but they can also carry hidden assumptions. Obermeyer and colleagues showed that a health-care algorithm produced racial bias when it used health-care cost as a proxy for health need. Because cost did not represent health need equally across groups, the proxy produced unequal results [@obermeyer2019racialBias].
+
+That study used a different dataset and algorithm, but its lesson applies here. IFN correlation is evidence that pattern activity follows the stimulation label; it is not a direct assay of every step in interferon signaling. A top-gene list helps interpret a pattern; it is not proof that the pattern is a complete pathway. An annotated cell type is a useful biological guide; it is not a perfect or permanent description of every cell. Ethical interpretation requires naming what each measure captures, what it leaves out, and what harm could follow if the distinction is ignored.
+
+## Ethical checkpoint for reuse and communication
+
+Before sharing a derivative file, figure, or conclusion from human molecular data, ask:
+
+1. **Is the use consistent with the source?** Have you cited the original investigators and repository, preserved the study context, and checked relevant access or reuse conditions?
+1. **Are you sharing only what is needed?** Could a summarized or de-identified file answer the question with less privacy risk?
+1. **What does the model output actually measure?** Are you distinguishing inferred pattern activity from clinical status, causal mechanism, or participant identity?
+1. **Who could be harmed by an overclaim?** Could the result stigmatize a group, expose private information, or be misused for clinical decisions that the data cannot support?
+
+For this case study, a responsible conclusion stays close to the experiment: the analysis examines expression patterns in matched control and six-hour IFN-beta-stimulated PBMC samples from eight coded lupus donors. It does not identify participants, diagnose lupus, rank donors, predict treatment response, or justify clinical decisions. Responsible reuse means preserving that boundary while giving credit to the people and research team who made the data available.
 
 ***
