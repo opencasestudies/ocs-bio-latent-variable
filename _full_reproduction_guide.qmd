@@ -1,161 +1,1495 @@
 # **Full Reproduction Guide**
 ***
 
-The main learner path uses saved model-selection summaries and lightweight exports from the selected `K = 6` model. This guide is optional. It is for learners, reviewers, or instructors who want to regenerate selected-model outputs after obtaining the larger local files and a compatible CoGAPS environment.
+The main analysis uses included data and saved CoGAPS results so that you can concentrate on interpretation. This guide follows the same analysis in the other direction: it starts with the source data, rebuilds the prepared PBMC dataset, fits the selected R model, and recreates the smaller tables and figures used earlier.
 
-This guide does not ask you to rerun the full HPC sweep. The sweep is represented in the case study by precomputed summaries under `data/processed/k_selection/`.
+You do not need to complete every step. Choose the goal that matches what you want to check, and stop when you have produced the files you need.
 
-## What this reproduces
+:::{.disclaimer_box}
+::::{.disclaimer_box_header}
+How to use this guide
+::::
+::::{.inner_block}
+- **Understand where the included results came from:** read the roadmap and the explanations in each stage. You do not need the large files or a model rerun.
+- **Rebuild tables or figures:** begin with the included selected-model outputs, then run the export, directionality, or figure-building stage you want to check.
+- **Complete the full local R reproduction:** obtain the larger source files, rebuild preprocessing, fit the selected `K = 6` R model, and recreate its diagnostics and interpretation files.
 
-The selected-model reproduction path reruns or regenerates artifacts for:
+The high-performance-computing rank sweep is an optional extension. It is explained near the end so that you can study its design without making cluster work part of the local reproduction route.
+::::
+:::
 
-- `K = 6`
-- `seed = 2`
-- `n_iter = 2000`
-- `sparseOptimization = TRUE`
-- R/Bioconductor CoGAPS as the primary implementation
-- Python/PyCoGAPS-compatible output as a parallel implementation
+## Choose What You Want To Rebuild
 
-The R selected run used heavier diagnostics: trace output, checkpoints, snapshots, and pump samples. The Python path supports the same biological interpretation, but some diagnostic features differ because PyCoGAPS does not expose every R diagnostic in the same way.
+The three routes share the same scripts and output folders, but they begin at different points.
 
-## Required and optional files
+| Your goal | Begin with | Stop when |
+|---|---|---|
+| Understand the evidence chain | The [Reproduction Roadmap](#reproduction-roadmap) | You can explain how source data become the tables and figures used in the analysis. |
+| Rebuild selected outputs | The full selected R model or the included compact tables | The diagnostic tables, directionality summaries, or figures you need have been recreated. |
+| Complete the full local R reproduction | The larger PBMC source file and the validated Docker image | The prepared dataset, selected R model, diagnostics, compact analysis tables, directionality summaries, and figures have all been checked. |
 
-The GitHub-safe case study includes the files needed to render and interpret the selected model. Full reruns require additional local files and enough compute time.
+The selected local model uses `K = 6`, `seed = 2`, 2,000 iterations per phase, and sparse optimization. R/Bioconductor CoGAPS is the primary implementation. A separate optional section shows how the Python-compatible output was produced, but it is not a required second route through the guide.
 
-File | Required for main learner path? | Required for full local rerun?
---- | --- | ---
-`data/source/kang_counts_25k.h5ad` | No | Yes, only if rebuilding the prepared PBMC dataset from source counts
-`data/processed/input/preprocessed_cells_hvg3000.h5ad` | Yes | Yes
-`data/processed/k_selection/*.csv` | Yes | No
-`data/processed/selected_model_k6/r/*.csv`, `.tsv.gz`, `.json` | Yes | Regenerated output
-`data/processed/selected_model_k6/python/*.csv`, `.tsv.gz`, `.json` | Yes for Python tabs | Regenerated output
-`data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad` | No | Python rerun only
-`data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds` | No | R full-result inspection/regeneration
-`data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad` | No | Python full-result inspection/regeneration
+## Before You Begin
 
-The optional full-local files may be supplied from Zenodo, another artifact host, or private local storage. They should not be committed to ordinary GitHub history.
+Full reproduction uses the validated Docker image introduced in [Packages and Setup](#packages-and-setup). The image provides R, Python, CoGAPS, PyCoGAPS, Quarto, and the packages used by the scripts. It does not contain the project data.
 
-## Recreate the prepared single-cell dataset
+Keep these three local folders distinct:
 
-Most learners should skip this step. The main case study starts from the prepared file:
+- **Case-study repository:** the GitHub clone containing the pages, scripts, included data, and output folders.
+- **Reproduction archive:** the downloaded Zenodo or local folder containing larger source files and full saved model objects. It is mounted read-only so the downloaded files remain unchanged.
+- **Writable work folder:** a local folder for regenerated files, logs, and trial outputs.
+
+Before starting a long run, confirm that you have enough local storage for the downloaded archive and regenerated model files. Runtime depends on the computer, Docker architecture, diagnostic settings, and thread support. The selected-model section therefore shows what progress should look like instead of promising one universal runtime.
+
+Use the commands below from your computer's Terminal. If you already cloned the repository, skip the `git clone` command and move into your existing repository folder.
+
+```bash
+# Get the case-study repository if you have not already cloned it.
+git clone https://github.com/opencasestudies/ocs-bio-latent-variable.git
+cd ocs-bio-latent-variable
+
+# Point to the downloaded Zenodo or local reproduction archive.
+mkdir -p "$HOME/cs4_reproduction_archive"
+export CS4_REPRODUCTION_ARCHIVE="$HOME/cs4_reproduction_archive"
+
+# Create a writable folder for regenerated outputs.
+mkdir -p "$PWD/reproduction_work"
+
+# Launch the validated case-study image.
+docker run --platform linux/amd64 --rm -it \
+  -p 8787:8787 \
+  -e PASSWORD="Password12" \
+  -v "$PWD":/home/rstudio/project:rw \
+  -v "$CS4_REPRODUCTION_ARCHIVE":/home/rstudio/project/data/external/reproduction_archive:ro \
+  othomas2/pycogaps-runtime-guide:0.3.0
+```
+
+Inside Docker, the repository appears at `/home/rstudio/project`, and the reproduction archive appears at `/home/rstudio/project/data/external/reproduction_archive`. Write regenerated files to the repository's expected output folders or to `reproduction_work/` while testing.
+
+After the container starts, inspect the downloaded archive before copying or linking anything:
+
+```bash
+cd /home/rstudio/project
+find data/external/reproduction_archive -maxdepth 5 -type f | sort
+```
+
+The scripts use the paths shown in the file inventory below. If the archive preserves those project-relative folders, copy the files you need into the matching writable locations or pass the archive path through the relevant command-line option. For example, the preprocessing script accepts `--source-h5ad`, so it can read the source H5AD directly from the mounted archive without changing the downloaded copy.
+
+Keep model fitting visible in Terminal. The progress messages show whether CoGAPS has loaded the data, entered equilibration, moved into sampling, and completed the requested iterations. They also report atom counts, chi-square values, and elapsed time that can help diagnose a stalled or unexpectedly slow run.
+
+### Complete File Inventory
+
+You only need files associated with the stage you intend to run. Open the inventory below when you need to locate a particular input or understand where an output belongs.
+
+<details>
+<summary><strong>Open the complete file inventory</strong></summary>
+
+<table class="table table-sm" style="width: 100%; table-layout: fixed; font-size: 0.88rem; line-height: 1.35;">
+<colgroup>
+<col style="width: 19%;">
+<col style="width: 30%;">
+<col style="width: 31%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th>File layer</th>
+<th>File or file family</th>
+<th>What it provides</th>
+<th>When you need it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Main analysis</strong></td>
+<td><code style="overflow-wrap:anywhere;">data/processed/input/preprocessed_cells_hvg3000.h5ad</code></td>
+<td>Prepared PBMC cells-by-genes data with metadata, UMAP coordinates, normalized/log-transformed expression, and 3,000 highly variable genes.</td>
+<td>Needed to render the page and run the analysis chunks.</td>
+</tr>
+<tr>
+<td><strong>Main analysis</strong></td>
+<td><code style="overflow-wrap:anywhere;">data/processed/input/preprocess_config_hvg3000.json</code></td>
+<td>Compact record of filtering, normalization, transformation, and highly variable gene choices.</td>
+<td>Needed to check what expression matrix CoGAPS received.</td>
+</tr>
+<tr>
+<td><strong>Main analysis</strong></td>
+<td><code style="overflow-wrap:anywhere;">data/processed/k_selection/*.csv</code></td>
+<td>Precomputed sweep summaries used to inspect model-resolution evidence and support the selected <code>K = 6</code> model.</td>
+<td>Needed for the Data Import model-choice checkpoint.</td>
+</tr>
+<tr>
+<td><strong>Main analysis</strong></td>
+<td><code style="overflow-wrap:anywhere;">data/processed/selected_model_k6/r/*.csv</code>, <code>*.tsv.gz</code>, <code>*.json</code></td>
+<td>Lightweight selected-model evidence from the primary R/Bioconductor CoGAPS run.</td>
+<td>Needed for R tabs, diagnostics, visualization, and analysis.</td>
+</tr>
+<tr>
+<td><strong>Main analysis</strong></td>
+<td><code style="overflow-wrap:anywhere;">data/processed/selected_model_k6/python/*.csv</code>, <code>*.tsv.gz</code>, <code>*.json</code></td>
+<td>Lightweight Python-compatible selected-model evidence.</td>
+<td>Needed for Python tabs.</td>
+</tr>
+<tr>
+<td><strong>Main analysis</strong></td>
+<td><code style="overflow-wrap:anywhere;">data/processed/figures/*.png</code> and <code>img/*.png</code></td>
+<td>Render-ready figures used in the displayed case study.</td>
+<td>Needed for the published HTML page.</td>
+</tr>
+<tr>
+<td><strong>Full local reproduction</strong></td>
+<td><code style="overflow-wrap:anywhere;">data/source/kang_counts_25k.h5ad</code></td>
+<td>Larger source PBMC IFN-beta single-cell count file used to rebuild preprocessing from source counts.</td>
+<td>Needed only if you rebuild the prepared PBMC dataset.</td>
+</tr>
+<tr>
+<td><strong>Full local reproduction</strong></td>
+<td><code style="overflow-wrap:anywhere;">data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad</code></td>
+<td>Dense genes-by-cells matrix used by the Python/PyCoGAPS selected-model launcher.</td>
+<td>Needed only for a full Python-compatible rerun.</td>
+</tr>
+<tr>
+<td><strong>Full local reproduction</strong></td>
+<td><code style="overflow-wrap:anywhere;">data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds</code></td>
+<td>Full selected R CoGAPS object used to regenerate diagnostics and compact R analysis tables.</td>
+<td>Needed for full R object inspection or table regeneration.</td>
+</tr>
+<tr>
+<td><strong>Full local reproduction</strong></td>
+<td><code style="overflow-wrap:anywhere;">data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.checkpoint.out</code></td>
+<td>Checkpoint from the selected heavy diagnostic R run.</td>
+<td>Useful for debugging or resuming a run.</td>
+</tr>
+<tr>
+<td><strong>Full local reproduction</strong></td>
+<td><code style="overflow-wrap:anywhere;">data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad</code></td>
+<td>Full selected Python/PyCoGAPS-compatible result.</td>
+<td>Needed for full Python-compatible object inspection.</td>
+</tr>
+</tbody>
+</table>
+
+The included files are enough to read the case study, rerun its summaries, and inspect the selected model evidence. The larger files are only needed to rebuild preprocessing, refit a model, or inspect a full saved model object.
+
+</details>
+
+## Stage 1: Confirm The Environment And Files
+
+Begin by checking which files are already present. These commands do not change the data or fit a model. They report whether each expected file can be found and, when it is present, show its size. This lets you distinguish a missing input from a problem inside a later script.
+
+Choose either tab. Both checks look for the same files and should report the same availability results.
+
+::: {.panel-tabset}
+
+### R
+
+```bash
+Rscript - <<'RS'
+checks <- c(
+  "prepared PBMC data" = "data/processed/input/preprocessed_cells_hvg3000.h5ad",
+  "preprocessing record" = "data/processed/input/preprocess_config_hvg3000.json",
+  "R lightweight pattern summary" = "data/processed/selected_model_k6/r/pattern_summary.csv",
+  "Python lightweight pattern summary" = "data/processed/selected_model_k6/python/pattern_summary.csv",
+  "mounted reproduction archive" = "data/external/reproduction_archive",
+  "source count file" = "data/source/kang_counts_25k.h5ad",
+  "dense Python CoGAPS input" = "data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad",
+  "full R selected model" = "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds",
+  "full Python selected model" = "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad"
+)
+
+for (label in names(checks)) {
+  path <- checks[[label]]
+  exists <- file.exists(path)
+  size <- if (exists) sprintf("%.1f MB", file.info(path)$size / 1e6) else ""
+  cat(sprintf("%-34s %-8s %10s  %s\n", label, if (exists) "present" else "missing", size, path))
+}
+RS
+```
+
+### Python
+
+```bash
+/opt/cogaps-venv/bin/python - <<'PY'
+from pathlib import Path
+
+checks = {
+    "prepared PBMC data": "data/processed/input/preprocessed_cells_hvg3000.h5ad",
+    "preprocessing record": "data/processed/input/preprocess_config_hvg3000.json",
+    "R lightweight pattern summary": "data/processed/selected_model_k6/r/pattern_summary.csv",
+    "Python lightweight pattern summary": "data/processed/selected_model_k6/python/pattern_summary.csv",
+    "mounted reproduction archive": "data/external/reproduction_archive",
+    "source count file": "data/source/kang_counts_25k.h5ad",
+    "dense Python CoGAPS input": "data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad",
+    "full R selected model": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds",
+    "full Python selected model": "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad",
+}
+
+for label, path in checks.items():
+    p = Path(path)
+    status = "present" if p.exists() else "missing"
+    size = f"{p.stat().st_size / 1_000_000:.1f} MB" if p.exists() else ""
+    print(f"{label:34s} {status:8s} {size:>10s}  {path}")
+PY
+```
+
+:::
+
+Interpret `missing` in relation to your goal. A missing included file can prevent the corresponding analysis or page from running. A missing larger file only prevents the reproduction stage that uses it. For example, you can rebuild figures without the source-count file, but you cannot rebuild preprocessing without it.
+
+**Stage 1 checkpoint:** The repository is visible inside Docker, and every input required for the stage you intend to run is reported as `present`. It is acceptable for unused optional files to be reported as `missing`.
+
+## Reproduction Roadmap
+
+The local reproduction route has six stages. Each stage answers one practical question and produces files that can be checked before you continue.
+
+| Stage | Question | Main result | A reasonable stopping point |
+|---|---|---|---|
+| 1. Confirm the setup | Can the container see the repository and the files needed for your chosen goal? | A successful environment and file check. | Stop here if you only wanted to verify that reproduction is possible. |
+| 2. Prepare the PBMC data | Can the source counts be transformed into the same cells-by-genes dataset used in the analysis? | Prepared PBMC data, an optional genes-by-cells input, and a preprocessing record. | Stop here if you are checking preprocessing only. |
+| 3. Fit the selected R model | Can the selected CoGAPS settings be rerun to completion? | Full R CoGAPS object, run metrics, checkpoint, and visible progress log. | Stop here if you only need the full fitted model. |
+| 4. Create diagnostic and analysis tables | Can the full model be converted into the compact evidence inspected earlier? | Trace, uncertainty, gene-weight, cell-activity, top-gene, and activity-summary files. | Stop here if you need refreshed model evidence but not new figures. |
+| 5. Rebuild directionality and figures | Do the high-weight genes move up or down after stimulation, and can the displayed figures be recreated? | Directionality tables, supporting pseudobulk summaries, and refreshed figures. | Stop here when all interpretation outputs are current. |
+| 6. Compare the regenerated files with the expected result | Did every stage produce the expected dimensions, settings, and file families? | A completed reproduction check. | This is the end of the primary local route. |
+
+The route is cumulative only when you begin from the source data. If you already have the full selected R model, you can begin at Stage 4. If you only changed an interpretation table, you may be able to begin at Stage 5.
+
+## Stage 2: Rebuild The Prepared PBMC Dataset
+
+Use this stage when you want to reconstruct the expression dataset that CoGAPS received. The source file contains the larger single-cell count dataset; the prepared file keeps the cells, metadata, normalized expression values, and 3,000 highly variable genes used in the analysis.
 
 ```text
 data/processed/input/preprocessed_cells_hvg3000.h5ad
 ```
 
-Full local reproduction starts earlier, from the larger source count file. That source file is planned as a Zenodo/local artifact because it is not needed for the main learner path and should not be stored in ordinary GitHub history.
+If you already have the included prepared file and do not want to revisit preprocessing, you can continue to Stage 3. Reading the explanation is still useful because filtering, normalization, transformation, and gene selection determine the exact matrix available to the model.
 
-The preprocessing script records the same preparation choices discussed in Data Wrangling:
+The preprocessing script is:
 
-- keep genes detected in at least three cells,
-- normalize each cell to a common library-size target of 10,000,
-- log-transform the normalized expression values,
-- select 3,000 highly variable genes using the recorded HVG method, and
-- write both the prepared cells-by-genes `.h5ad` file and the optional dense genes-by-cells PyCoGAPS input.
+```text
+scripts/reproduction/prepare_preprocessed_hvg3000.py
+```
 
-Run this only after the larger source file is available locally:
+It performs six main jobs:
+
+1. reads the larger source `.h5ad` file;
+1. keeps a raw count layer for steps that need count-scale values;
+1. removes genes detected in too few cells;
+1. normalizes and log-transforms expression values;
+1. selects 3,000 highly variable genes; and
+1. writes both the prepared case-study data file and the optional dense PyCoGAPS input.
+
+The recorded preprocessing workflow is implemented in Python. Run the complete script inside Docker from `/home/rstudio/project` after the source file is available:
 
 ```bash
-python scripts/reproduction/prepare_preprocessed_hvg3000.py \
+/opt/cogaps-venv/bin/python scripts/reproduction/prepare_preprocessed_hvg3000.py \
   --source-h5ad data/source/kang_counts_25k.h5ad \
   --out-h5ad data/processed/input/preprocessed_cells_hvg3000.h5ad \
   --cogaps-input-h5ad data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad \
   --config-json data/processed/input/preprocess_config_hvg3000.json
 ```
 
-This step is intentionally separated from model fitting. It rebuilds the analysis-ready single-cell file and the CoGAPS input matrix; it does not choose `K`, run the rank sweep, or fit the selected model.
+### The Script Starts By Making The Choices Visible
 
-## Run inside the validated image
+The first important design choice is that preprocessing settings are command-line arguments, not hidden constants. The script has defaults, but the command above could override them if you wanted to test another preprocessing recipe.
 
-The case study is validated against the OpenMP-enabled runtime image used during development:
-
-```bash
-docker run --rm --platform linux/amd64 \
-  -v "$PWD:/workspace/case-study" \
-  -w /workspace/case-study \
-  othomas2/pycogaps-runtime-guide:0.3.0 \
-  bash
+```python
+parser.add_argument("--min-cells", type=int, default=3)
+parser.add_argument("--target-sum", type=float, default=10000.0)
+parser.add_argument("--n-top-genes", type=int, default=3000)
+parser.add_argument("--hvg-flavor", default="seurat_v3")
 ```
 
-After the shell opens, run the selected-model scripts from `/workspace/case-study`. If you are fitting a model, run it in a visible Terminal so you can watch progress and stop it if runtime becomes impractical.
+These four arguments describe the main preprocessing decisions:
 
-## R selected-model reproduction
+- `min_cells = 3` means a gene must be detected in at least three cells to remain in the dataset.
+- `target_sum = 10000` means each cell is rescaled to the same total expression depth before log transformation.
+- `n_top_genes = 3000` means the prepared CoGAPS input uses 3,000 highly variable genes.
+- `hvg_flavor = "seurat_v3"` names the highly variable gene-selection method.
 
-The R path is the primary reproduction route. It reruns the selected K6 sparse-on model with the diagnostic settings used for the local selected R result.
+This is a useful reproducibility habit. If a later model result changes, you can check whether the model changed or whether the expression matrix was rebuilt with different preprocessing settings.
+
+### The Script Reads The Source AnnData File And Preserves Counts
+
+The source file is an AnnData `.h5ad` object. In single-cell analysis, an AnnData object usually stores cells as rows and genes as columns. The main expression matrix is `adata.X`, and additional versions of the matrix can be stored in `adata.layers`.
+
+The script reads the source file and makes sure there is a `counts` layer:
+
+```python
+adata = ad.read_h5ad(args.source_h5ad)
+
+if "counts" not in adata.layers:
+    adata.layers["counts"] = adata.X.copy()
+```
+
+This matters because the workflow uses expression values in more than one way. The normalized, log-transformed matrix is easier to compare across cells and is the matrix used for the prepared case-study file. The count-scale layer is kept so highly variable gene selection can use count-like values, and so later full-reproduction steps have a clear record of where count-scale information came from.
+
+### Filtering Removes Genes With Too Little Information
+
+The first filtering step removes genes detected in too few cells:
+
+```python
+sc.pp.filter_genes(adata, min_cells=args.min_cells)
+```
+
+This step does not decide which immune cells are important. It only removes genes that are so rarely detected that they are unlikely to help the factorization. In this workflow, a gene must be detected in at least three cells. That low threshold is intentionally permissive: it removes nearly absent genes while retaining a broad expression space for the highly variable gene step.
+
+### Normalization And Log Transformation Put Cells On A Comparable Scale
+
+Single cells can differ in total captured RNA or sequencing depth. Before comparing expression values across cells, the script rescales each cell and then log-transforms the normalized values:
+
+```python
+sc.pp.normalize_total(adata, target_sum=args.target_sum)
+sc.pp.log1p(adata)
+```
+
+`normalize_total()` rescales each cell so that its total expression is comparable to the same target value. Here, that target is 10,000. `log1p()` then applies a log transform using `log(1 + expression)`, which reduces the dominance of very large expression values while keeping zeros defined.
+
+For this case study, the important point is not the specific number 10,000 by itself. The important point is that CoGAPS receives an expression matrix where cells have already been put on a more comparable scale.
+
+### Highly Variable Genes Define The Modeling Space
+
+The source study measured many genes, but the selected model uses 3,000 highly variable genes. Highly variable genes are genes whose expression varies enough across cells to help distinguish cell states, cell identities, stimulation responses, or other structure.
+
+The script marks highly variable genes, then creates a reduced AnnData object:
+
+```python
+sc.pp.highly_variable_genes(
+    adata,
+    n_top_genes=args.n_top_genes,
+    flavor=args.hvg_flavor,
+    layer="counts",
+    subset=False,
+)
+
+adata_hvg = adata[:, adata.var["highly_variable"].to_numpy()].copy()
+```
+
+There are two small programming details worth noticing here. First, `subset=False` means the function adds a `highly_variable` column to `adata.var` rather than immediately dropping genes. Second, the next line uses that Boolean column as a mask to keep only the selected genes. A Boolean mask is a true/false vector: genes marked `TRUE` stay in `adata_hvg`, and genes marked `FALSE` are left behind.
+
+The result is the prepared matrix used by the case study:
+
+```text
+24,673 cells x 3,000 highly variable genes
+```
+
+### The Script Writes Two Orientations Of The Same Prepared Data
+
+The main prepared file is written as cells by genes, which is the usual AnnData orientation:
+
+```python
+adata_hvg.write_h5ad(args.out_h5ad)
+```
+
+The script also creates an optional dense genes-by-cells file for the Python/PyCoGAPS full rerun:
+
+```python
+def build_cogaps_input(preprocessed_cells: ad.AnnData) -> ad.AnnData:
+    cogaps_input = preprocessed_cells.T.copy()
+    X = cogaps_input.X.toarray() if sparse.issparse(cogaps_input.X) else cogaps_input.X
+    cogaps_input.X = np.asarray(X, dtype=np.float64)
+    cogaps_input.var = preprocessed_cells.obs.copy()
+    cogaps_input.var_names = preprocessed_cells.obs_names.astype(str).copy()
+    cogaps_input.obs = preprocessed_cells.var.copy()
+    cogaps_input.obs_names = preprocessed_cells.var_names.astype(str).copy()
+    return cogaps_input
+```
+
+This function transposes the matrix so genes become rows and cells become columns. It also densifies the matrix and stores it as `float64`. That dense genes-by-cells file is not needed for the main analysis, but it is needed if you want to rerun the Python-compatible CoGAPS workflow with the supplied launcher.
+
+The two outputs are therefore different views of the same prepared expression space:
+
+- `preprocessed_cells_hvg3000.h5ad`: cells by genes, used for the main analysis and most summaries.
+- `cogaps_input_genesxcells_hvg3000_float64.h5ad`: genes by cells, used for the optional full Python-compatible rerun.
+
+### Record The Preprocessing Choices
+
+At the end, the script writes a compact JSON record:
+
+```python
+config = {
+    "raw_h5ad": args.source_h5ad.name,
+    "min_cells": args.min_cells,
+    "target_sum": args.target_sum,
+    "hvg_flavor": args.hvg_flavor,
+    "n_top_genes": args.n_top_genes,
+    "prepared_h5ad": str(args.out_h5ad),
+    "cogaps_input_h5ad": str(args.cogaps_input_h5ad),
+}
+args.config_json.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+```
+
+After the script finishes, inspect `data/processed/input/preprocess_config_hvg3000.json`. That record should name the source file, minimum cell threshold, library-size target, highly variable gene method, number of selected genes, and output paths.
+
+This file records the expression space given to CoGAPS before model interpretation begins. It answers questions such as why the selected model has 3,000 genes and whether the expression matrix was normalized before model fitting.
+
+### Check The Prepared Dataset
+
+After preprocessing finishes, inspect the saved file in either R or Python. The two snippets check the same properties: matrix dimensions, availability of the count layer, and the cell metadata fields used later for donor-, condition-, and cell-type-aware analyses.
+
+::: {.panel-tabset}
+
+#### R
+
+```r
+prepared_r <- zellkonverter::readH5AD(
+  "data/processed/input/preprocessed_cells_hvg3000.h5ad"
+)
+
+data.frame(
+  cells = ncol(prepared_r),
+  genes = nrow(prepared_r),
+  count_layer_present = "counts" %in% SummarizedExperiment::assayNames(prepared_r),
+  metadata_fields = paste(
+    colnames(SummarizedExperiment::colData(prepared_r)),
+    collapse = ", "
+  )
+)
+```
+
+#### Python
+
+```python
+import anndata as ad
+
+prepared_py = ad.read_h5ad(
+    "data/processed/input/preprocessed_cells_hvg3000.h5ad"
+)
+
+{
+    "cells": prepared_py.n_obs,
+    "genes": prepared_py.n_vars,
+    "count_layer_present": "counts" in prepared_py.layers,
+    "metadata_fields": list(prepared_py.obs.columns),
+}
+```
+
+:::
+
+The prepared dataset should contain 24,673 cells and 3,000 genes. The metadata should retain the fields needed to connect each cell with its condition, donor, annotated PBMC identity, and UMAP coordinates.
+
+:::{.reproducibility_box}
+::::{.reproducibility_box_header}
+Why this step is separate
+::::
+::::{.inner_block}
+Preprocessing changes the matrix that CoGAPS sees. Keeping it in a separate script makes the sequence visible: first rebuild the prepared PBMC dataset, then fit CoGAPS, then summarize the selected model. This separation also makes it easier to check a preprocessing decision without accidentally rerunning a long model.
+
+For a full check, compare three files together:
+
+- the source file, `data/source/kang_counts_25k.h5ad`;
+- the prepared file, `data/processed/input/preprocessed_cells_hvg3000.h5ad`; and
+- the preprocessing record, `data/processed/input/preprocess_config_hvg3000.json`.
+
+Together, they tell you where the data started, what matrix the case study uses, and which preprocessing choices connect the two.
+::::
+:::
+
+**Stage 2 checkpoint:** The prepared H5AD file contains 24,673 cells and 3,000 genes, the count layer is available, and the preprocessing JSON records the settings used to create it. If those checks pass, the expression data are ready for the selected-model fit.
+
+## Stage 3: Fit The Selected R CoGAPS Model
+
+The selected R model is the primary fitted model used in the analysis. This stage runs CoGAPS and saves the complete model object. Later stages read that object to create diagnostics, compact tables, directionality summaries, and figures. Keeping model fitting separate from those later exports means you do not need to refit CoGAPS whenever you want to redraw a figure or change a summary table.
+
+The selected R model uses:
+
+- `K = 6`, the selected number of CoGAPS patterns;
+- `seed = 2`, the run seed used for the selected model;
+- `n_iter = 2000`, the number of iterations per CoGAPS phase;
+- `sparseOptimization = TRUE`, the sparse-optimized model path; and
+- diagnostic collection, including trace output, checkpoints, snapshots, and pump samples.
+
+The complete R output map is available below for reference. You do not need to memorize it before running the model.
+
+<details>
+<summary><strong>Open the selected R model output map</strong></summary>
+
+<table class="table table-sm" style="width: 100%; table-layout: fixed; font-size: 0.88rem; line-height: 1.35;">
+<colgroup>
+<col style="width: 21%;">
+<col style="width: 23%;">
+<col style="width: 28%;">
+<col style="width: 28%;">
+</colgroup>
+<thead>
+<tr>
+<th>R reproduction step</th>
+<th>Reads</th>
+<th>Writes</th>
+<th>Why the output matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Fit selected R model</strong><br><code style="overflow-wrap:anywhere;">run_selected_model_r.sh</code><br><code style="overflow-wrap:anywhere;">cogaps_run_one_singleprocess_r.R</code></td>
+<td><code style="overflow-wrap:anywhere;">preprocessed_cells_hvg3000.h5ad</code> and selected model settings.</td>
+<td><code style="overflow-wrap:anywhere;">cogaps_K6_seed2_iter2000.rds</code>, <code style="overflow-wrap:anywhere;">cogaps_K6_seed2_iter2000.metrics.json</code>, checkpoint output, and runtime log messages.</td>
+<td>Creates the full primary R CoGAPS result and records the model settings, runtime, mean chi-square, run-specific IFN-associated pattern label, and top genes.</td>
+</tr>
+<tr>
+<td><strong>Export R diagnostics</strong><br><code style="overflow-wrap:anywhere;">export_cogaps_diagnostics_r.R</code></td>
+<td>Prepared PBMC file plus the full selected R <code>.rds</code> object.</td>
+<td>Trace CSV, snapshot summary, uncertainty summary, pump outputs, mean pattern assignment table, and diagnostics JSON.</td>
+<td>Makes convergence, stability, posterior uncertainty, and diagnostic evidence inspectable without manually opening the full model object.</td>
+</tr>
+<tr>
+<td><strong>Export compact R analysis tables</strong><br><code style="overflow-wrap:anywhere;">export_lightweight_cogaps_derivatives_r.R</code></td>
+<td>Prepared PBMC file plus the full selected R <code>.rds</code> object.</td>
+<td>Gene-weight matrix, cell-activity matrix, posterior SD matrices, activity-with-metadata table, top genes, pattern correlations, cell-type summaries, donor summaries, and pattern summary.</td>
+<td>Creates the compact tables used throughout Data Import, Data Exploration, Data Visualization, and Data Analysis.</td>
+</tr>
+<tr>
+<td><strong>Rebuild directionality evidence</strong><br><code style="overflow-wrap:anywhere;">pattern_directionality_analysis_r.R</code></td>
+<td>Prepared expression values, selected-model top genes, donor labels, condition labels, and annotated PBMC identities.</td>
+<td>Global and cell-type directionality tables, pattern direction summary, pseudobulk support tables, and directionality heatmap.</td>
+<td>Shows whether high-weight pattern genes are higher or lower after IFN-beta stimulation; this prevents interpreting CoGAPS weights as expression direction.</td>
+</tr>
+</tbody>
+</table>
+
+</details>
+
+### Run The Model Where You Can See Its Progress
+
+Run the launcher from your normal computer Terminal or from the Docker/RStudio Terminal while you can watch the output:
 
 ```bash
 bash scripts/reproduction/run_selected_model_r.sh
 ```
 
-The script writes outputs to:
+The launcher writes selected-model outputs to:
 
 ```text
 data/processed/selected_model_k6/r/
 ```
 
-If a full R model object is already present, the wrapper will stop before overwriting it. To intentionally rerun the selected model, use:
+If a full R selected-model object already exists, the launcher stops before overwriting it. To intentionally rerun the model, set `FORCE_RERUN=1`:
 
 ```bash
 FORCE_RERUN=1 bash scripts/reproduction/run_selected_model_r.sh
 ```
 
-After the model finishes, regenerate lightweight R artifacts:
+The launcher checks that R CoGAPS was compiled with OpenMP support and sets `OMP_NUM_THREADS=4` before starting the run. It then calls `scripts/cogaps_run_one_singleprocess_r.R` with the selected settings.
+
+The R runner does four important things:
+
+1. reads `data/processed/input/preprocessed_cells_hvg3000.h5ad` with `zellkonverter`;
+1. extracts the normalized expression matrix used by CoGAPS;
+1. builds `CogapsParams()` with the selected `K`, seed, iteration count, and sparse-optimization setting; and
+1. saves the full CoGAPS result as `cogaps_K6_seed2_iter2000.rds`.
+
+The log should show CoGAPS progressing through equilibration and sampling. During **equilibration**, the sampler moves away from its starting state and toward a region of the model space that fits the data better. During **sampling**, CoGAPS continues updating the model while collecting the posterior summaries used in the final result.
+
+While the run is active, check for four signs of progress:
+
+1. the input dimensions and selected settings are printed correctly;
+1. iteration numbers continue to increase;
+1. the run moves from equilibration into sampling; and
+1. the final requested sampling iteration is reached without an error.
+
+Chi-square values do not need to decrease at every sampling update. CoGAPS is a stochastic sampler rather than a monotone optimizer, so small fluctuations during the sampling phase are expected. The diagnostic exports in Stage 4 make the full trace easier to inspect.
+
+The first files to check after this stage are the full selected R CoGAPS object, the metrics JSON, and the checkpoint file. The `.rds` object is the source for later exports. The metrics JSON provides a compact record of settings, runtime, dimensions, and headline model summaries. The checkpoint is mainly useful for debugging or resuming a run.
+
+**Stage 3 checkpoint:** The Terminal shows that equilibration and sampling completed, and `data/processed/selected_model_k6/r/` contains the full `.rds` model and metrics JSON. Do not continue to the export stage if the fit ended with an error or stopped before completing sampling.
+
+## Stage 4: Create Diagnostic And Analysis Tables
+
+The full model object contains much more information than is practical to display directly in a web page. This stage creates smaller files for two purposes:
+
+- **diagnostic tables** summarize the model trace, snapshots, assignments, and posterior uncertainty;
+- **analysis tables** organize gene weights, cell activities, top genes, and grouped activity summaries into forms that can be inspected with R or Python.
+
+These are not additional model fits. They are different views of the same selected R result.
+
+### Export Diagnostics From The Full R Model
+
+The full `.rds` object is useful, but it is not the easiest format to inspect directly. The diagnostic export script reads the full result and writes smaller files that are easy to plot or summarize:
 
 ```bash
 Rscript scripts/export_cogaps_diagnostics_r.R
+```
+
+This script reads two inputs:
+
+- `data/processed/input/preprocessed_cells_hvg3000.h5ad`, so it can check matrix orientation and names; and
+- `data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds`, the full selected R CoGAPS result.
+
+The script extracts four model matrices from the CoGAPS object:
+
+- the gene-loading matrix, often called `A`, where rows are genes and columns are patterns;
+- the cell-activity matrix, often called `P`, where rows are cells and columns are patterns;
+- the gene-loading standard-deviation matrix; and
+- the cell-activity standard-deviation matrix.
+
+It also reads CoGAPS metadata: chi-square trace values, atom-count traces, snapshots, pump statistics, mean pattern assignment summaries, run parameters, and runtime metadata.
+
+The main outputs are:
+
+<table class="table table-sm" style="width: 100%; table-layout: fixed; font-size: 0.88rem; line-height: 1.35;">
+<colgroup>
+<col style="width: 34%;">
+<col style="width: 42%;">
+<col style="width: 24%;">
+</colgroup>
+<thead>
+<tr>
+<th>Diagnostic output</th>
+<th>What it contains</th>
+<th>Where it is used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code style="overflow-wrap:anywhere;">cogaps_K6_seed2_iter2000.trace.csv</code></td>
+<td>Chi-square and atom-count traces across the run.</td>
+<td>Convergence and stability checks.</td>
+</tr>
+<tr>
+<td><code style="overflow-wrap:anywhere;">cogaps_K6_seed2_iter2000.snapshot_summary.csv</code></td>
+<td>Comparisons between saved intermediate sampler states and the final selected result.</td>
+<td>Snapshot-based stability checks.</td>
+</tr>
+<tr>
+<td><code style="overflow-wrap:anywhere;">cogaps_K6_seed2_iter2000.pattern_uncertainty_summary.csv</code></td>
+<td>Per-pattern uncertainty summaries based on posterior standard-deviation matrices.</td>
+<td>Posterior uncertainty interpretation.</td>
+</tr>
+<tr>
+<td><code style="overflow-wrap:anywhere;">cogaps_K6_seed2_iter2000.pump_stat.tsv.gz</code><br><code style="overflow-wrap:anywhere;">cogaps_K6_seed2_iter2000.mean_pattern_assignment.tsv.gz</code></td>
+<td>Pump and mean pattern-assignment diagnostics, when those diagnostics are present in the saved result.</td>
+<td>Pattern assignment and diagnostic record.</td>
+</tr>
+<tr>
+<td><code style="overflow-wrap:anywhere;">cogaps_K6_seed2_iter2000.diagnostics.json</code></td>
+<td>Compact diagnostic record with dimensions, parameter settings, trace summaries, snapshot counts, and metadata fields.</td>
+<td>Run-level reporting and checks.</td>
+</tr>
+</tbody>
+</table>
+
+These files are the bridge between model fitting and model diagnosis. They let you check convergence, snapshots, uncertainty, and runtime without opening a large R object by hand.
+
+### Export Compact R Tables For Analysis
+
+The next export script turns the same full R result into the matrices and summaries used throughout the main analysis sections:
+
+```bash
 Rscript scripts/export_lightweight_cogaps_derivatives_r.R
+```
+
+This script again reads the prepared PBMC `.h5ad` file and the selected R `.rds` object. It then creates the tables that the main analysis uses.
+
+The export script creates three kinds of files:
+
+<table class="table table-sm" style="width: 100%; table-layout: fixed; font-size: 0.88rem; line-height: 1.35;">
+<colgroup>
+<col style="width: 22%;">
+<col style="width: 36%;">
+<col style="width: 42%;">
+</colgroup>
+<thead>
+<tr>
+<th>Output family</th>
+<th>Output files</th>
+<th>How the files are used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model matrices</td>
+<td><code style="overflow-wrap:anywhere;">pattern_gene_weights.tsv.gz</code><br><code style="overflow-wrap:anywhere;">pattern_cell_activities.tsv.gz</code><br><code style="overflow-wrap:anywhere;">pattern_gene_weight_sd.tsv.gz</code><br><code style="overflow-wrap:anywhere;">pattern_cell_activity_sd.tsv.gz</code></td>
+<td>Gene weights identify which genes define each pattern. Cell activities identify where each pattern is used across cells. Posterior SD matrices support uncertainty summaries.</td>
+</tr>
+<tr>
+<td>Cell activities joined to metadata</td>
+<td><code style="overflow-wrap:anywhere;">pattern_cell_activities_with_metadata.csv.gz</code></td>
+<td>Joins each cell's pattern activities to barcode, condition, donor/replicate, annotated PBMC identity, and UMAP coordinates. This is what lets later sections compare pattern activity with stimulation, cell identity, donor structure, and UMAP location.</td>
+</tr>
+<tr>
+<td>Pattern-level summaries</td>
+<td><code style="overflow-wrap:anywhere;">pattern_top_genes.csv</code><br><code style="overflow-wrap:anywhere;">pattern_correlations.csv</code><br><code style="overflow-wrap:anywhere;">pattern_activity_by_celltype_condition.csv</code><br><code style="overflow-wrap:anywhere;">pattern_activity_by_replicate_condition.csv</code><br><code style="overflow-wrap:anywhere;">pattern_summary.csv</code></td>
+<td>Ranks top genes, measures association with stimulation, summarizes activity by PBMC identity and donor, and gathers compact pattern evidence for tables and figures.</td>
+</tr>
+</tbody>
+</table>
+
+These files are not separate models. They are smaller views of the selected R model, reshaped so you can inspect one kind of evidence at a time.
+
+### Check The Exported Tables In R Or Python
+
+The export scripts are written in R because they read the full R CoGAPS object. Once the CSV and compressed TSV files have been created, you can inspect them in either language.
+
+::: {.panel-tabset}
+
+#### R
+
+```r
+pattern_summary_r <- readr::read_csv(
+  "data/processed/selected_model_k6/r/pattern_summary.csv",
+  show_col_types = FALSE
+)
+
+pattern_summary_r |>
+  dplyr::select(
+    pattern,
+    corr_with_stim,
+    dominant_cell_type,
+    top_genes_top8
+  ) |>
+  knitr::kable()
+```
+
+#### Python
+
+```python
+import pandas as pd
+
+pattern_summary_py = pd.read_csv(
+    "data/processed/selected_model_k6/r/pattern_summary.csv"
+)
+
+pattern_summary_py[
+    [
+        "pattern",
+        "corr_with_stim",
+        "dominant_cell_type",
+        "top_genes_top8",
+    ]
+]
+```
+
+:::
+
+Both snippets read the same R-selected-model summary. The check should return one row for each of the six patterns and retain the columns needed to connect stimulation association, cell identity, and top genes.
+
+**Stage 4 checkpoint:** The trace, uncertainty, gene-weight, cell-activity, top-gene, and pattern-summary files are present. The pattern summary contains six rows, and the matrices retain matching gene, cell, and pattern labels.
+
+## Stage 5: Rebuild Directionality And Figures
+
+The selected-model exports show which genes have high CoGAPS weights and where each pattern is active. They do not show whether a high-weight gene increases or decreases after IFN-beta stimulation. This stage adds that expression-direction evidence and rebuilds the figures that display the combined results.
+
+### Rebuild Directionality Evidence
+
+The R model export tells you which genes have high CoGAPS weights. It does not tell you whether those genes are higher after IFN-beta stimulation. Directionality is rebuilt with a separate expression-contrast script. Choose the command that matches the selected-model outputs you are rebuilding.
+
+::: {.panel-tabset}
+
+#### R
+
+```bash
 Rscript scripts/pattern_directionality_analysis_r.R
 ```
 
-These commands refresh the trace, summary tables, exported `A` and `P` matrices, activity summaries, top genes, and targeted directionality outputs used in the main narrative.
+#### Python
 
-## Python selected-model reproduction
+```bash
+/opt/cogaps-venv/bin/python scripts/pattern_directionality_analysis.py
+```
 
-The Python path is a parallel implementation. It is useful for learners who want to compare the same conceptual workflow in Python, but it is not the primary implementation for this case study.
+:::
+
+This script uses the prepared expression values, selected model top genes, donor labels, condition labels, and annotated PBMC identities. It builds pseudobulk summaries and compares IFN-beta-stimulated aliquots with matched control aliquots.
+
+The main outputs are:
+
+<table class="table table-sm" style="width: 100%; table-layout: fixed; font-size: 0.88rem; line-height: 1.35;">
+<colgroup>
+<col style="width: 34%;">
+<col style="width: 44%;">
+<col style="width: 22%;">
+</colgroup>
+<thead>
+<tr>
+<th>Directionality output</th>
+<th>What it contains</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code style="overflow-wrap:anywhere;">pattern_gene_directionality_global.csv</code></td>
+<td>Gene-level IFN-beta versus control contrasts across all cells.</td>
+<td>Checks whether top genes rise or fall overall.</td>
+</tr>
+<tr>
+<td><code style="overflow-wrap:anywhere;">pattern_gene_directionality_by_celltype.csv</code></td>
+<td>Gene-level contrasts within annotated PBMC identities.</td>
+<td>Checks whether direction is consistent or cell-type-specific.</td>
+</tr>
+<tr>
+<td><code style="overflow-wrap:anywhere;">pattern_direction_summary.csv</code></td>
+<td>One row per pattern summarizing how many top genes are higher or lower after stimulation.</td>
+<td>Supports pattern-level direction interpretation.</td>
+</tr>
+<tr>
+<td><code style="overflow-wrap:anywhere;">pseudobulk_counts_global.csv</code><br><code style="overflow-wrap:anywhere;">pseudobulk_counts_by_celltype.csv</code></td>
+<td>Support files showing how many observations contributed to the expression summaries.</td>
+<td>Helps check whether a contrast is based on enough cells.</td>
+</tr>
+<tr>
+<td><code style="overflow-wrap:anywhere;">pattern_gene_directionality_heatmap.png</code></td>
+<td>Compact visual summary of directionality across patterns and cell types.</td>
+<td>Useful for quick review after rerunning the directionality script.</td>
+</tr>
+</tbody>
+</table>
+
+The directionality step is part of the evidence chain because CoGAPS weights and expression fold-changes answer different questions. A gene can strongly define a pattern and still move in either direction after stimulation. The case study therefore interprets gene weights and expression direction together.
+
+### Check The R Output Folder
+
+After running the R fit and export scripts, inspect the output folder:
+
+```bash
+find data/processed/selected_model_k6/r -maxdepth 1 -type f | sort
+```
+
+You should see the full selected model, diagnostic files, lightweight matrices, activity summaries, top-gene tables, and directionality summaries. If a later case-study section cannot find a file, start by checking whether it appears in this folder and whether it was regenerated after the latest model run.
+
+### Regenerate The Displayed Figures
+
+Most displayed figures are built from processed evidence tables rather than directly from a live model fit. That separation makes it possible to update a visualization without waiting for CoGAPS to run again.
+
+Regenerate the shared selected-model figures with:
+
+```bash
+/opt/cogaps-venv/bin/python scripts/build_selected_k6_figures.py
+```
+
+The script writes figures under `data/processed/figures/` and updates selected display copies under `img/`. Figures generated directly by R and Python code chunks are refreshed when the complete Quarto page is rendered:
+
+```bash
+quarto render
+```
+
+Before interpreting a rebuilt figure, confirm that its source table was regenerated from the same selected-model output. A newly rendered image does not correct an older source table by itself.
+
+**Stage 5 checkpoint:** Directionality tables and pseudobulk support files are present for the selected output, the expected figures have been regenerated, and the Quarto render completes without missing-file errors.
+
+## Stage 6: Confirm The Reproduction
+
+A successful script exit is necessary, but it is not the only check. Confirm that the regenerated files still represent the intended dataset and model.
+
+| Check | Expected result | Why it matters |
+|---|---|---|
+| Prepared data | 24,673 cells, 3,000 genes, and the required condition, donor, cell-type, and UMAP fields | Confirms that CoGAPS received the intended cells, genes, and metadata. |
+| Selected settings | `K = 6`, seed 2, 2,000 iterations per phase, and sparse optimization enabled | Confirms that the regenerated model matches the selected specification. |
+| Pattern structure | Six gene-weight and cell-activity columns with aligned pattern labels | Confirms that the compact exports describe the complete selected model. |
+| Diagnostics | Trace, snapshot, uncertainty, metrics, and available pump files are present for R | Confirms that the evidence needed to evaluate the R run was exported. |
+| Directionality | Global, cell-type, paired, and pseudobulk support tables are present | Confirms that expression direction can be interpreted separately from CoGAPS weights. |
+| Display files | Figures were rebuilt after their source tables | Confirms that the page displays the current evidence. |
+
+The checks below summarize the selected-model folder from either language. They do not decide whether the biological interpretation is correct; they confirm that the expected evidence files are available and internally complete.
+
+::: {.panel-tabset}
+
+### R
+
+```r
+r_dir <- "data/processed/selected_model_k6/r"
+
+r_check <- data.frame(
+  check = c(
+    "pattern rows",
+    "trace file",
+    "uncertainty file",
+    "directionality file",
+    "full R model"
+  ),
+  value = c(
+    nrow(readr::read_csv(file.path(r_dir, "pattern_summary.csv"), show_col_types = FALSE)),
+    file.exists(file.path(r_dir, "cogaps_K6_seed2_iter2000.trace.csv")),
+    file.exists(file.path(r_dir, "cogaps_K6_seed2_iter2000.pattern_uncertainty_summary.csv")),
+    file.exists(file.path(r_dir, "pattern_gene_directionality_global.csv")),
+    file.exists(file.path(r_dir, "cogaps_K6_seed2_iter2000.rds"))
+  )
+)
+
+knitr::kable(r_check)
+```
+
+### Python
+
+```python
+from pathlib import Path
+import pandas as pd
+
+py_dir = Path("data/processed/selected_model_k6/python")
+
+py_check = pd.DataFrame(
+    {
+        "check": [
+            "pattern rows",
+            "metrics file",
+            "directionality file",
+            "full Python-compatible model",
+        ],
+        "value": [
+            len(pd.read_csv(py_dir / "pattern_summary.csv")),
+            (py_dir / "cogaps_K6_seed2_iter2000.metrics.json").exists(),
+            (py_dir / "pattern_gene_directionality_global.csv").exists(),
+            (py_dir / "cogaps_K6_seed2_iter2000.h5ad").exists(),
+        ],
+    }
+)
+
+py_check
+```
+
+:::
+
+The R table should report six pattern rows and `TRUE` for every expected file. The Python table should also report six pattern rows and `TRUE` for its available output files. The Python list is shorter because the Python-compatible run does not expose the same snapshot and pump diagnostics as the selected R run.
+
+If a regenerated value differs, stop before replacing the included evidence. Review the preprocessing record, matrix orientation, model settings, random seed, runtime environment, and export logs to identify where the difference entered the workflow.
+
+**Stage 6 checkpoint:** The structural checks pass, the expected files are current, and any differences from the included result have been explained before the regenerated files are used for interpretation.
+
+## Optional Extension: Rebuild The Python-Compatible Model
+
+Use this extension if you want to recreate the Python-compatible output shown in the Python tabs. It addresses the same biological questions as the selected R model, but its pattern numbers and available diagnostics are implementation-specific. In the included outputs, the R run labels the IFN-associated signal `Pattern4`, while the Python-compatible output labels the corresponding signal `Pattern5`.
+
+The Python-compatible fit requires the dense genes-by-cells input:
+
+```text
+data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad
+```
+
+Run the launcher in a visible Terminal:
 
 ```bash
 bash scripts/reproduction/run_selected_model_python.sh
 ```
 
-The script writes outputs to:
-
-```text
-data/processed/selected_model_k6/python/
-```
-
-If a full Python model object is already present, the wrapper will stop before overwriting it. To intentionally rerun it, use:
+The result is written under `data/processed/selected_model_k6/python/`. If a full result already exists, the launcher stops before replacing it. Use `FORCE_RERUN=1` only when you have intentionally chosen to replace that result:
 
 ```bash
 FORCE_RERUN=1 bash scripts/reproduction/run_selected_model_python.sh
 ```
 
-After the model finishes, regenerate lightweight Python artifacts:
+The Python-compatible launcher uses `nSnapshots = 0` because its snapshot-conversion route does not provide the same reliable diagnostic export used by R. After model fitting completes, create the compact tables and directionality summaries:
 
 ```bash
-python scripts/export_lightweight_cogaps_derivatives.py
-python scripts/pattern_directionality_analysis.py
+/opt/cogaps-venv/bin/python scripts/export_lightweight_cogaps_derivatives.py
+/opt/cogaps-venv/bin/python scripts/pattern_directionality_analysis.py
 ```
 
-The selected Python output may use different pattern labels from the R output. In the current saved artifacts, the R selected run labels the IFN-associated pattern `Pattern4`, while the Python saved output labels the corresponding signal `Pattern5`.
+Check the Python-compatible folder with the Python tab in Stage 6. Compare biological evidence by cell activity, top genes, condition association, and cell-type structure rather than assuming that the same pattern number must be recovered in both implementations.
 
-## Regenerate learner-facing figures
+**Python extension checkpoint:** The full H5AD result, metrics JSON, six-row pattern summary, gene-weight and cell-activity files, and directionality tables are present. Pattern labels may differ from R, but the evidence used to match corresponding signals should be available.
 
-After refreshing selected-model outputs, regenerate the selected K6 figures:
+## Optional Extension: Understand How The Rank Sweep Was Run
 
-```bash
-python scripts/build_selected_k6_figures.py
-```
+The full rank sweep supports the choice of `K = 6`, but it is not part of local reproduction. The sweep used many CoGAPS runs across candidate ranks, seeds, and iteration counts. That is cluster work, not work you need to do on a local computer.
 
-The render-ready copies live under:
+The useful idea is not the exact cluster command. The useful idea is the design pattern: build one reproducible input, write an explicit table of model runs, let the scheduler run one row at a time, and aggregate the completed runs into evidence tables before choosing one model for interpretation.
+
+The included model-selection summaries live under:
 
 ```text
-data/processed/figures/
+data/processed/k_selection/
 ```
 
-## What not to rerun here
+Those files are used in [Data Import](#data-import) to evaluate model resolution. They connect the completed sweep runs with the model-choice tables shown in the case study.
 
-The full HPC sweep is intentionally outside the ordinary reproduction path. It requires cluster-specific job scripts, many array tasks, and longer runtime. For this case study, learners analyze the sweep summaries that are already included under `data/processed/k_selection/`.
+For transparency, the repository includes portable copies of the scripts that prepared the sweep inputs, ran individual model fits, aggregated completed runs, and summarized candidate models:
 
-If a reviewer wants to audit the full sweep, treat that as a separate HPC provenance exercise rather than part of the main case-study workflow.
+```text
+scripts/reproduction/hpc_sweep/
+```
+
+Read the sweep as a sequence of jobs. A Slurm launch script submits work to the cluster, while the Python script named in the same row performs the data preparation, model fitting, or summarization.
+
+<table class="table table-sm" style="width: 100%; table-layout: fixed; font-size: 0.86rem; line-height: 1.35;">
+<colgroup>
+<col style="width: 16%;">
+<col style="width: 25%;">
+<col style="width: 29%;">
+<col style="width: 30%;">
+</colgroup>
+<thead>
+<tr>
+<th>Sweep stage</th>
+<th>Launcher or script</th>
+<th>What it does</th>
+<th>What you check afterward</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Prepare cache and jobs</strong></td>
+<td><code style="overflow-wrap:anywhere;">prep_cogaps_cache_and_jobs_rhino_light.sbatch</code><br><code style="overflow-wrap:anywhere;">cogaps_prep_cache.py</code><br><code style="overflow-wrap:anywhere;">make_cogaps_jobs_tsv.py</code></td>
+<td>The Slurm launch script activates the cluster environment, preprocesses the PBMC object once, and writes a headerless jobs table. Each row of the jobs table is one model setting: <code>K</code>, seed, and iteration count.</td>
+<td>The cache folder should contain the prepared cells-by-genes object, the genes-by-cells CoGAPS input, and the preprocessing JSON. The jobs table should have the expected number of rows.</td>
+</tr>
+<tr>
+<td><strong>Run one model per array task</strong></td>
+<td><code style="overflow-wrap:anywhere;">cogaps_sweep_array_singleprocess_rhino_light.sbatch</code><br><code style="overflow-wrap:anywhere;">cogaps_run_one_singleprocess.py</code></td>
+<td>Each Slurm array task uses <code>SLURM_ARRAY_TASK_ID</code> to read one row from the jobs table. It passes that row to the single-run PyCoGAPS script, which fits one model and writes model output plus a metrics JSON.</td>
+<td>The <code>runs/</code> folder should fill with one model object and one metrics file per completed row. The <code>logs/</code> folder should show progress and failures for individual tasks.</td>
+</tr>
+<tr>
+<td><strong>Aggregate completed runs</strong></td>
+<td><code style="overflow-wrap:anywhere;">aggregate_cogaps_results_rhino_light.sbatch</code><br><code style="overflow-wrap:anywhere;">cogaps_aggregate_results.py</code></td>
+<td>The aggregation script reads completed metrics files, checks sweep coverage, summarizes runtime and IFN-pattern evidence by <code>K</code>, and writes report-ready summary files.</td>
+<td>The output folder should contain <code>per_run_metrics.csv</code>, <code>summary_by_K.csv</code>, and <code>report.md</code>. These files are the starting point for model-resolution evidence.</td>
+</tr>
+<tr>
+<td><strong>Summarize candidate models</strong></td>
+<td><code style="overflow-wrap:anywhere;">phase2_candidate_model_interpretation.py</code></td>
+<td>This post-processing script compares selected candidate models more closely. It summarizes pattern activity, top genes, cell-type and condition structure, and cross-model pattern matching.</td>
+<td>The key output files include <code>candidate_pattern_summary.csv</code>, <code>candidate_top_genes.csv</code>, activity-by-cell-type summaries, and cross-model match tables.</td>
+</tr>
+<tr>
+<td><strong>Check high-rank behavior</strong></td>
+<td><code style="overflow-wrap:anywhere;">submit_phase3_highk_2000_rhino.sh</code><br><code style="overflow-wrap:anywhere;">phase3_highk_fragmentation_analysis.py</code></td>
+<td>The helper submits a separate high-<code>K</code> array using the same single-run and aggregation launch scripts. The fragmentation script then checks whether higher ranks improve the IFN evidence or mostly split existing structure.</td>
+<td>The high-rank summary should show whether large <code>K</code> values improve stability enough to justify their runtime. In this case study, they did not replace the selected lower-rank model.</td>
+</tr>
+</tbody>
+</table>
+
+### Initial Sweep Order
+
+The first sweep pass used the same cached PBMC input for all model runs. That matters because the rank comparison should not mix changes in `K` with changes in preprocessing. The preparation job therefore runs once before the array is submitted.
+
+```bash
+# Stage 1: build the cached PBMC input and the jobs table.
+sbatch prep_cogaps_cache_and_jobs_rhino_light.sbatch
+```
+
+The preparation job calls these two Python programs:
+
+```bash
+python3 cogaps_prep_cache.py \
+  --input-h5ad kang_counts_25k.h5ad \
+  --outdir results_cogaps_singleprocess_hpc \
+  --min-cells 3 \
+  --target-sum 10000 \
+  --n-top-genes 3000 \
+  --hvg-flavor seurat_v3
+
+python3 make_cogaps_jobs_tsv.py \
+  --k-grid 7,9,11,13 \
+  --seeds 1,2,3,4,5 \
+  --iters 2000,10000,20000 \
+  --out results_cogaps_singleprocess_hpc/jobs.tsv
+```
+
+The jobs table is intentionally simple. It has no header; each line is a tab-separated `K`, seed, and iteration count. The initial sweep table had `60` rows: four candidate ranks, five seeds, and three iteration settings.
+
+```bash
+# Stage 2: submit one Slurm array task per row in jobs.tsv.
+OUTDIR=results_cogaps_singleprocess_hpc
+JOBS_TSV=${OUTDIR}/jobs.tsv
+N=$(wc -l < "${JOBS_TSV}")
+
+sbatch --export=ALL,OUTDIR="${OUTDIR}",JOBS_TSV="${JOBS_TSV}" \
+  --array=0-$((N-1))%15 \
+  cogaps_sweep_array_singleprocess_rhino_light.sbatch
+```
+
+The `%15` limit is a concurrency cap. It allows at most 15 array tasks to run at the same time. Each task is still one single-process CoGAPS run; the cluster parallelism comes from running many independent rows of the jobs table.
+
+Each array task reads one row from `jobs.tsv` and calls:
+
+```bash
+python3 cogaps_run_one_singleprocess.py \
+  --cogaps-input-h5ad results_cogaps_singleprocess_hpc/cache/cogaps_input_genesxcells_hvg3000_float64.h5ad \
+  --outdir results_cogaps_singleprocess_hpc \
+  --k "${K}" \
+  --seed "${SEED}" \
+  --n-iter "${NITER}" \
+  --stim-label "stim" \
+  --top-genes 50 \
+  --use-sparse-opt \
+  --blas-threads "${NTHREADS}" \
+  --cogaps-threads "${NTHREADS}"
+```
+
+That single-run script writes one saved result and one metrics JSON for the row it received. The metrics file is important because it records the runtime, selected IFN-associated pattern, IFN correlation, top genes, and status for that model.
+
+```bash
+# Stage 3: aggregate after the array completes.
+sbatch --dependency=afterok:<ARRAY_JOB_ID> \
+  aggregate_cogaps_results_rhino_light.sbatch
+```
+
+After the model jobs finish, the aggregation job calls:
+
+```bash
+python3 cogaps_aggregate_results.py \
+  --outdir results_cogaps_singleprocess_hpc \
+  --k-grid 7,9,11,13 \
+  --seeds 1,2,3,4,5 \
+  --iters 2000,10000,20000 \
+  --top-genes 50 \
+  --preprocessed-h5ad results_cogaps_singleprocess_hpc/cache/preprocessed_cells_hvg3000.h5ad \
+  --no-umap
+```
+
+Aggregation is where individual model runs become model-selection evidence. The script does not choose a model by looking at one run in isolation. It reads the available metrics files, checks whether expected combinations are missing, summarizes performance by candidate rank, and writes the tables that can be inspected in the case study.
+
+### Lower-Rank And Longer-Run Follow-Ups
+
+The first sweep made it clear that the lower end of the rank grid needed closer inspection. The follow-up jobs reused the same array runner, but with new jobs tables:
+
+<table class="table table-sm" style="width: 100%; table-layout: fixed; font-size: 0.86rem; line-height: 1.35;">
+<colgroup>
+<col style="width: 22%;">
+<col style="width: 25%;">
+<col style="width: 28%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th>Follow-up</th>
+<th>Jobs table</th>
+<th>What varied</th>
+<th>Why it was run</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Lower-rank sweep</strong></td>
+<td><code style="overflow-wrap:anywhere;">jobs_phase1_lowerk.tsv</code></td>
+<td><code>K = 2</code> through <code>K = 7</code>, seeds 1-5, 2,000 iterations.</td>
+<td>Ask whether a smaller number of patterns could still recover the IFN-associated signal.</td>
+</tr>
+<tr>
+<td><strong>Longer lower-rank sweep</strong></td>
+<td><code style="overflow-wrap:anywhere;">jobs_phase1b_lowerk_long.tsv</code></td>
+<td><code>K = 4</code>, <code>5</code>, and <code>6</code>, seeds 1-5, 10,000 and 20,000 iterations.</td>
+<td>Check whether lower-rank candidates stayed stable when the model was allowed to run longer.</td>
+</tr>
+<tr>
+<td><strong>Candidate-model interpretation</strong></td>
+<td><code style="overflow-wrap:anywhere;">phase2_candidate_model_interpretation.py</code></td>
+<td>Post-processing of candidate models rather than a new CoGAPS fit.</td>
+<td>Compare pattern-level biology, top genes, activity structure, and cross-model matching before selecting the case-study model.</td>
+</tr>
+</tbody>
+</table>
+
+These follow-ups are why the case study does not treat the original rank grid as the final word. The lower-rank and longer-run summaries provide the evidence that `K = 6` is a better compromise for this PBMC IFN-beta dataset than a more compressed `K = 4` model or a higher-rank model.
+
+### High-K Extension
+
+The high-rank extension asked the opposite question: could much larger ranks reveal useful structure that the lower-rank candidates missed? It used candidate values from `K = 14` to `K = 80` at 2,000 iterations:
+
+```bash
+bash submit_phase3_highk_2000_rhino.sh
+```
+
+That helper prepares the high-K jobs table, makes the Slurm launch files available on Rhino, submits the array, and then submits the aggregation job after the array succeeds. The same single-run Python script performs the model fit for each row.
+
+The high-K jobs table used:
+
+```text
+K_GRID=14,20,26,32,38,44,50,56,62,68,74,80
+SEEDS=1,2,3,4,5
+ITERS=2000
+```
+
+After those runs, `phase3_highk_fragmentation_analysis.py` summarized whether high ranks improved the IFN-associated evidence or mostly split signal across extra patterns. The current model decision uses the high-K extension as a check against missing a clearly better high-rank model; it does not make high-K reruns part of local reproduction.
+
+:::{.disclaimer_box}
+::::{.disclaimer_box_header}
+Cluster note
+::::
+::::{.inner_block}
+Do not run the Slurm commands while working through the main analysis. They are included so you can see how the sweep summaries were produced and how you might design a similar sweep for your own project. Cluster paths, account settings, conda environments, partitions, memory, walltime, and software activation commands must be adapted to the cluster where you run them.
+::::
+:::
+
+The important design idea is transferable even if the cluster commands are not. A sweep should record candidate ranks, seeds, iteration counts, runtime, pattern summaries, stability evidence, and enough per-run metadata to let the model choice be reviewed later. For this case study, the reviewed summaries under `data/processed/k_selection/` are the evidence used in the model-choice checkpoint.
+
+## Script Library: Read The Complete Workflow
+
+The complete scripts show every operation used by the reproduction workflow. The command examples above show how to launch the major stages. The dropdowns below show the script bodies in the same order: path setup, preprocessing, model fitting, diagnostics, table exports, directionality, figure building, and the optional rank sweep.
+
+Opening a dropdown displays code but does not run it. Shell launchers such as `run_selected_model_r.sh` and `run_selected_model_python.sh` set paths and options before calling R or Python. The dropdowns show the underlying R or Python programs so you can inspect the operations that produce each output.
+
+```{r full-reproduction-script-dropdowns}
+#| echo: false
+#| results: asis
+escape_html <- function(x) {
+  x <- gsub("&", "&amp;", x, fixed = TRUE)
+  x <- gsub("<", "&lt;", x, fixed = TRUE)
+  x <- gsub(">", "&gt;", x, fixed = TRUE)
+  x
+}
+
+emit_script_dropdown <- function(title, path, language, note = NULL) {
+  cat("<details class=\"script-source\">\n")
+  cat("<summary><strong>", escape_html(title), "</strong></summary>\n\n", sep = "")
+  cat("<p><code>", escape_html(path), "</code>", sep = "")
+  if (!is.null(note)) {
+    cat("<br>", escape_html(note), sep = "")
+  }
+  cat("</p>\n\n")
+
+  if (!file.exists(path)) {
+    cat("<p><em>This script is not present in the current checkout.</em></p>\n")
+    cat("</details>\n\n")
+    return(invisible(NULL))
+  }
+
+  script_text <- paste(readLines(path, warn = FALSE), collapse = "\n")
+  cat("````{.", language, " code-copy=\"true\"}\n", sep = "")
+  cat(script_text, "\n", sep = "")
+  cat("````\n")
+  cat("</details>\n\n")
+}
+
+scripts_to_show <- list(
+  list(
+    title = "1. R path helper",
+    path = "scripts/helpers/case_study_paths.R",
+    language = "r",
+    note = "Defines the R file paths used by analysis chunks and reproduction checks."
+  ),
+  list(
+    title = "2. Python path helper",
+    path = "scripts/helpers/case_study_paths.py",
+    language = "python",
+    note = "Defines the Python file paths used by analysis chunks and reproduction checks."
+  ),
+  list(
+    title = "3. Rebuild the prepared PBMC dataset",
+    path = "scripts/reproduction/prepare_preprocessed_hvg3000.py",
+    language = "python",
+    note = "Reads the larger source AnnData file, filters genes, normalizes/log-transforms expression, selects highly variable genes, and writes the prepared inputs."
+  ),
+  list(
+    title = "4. Fit the selected R CoGAPS model",
+    path = "scripts/cogaps_run_one_singleprocess_r.R",
+    language = "r",
+    note = "This is the R program called by the selected-model shell launcher."
+  ),
+  list(
+    title = "5. Export R diagnostic tables",
+    path = "scripts/export_cogaps_diagnostics_r.R",
+    language = "r",
+    note = "Reads the full selected R CoGAPS object and writes trace, snapshot, uncertainty, pump, and diagnostic files."
+  ),
+  list(
+    title = "6. Export compact R selected-model tables",
+    path = "scripts/export_lightweight_cogaps_derivatives_r.R",
+    language = "r",
+    note = "Turns the full selected R model into gene-weight, cell-activity, top-gene, correlation, and summary tables."
+  ),
+  list(
+    title = "7. Fit the Python-compatible selected model",
+    path = "scripts/cogaps_run_one_singleprocess.py",
+    language = "python",
+    note = "This is the Python program called by the selected-model shell launcher."
+  ),
+  list(
+    title = "8. Export compact Python-compatible tables",
+    path = "scripts/export_lightweight_cogaps_derivatives.py",
+    language = "python",
+    note = "Turns the full Python-compatible result into the tables used by Python tabs."
+  ),
+  list(
+    title = "9. Rebuild R directionality evidence",
+    path = "scripts/pattern_directionality_analysis_r.R",
+    language = "r",
+    note = "Builds pseudobulk expression contrasts for selected R pattern genes."
+  ),
+  list(
+    title = "10. Rebuild Python directionality evidence",
+    path = "scripts/pattern_directionality_analysis.py",
+    language = "python",
+    note = "Builds pseudobulk expression contrasts for Python-compatible pattern genes."
+  ),
+  list(
+    title = "11. Rebuild selected-model figures",
+    path = "scripts/build_selected_k6_figures.py",
+    language = "python",
+    note = "Regenerates the selected-model figures and figure source tables used in the case study."
+  ),
+  list(
+    title = "12. Rebuild setup figures",
+    path = "scripts/generate_packages_setup_figures.py",
+    language = "python",
+    note = "Regenerates the setup and workflow figures used in Packages and Setup."
+  ),
+  list(
+    title = "13. Prepare the HPC sweep cache",
+    path = "scripts/reproduction/hpc_sweep/cogaps_prep_cache.py",
+    language = "python",
+    note = "Creates cached input files for the cluster sweep."
+  ),
+  list(
+    title = "14. Build the HPC sweep jobs table",
+    path = "scripts/reproduction/hpc_sweep/make_cogaps_jobs_tsv.py",
+    language = "python",
+    note = "Creates the rank, seed, and iteration grid used by Slurm array jobs."
+  ),
+  list(
+    title = "15. Run one HPC sweep task",
+    path = "scripts/reproduction/hpc_sweep/cogaps_run_one_singleprocess.py",
+    language = "python",
+    note = "Runs one single-process CoGAPS sweep model from a jobs-table row."
+  ),
+  list(
+    title = "16. Aggregate HPC sweep results",
+    path = "scripts/reproduction/hpc_sweep/cogaps_aggregate_results.py",
+    language = "python",
+    note = "Aggregates per-run sweep outputs into summary files."
+  ),
+  list(
+    title = "17. Interpret lower-K candidate models",
+    path = "scripts/reproduction/hpc_sweep/phase2_candidate_model_interpretation.py",
+    language = "python",
+    note = "Builds candidate-model interpretation summaries used in the K-selection evidence."
+  ),
+  list(
+    title = "18. Summarize high-K fragmentation",
+    path = "scripts/reproduction/hpc_sweep/phase3_highk_fragmentation_analysis.py",
+    language = "python",
+    note = "Summarizes high-rank sweep behavior and fragmentation evidence."
+  )
+)
+
+for (script in scripts_to_show) {
+  do.call(emit_script_dropdown, script)
+}
+```
+
+## Software Used For Reproduction
+
+The validated runtime image is:
+
+```text
+othomas2/pycogaps-runtime-guide:0.3.0
+```
+
+Full reproduction assumes that the image provides the following software families:
+
+### R And Bioconductor
+
+R, Bioconductor, and `CoGAPS` are used for the primary selected-model fitting route and R diagnostic exports. The R CoGAPS build should report OpenMP support for the multithreaded selected-model run.
+
+Check OpenMP support inside Docker with:
+
+```bash
+Rscript -e 'cat("R CoGAPS OpenMP support:", CoGAPS::compiledWithOpenMPSupport(), "\n")'
+```
+
+### Python
+
+Python packages such as `anndata`, `scanpy`, `numpy`, `pandas`, and `scipy` are used for preprocessing, Python-compatible selected-model fitting, table generation, and figure building. The PyCoGAPS-compatible runtime supports the Python rerun path.
+
+Check the main Python runtime with:
+
+```bash
+/opt/cogaps-venv/bin/python - <<'PY'
+import anndata, numpy, pandas, scipy
+print("anndata", anndata.__version__)
+print("numpy", numpy.__version__)
+print("pandas", pandas.__version__)
+print("scipy", scipy.__version__)
+PY
+```
+
+### Rendering, Figures, And Statistical Checks
+
+Quarto renders the case study. `ggplot2`, `matplotlib`, and related plotting tools regenerate figures. `nlme` and `statsmodels` support optional donor-aware mixed-model checks in the analysis section.
+
+## Troubleshooting By Stage
+
+When a command fails, begin with the first error message rather than the final line of the log. The first error usually identifies the missing file, unavailable package, incorrect path, or model-setting problem that caused later messages.
+
+Use the checkpoint at the end of each stage to decide where to begin. If Stage 1 passed but preprocessing failed, for example, you can focus on the source file and preprocessing command rather than rebuilding the Docker image.
+
+### Docker Or RStudio Server Does Not Start Correctly
+
+| What you see | What it usually means | What to check and do |
+|---|---|---|
+| Docker reports that the image cannot be found | The image has not been pulled, or its name or tag is misspelled. | Run `docker pull othomas2/pycogaps-runtime-guide:0.3.0`, then copy the image name directly into the launch command. |
+| Port 8787 is already in use | Another RStudio Server container or local process is using that port. | Stop the older container or map another local port, such as `-p 8788:8787`, and open `http://localhost:8788`. |
+| RStudio Server opens but the project files are absent | The repository was mounted from the wrong local folder. | Stop the container, move to the repository root, and confirm that `index.qmd` is visible before rerunning Docker. |
+| Files can be read but regenerated outputs cannot be written | The repository or output mount is read-only. | Confirm that the repository mount ends in `:rw`. Keep only the downloaded reproduction archive read-only. |
+
+From the RStudio Server Terminal, this command should list `index.qmd`, `data/`, and `scripts/`:
+
+```bash
+cd /home/rstudio/project
+pwd
+ls
+```
+
+If those entries are missing, correct the mount before continuing.
+
+### Preprocessing Cannot Find Or Create Its Files
+
+| What you see | What it usually means | What to check and do |
+|---|---|---|
+| `kang_counts_25k.h5ad` is missing | The larger source file has not been copied or linked into the expected location. | Place it at `data/source/kang_counts_25k.h5ad` or pass its actual location with `--source-h5ad`. |
+| The H5AD file exists but cannot be read | The path is wrong inside Docker, the download is incomplete, or the file is not a valid H5AD object. | Check the path from inside the container, compare the file size with the archive record, and redownload an incomplete file. |
+| The prepared file has unexpected dimensions | A filter, highly variable gene setting, or source file differs from the recorded workflow. | Compare the command with `preprocess_config_hvg3000.json`; check `min_cells`, `target_sum`, `n_top_genes`, and `hvg_flavor`. |
+| The dense Python input cannot be written | The output folder is absent, not writable, or the computer lacks enough memory for densification. | Create the output folder, check permissions, and skip the dense Python input when reproducing only the R route. |
+
+After correcting the problem, rerun the Stage 2 dataset check. Do not begin model fitting until the prepared dataset has 24,673 cells, 3,000 genes, and the expected metadata.
+
+### The Selected Model Does Not Start Or Finish
+
+| What you see | What it usually means | What to check and do |
+|---|---|---|
+| The R launcher stops before model fitting | The prepared H5AD is missing, CoGAPS is unavailable, or OpenMP support failed its check. | Rerun Stage 1, then use the software checks below to confirm `CoGAPS` and OpenMP support. |
+| The launcher refuses to replace an existing model | A full output already exists and is being protected from accidental replacement. | Keep the existing result, move it to a backup folder, or use `FORCE_RERUN=1` only when replacement is intentional. |
+| No progress appears after the run begins | Output may be redirected, or the model may still be loading data. | Run the launcher directly in a visible Terminal and wait for the data-loading and phase messages before deciding that the run is stalled. |
+| The run is much slower than expected | Docker emulation, hardware, diagnostics, dense data handling, or thread settings differ. | Check the printed platform, OpenMP result, thread count, sparse-optimization setting, and whether snapshots and checkpoints are enabled. |
+| The run ends during equilibration or sampling | The process may have exceeded memory, reached a time limit, or encountered an input problem. | Read the first error, inspect available memory and disk space, and confirm the input dimensions and model settings before restarting. |
+
+A valid R run should print the selected settings, complete equilibration, enter sampling, and reach the final sampling iteration. Keep the complete Terminal log when investigating a failure; the last chi-square value alone is not enough to identify the cause.
+
+### The Model Finished But Tables Or Figures Are Missing
+
+| What you see | What it usually means | What to check and do |
+|---|---|---|
+| The full R model exists but diagnostic CSV files do not | Model fitting completed, but the diagnostic export was not run or stopped. | Run `Rscript scripts/export_cogaps_diagnostics_r.R` and read the first export error. |
+| Gene-weight or cell-activity tables are absent | The compact-table export has not been run against the current model object. | Run `Rscript scripts/export_lightweight_cogaps_derivatives_r.R`. |
+| Directionality tables are absent | The expression-contrast stage has not been run for the selected outputs. | Run the R or Python directionality command from Stage 5. |
+| A figure still shows older values | Its source table was not refreshed, or the page is displaying a different copy of the image. | Rebuild the source table first, run `/opt/cogaps-venv/bin/python scripts/build_selected_k6_figures.py`, and check both `data/processed/figures/` and `img/`. |
+| Quarto reports a missing file | A path in the page does not match the regenerated filename or location. | Copy the path from the error, confirm it from inside Docker, and update either the output command or the page reference so they agree. |
+
+Use file modification times as a quick check:
+
+```bash
+ls -lh --time-style=long-iso data/processed/selected_model_k6/r
+ls -lh --time-style=long-iso data/processed/figures
+ls -lh --time-style=long-iso img
+```
+
+A recent image built from an older table is still an older analysis. Check both the source table and the displayed figure.
+
+### Cluster Commands Fail
+
+The rank-sweep commands require Slurm and a cluster login environment. They will not run in the local Docker container.
+
+If you adapt the sweep elsewhere, update the account, partition, memory, walltime, environment activation, storage paths, and concurrency limit for that system. Test one row of the jobs table before submitting a large array. After submission, use the scheduler's queue and accounting commands to distinguish pending, running, completed, failed, and cancelled tasks.
+
+For local work, use the completed summary files under `data/processed/k_selection/`. Reproducing the selected local model does not require rerunning the sweep.
+
+## Finish And Record Your Reproduction
+
+Before treating a regenerated result as comparable to the included output, check the following:
+
+- The selected model settings are `K = 6`, `seed = 2`, `n_iter = 2000`, and `sparseOptimization = TRUE`.
+- The R selected-model output is kept as the primary implementation.
+- Python outputs are interpreted as a parallel implementation, not as proof that pattern numbers are portable.
+- The prepared PBMC dataset has 3,000 highly variable genes and the expected cell metadata.
+- Directionality is interpreted from expression contrasts, not from CoGAPS gene weights alone.
+- Rank-sweep summaries under `data/processed/k_selection/` remain the source for the model-selection discussion.
+- Full model objects and dense inputs remain outside normal Git history unless a large-file release strategy has been chosen deliberately.
+
+Record the date, Docker image tag, stages completed, model settings, output folder, and any departures from the supplied commands. This short record makes it possible to distinguish an intentional change from an unnoticed difference in preprocessing or software.
+
+When these checks pass, the regenerated files can be compared with the included evidence. If a result differs, inspect the preprocessing record, model settings, random seed, runtime environment, and output paths before changing the biological interpretation.
+
+The important outcome is not simply that every command ran. You should now be able to trace the analysis from source counts to the prepared PBMC dataset, from the prepared matrix to a fitted CoGAPS model, and from that full model to the diagnostics, activity summaries, gene evidence, directionality results, and figures used to support interpretation.
 
 ***

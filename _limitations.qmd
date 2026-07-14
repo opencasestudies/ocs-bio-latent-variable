@@ -1,14 +1,44 @@
 # **Limitations**
 ***
 
-There are some important considerations regarding this data analysis to keep in mind:
+Limitations help define how far an interpretation can travel. They do not erase the evidence in a study. Instead, they clarify which questions the data can answer and which conclusions would require more samples, measurements, or analyses.
 
-1. This case study uses a processed AnnData object with 3,000 highly variable genes rather than a full workflow from raw sequencing files or all measured genes.
-1. The chosen CoGAPS rank, `K = 6`, comes from a limited completed sweep and should be described as a local model-selection decision rather than a universal optimum.
-1. The main learner workflow loads a saved chosen model by default because running even one CoGAPS model can take substantial time.
-1. CoGAPS pattern weights identify genes associated with latent programs, but up/down regulation must be assessed separately using expression contrasts.
-1. The directionality analysis is targeted to top pattern genes and is not a genome-wide differential-expression analysis.
-1. Cell-type heterogeneity summaries are descriptive unless additional donor-aware inference is added.
-1. The dataset tests IFN-beta stimulation in PBMCs, not direct dengue infection.
+## The experiment captures one acute response
+
+The Kang et al. experiment compared matched control and IFN-beta-stimulated PBMC aliquots from eight lupus donors. The stimulated cells were exposed to IFN-beta for six hours outside the body before single-cell profiling [@kang2018multiplexed]. This {{< glossary "Paired design" display="paired design" >}} provides a controlled view of an acute response because each donor contributes cells to both conditions.
+
+The experiment does not show how the response develops across several time points, changes with different exposure conditions, or behaves in tissues outside the blood. The analyzed data also do not include a healthy comparison group, and this case study does not model disease activity, medication history, treatment response, or clinical outcomes. The results therefore cannot establish a chronic lupus mechanism, predict how a patient will respond to therapy, or represent every person with lupus.
+
+## The cells come from eight donors
+
+The prepared dataset contains 24,673 cells, but those cells do not represent 24,673 independent people. The main {{< glossary "Experimental unit" display="experimental unit" >}} is the donor. Measuring many cells gives a detailed view of each donor's PBMC mixture, but it does not increase the number of independent donors.
+
+Later donor-paired summaries and donor-aware models preserve this study structure rather than treating every cell as an independent replicate. Even with that protection, eight donors provide limited {{< glossary "Generalizability" display="generalizability" >}}. The study can reveal a response that is consistent within these matched donor samples, but it is not large enough to characterize the full range of lupus heterogeneity or support detailed clinical subgroup comparisons.
+
+## The prepared dataset defines what the model can learn
+
+The main analysis uses a processed single-cell dataset with 3,000 {{< glossary "Highly variable gene" display="highly variable genes" >}}. Genes outside that selected set cannot contribute to a pattern in the fitted model. Filtering, normalization, log transformation, and variable-gene selection make the analysis tractable, but they also define the expression space available to CoGAPS. A different preprocessing recipe could emphasize somewhat different structure.
+
+The case study also uses the broad immune-cell annotations supplied with the prepared data rather than performing a new cell-annotation or subclustering analysis. Cell types are represented unequally, and smaller groups provide less information than abundant populations. For that reason, activity differences across annotated cell types should be interpreted as evidence within this prepared dataset, not as a complete map of every PBMC subtype or activation state.
+
+## Model resolution is a choice, not a biological constant
+
+CoGAPS must be told how many patterns to learn. This {{< glossary "Model resolution" display="model resolution" >}} is evaluated later using a finite rank sweep, seed-to-seed stability, biological evidence, and runtime. That process can identify a useful resolution for the current analysis, but it cannot prove that one value is the universally correct number of biological programs.
+
+A model with fewer patterns can merge distinct signals, while a model with more patterns can divide one signal into several related parts. CoGAPS is also stochastic, so another seed, run, or software implementation can recover similar biological structure under different pattern numbers. Pattern numbers should therefore be treated as run-specific labels rather than permanent biological names.
+
+## Diagnostics support interpretation without proving certainty
+
+The analysis later examines the model's {{< glossary "Diagnostic trace" display="diagnostic trace" >}}, snapshot stability, and {{< glossary "Posterior uncertainty" display="posterior uncertainty" >}}. These checks help determine whether the fit moved into a more stable region, whether important genes remained similar across saved states, and how variable the sampled pattern summaries were.
+
+Those diagnostics support a practical decision about whether a model is suitable to interpret; they do not prove that every part of the model has converged perfectly. The case study evaluates one selected run in detail rather than comparing several independent sampling chains with formal between-chain diagnostics. Longer runs or additional independent fits could provide stronger evidence for patterns whose stability remains uncertain.
+
+## Pattern meaning requires several kinds of evidence
+
+CoGAPS patterns are inferred signals, not directly observed cell types, pathways, or disease mechanisms [@fertig2010cogaps]. A biological label is a working interpretation supported by several pieces of evidence: where the pattern is active, which genes have high weights, how activity relates to stimulation and cell identity, whether targeted gene sets are represented, and whether the interpretation agrees with relevant literature.
+
+A {{< glossary "Gene weight" display="gene weight" >}} shows how strongly a gene helps define a pattern, but it does not show whether that gene is higher or lower after stimulation. The case study therefore uses a separate, donor-aware directionality analysis for selected pattern genes. That analysis is targeted rather than genome-wide, and cell-type-specific directionality summaries remain descriptive unless they are tested with a sufficiently powered donor-aware interaction model. These checks support careful pattern interpretation, but they do not establish that a pattern causes a biological response.
+
+Within these boundaries, the case study can ask whether a selected latent-pattern model separates stimulation-associated activity from immune-cell-linked structure in this prepared eight-donor PBMC dataset. It cannot determine the true number of biological programs in all patients, identify every IFN-responsive gene, establish a clinical lupus mechanism, or show how the response changes across tissues, exposure conditions, or time.
 
 ***

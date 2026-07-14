@@ -1,36 +1,65 @@
 # **Continued Learning**
 ***
 
+The exercises below help you practice the interpretation habits used throughout this case study. They use the prepared PBMC data, saved model-selection summaries, and selected-model CoGAPS outputs that you have already imported. You do not need to refit CoGAPS or rerun the full model sweep to complete them.
+
 :::{.next_steps_box}
 ::::{.next_steps_box_header}
 Common Next Steps
 ::::
 ::::{.inner_block}
-Discuss common next steps for this type of an analysis in this box. Is there a specific number of steps that you need to do before a specific step? Is a "next step" more of an alternate step?
+After completing the main analysis, useful next steps are to:
+
+- recheck the selected model using the diagnostic summaries;
+- practice annotating a non-IFN pattern using activity, top genes, and directionality;
+- redraw one visualization so you can explain what the plot is showing;
+- compare the IFN-associated pattern with a cell-type-linked pattern;
+- write a cautious biological interpretation that separates what the data support from what would require more evidence.
+
+These are short practice tasks. They are designed to strengthen your CoGAPS interpretation skills without requiring long model runs.
 ::::
 :::
 
-<!--
-## Reinforcement Exercises
+## Core Homework
 
-Uncomment this section if you're suggesting an exercise that reiterates a large portion of the case study so learners can practice a hard skill again, reinforcing topics from the case study
--->
+These exercises revisit the central moves of the case study. Each one can be completed from either the selected R outputs or the selected Python outputs unless the prompt asks you to compare both.
 
+1. **Recreate the K-selection argument.**
+Return to the model-resolution evidence from the Data Import section. In a short paragraph, explain why `K = 6` was selected over a more compressed lower-rank model and over the high-K extension. Your answer should mention stability, IFN-associated signal recovery, non-IFN structure, and runtime.
 
-## Advancement Exercises
+1. **Annotate one non-IFN pattern.**
+Choose one pattern that is not the {{< glossary "IFN-associated pattern" display="IFN-associated pattern" >}}. Use its dominant cell type, stimulation correlation, top genes, and directionality summary to write a working interpretation. For example, ask whether the pattern looks more like a {{< glossary "Cell-type-linked pattern" display="cell-type-linked pattern" >}}, a stimulation-linked pattern, or a mixture of both.
 
-Use this section to suggest different levels of exercises that build upon topics from the case study ... next steps, tangential skills, diving deeper into a side quest, etc.
+1. **Redraw one pattern-activity figure.**
+Choose one of the plots that summarizes {{< glossary "Cell activity" display="cell activity" >}} by condition, donor, or PBMC identity. Recreate it with a different plot type, such as a dot plot, paired-line plot, heatmap, or faceted box plot. Write two sentences explaining what your redesign makes easier or harder to see.
 
-Perhaps explain how the suggested exercises relate to the common next steps.
+1. **Check directionality for a short gene list.**
+Select 5 to 8 high-weight genes from the IFN-associated pattern. Make a compact table or bar plot showing each gene's {{< glossary "Gene weight" display="CoGAPS weight" >}} and {{< glossary "Directionality" display="directionality" >}} after IFN-beta stimulation. Explain why gene weight and expression direction answer different questions.
 
-### Beginner
+1. **Compare the R and Python pattern labels.**
+In the selected R run, the IFN-associated pattern is `Pattern4`. In the selected Python output, the corresponding signal is `Pattern5`. Use top genes, activity correlation, or condition-associated activity to explain why the biological interpretation can match even when the pattern numbers differ.
 
-### Intermediate
+## Side Quests
 
-### Advanced
+These optional exercises give you more practice with the same evidence types from a new angle.
 
-<!--
-Example from a previous case study: https://www.opencasestudies.org/ocs-bp-co2-emissions/#Suggested_Homework (though this example doesn't include different levels like Beginner, Intermediate, and Advanced)
--->
+1. **Recolor the UMAP by another pattern.**
+Use the same {{< glossary "UMAP" display="UMAP" >}} coordinates, but recolor the cells by a non-IFN pattern. Compare that activity map with the cell-identity reference map. Does the pattern appear concentrated in one neighborhood or spread across several PBMC identities?
+
+1. **Redraw the condition-shift heatmap.**
+Recreate the pattern-by-cell-type heatmap with a different color scale or ordering of PBMC identities. Explain whether the plot still separates broad stimulation-associated activity from cell-type-linked activity.
+
+1. **Contrast IFN-associated and antigen-presentation-linked evidence.**
+Compare the IFN-associated pattern with the antigen-presentation-linked pattern. Use one figure or table to show how their top genes, dominant cell neighborhoods, and stimulation shifts differ.
+
+1. **Build a mini gene-set check.**
+Choose a short literature-guided gene set with 5 to 10 genes, such as a small interferon-stimulated gene list or an antigen-presentation list. Score the genes or summarize their weights in the selected model, then explain whether the result supports one pattern interpretation.
+
+1. **Write a limitations audit.**
+Write a short note that names three limits of the case-study analysis. At least one limitation should concern the dataset, one should concern model interpretation, and one should concern what cannot be inferred from an IFN-beta stimulation experiment alone.
+
+## Optional Challenge
+
+Design a follow-up sweep without running it. Choose a small set of K values, seeds, and iteration counts that would test one unresolved question from the case study. For each setting, list the metrics you would inspect and the result that would change your mind about the selected model. This challenge is about experimental design and reproducibility planning, not about launching new jobs.
 
 ***

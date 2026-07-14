@@ -186,9 +186,13 @@ make_pseudobulk <- function(sce, genes, group_cols, min_cells) {
 add_cpm <- function(pseudobulk, genes) {
   out <- pseudobulk
   for (gene in genes) {
+    count_col <- if (gene %in% names(out)) gene else make.names(gene)
+    if (!count_col %in% names(out)) {
+      stop(sprintf("Could not find pseudobulk count column for gene '%s'.", gene))
+    }
     out[[paste0(gene, "__cpm")]] <- ifelse(
       out$library_size_total_counts > 0,
-      (out[[gene]] / out$library_size_total_counts) * 1e6,
+      (out[[count_col]] / out$library_size_total_counts) * 1e6,
       0
     )
   }

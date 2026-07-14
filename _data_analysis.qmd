@@ -1,597 +1,1635 @@
 # **Data Analysis**
 ***
 
-This section is the core of the case study. We use the selected R K6 CoGAPS model, inspect the pattern matrices, identify the IFN-associated pattern, and connect pattern genes to stimulation directionality. Python is included as a parallel implementation in the second tab.
+You have now imported the prepared PBMC data, inspected model-selection evidence, and visualized CoGAPS {{< glossary "Latent pattern" display="patterns" >}} in relation to cell identity, IFN-beta stimulation, and gene direction. This section turns those pieces into an evidence chain: first check that the selected model is suitable to interpret, then use the four main questions to organize the biological interpretation.
 
-The R and Python analyses follow the same scientific path, but they use separately saved outputs:
+The key habit is to avoid naming a pattern from one clue alone. A CoGAPS pattern has two linked parts: {{< glossary "Cell activity" display="cell activity" >}} and {{< glossary "Gene weight" display="gene weight" >}}. A pattern can have high-weight interferon-stimulated genes, but the cells also need to show activity where an interferon response is expected. A gene can have a high CoGAPS weight, but that weight does not by itself tell you whether the gene is higher or lower after IFN-beta stimulation.
 
-- selected R/Bioconductor artifacts live under `data/processed/selected_model_k6/r/`
-- selected Python/PyCoGAPS-compatible artifacts live under `data/processed/selected_model_k6/python/`
-- older K7 artifacts are retained only as reference or sensitivity outputs
+The selected R model is the primary model you will interpret. The Python tab lets you repeat the same checks with saved Python outputs. Because pattern numbers can differ across runs, the phrase "{{< glossary "IFN-associated pattern" display="the IFN-associated pattern" >}}" is usually safer than a numbered label. When this section discusses a specific saved run, it states the run-specific label explicitly.
 
-## Why use `K = 6`?
-
-The full rank-selection sweep is not part of the main learner workflow. It was run beforehand as an instructor/reviewer-facing model-selection step. The selected model used `K = 6`, `seed = 2`, `n_iter = 2000`, and sparse optimization.
-
-::: {.panel-tabset}
-
-### R
-
-```{r}
-summary_by_k_r <- read.csv(PHASE1B_LOWERK_LONG_SUMMARY_CSV_R, stringsAsFactors = FALSE)
-summary_by_k_r[order(summary_by_k_r$K, summary_by_k_r$n_iter), ]
-```
-
-### Python
-
-```{python}
-summary_by_k = pd.read_csv(PHASE1B_LOWERK_LONG_SUMMARY_CSV)
-summary_by_k.sort_values(["K", "n_iter"])
-```
-
-:::
-
-The lower-rank and long-iteration sweeps showed that K4, K5, and K6 all recovered the main IFN/ISG program well. K4 was strongest by IFN correlation and runtime, but the pattern-structure comparison showed that it compressed non-IFN structure. K6 was selected because it preserved the main IFN/ISG program while retaining more of the non-IFN structure seen in the older K7 reference model. This is a local model-selection decision for this case study, not a universal claim that K6 is always optimal.
-
-## Load the chosen CoGAPS result or lightweight pattern exports
-
-The default GitHub-friendly path uses lightweight exported R pattern matrices and summary tables. If a learner or reviewer has the full R `.rds` result locally, the same code can load it directly and derive the matrices from the full model object. The Python tab follows the same cooking-show pattern: the full Python `.h5ad` is supported for full-local work, but the Python interpretation can render from the lightweight exports in `data/processed/selected_model_k6/python/` when that larger file is absent.
-
-::: {.panel-tabset}
-
-### R
-
-```{r}
-chosen_metrics_r <- NULL
-A_r <- NULL
-P_r <- NULL
-pattern_names_r <- character()
-result_r <- NULL
-
-if (file.exists(R_CHOSEN_METRICS_JSON_R)) {
-  chosen_metrics_r <- jsonlite::read_json(R_CHOSEN_METRICS_JSON_R, simplifyVector = TRUE)
-  ifn_pattern_r <- chosen_metrics_r$ifn_pattern
-} else {
-  ifn_pattern_r <- NA_character_
-}
-
-if (HAS_R_CHOSEN_RESULT_R) {
-  result_r <- readRDS(R_CHOSEN_RESULT_RDS_R)
-  A_r <- as.matrix(CoGAPS::getFeatureLoadings(result_r))
-  P_r <- as.matrix(CoGAPS::getSampleFactors(result_r))
-
-  if (nrow(A_r) != nrow(sce_cells) && ncol(A_r) == nrow(sce_cells)) {
-    A_r <- t(A_r)
-  }
-  if (nrow(P_r) != ncol(sce_cells) && ncol(P_r) == ncol(sce_cells)) {
-    P_r <- t(P_r)
-  }
-
-  if (is.null(rownames(A_r))) {
-    rownames(A_r) <- rownames(sce_cells)
-  }
-  if (is.null(rownames(P_r))) {
-    rownames(P_r) <- colnames(sce_cells)
-  }
-  if (is.null(colnames(A_r))) {
-    colnames(A_r) <- sprintf("Pattern%d", seq_len(ncol(A_r)))
-  } else {
-    colnames(A_r) <- canonicalize_pattern_names_r(colnames(A_r))
-  }
-  if (is.null(colnames(P_r))) {
-    colnames(P_r) <- sprintf("Pattern%d", seq_len(ncol(P_r)))
-  } else {
-    colnames(P_r) <- canonicalize_pattern_names_r(colnames(P_r))
-  }
-  pattern_names_r <- pattern_columns_r(colnames(A_r))
-  analysis_mode_label_r <- "Full chosen-model RDS"
-} else if (HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R) {
-  lightweight_r <- load_lightweight_pattern_matrices_r(
-    R_PATTERN_GENE_WEIGHTS_TSV_GZ_R,
-    R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R
-  )
-  A_r <- as.matrix(lightweight_r$A)
-  P_r <- as.matrix(lightweight_r$P)
-  pattern_names_r <- pattern_columns_r(colnames(A_r))
-  analysis_mode_label_r <- "Lightweight exported A/P matrices"
-} else {
-  analysis_mode_label_r <- "Unavailable"
-}
-
-cat("R analysis mode:", analysis_mode_label_r, "\n")
-if (length(pattern_names_r) > 0) {
-  cat("Pattern columns:", paste(pattern_names_r, collapse = ", "), "\n")
-  cat("A matrix shape:", paste(dim(A_r), collapse = " x "), "\n")
-  cat("P matrix shape:", paste(dim(P_r), collapse = " x "), "\n")
-}
-if (!is.null(chosen_metrics_r)) {
-  cat("IFN-associated pattern from metrics:", ifn_pattern_r, "\n")
-  cat("IFN correlation:", round(chosen_metrics_r$ifn_corr, 4), "\n")
-  cat("Runtime in original environment, minutes:", round(chosen_metrics_r$runtime_sec / 60, 1), "\n")
-}
-```
-
-### Python
-
-```{python}
-with open(PY_CHOSEN_METRICS_JSON) as f:
-    chosen_metrics = json.load(f)
-
-ifn_pattern = chosen_metrics["ifn_pattern"]
-
-if HAS_PY_CHOSEN_RESULT:
-    result = ad.read_h5ad(PY_CHOSEN_RESULT_H5AD)
-    pattern_names = pattern_columns(result.obs)
-    A = result.obs[pattern_names].copy()
-    A.index.name = "gene"
-    P = result.var[pattern_names].copy()
-    P.index = result.var_names.astype(str)
-    P.index.name = "cell_barcode"
-    analysis_mode_label = "Full chosen-model H5AD"
-else:
-    result = None
-    A, P = load_lightweight_pattern_matrices(
-        PY_PATTERN_GENE_WEIGHTS_TSV_GZ,
-        PY_PATTERN_CELL_ACTIVITIES_TSV_GZ,
-    )
-    pattern_names = pattern_columns(A)
-    analysis_mode_label = "Lightweight exported A/P matrices"
-
-print("Python analysis mode:", analysis_mode_label)
-print("Pattern columns:", pattern_names)
-print("A matrix shape:", A.shape)
-print("P matrix shape:", P.shape)
-print("IFN-associated pattern from metrics:", ifn_pattern)
-print("IFN correlation:", round(chosen_metrics["ifn_corr"], 4))
-print("Runtime in original environment, minutes:", round(chosen_metrics["runtime_sec"] / 60, 1))
-```
-
-:::
-
-::: {.column-margin}
-The saved full model paths are optional in both languages. The lightweight exports are the default GitHub/classroom path and should match the saved selected model within each language-specific implementation.
-:::
-
-## Optional full local model run
-
-The code below shows how to run the selected model locally. These chunks are not evaluated by default because fitting CoGAPS can take substantial time.
-
-::: {.panel-tabset}
-
-### R
-
-```{r}
-#| eval: false
-params_r <- CoGAPS::CogapsParams(
-  nPatterns = CHOSEN_K_R,
-  nIterations = CHOSEN_ITER_R,
-  seed = CHOSEN_SEED_R,
-  sparseOptimization = TRUE
-)
-
-cogaps_input_dense_r <- as.matrix(assay(sce_cells, "X"))
-storage.mode(cogaps_input_dense_r) <- "double"
-
-result_r <- CoGAPS::CoGAPS(cogaps_input_dense_r, params_r, nThreads = 1)
-saveRDS(result_r, R_CHOSEN_RESULT_RDS_R)
-```
-
-### Python
-
-```{python}
-#| eval: false
-from PyCoGAPS.parameters import CoParams
-from PyCoGAPS.pycogaps_main import CoGAPS
-
-params = CoParams(
-    nPatterns=CHOSEN_K,
-    nIterations=CHOSEN_ITER,
-    seed=CHOSEN_SEED,
-    useSparseOptimization=True,
-)
-
-result = CoGAPS(str(COGAPS_INPUT_H5AD), params)
-```
-
-:::
-
-## Extract the `A` and `P` matrices
-
-The selected result stores gene weights and cell activities as pattern columns. In the R workflow, `A` is the feature-loading matrix and `P` is the sample-factor matrix. In the Python saved result, the same conceptual matrices are available from the saved AnnData object or lightweight tables.
-
-::: {.panel-tabset}
-
-### R
-
-```{r}
-if (!is.null(P_r)) {
-  cell_meta_r <- as.data.frame(colData(sce_cells))
-  P_r <- P_r[colnames(sce_cells), , drop = FALSE]
-  adata_with_patterns_r <- cbind(
-    cell_meta_r[, c("condition", "cell_type", "replicate"), drop = FALSE],
-    as.data.frame(P_r, check.names = FALSE)
-  )
-  head(adata_with_patterns_r[, c("condition", "cell_type", pattern_names_r), drop = FALSE])
-} else {
-  adata_with_patterns_r <- NULL
-  cat("R pattern activity matrix is not available in this render context.\n")
-}
-```
-
-### Python
-
-```{python}
-adata_with_patterns = adata_cells.copy()
-
-missing_cells = adata_with_patterns.obs_names.difference(P.index)
-if len(missing_cells) > 0:
-    raise ValueError(f"Missing pattern activity values for {len(missing_cells)} cells.")
-
-P = P.loc[adata_with_patterns.obs_names].copy()
-for pattern in pattern_names:
-    adata_with_patterns.obs[pattern] = P[pattern].to_numpy()
-
-adata_with_patterns.obs[["condition", "cell_type", *pattern_names]].head()
-```
-
-:::
-
-## Identify the IFN-associated pattern
-
-We identify the stimulation-associated pattern by correlating each pattern's cell activity with a binary stimulation indicator. Pattern labels are run-specific: in the selected R K6 result the IFN-associated pattern is `Pattern4`, while the Python K6 saved result labels the corresponding signal `Pattern5`.
-
-::: {.panel-tabset}
-
-### R
-
-```{r}
-if (!is.null(P_r)) {
-  stim_indicator_r <- as.integer(adata_with_patterns_r$condition == STIM_LABEL_R)
-  pattern_corrs_r <- setNames(
-    vapply(pattern_names_r, function(pattern) cor(P_r[, pattern], stim_indicator_r), numeric(1)),
-    pattern_names_r
-  )
-  pattern_corrs_r <- sort(pattern_corrs_r, decreasing = TRUE)
-
-  if (is.na(ifn_pattern_r)) {
-    ifn_pattern_r <- names(pattern_corrs_r)[1]
-  }
-
-  pattern_corrs_r
-} else {
-  pattern_corrs_r <- numeric()
-  cat("R pattern correlations are unavailable because the R result artifacts are missing.\n")
-}
-```
-
-```{r}
-if (HAS_R_PATTERN_CORRELATIONS_R && length(pattern_corrs_r) > 0) {
-  cached_pattern_corrs_r <- read.csv(R_PATTERN_CORRELATIONS_CSV_R, stringsAsFactors = FALSE)
-  cached_lookup_r <- setNames(cached_pattern_corrs_r$corr_with_stim, cached_pattern_corrs_r$pattern)
-  corr_check_r <- max(abs(cached_lookup_r[names(pattern_corrs_r)] - pattern_corrs_r), na.rm = TRUE)
-  cat("Max absolute difference from cached R pattern_correlations.csv:", round(corr_check_r, 10), "\n")
-}
-```
-
-### Python
-
-```{python}
-stim_indicator = (adata_with_patterns.obs["condition"].astype(str) == STIM_LABEL).astype(int)
-pattern_corrs = pd.Series(
-    {pattern: adata_with_patterns.obs[pattern].corr(stim_indicator) for pattern in pattern_names},
-    name="corr_with_stim",
-).sort_values(ascending=False)
-
-pattern_corrs
-```
-
-```{python}
-if HAS_PY_PATTERN_CORRELATIONS:
-    cached_pattern_corrs = pd.read_csv(PY_PATTERN_CORRELATIONS_CSV)
-    corr_check = (
-        cached_pattern_corrs.set_index("pattern")["corr_with_stim"]
-        .reindex(pattern_corrs.index)
-        .subtract(pattern_corrs)
-        .abs()
-        .max()
-    )
-    print("Max absolute difference from cached Python pattern_correlations.csv:", round(float(corr_check), 10))
-else:
-    print("Cached Python pattern_correlations.csv not available.")
-```
-
-:::
-
-## Inspect top genes for the IFN-associated pattern
-
-::: {.panel-tabset}
-
-### R
-
-```{r}
-if (!is.null(A_r) && !is.na(ifn_pattern_r)) {
-  ifn_top_genes_r <- top_genes_from_matrix_r(A_r, ifn_pattern_r, n = 15)
-  ifn_top_genes_r
-} else {
-  cat("R top-gene inspection is unavailable because the R result artifacts are missing.\n")
-}
-```
-
-### Python
-
-```{python}
-ifn_top_genes = top_genes_from_matrix(A, ifn_pattern, n=15)
-ifn_top_genes
-```
-
-:::
-
-The top genes for the selected R K6 IFN-associated pattern include canonical interferon-stimulated genes such as `ISG15`, `ISG20`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `IFIT2`, `IRF7`, `OAS1`, `PLSCR1`, and `BST2`. This supports interpreting the pattern as an IFN-associated program.
-
-However, pattern weights alone do not tell us whether those genes are up or down in stimulated cells.
-
-:::{.think_question}
-::::{.think_question_header}
-Question opportunity
+:::{.main_question}
+::::{.main_question_header}
+Questions answered in this section
 ::::
 ::::{.inner_block}
-If a gene has a high CoGAPS weight in a pattern, does that mean it is up-regulated in stimulated cells?
-<details><summary>Answer</summary>
-No. A high CoGAPS weight means the gene helps define the pattern. To determine up- or down-regulation, we compare expression between conditions using the count data or normalized expression summaries.
-</details>
+1. What latent transcriptional programs are present in IFN-beta-stimulated and control PBMC single-cell RNA-seq data?
+1. Can CoGAPS help distinguish broad stimulation-associated activity from cell-type-linked immune programs?
+1. Which genes define the strongest IFN-associated pattern, and what is their direction in stimulation?
+1. How does the IFN-associated pattern vary across annotated PBMC cell types?
 ::::
 :::
 
-## Add directionality for IFN-associated pattern genes
+## Load The Analysis Tables
 
-We answer the directionality question using a targeted paired pseudobulk analysis. The directionality table was generated from raw counts by aggregating cells within donor and condition, computing `log2(stim CPM + 0.5) - log2(ctrl CPM + 0.5)`, and summarizing across donors.
+The selected-model files are lightweight tables exported from the saved CoGAPS runs. They let the case study inspect model evidence without requiring every learner to load a full model object. In this first step, the code reads the tables that later chunks reuse.
+
+In R, `readr::read_csv()` reads comma-separated tables and `readr::read_tsv()` reads tab-separated pattern matrices. The pipe operator `|>` passes the result of one step into the next step, which makes the code read from left to right. In Python, `pandas.read_csv()` plays the same role, and `Path` objects keep file paths explicit.
 
 ::: {.panel-tabset}
 
 ### R
 
 ```{r}
-if (file.exists(R_DIRECTION_GLOBAL_CSV_R)) {
-  direction_global_r <- read.csv(R_DIRECTION_GLOBAL_CSV_R, stringsAsFactors = FALSE)
-  ifn_direction_r <- subset(direction_global_r, pattern == ifn_pattern_r)
-  ifn_direction_r <- ifn_direction_r[order(ifn_direction_r$rank), c(
-    "rank",
-    "gene",
-    "mean_log2fc_stim_vs_ctrl",
-    "n_up_pairs",
-    "n_down_pairs",
-    "wilcoxon_fdr",
-    "direction",
-    "evidence_strength"
-  )]
-  ifn_direction_r
-} else {
-  cat("R directionality outputs are unavailable in this render context.\n")
-}
-```
-
-### Python
-
-```{python}
-direction_global = pd.read_csv(PY_DIRECTION_GLOBAL_CSV)
-
-ifn_direction = (
-    direction_global.loc[direction_global["pattern"] == ifn_pattern]
-    .sort_values("rank")
-    [[
-        "rank",
-        "gene",
-        "mean_log2fc_stim_vs_ctrl",
-        "n_up_pairs",
-        "n_down_pairs",
-        "wilcoxon_fdr",
-        "direction",
-        "evidence_strength",
-    ]]
+#| label: analysis-load-r
+#| message: false
+#| warning: false
+analysis_metrics_r <- jsonlite::read_json(
+  R_CHOSEN_METRICS_JSON_R,
+  simplifyVector = TRUE
 )
 
-ifn_direction
-```
+analysis_metrics_python_for_r <- jsonlite::read_json(
+  PY_CHOSEN_METRICS_JSON_R,
+  simplifyVector = TRUE
+)
 
-:::
+analysis_diag_r <- jsonlite::read_json(
+  file.path(R_K6_RESULTS_DIR_R, "cogaps_K6_seed2_iter2000.diagnostics.json"),
+  simplifyVector = TRUE
+)
 
-In the selected R K6 directionality analysis, most top IFN-associated pattern genes are up in IFN-beta stimulation. `FTH1` remains the main down-in-stimulation exception. This distinction matters: `FTH1` contributes to the pattern, but it should not be described as an up-regulated IFN-stimulated gene in this dataset.
+trace_r <- readr::read_csv(
+  file.path(R_K6_RESULTS_DIR_R, "cogaps_K6_seed2_iter2000.trace.csv"),
+  show_col_types = FALSE
+)
 
-## Summarize all patterns
+snapshot_summary_r <- readr::read_csv(
+  file.path(R_K6_RESULTS_DIR_R, "cogaps_K6_seed2_iter2000.snapshot_summary.csv"),
+  show_col_types = FALSE
+)
 
-::: {.panel-tabset}
+uncertainty_summary_r <- readr::read_csv(
+  file.path(R_K6_RESULTS_DIR_R, "cogaps_K6_seed2_iter2000.pattern_uncertainty_summary.csv"),
+  show_col_types = FALSE
+)
 
-### R
+pattern_summary_r <- readr::read_csv(R_PATTERN_SUMMARY_CSV_R, show_col_types = FALSE)
+pattern_correlations_r <- readr::read_csv(R_PATTERN_CORRELATIONS_CSV_R, show_col_types = FALSE)
+pattern_top_genes_r <- readr::read_csv(R_PATTERN_TOP_GENES_CSV_R, show_col_types = FALSE)
+activity_by_celltype_r <- readr::read_csv(
+  R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV_R,
+  show_col_types = FALSE
+)
+activity_by_replicate_r <- readr::read_csv(
+  R_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV_R,
+  show_col_types = FALSE
+)
+direction_global_r <- readr::read_csv(R_DIRECTION_GLOBAL_CSV_R, show_col_types = FALSE)
+direction_celltype_r <- readr::read_csv(R_DIRECTION_CELLTYPE_CSV_R, show_col_types = FALSE)
+direction_summary_r <- readr::read_csv(R_DIRECTION_SUMMARY_CSV_R, show_col_types = FALSE)
 
-```{r}
-if (HAS_R_PATTERN_SUMMARY_R) {
-  pattern_summary_r <- read.csv(R_PATTERN_SUMMARY_CSV_R, stringsAsFactors = FALSE)
-  pattern_summary_r
-} else if (!is.null(A_r) && !is.null(P_r)) {
-  pattern_summary_r <- do.call(
-    rbind,
-    lapply(pattern_names_r, function(pattern) {
-      top8 <- head(top_genes_from_matrix_r(A_r, pattern, n = 8)$gene, 8)
-      dominant_cell_type <- names(sort(tapply(P_r[, pattern], adata_with_patterns_r$cell_type, mean), decreasing = TRUE))[1]
-      data.frame(
-        pattern = pattern,
-        corr_with_stim = round(pattern_corrs_r[[pattern]], 4),
-        dominant_cell_type = dominant_cell_type,
-        top_genes_top8 = paste(top8, collapse = ", "),
-        row.names = NULL
-      )
-    })
+matrices_r <- load_lightweight_pattern_matrices_r(
+  R_PATTERN_GENE_WEIGHTS_TSV_GZ_R,
+  R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R
+)
+A_r <- matrices_r$A
+P_r <- matrices_r$P
+pattern_names_r <- pattern_columns_r(colnames(A_r))
+
+ifn_pattern_r <- analysis_metrics_r$ifn_pattern
+ifn_pattern_python_for_r <- analysis_metrics_python_for_r$ifn_pattern
+
+selected_run_overview_r <- tibble::tibble(
+  item = c(
+    "implementation",
+    "model resolution",
+    "seed",
+    "iterations per phase",
+    "sparse optimization",
+    "saved IFN-associated pattern",
+    "mean chi-square"
+  ),
+  value = c(
+    "R / Bioconductor CoGAPS",
+    analysis_metrics_r$nPatterns,
+    analysis_metrics_r$seed,
+    analysis_metrics_r$nIterations,
+    analysis_metrics_r$sparseOptimization,
+    ifn_pattern_r,
+    format(analysis_metrics_r$meanChiSq, big.mark = ",")
   )
-  pattern_summary_r
-} else {
-  cat("R pattern summaries are unavailable in this render context.\n")
-}
+)
+
+knitr::kable(
+  selected_run_overview_r,
+  col.names = c("Item", "Value")
+)
 ```
 
 ### Python
 
 ```{python}
-if HAS_PY_PATTERN_SUMMARY:
-    pattern_summary = pd.read_csv(PY_PATTERN_SUMMARY_CSV)
-else:
-    pattern_summary_rows = []
-    for pattern in pattern_names:
-        top_genes = ", ".join(top_genes_from_matrix(A, pattern, n=8)["gene"].tolist())
-        dominant_cell_type = (
-            adata_with_patterns.obs.groupby("cell_type", observed=True)[pattern]
-            .mean()
-            .sort_values(ascending=False)
-            .index[0]
+#| label: analysis-load-python
+#| results: asis
+if "render_table" not in globals():
+    def render_table(data_frame):
+        """Render a pandas DataFrame as a readable HTML table in Quarto."""
+        return data_frame.to_html(
+            index=False,
+            escape=False,
+            border=0,
+            classes="table table-sm table-striped"
         )
-        pattern_summary_rows.append(
+
+with open(PY_CHOSEN_METRICS_JSON) as f:
+    analysis_metrics = json.load(f)
+
+with open(R_CHOSEN_METRICS_JSON) as f:
+    analysis_metrics_r_for_python = json.load(f)
+
+pattern_summary = pd.read_csv(PY_PATTERN_SUMMARY_CSV)
+pattern_correlations = pd.read_csv(PY_PATTERN_CORRELATIONS_CSV)
+pattern_top_genes = pd.read_csv(PY_PATTERN_TOP_GENES_CSV)
+activity_by_celltype = pd.read_csv(PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV)
+activity_by_replicate = pd.read_csv(PY_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV)
+direction_global = pd.read_csv(PY_DIRECTION_GLOBAL_CSV)
+direction_celltype = pd.read_csv(PY_DIRECTION_CELLTYPE_CSV)
+direction_summary = pd.read_csv(PY_DIRECTION_SUMMARY_CSV)
+
+A_py, P_py = load_lightweight_pattern_matrices(
+    PY_PATTERN_GENE_WEIGHTS_TSV_GZ,
+    PY_PATTERN_CELL_ACTIVITIES_TSV_GZ
+)
+pattern_names_py = pattern_columns(A_py)
+
+ifn_pattern_py = analysis_metrics["ifn_pattern"]
+ifn_pattern_r_for_python = analysis_metrics_r_for_python["ifn_pattern"]
+python_model_resolution = analysis_metrics.get("nPatterns", analysis_metrics.get("K"))
+python_iterations = analysis_metrics.get("nIterations", analysis_metrics.get("n_iter"))
+python_sparse_setting = analysis_metrics.get(
+    "sparseOptimization",
+    "not recorded in lightweight metrics",
+)
+python_mean_chisq = analysis_metrics.get(
+    "meanChiSq",
+    "not exported in lightweight metrics",
+)
+
+selected_run_overview = pd.DataFrame(
+    {
+        "Item": [
+            "implementation",
+            "model resolution",
+            "seed",
+            "iterations per phase",
+            "sparse optimization",
+            "saved IFN-associated pattern",
+            "mean chi-square",
+        ],
+        "Value": [
+            "Python / PyCoGAPS-compatible output",
+            python_model_resolution,
+            analysis_metrics["seed"],
+            python_iterations,
+            python_sparse_setting,
+            ifn_pattern_py,
+            python_mean_chisq if isinstance(python_mean_chisq, str) else f"{python_mean_chisq:,}",
+        ],
+    }
+)
+
+print(render_table(selected_run_overview))
+```
+
+:::
+
+The R run labels the IFN-associated pattern as `Pattern4`. The Python-compatible output labels the corresponding signal as `Pattern5`. That difference is not a contradiction. CoGAPS pattern numbers are labels assigned inside a run; they are not stable biological names.
+
+## Carry-Forward Check: Is The Selected Model Appropriate To Interpret?
+
+Before interpreting a latent pattern, ask whether the model run looks stable enough to support interpretation. CoGAPS is a {{< glossary "Bayesian model" display="Bayesian" >}} matrix-factorization method, not a simple optimizer that must make the {{< glossary "Chi-square" display="chi-square" >}} smaller at every printed step. Some movement during sampling is expected. What you want to see is a large early improvement followed by a much flatter region where the trace changes only modestly.
+
+The {{< glossary "Diagnostic trace" display="diagnostic trace" >}} below comes from the selected R run because the R implementation is the primary model for this case study and has the richest saved diagnostic record. The dashed line marks the transition between {{< glossary "Equilibration" display="equilibration" >}} and the {{< glossary "Sampling phase" display="sampling phase" >}}. Equilibration is the burn-in-like phase in which the sampler moves away from its starting state. Sampling is the phase used to summarize the final pattern matrices.
+
+:::{.disclaimer_box}
+::::{.disclaimer_box_header}
+How to use this model-check section
+::::
+::::{.inner_block}
+- **R analysis path:** run these diagnostic chunks. They use saved trace, snapshot, and uncertainty files from the selected R CoGAPS model.
+- **Python analysis path:** read the rendered diagnostic evidence here, then continue with the Python tabs in Question 1. These particular diagnostics are shown from R because the selected R run is the primary model and has the richest saved diagnostic record.
+- **Full reproduction path:** use the Full Reproduction Guide if you want to rerun the selected model and regenerate these diagnostic files yourself.
+::::
+:::
+
+The first plotting chunk builds the chi-square trace in two steps. It first adds a `phase` column so each printed iteration is labeled as either equilibration or sampling. Then `ggplot()` draws the trace as a connected line, adds colored points for the two phases, and places a dashed vertical line at relative progress `0.5`, where sampling begins.
+
+```{r}
+#| label: analysis-r-trace-plot
+#| message: false
+#| warning: false
+#| fig-width: 8.5
+#| fig-height: 4.8
+#| fig-cap: "Diagnostic chi-square trace for the selected R K6 CoGAPS run. The trace drops steeply early, then changes much more slowly during the sampling half of the run. A perfectly flat trace is not required for an MCMC sampler, but the later plateau is evidence that the run has moved into a more stable region before interpretation."
+trace_plot_r <- trace_r |>
+  dplyr::mutate(
+    phase = dplyr::if_else(relative_progress <= 0.5, "equilibration", "sampling")
+  )
+
+ggplot(trace_plot_r, aes(x = relative_progress, y = chisq)) +
+  geom_line(color = "#2F5D8C", linewidth = 1) +
+  geom_point(aes(color = phase), size = 2.4) +
+  geom_vline(xintercept = 0.5, linetype = "dashed", color = "#102A43") +
+  scale_color_manual(values = c("equilibration" = "#E76F51", "sampling" = "#2A9D8F")) +
+  scale_y_continuous(labels = scales::label_number(big.mark = ",")) +
+  labs(
+    title = "Selected R model reaches a chi-square plateau",
+    subtitle = "Relative progress 0.5 marks the end of equilibration and the start of sampling.",
+    x = "Relative progress through the full run",
+    y = "Chi-square",
+    color = "Phase"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "bottom")
+```
+
+The plot supports using the model, but it should not be oversold. The trace still has small stochastic changes late in the run. That is normal for a sampler. The important point is that the large early changes have mostly settled before the final summaries are interpreted.
+
+Snapshots give a second stability check. A snapshot is a saved view of the model state during the run. The code below focuses on the gene-loading matrix, because top genes are central to biological interpretation. The column `mean_top_overlap` asks whether the top genes in each snapshot resemble the top genes in the final summary.
+
+The plotting code filters the snapshot table to matrix `A`, the gene-weight matrix, because this check is about top-gene stability. It then orders snapshots by phase, draws `mean_top_overlap` over time, and adds a dotted reference line at `0.9`. Values near the top of the plot mean the snapshot top genes are very similar to the final top genes.
+
+```{r}
+#| label: analysis-r-snapshot-plot
+#| message: false
+#| warning: false
+#| fig-width: 8.5
+#| fig-height: 4.8
+#| fig-cap: "Snapshot stability for the selected R gene-loading matrix. Mean top-gene overlap rises during equilibration and remains high during sampling, supporting the use of the final top-gene summaries for interpretation."
+snapshot_a_r <- snapshot_summary_r |>
+  dplyr::filter(matrix == "A", !is.na(mean_top_overlap)) |>
+  dplyr::mutate(
+    phase = factor(phase, levels = c("equilibration", "sampling"))
+  )
+
+ggplot(snapshot_a_r, aes(x = snapshot_label, y = mean_top_overlap, color = phase)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0.9, linetype = "dotted", color = "grey45") +
+  scale_color_manual(values = c("equilibration" = "#E76F51", "sampling" = "#2A9D8F")) +
+  scale_y_continuous(limits = c(0, 1), labels = scales::label_number(accuracy = 0.01)) +
+  labs(
+    title = "Top genes stabilize before the final summary",
+    subtitle = "Higher overlap means the snapshot top genes resemble the final top genes.",
+    x = "Iteration within phase",
+    y = "Mean top-gene overlap",
+    color = "Phase"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "bottom")
+```
+
+A third diagnostic looks at {{< glossary "Posterior uncertainty" display="posterior uncertainty" >}}. The table below is not a pass/fail test. It helps you notice which patterns have more variability in their gene weights or cell activities. The IFN-associated pattern has a strong biological signal and interpretable top genes, but its uncertainty is still worth carrying forward as part of the evidence.
+
+Two columns matter most here. **Mean cell-activity SD** summarizes the average posterior standard deviation of the pattern's cell activity scores. A larger value means that, across cells, the model sampled a wider range of plausible activity values for that pattern. **Median top-gene loading CV** summarizes uncertainty in the gene weights for the pattern's strongest genes; the {{< glossary "Coefficient of variation" display="coefficient of variation" >}} compares uncertainty with the size of the estimated loading, and the median keeps one unusually noisy top gene from dominating the summary.
+
+These statistics are uncertainty summaries, not biological effect sizes. A high cell-activity SD does not mean the pattern is more biologically important, and a lower loading CV does not by itself name the pattern. Instead, use them beside the trace, snapshot stability, top genes, and stimulation/cell-type evidence.
+
+The table marks the run-specific IFN-associated pattern, then shows the two uncertainty summaries beside the other selected-model patterns. First find the IFN-associated row, then compare its uncertainty values with the rest of the model.
+
+```{r}
+#| label: analysis-r-uncertainty-table
+#| message: false
+#| warning: false
+uncertainty_display_r <- uncertainty_summary_r |>
+  dplyr::mutate(
+    pattern_role = dplyr::if_else(
+      pattern == ifn_pattern_r,
+      "IFN-associated pattern in selected R run",
+      "other selected-model pattern"
+    )
+  ) |>
+  dplyr::select(
+    pattern,
+    pattern_role,
+    mean_factor_sd,
+    top_gene_median_loading_cv
+  ) |>
+  dplyr::mutate(
+    mean_factor_sd = round(mean_factor_sd, 4),
+    top_gene_median_loading_cv = round(top_gene_median_loading_cv, 4)
+  )
+
+knitr::kable(
+  uncertainty_display_r,
+  col.names = c(
+    "Pattern",
+    "Role in this run",
+    "Mean cell-activity SD",
+    "Median top-gene loading CV"
+  )
+)
+```
+
+In this run, the IFN-associated pattern is `Pattern4`. Its mean cell-activity SD is `0.0105`, which is higher than several other patterns but lower than `Pattern6`. Its median top-gene loading CV is `0.0233`, similar to `Pattern6` and higher than the other rows. That means the IFN-associated pattern is not the least uncertain pattern in the model, so you should not interpret a single cell's exact activity score too literally. The more important question is whether the same pattern is supported by several kinds of evidence. Here, the uncertainty table does not stand alone: it is read beside the chi-square trace, the snapshot top-gene stability check, the IFN-linked top genes, and the paired donor activity results below.
+
+Together, the trace, snapshot, and uncertainty summaries support proceeding with interpretation. They do not prove that this is the only possible model. They show that the selected R run behaved coherently enough for the focused biological questions in this case study.
+
+## Question 1: What Latent Transcriptional Programs Are Present?
+
+This question asks what kinds of signals the selected CoGAPS model learned from IFN-beta-stimulated and control PBMC single-cell RNA-seq data. You begin by comparing patterns by evidence, not by numbered labels. Then you make a working inventory of candidate programs using stimulation association, top genes, cell-type activity, and gene direction.
+
+### Match Patterns By Evidence, Not By Number
+
+The R and Python-compatible outputs should not be compared by pattern number. Instead, compare what each pattern does. The code below matches patterns using two pieces of evidence:
+
+- **{{< glossary "Spearman correlation" display="cell-activity correlation" >}}:** do the two patterns assign high activity to the same cells?
+- **{{< glossary "Top-gene Jaccard" display="top-gene Jaccard" >}}:** do the two patterns use similar top genes?
+
+The programming move here is a pairwise comparison. The code creates every R-pattern by Python-pattern pair, computes a similarity score for each pair, and then chooses non-overlapping best matches. In R, `expand.grid()` creates all pattern pairs. In Python, nested `for` loops do the same job in a way that is easy to read.
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+#| label: analysis-r-python-match-r
+#| message: false
+#| warning: false
+python_matrices_r <- load_lightweight_pattern_matrices_r(
+  file.path(SELECTED_PYTHON_RESULTS_DIR_R, "pattern_gene_weights.tsv.gz"),
+  file.path(SELECTED_PYTHON_RESULTS_DIR_R, "pattern_cell_activities.tsv.gz")
+)
+
+A_python_for_match_r <- python_matrices_r$A
+P_python_for_match_r <- python_matrices_r$P
+
+common_cells_r <- intersect(rownames(P_r), rownames(P_python_for_match_r))
+common_genes_r <- intersect(rownames(A_r), rownames(A_python_for_match_r))
+
+pair_grid_r <- expand.grid(
+  r_pattern = pattern_columns_r(colnames(P_r)),
+  python_pattern = pattern_columns_r(colnames(P_python_for_match_r)),
+  stringsAsFactors = FALSE
+)
+
+top_n_match_r <- 50L
+pair_grid_r$activity_spearman <- NA_real_
+pair_grid_r$top50_overlap <- NA_integer_
+pair_grid_r$top50_jaccard <- NA_real_
+
+for (i in seq_len(nrow(pair_grid_r))) {
+  r_pat <- pair_grid_r$r_pattern[i]
+  py_pat <- pair_grid_r$python_pattern[i]
+
+  pair_grid_r$activity_spearman[i] <- suppressWarnings(cor(
+    P_r[common_cells_r, r_pat],
+    P_python_for_match_r[common_cells_r, py_pat],
+    method = "spearman"
+  ))
+
+  r_weights_i <- A_r[common_genes_r, r_pat]
+  names(r_weights_i) <- common_genes_r
+  py_weights_i <- A_python_for_match_r[common_genes_r, py_pat]
+  names(py_weights_i) <- common_genes_r
+  r_top <- names(sort(r_weights_i, decreasing = TRUE))[seq_len(top_n_match_r)]
+  py_top <- names(sort(py_weights_i, decreasing = TRUE))[seq_len(top_n_match_r)]
+  pair_grid_r$top50_overlap[i] <- length(intersect(r_top, py_top))
+  pair_grid_r$top50_jaccard[i] <- length(intersect(r_top, py_top)) / length(union(r_top, py_top))
+}
+
+greedy_order_r <- pair_grid_r |>
+  dplyr::arrange(dplyr::desc(activity_spearman), dplyr::desc(top50_jaccard))
+
+matched_rows_r <- list()
+used_r_patterns <- character()
+used_python_patterns <- character()
+
+for (i in seq_len(nrow(greedy_order_r))) {
+  row_i <- greedy_order_r[i, ]
+  if (!(row_i$r_pattern %in% used_r_patterns) &&
+      !(row_i$python_pattern %in% used_python_patterns)) {
+    matched_rows_r[[length(matched_rows_r) + 1L]] <- row_i
+    used_r_patterns <- c(used_r_patterns, row_i$r_pattern)
+    used_python_patterns <- c(used_python_patterns, row_i$python_pattern)
+  }
+}
+
+matched_patterns_r <- dplyr::bind_rows(matched_rows_r) |>
+  dplyr::arrange(as.integer(sub("Pattern", "", r_pattern))) |>
+  dplyr::mutate(
+    activity_spearman = round(activity_spearman, 3),
+    top50_jaccard = round(top50_jaccard, 3)
+  )
+
+knitr::kable(
+  matched_patterns_r |>
+    dplyr::select(r_pattern, python_pattern, activity_spearman, top50_overlap, top50_jaccard),
+  col.names = c(
+    "R pattern",
+    "Python-compatible pattern",
+    "Cell-activity Spearman",
+    "Top-50 gene overlap",
+    "Top-50 Jaccard"
+  )
+)
+```
+
+#### Python
+
+```{python}
+#| label: analysis-r-python-match-python
+#| results: asis
+r_weights = pd.read_csv(R_PATTERN_GENE_WEIGHTS_TSV_GZ, sep="\t").set_index("gene")
+r_activities = pd.read_csv(R_PATTERN_CELL_ACTIVITIES_TSV_GZ, sep="\t").set_index("cell_barcode")
+r_weights.columns = [col.replace("Pattern_", "Pattern") for col in r_weights.columns]
+r_activities.columns = [col.replace("Pattern_", "Pattern") for col in r_activities.columns]
+
+common_cells = r_activities.index.intersection(P_py.index)
+common_genes = r_weights.index.intersection(A_py.index)
+
+def top_gene_set(weight_table, pattern, n=50):
+    return set(weight_table.loc[common_genes, pattern].sort_values(ascending=False).head(n).index)
+
+pair_records = []
+for r_pattern in pattern_columns(r_weights):
+    for python_pattern in pattern_columns(A_py):
+        r_activity = r_activities.loc[common_cells, r_pattern].rank()
+        python_activity = P_py.loc[common_cells, python_pattern].rank()
+        activity_spearman = r_activity.corr(python_activity)
+
+        r_top = top_gene_set(r_weights, r_pattern)
+        python_top = top_gene_set(A_py, python_pattern)
+        overlap = len(r_top.intersection(python_top))
+        jaccard = overlap / len(r_top.union(python_top))
+
+        pair_records.append(
             {
-                "pattern": pattern,
-                "corr_with_stim": round(float(pattern_corrs[pattern]), 4),
-                "dominant_cell_type": dominant_cell_type,
-                "top_genes_top8": top_genes,
+                "R pattern": r_pattern,
+                "Python-compatible pattern": python_pattern,
+                "Cell-activity Spearman": activity_spearman,
+                "Top-50 gene overlap": overlap,
+                "Top-50 Jaccard": jaccard,
             }
         )
-    pattern_summary = pd.DataFrame(pattern_summary_rows)
 
-pattern_summary
+pair_table = pd.DataFrame(pair_records).sort_values(
+    ["Cell-activity Spearman", "Top-50 Jaccard"],
+    ascending=False,
+)
+
+used_r = set()
+used_python = set()
+matched_records = []
+for _, row in pair_table.iterrows():
+    if row["R pattern"] not in used_r and row["Python-compatible pattern"] not in used_python:
+        matched_records.append(row)
+        used_r.add(row["R pattern"])
+        used_python.add(row["Python-compatible pattern"])
+
+matched_patterns = (
+    pd.DataFrame(matched_records)
+    .sort_values("R pattern", key=lambda s: s.str.replace("Pattern", "").astype(int))
+    .round({"Cell-activity Spearman": 3, "Top-50 Jaccard": 3})
+)
+
+print(render_table(matched_patterns))
 ```
 
 :::
 
-The selected K6 model also contains an additional stimulation-associated pattern with interferon-related genes. We interpret this as a stimulation-associated candidate, not as a fully validated distinct biological program. Other K6 patterns have interpretable myeloid, T-cell-associated, or antigen-presentation anchors; those labels should remain cautious.
+The matched table shows that the R and Python-compatible outputs recover the same major pattern structure, even though the pattern numbers are permuted. In particular, the selected R IFN-associated pattern, `Pattern4`, matches the Python-compatible IFN-associated pattern, `Pattern5`, with very high cell-activity agreement and complete top-50 gene overlap. That agreement gives you a useful check on interpretation: the main biological signal is not tied to one implementation-specific pattern number.
 
-## IFN-associated pattern across cell types
+### Summarize The Candidate Programs
+
+Now that you know not to rely on pattern numbers alone, you can ask what kinds of {{< glossary "Latent pattern" display="latent patterns" >}} are present. This table is a working inventory, not a final naming ceremony. It combines four clues that you have already seen in earlier sections:
+
+- **stimulation association:** whether pattern activity tracks IFN-beta stimulation,
+- **dominant cell-type activity:** where the pattern is strongest on average,
+- **top genes:** which genes have the largest CoGAPS weights,
+- **direction among top genes:** whether those top genes tend to be higher or lower after stimulation.
+
+The code below uses simple, visible rules to assign cautious working interpretations. For example, a pattern with high stimulation correlation and interferon-stimulated genes is marked as IFN-associated. A pattern with `CD74` and `HLA` genes is marked as antigen-presentation-linked. A pattern with monocyte markers and highest mean activity in monocytes is treated as monocyte-linked. These labels are starting points for interpretation, not labels that CoGAPS knew in advance.
+
+As you read the code, focus on the data-wrangling pattern rather than trying to memorize every function name. Both tabs do the same four jobs:
+
+1. **Start from one row per CoGAPS pattern.** The source table already contains pattern-level summaries, such as stimulation correlation, mean activity in control and stimulated cells, the dominant cell type, and the top genes.
+2. **Add the directionality summary.** The code joins in the count of top genes that are higher or lower after IFN-beta stimulation, so the final table can keep CoGAPS weights and expression direction side by side.
+3. **Create readable evidence columns.** The code calculates `stim - control`, keeps only the first few top genes for display, and turns several numeric columns into short phrases that are easier to scan.
+4. **Apply cautious interpretation rules.** The rules use the evidence already in the table. They do not rerun CoGAPS, and they do not replace biological judgment.
+
+In R, the pipe operator `|>` reads as "then." The code starts with `pattern_summary_r`, then uses `left_join()` to add direction counts, `mutate()` to create new columns, `case_when()` to assign the working interpretation, `arrange()` to put `Pattern1` through `Pattern6` in order, and `select()` to keep only the columns shown in the table. In Python, the same idea appears as a method chain: `merge()` adds the direction counts, `assign()` creates new columns, `apply()` runs the interpretation function once per row, `sort_values()` orders the patterns, and the final column selection keeps the output focused.
 
 ::: {.panel-tabset}
 
-### R
+#### R
 
 ```{r}
-if (HAS_R_PATTERN_ACTIVITY_BY_CELLTYPE_R) {
-  ifn_by_celltype_r <- subset(
-    read.csv(R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV_R, stringsAsFactors = FALSE),
-    pattern == ifn_pattern_r
+#| label: analysis-candidate-programs-r
+#| message: false
+#| warning: false
+first_genes_r <- function(gene_text, n = 4L) {
+  vapply(
+    strsplit(gene_text, ",\\s*"),
+    function(genes) paste(head(genes, n), collapse = ", "),
+    character(1)
   )
-} else if (!is.null(P_r) && !is.na(ifn_pattern_r)) {
-  tmp_r <- aggregate(
-    P_r[, ifn_pattern_r],
-    by = list(cell_type = adata_with_patterns_r$cell_type, condition = adata_with_patterns_r$condition),
-    FUN = function(x) c(mean = mean(x), median = median(x), n_cells = length(x))
+}
+
+program_inventory_r <- pattern_summary_r |>
+  dplyr::left_join(
+    direction_summary_r |>
+      dplyr::select(pattern, n_up_in_stim, n_down_in_stim),
+    by = "pattern"
+  ) |>
+  dplyr::mutate(
+    activity_shift = mean_activity_stim - mean_activity_ctrl,
+    top_genes_top4 = first_genes_r(top_genes_top15),
+    working_interpretation = dplyr::case_when(
+      corr_with_stim >= 0.70 &
+        grepl("ISG15|IFIT|MX1|OAS1|IRF7", top_genes_top15) ~
+        "Broad IFN-associated stimulation",
+      corr_with_stim >= 0.20 &
+        grepl("CXCL10|APOBEC3A|RSAD2|ISG15", top_genes_top15) ~
+        "Monocyte-biased stimulation-linked",
+      grepl("CD74|HLA-DRA|HLA-DRB1|HLA-DPA1|HLA-DPB1", top_genes_top15) ~
+        "Dendritic / antigen-presentation-linked",
+      dominant_cell_type == "FCGR3A+ Monocytes" ~
+        "FCGR3A+ monocyte-linked",
+      dominant_cell_type == "CD14+ Monocytes" ~
+        "CD14+ monocyte-linked baseline",
+      dominant_cell_type == "CD4 T cells" ~
+        "T-cell / lymphocyte-linked baseline",
+      TRUE ~ "additional immune-cell-linked signal"
+    ),
+    stimulation_evidence = paste0(
+      "corr = ", round(corr_with_stim, 2),
+      "; stim - control = ", round(activity_shift, 2)
+    ),
+    identity_gene_evidence = paste0(
+      "highest in ", dominant_cell_type,
+      "; top genes: ", top_genes_top4
+    ),
+    direction_evidence = paste0(
+      n_up_in_stim, " up / ",
+      n_down_in_stim, " down among top 15 genes"
+    ),
+    pattern_index = as.integer(sub("Pattern", "", pattern))
+  ) |>
+  dplyr::arrange(pattern_index) |>
+  dplyr::select(
+    pattern,
+    working_interpretation,
+    stimulation_evidence,
+    identity_gene_evidence,
+    direction_evidence
   )
-  stats_r <- if (is.list(tmp_r$x) && !is.matrix(tmp_r$x)) {
-    do.call(rbind, tmp_r$x)
-  } else {
-    tmp_r$x
+
+knitr::kable(
+  program_inventory_r,
+  col.names = c(
+    "Pattern",
+    "Working interpretation",
+    "Stimulation evidence",
+    "Identity / gene evidence",
+    "Direction check"
+  )
+)
+```
+
+#### Python
+
+```{python}
+#| label: analysis-candidate-programs-python
+#| results: asis
+def first_genes(gene_text, n=4):
+    genes = [gene.strip() for gene in str(gene_text).split(",")]
+    return ", ".join(genes[:n])
+
+def interpret_program(row):
+    genes = str(row["top_genes_top15"])
+    dominant = row["dominant_cell_type"]
+    corr = row["corr_with_stim"]
+
+    if corr >= 0.70 and any(gene in genes for gene in ["ISG15", "IFIT", "MX1", "OAS1", "IRF7"]):
+        return "Broad IFN-associated stimulation"
+    if corr >= 0.20 and any(gene in genes for gene in ["CXCL10", "APOBEC3A", "RSAD2", "ISG15"]):
+        return "Monocyte-biased stimulation-linked"
+    if any(gene in genes for gene in ["CD74", "HLA-DRA", "HLA-DRB1", "HLA-DPA1", "HLA-DPB1"]):
+        return "Dendritic / antigen-presentation-linked"
+    if dominant == "FCGR3A+ Monocytes":
+        return "FCGR3A+ monocyte-linked"
+    if dominant == "CD14+ Monocytes":
+        return "CD14+ monocyte-linked baseline"
+    if dominant == "CD4 T cells":
+        return "T-cell / lymphocyte-linked baseline"
+    return "additional immune-cell-linked signal"
+
+program_inventory = (
+    pattern_summary
+    .merge(
+        direction_summary[
+            ["pattern", "n_up_in_stim", "n_down_in_stim"]
+        ],
+        on="pattern",
+        how="left",
+    )
+    .assign(
+        activity_shift=lambda df: df["mean_activity_stim"] - df["mean_activity_ctrl"],
+        top_genes_top4=lambda df: df["top_genes_top15"].apply(first_genes),
+    )
+)
+
+program_inventory["Working interpretation"] = program_inventory.apply(interpret_program, axis=1)
+program_inventory["Stimulation evidence"] = (
+    "corr = " + program_inventory["corr_with_stim"].round(2).astype(str)
+    + "; stim - control = " + program_inventory["activity_shift"].round(2).astype(str)
+)
+program_inventory["Identity / gene evidence"] = (
+    "highest in " + program_inventory["dominant_cell_type"]
+    + "; top genes: " + program_inventory["top_genes_top4"]
+)
+program_inventory["Direction check"] = (
+    program_inventory["n_up_in_stim"].astype(int).astype(str)
+    + " up / "
+    + program_inventory["n_down_in_stim"].astype(int).astype(str)
+    + " down among top 15 genes"
+)
+
+program_inventory_display = (
+    program_inventory
+    .assign(pattern_index=lambda df: df["pattern"].str.replace("Pattern", "").astype(int))
+    .sort_values("pattern_index")
+    [["pattern", "Working interpretation", "Stimulation evidence", "Identity / gene evidence", "Direction check"]]
+    .rename(columns={"pattern": "Pattern"})
+)
+
+print(render_table(program_inventory_display))
+```
+
+:::
+
+### Check The Evidence Behind The Working Labels
+
+The working interpretations above should not be read as automatic names. They are short labels for evidence patterns. A label is strongest when two kinds of evidence agree:
+
+- **local model evidence**, such as stimulation correlation, dominant cell-type activity, top genes, and expression direction; and
+- **prior biological knowledge**, such as known interferon-stimulated genes, antigen-presentation genes, or immune-cell annotations from the source study.
+
+This distinction matters because not all six labels have the same strength. Some are **gene-anchored**: the top genes have a well-established biological role. Others are more **activity-anchored**: the pattern is strongest in a particular annotated cell population, but the top genes are not enough by themselves to name a pathway.
+
+- **Pattern4, broad IFN-associated stimulation**, has the strongest support. It has high stimulation correlation, a large positive stimulated-minus-control activity shift, mostly up-regulated top genes, and top genes such as `ISG15`, `ISG20`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `OAS1`, and `IRF7`. Those genes are consistent with the IFN-beta perturbation in the source study and with the interferon-stimulated gene biology introduced in the Context section [@kang2018multiplexed; @chyuan2019interferons; @catalina2019interferonSLE].
+
+- **Pattern5, monocyte-biased stimulation-linked**, has a moderate positive stimulation association and many stimulation-up genes, including interferon-related genes. Its "monocyte-biased" part comes from the local activity evidence: the pattern is strongest in annotated CD14+ monocytes. That is why the label is more cautious than Pattern4. It suggests an IFN-responsive signal with stronger monocyte activity, not a fully separate monocyte pathway.
+
+- **Pattern3, dendritic / antigen-presentation-linked**, is strongly supported by its top genes. `CD74` and HLA class II genes such as `HLA-DRA`, `HLA-DRB1`, `HLA-DPA1`, and `HLA-DPB1` are tied to MHC class II antigen processing and presentation [@blum2013pathways]. The local activity evidence adds that this pattern is strongest in annotated dendritic cells, a blood immune-cell population where antigen-presentation biology is expected [@villani2017singlecell].
+
+- **Pattern1 and Pattern2, monocyte-linked**, are mainly activity-anchored. Pattern1 is strongest in annotated FCGR3A+ monocytes and includes `FCGR3A` among its top genes. Pattern2 is strongest in annotated CD14+ monocytes, but its top genes include several broad baseline or stress-response genes, such as ferritin genes. Human blood monocytes are often discussed using CD14/CD16-related distinctions, and single-cell blood atlases show that monocyte and dendritic-cell annotations can contain multiple related subtypes [@zieglerHeitbrock2010nomenclature; @villani2017singlecell]. In this table, those labels should therefore be read as "where the pattern is strongest," not as complete pathway names.
+
+- **Pattern6, T-cell / lymphocyte-linked baseline**, is also activity-anchored. It is strongest in annotated CD4 T cells and has lower activity after stimulation, but its top genes are not a clean T-cell receptor or cytokine pathway. The safest interpretation is that this pattern marks lymphocyte-neighborhood baseline structure in this run. This is still useful, because a latent model can contain both cell-identity-like signals and cell-activity-like signals in the same dataset [@kotliar2019identityActivity].
+
+Taken together, the selected model does not recover only one stimulation signal. It contains a strongly supported IFN-associated stimulation pattern, a second more cautious monocyte-biased stimulation-linked pattern, a gene-anchored antigen-presentation-linked pattern, and several activity-anchored immune-cell-linked baseline patterns. The next questions test the most important part of that inventory more deeply: whether the IFN-associated pattern behaves like a broad stimulation response rather than a mislabeled cell-type pattern.
+
+## Question 2: Can CoGAPS Separate Stimulation From Cell-Type-Linked Structure?
+
+This question asks whether the selected model contains a broad IFN-beta stimulation signal while still retaining immune-cell-linked structure. You answer it by testing the paired stimulation shift, comparing the IFN-associated pattern with a simple interferon-stimulated gene score, and contrasting that pattern with an antigen-presentation-linked pattern.
+
+Here, **compare** means asking whether two different kinds of evidence point to the same biological signal. If the IFN-associated CoGAPS pattern rises after stimulation and also agrees with a simple interferon-stimulated gene score, that supports interpreting the pattern as an IFN-beta response rather than as a numerical pattern with no clear biology.
+
+Here, **contrast** means setting that IFN-associated pattern beside a different pattern that should behave differently. An {{< glossary "Antigen presentation" display="antigen-presentation" >}}-linked pattern, for example, may be defined by `CD74` and HLA class II genes rather than by a broad stimulation shift. Seeing those differences helps you separate a shared treatment-response signal from immune-cell-linked biology [@blum2013pathways].
+
+### Test The Paired IFN Activity Shift
+
+The source experiment used a {{< glossary "Paired design" display="paired design" >}}: each donor contributed a control aliquot and an IFN-beta-stimulated aliquot. That design is valuable because each donor can serve as their own comparison. Instead of asking only whether all stimulated cells have higher activity on average, you can ask whether the shift appears within each matched donor pair.
+
+The code below filters to the IFN-associated pattern, separates control and stimulated mean activity by donor, computes `stim - control`, and then performs a one-sided {{< glossary "Sign test" display="sign test" >}}. The sign test asks a simple question: if stimulation had no consistent direction, how surprising would it be to see this many donor pairs shift upward?
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+#| label: analysis-paired-ifn-r
+#| message: false
+#| warning: false
+ifn_replicate_r <- activity_by_replicate_r |>
+  dplyr::filter(pattern == ifn_pattern_r)
+
+ctrl_replicate_r <- ifn_replicate_r |>
+  dplyr::filter(condition == "ctrl") |>
+  dplyr::select(replicate, ctrl_mean_activity = mean_activity, ctrl_n_cells = n_cells)
+
+stim_replicate_r <- ifn_replicate_r |>
+  dplyr::filter(condition == "stim") |>
+  dplyr::select(replicate, stim_mean_activity = mean_activity, stim_n_cells = n_cells)
+
+ifn_pair_shift_r <- dplyr::inner_join(
+  ctrl_replicate_r,
+  stim_replicate_r,
+  by = "replicate"
+) |>
+  dplyr::mutate(activity_shift = stim_mean_activity - ctrl_mean_activity)
+
+n_positive_r <- sum(ifn_pair_shift_r$activity_shift > 0)
+n_nonzero_r <- sum(ifn_pair_shift_r$activity_shift != 0)
+sign_test_r <- binom.test(
+  n_positive_r,
+  n_nonzero_r,
+  p = 0.5,
+  alternative = "greater"
+)
+
+paired_shift_summary_r <- tibble::tibble(
+  `IFN-associated pattern` = ifn_pattern_r,
+  `matched donor pairs` = nrow(ifn_pair_shift_r),
+  `pairs higher after stimulation` = n_positive_r,
+  `mean shift` = round(mean(ifn_pair_shift_r$activity_shift), 3),
+  `median shift` = round(median(ifn_pair_shift_r$activity_shift), 3),
+  `one-sided sign-test p-value` = signif(sign_test_r$p.value, 3)
+)
+
+knitr::kable(paired_shift_summary_r)
+```
+
+#### Python
+
+```{python}
+#| label: analysis-paired-ifn-python
+#| results: asis
+from math import comb
+
+def one_sided_sign_test_pvalue(n_positive, n_nonzero):
+    """Exact one-sided sign-test probability under a 50/50 null."""
+    return sum(comb(n_nonzero, k) for k in range(n_positive, n_nonzero + 1)) / (2 ** n_nonzero)
+
+ifn_replicate = activity_by_replicate.loc[
+    activity_by_replicate["pattern"] == ifn_pattern_py
+]
+
+ifn_pair_shift = (
+    ifn_replicate.pivot_table(
+        index="replicate",
+        columns="condition",
+        values="mean_activity"
+    )
+    .dropna()
+    .reset_index()
+)
+ifn_pair_shift["activity_shift"] = ifn_pair_shift["stim"] - ifn_pair_shift["ctrl"]
+
+n_positive = int((ifn_pair_shift["activity_shift"] > 0).sum())
+n_nonzero = int((ifn_pair_shift["activity_shift"] != 0).sum())
+sign_pvalue = one_sided_sign_test_pvalue(n_positive, n_nonzero)
+
+paired_shift_summary = pd.DataFrame(
+    {
+        "IFN-associated pattern": [ifn_pattern_py],
+        "matched donor pairs": [len(ifn_pair_shift)],
+        "pairs higher after stimulation": [n_positive],
+        "mean shift": [round(ifn_pair_shift["activity_shift"].mean(), 3)],
+        "median shift": [round(ifn_pair_shift["activity_shift"].median(), 3)],
+        "one-sided sign-test p-value": [f"{sign_pvalue:.3g}"],
+    }
+)
+
+print(render_table(paired_shift_summary))
+```
+
+:::
+
+Read the table as a donor-paired direction check, not as a cell-level test.
+Each donor contributes one matched comparison: the mean IFN-associated pattern activity in that donor's stimulated aliquot minus the mean activity in that donor's control aliquot.
+
+- **IFN-associated pattern** gives the run-specific pattern label being tested. In the selected R run, this is `Pattern4`; in another run, the same biological signal can have a different pattern number.
+- **Matched donor pairs** is the number of donors that have both a control and stimulated measurement available for this comparison.
+- **Pairs higher after stimulation** counts how many donor pairs have a positive `stim - control` shift. Here, `8` means every matched donor pair moved in the same upward direction.
+- **Mean shift** and **median shift** summarize the size of the donor-level activity change. The mean is the average shift across donors; the median is the middle donor shift and is less sensitive to one unusually large or small donor response.
+- **One-sided sign-test p-value** asks how surprising it would be to observe at least this many upward shifts if upward and downward shifts were equally likely. With 8 of 8 donor pairs higher after stimulation, the probability under that no-direction null is `0.00391`, or about 0.4%.
+
+The p-value comes from the directions of the paired shifts, not from thousands of individual cells and not from the size of the shifts. That is why the table reports both pieces of evidence: the sign test checks whether the direction is consistent across donors, while the mean and median shifts show how large the activity change is on the CoGAPS activity scale.
+
+For the selected R run, all eight matched donor pairs have higher IFN-associated activity after stimulation. The Python-compatible output shows the same qualitative result for its matched IFN-associated pattern. This is stronger evidence than a pooled cell-level average because it respects the paired study design.
+
+The sign test is intentionally modest. It does not claim that IFN-beta stimulation has the same effect size in every donor, and it does not replace a full clinical model. It simply checks whether the direction of the pattern activity shift is consistent across the donor pairs in this dataset.
+
+### Optional Formal Check: Account For Donor With A Mixed Model
+
+The paired sign test checks whether the direction of change is consistent across donors. A {{< glossary "Mixed model" display="mixed model" >}} asks a slightly different question: after allowing each donor to have their own baseline activity, is the average stimulation effect still positive?
+
+This is useful because donors can differ before stimulation. One donor may have higher baseline pattern activity than another donor even before IFN-beta is added. If you ignore that pairing, the analysis can mix two ideas together: differences between donors and the effect of stimulation within the same donor.
+
+The model below separates those ideas. It treats **condition** as the effect of interest: stimulated versus control. It treats **donor** as the grouping term: measurements from the same donor are related because they come from matched aliquots. In plain language, the model asks:
+
+> After accounting for each donor's baseline activity level, how much higher is the IFN-associated pattern activity in stimulated aliquots than in control aliquots?
+
+The model is fit to donor-level mean activity, not to every cell. In this dataset, that means each donor contributes one control mean and one stimulated mean for the IFN-associated pattern. This keeps the analysis aligned with the experimental design and avoids treating thousands of cells as thousands of independent donors.
+
+The R and Python chunks below do the same analysis in parallel:
+
+1. They start from the donor-by-condition activity table for the IFN-associated pattern.
+1. They keep only the columns needed for the model: donor, condition, and mean activity.
+1. They make control the reference condition, so the stimulation coefficient is interpreted as `stim - control`.
+1. They fit a random-intercept mixed model. In R, `nlme::lme(mean_activity ~ condition, random = ~ 1 | replicate)` means "estimate the condition effect, while allowing each donor to have its own baseline." In Python, `statsmodels` uses the same idea with `mean_activity ~ condition_stim` and `groups = replicate`.
+1. They extract the stimulation effect, its uncertainty, the p-value, and the variation left over after accounting for condition and donor.
+1. They place those quantities into a small summary table so the statistical result can be read beside the simpler paired sign-test result.
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+#| label: analysis-ifn-mixed-model-r
+#| message: false
+#| warning: false
+mixed_model_data_r <- ifn_replicate_r |>
+  dplyr::mutate(
+    condition = factor(condition, levels = c("ctrl", "stim")),
+    replicate = factor(replicate)
+  ) |>
+  dplyr::select(replicate, condition, mean_activity)
+
+ifn_mixed_model_r <- nlme::lme(
+  mean_activity ~ condition,
+  random = ~ 1 | replicate,
+  data = mixed_model_data_r,
+  method = "REML",
+  control = nlme::lmeControl(msMaxIter = 100, opt = "optim")
+)
+
+mixed_coef_r <- summary(ifn_mixed_model_r)$tTable
+mixed_condition_r <- mixed_coef_r["conditionstim", ]
+mixed_varcorr_r <- nlme::VarCorr(ifn_mixed_model_r)
+
+mixed_effect_r <- unname(mixed_condition_r["Value"])
+mixed_pvalue_r <- unname(mixed_condition_r["p-value"])
+mixed_donor_sd_r <- suppressWarnings(as.numeric(mixed_varcorr_r["(Intercept)", "StdDev"]))
+mixed_residual_sd_r <- suppressWarnings(as.numeric(mixed_varcorr_r["Residual", "StdDev"]))
+
+mixed_model_summary_r <- tibble::tibble(
+  `IFN-associated pattern` = ifn_pattern_r,
+  `model question` = "stimulated mean activity vs control, accounting for donor",
+  `estimated stimulation effect` = round(mixed_effect_r, 3),
+  `standard error` = round(unname(mixed_condition_r["Std.Error"]), 3),
+  `t statistic` = round(unname(mixed_condition_r["t-value"]), 2),
+  `p-value` = format.pval(mixed_pvalue_r, digits = 3, eps = 0.001),
+  `donor baseline SD` = round(mixed_donor_sd_r, 3),
+  `residual SD` = round(mixed_residual_sd_r, 3)
+)
+
+knitr::kable(mixed_model_summary_r)
+```
+
+#### Python
+
+```{python}
+#| label: analysis-ifn-mixed-model-python
+#| results: asis
+import warnings
+import statsmodels.formula.api as smf
+
+mixed_model_data = ifn_replicate[
+    ["replicate", "condition", "mean_activity"]
+].copy()
+mixed_model_data["condition"] = pd.Categorical(
+    mixed_model_data["condition"],
+    categories=["ctrl", "stim"],
+    ordered=True,
+)
+mixed_model_data["condition_stim"] = (
+    mixed_model_data["condition"] == "stim"
+).astype(int)
+
+ifn_mixed_model = smf.mixedlm(
+    "mean_activity ~ condition_stim",
+    mixed_model_data,
+    groups=mixed_model_data["replicate"],
+)
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    try:
+        ifn_mixed_result = ifn_mixed_model.fit(
+            reml=True,
+            method="lbfgs",
+            disp=False,
+        )
+    except Exception:
+        ifn_mixed_result = ifn_mixed_model.fit(
+            reml=True,
+            method="powell",
+            maxiter=500,
+            disp=False,
+        )
+
+mixed_effect = float(ifn_mixed_result.params["condition_stim"])
+mixed_pvalue = float(ifn_mixed_result.pvalues["condition_stim"])
+mixed_donor_sd = float(np.sqrt(ifn_mixed_result.cov_re.iloc[0, 0]))
+mixed_residual_sd = float(np.sqrt(ifn_mixed_result.scale))
+
+mixed_model_summary = pd.DataFrame(
+    {
+        "IFN-associated pattern": [ifn_pattern_py],
+        "model question": [
+            "stimulated mean activity vs control, accounting for donor"
+        ],
+        "estimated stimulation effect": [round(mixed_effect, 3)],
+        "standard error": [round(float(ifn_mixed_result.bse["condition_stim"]), 3)],
+        "z statistic": [round(float(ifn_mixed_result.tvalues["condition_stim"]), 2)],
+        "p-value": ["<0.001" if mixed_pvalue < 0.001 else f"{mixed_pvalue:.3f}"],
+        "donor baseline SD": [round(mixed_donor_sd, 3)],
+        "residual SD": [round(mixed_residual_sd, 3)],
+    }
+)
+
+print(render_table(mixed_model_summary))
+```
+
+:::
+
+Read this model as a formal companion to the sign test, not as a separate discovery. The sign test used only the direction of each donor-pair shift. The mixed model uses the donor-level activity values themselves while still accounting for the fact that control and stimulated measurements are paired within donor.
+
+Here is how to read the mixed-model table:
+
+- **IFN-associated pattern** gives the run-specific pattern label being tested. In the selected R run, this is `Pattern4`.
+- **Model question** states the comparison being estimated: stimulated mean activity versus control mean activity, while accounting for donor.
+- **Estimated stimulation effect** is the estimated average `stim - control` difference after the model accounts for donor baselines. A positive value means stimulated aliquots have higher IFN-associated activity on average. Here, `0.281` is nearly identical to the simple donor-paired mean shift above, which is reassuring.
+- **Standard error** summarizes the uncertainty around that estimated stimulation effect. A small standard error relative to the estimate means the donor-level shifts are very consistent.
+- **T statistic** in R, or **z statistic** in Python, is the estimated stimulation effect divided by its standard error. A large positive value means the estimated stimulation effect is much larger than its estimated uncertainty.
+- **P-value** tests the model-based null idea that the average stimulation effect is zero after accounting for donor. The value `<0.001` is consistent with a strong positive stimulation-associated shift in this dataset.
+- **Donor baseline SD** summarizes how much the fitted donor baselines vary after condition is included. A value near zero means the donor-level baseline differences are small in this summarized table.
+- **Residual SD** summarizes the remaining donor-condition variation after the model accounts for condition and donor. Smaller residual variation means the donor-level points sit close to the fitted model.
+
+The main result is the estimated stimulation effect. A positive effect of about `0.281` means that, after donor pairing is accounted for, the selected R IFN-associated pattern has higher average activity in IFN-beta-stimulated aliquots than in matched control aliquots. This points in the same direction as the paired sign test, which strengthens the conclusion that the IFN-associated activity shift is not caused by one donor alone.
+
+With only eight donor pairs, the p-value should still be interpreted as a compact check inside this dataset rather than as a broad clinical inference. The useful message is the agreement across evidence types: paired direction, estimated effect size, and biological gene support all point toward the same stimulation-associated pattern.
+
+### Compare Activity With A Canonical ISG Score
+
+The IFN-associated pattern should not only separate stimulated and control cells. Its activity should also agree with known interferon biology. One simple way to check that is to build a small score from canonical {{< glossary "Interferon-stimulated gene" display="interferon-stimulated genes" >}}, often called ISGs.
+
+This is a teaching check, not a new cell-type annotation. The short list below is a compact guidepost drawn from interferon-response resources rather than a new signature discovered in this case study. Many of the genes appear in the MSigDB Hallmark interferon-response gene sets, and Interferome provides a broader catalog of interferon-regulated genes [@liberzon2015hallmark; @rusinova2013interferome]. The Kang source study supplies the IFN-beta PBMC perturbation context, while the lupus/interferon literature explains why an interferon-gene score is relevant in SLE [@kang2018multiplexed; @catalina2019interferonSLE; @chyuan2019interferons].
+
+The code below turns that biological guidepost into a small, checkable table. Both tabs do the same four things. First, the code defines the compact ISG list. Second, it checks which of those genes are actually present in the prepared single-cell dataset. Third, it averages the expression of the available ISGs within each cell, producing one ISG score per cell. Fourth, it compares that per-cell ISG score with the run-specific IFN-associated CoGAPS activity. In the selected R run, that activity comes from `Pattern4`; in the Python output, it comes from the matched IFN-associated pattern for that implementation.
+
+In the R tab, `intersect()` keeps only genes that appear in both the ISG list and the `SingleCellExperiment` row names. `SummarizedExperiment::assay(sce_cells, "X")` pulls out the prepared expression matrix, and `colMeans()` averages the selected ISG expression values across genes for each cell. The final `cor(..., method = "spearman")` call compares ranked ISG scores with ranked CoGAPS activity values, so the check asks whether cells with higher ISG expression also tend to have higher IFN-associated pattern activity.
+
+The Python tab follows the same logic with `AnnData` and `pandas`. A list comprehension keeps genes found in `adata_cells.var_names`, slicing `adata_cells[:, isg_genes_present].X` pulls out the expression values, and `mean(axis=1)` averages those genes within each cell. The `.rank().corr(...)` step performs the same Spearman-style comparison by correlating the ranks of the ISG score and the ranks of the IFN-associated pattern activity.
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+#| label: analysis-isg-score-r
+#| message: false
+#| warning: false
+canonical_isg_genes_r <- c(
+  # Compact IFN-response guidepost; not an exhaustive ISG database.
+  "ISG15", "ISG20", "IFI6", "IFIT1", "IFIT2", "IFIT3",
+  "IRF7", "MX1", "OAS1", "BST2", "PLSCR1", "LY6E",
+  "TNFSF10", "RSAD2", "CXCL10", "IFITM3", "APOBEC3A"
+)
+
+isg_genes_present_r <- intersect(canonical_isg_genes_r, rownames(sce_cells))
+
+isg_expression_r <- SummarizedExperiment::assay(sce_cells, "X")[
+  isg_genes_present_r,
+  ,
+  drop = FALSE
+]
+isg_score_r <- colMeans(as.matrix(isg_expression_r))
+
+shared_isg_cells_r <- intersect(names(isg_score_r), rownames(P_r))
+isg_activity_corr_r <- suppressWarnings(cor(
+  isg_score_r[shared_isg_cells_r],
+  P_r[shared_isg_cells_r, ifn_pattern_r],
+  method = "spearman"
+))
+
+isg_activity_summary_r <- tibble::tibble(
+  check = c(
+    "canonical ISG genes requested",
+    "canonical ISG genes present",
+    "cells compared",
+    "Spearman correlation with IFN-associated activity"
+  ),
+  value = c(
+    as.character(length(canonical_isg_genes_r)),
+    as.character(length(isg_genes_present_r)),
+    format(length(shared_isg_cells_r), big.mark = ","),
+    sprintf("%.3f", isg_activity_corr_r)
+  )
+)
+
+knitr::kable(isg_activity_summary_r, col.names = c("Check", "Value"))
+```
+
+#### Python
+
+```{python}
+#| label: analysis-isg-score-python
+#| results: asis
+canonical_isg_genes = [
+    # Compact IFN-response guidepost; not an exhaustive ISG database.
+    "ISG15", "ISG20", "IFI6", "IFIT1", "IFIT2", "IFIT3",
+    "IRF7", "MX1", "OAS1", "BST2", "PLSCR1", "LY6E",
+    "TNFSF10", "RSAD2", "CXCL10", "IFITM3", "APOBEC3A",
+]
+
+isg_genes_present = [gene for gene in canonical_isg_genes if gene in adata_cells.var_names]
+isg_matrix = adata_cells[:, isg_genes_present].X
+if sparse.issparse(isg_matrix):
+    isg_matrix = isg_matrix.toarray()
+isg_score = pd.Series(
+    np.asarray(isg_matrix).mean(axis=1),
+    index=adata_cells.obs_names,
+    name="canonical_isg_score",
+)
+
+shared_isg_cells = isg_score.index.intersection(P_py.index)
+isg_activity_corr = (
+    isg_score.loc[shared_isg_cells].rank()
+    .corr(P_py.loc[shared_isg_cells, ifn_pattern_py].rank())
+)
+
+isg_activity_summary = pd.DataFrame(
+    {
+        "Check": [
+            "canonical ISG genes requested",
+            "canonical ISG genes present",
+            "cells compared",
+            "Spearman correlation with IFN-associated activity",
+        ],
+        "Value": [
+            str(len(canonical_isg_genes)),
+            str(len(isg_genes_present)),
+            f"{len(shared_isg_cells):,}",
+            f"{isg_activity_corr:.3f}",
+        ],
+    }
+)
+
+print(render_table(isg_activity_summary))
+```
+
+:::
+
+Here is how to read this table. **Canonical ISG genes requested** is the size of the short literature-guided list. **Canonical ISG genes present** tells you whether those genes survived preprocessing and are available in the 3,000-gene modeling space. In this run, all 17 requested ISGs are present, so the score is using the full intended guidepost. **Cells compared** confirms that the score and the CoGAPS activity were aligned for the full prepared cell set, not for a small subset. **Spearman correlation with IFN-associated activity** is the main result: it asks whether cells with higher ISG-score ranks also have higher IFN-associated CoGAPS activity ranks.
+
+The correlation is `0.803`, which is strong positive agreement. That means the cells that rank high for the simple ISG score also tend to rank high for the IFN-associated pattern activity. This does not prove mechanism by itself, and it is not a replacement for the donor-paired stimulation analysis. Instead, it is an independent biological check on the pattern interpretation: the same pattern that shifts upward after IFN-beta stimulation also follows a compact interferon-stimulated gene score built outside the CoGAPS model.
+
+This is the habit to carry forward. Before naming a latent pattern, check whether its cell activity agrees with an external biological guidepost and whether its high-weight genes make biological sense. Here, the ISG-score comparison supports calling the selected pattern IFN-associated, while the next subsection checks the gene-weight side of that same interpretation.
+
+### Test Targeted IFN And Antigen-Presentation Gene-Set Support
+
+Top genes are easier to interpret when they are checked against known biological gene sets. Here we use two small targeted sets:
+
+- an **IFN / antiviral response** set, which includes common interferon-stimulated genes; and
+- an **antigen-presentation** set, which includes `CD74` and HLA class II genes. HLA-DR, HLA-DQ, and HLA-DP are human MHC class II molecules, and CD74 is the invariant chain involved in MHC class II assembly and trafficking, so this compact set is a transparent marker for antigen-presentation biology [@blum2013pathways].
+
+This is not a full pathway database analysis. It is a transparent targeted {{< glossary "Gene-set enrichment" display="enrichment check" >}}. The code asks whether each pattern's top 50 genes contain more genes from a small reference set than expected from the 3,000-gene modeling universe.
+
+The basic idea is a counting comparison. For each CoGAPS pattern, the code takes the 50 genes with the largest pattern weights. It then asks how many of those 50 genes overlap a targeted reference set. If many IFN / antiviral genes appear among a pattern's top 50 genes, that pattern has interferon-response gene support. If many antigen-presentation genes appear among a pattern's top 50 genes, that pattern has antigen-presentation gene support.
+
+The p-value in this table is an overlap probability. It asks: if you drew 50 genes from the 3,000 modeled genes, how surprising would it be to see at least this many genes from the targeted set? In R, `fisher.test(..., alternative = "greater")` computes that one-sided overlap test from a small 2-by-2 contingency table. In Python, the helper function `hypergeom_tail()` computes the same kind of upper-tail probability directly from combinations.
+
+Several programming moves are worth noticing. Both tabs define two named gene sets, define the modeling universe as the genes in the CoGAPS gene-weight matrix, loop across patterns, select each pattern's top 50 genes, count overlaps with each targeted gene set, and then assemble one summary row per pattern and gene set. The R code stores rows in a list of small tibbles and combines them with `dplyr::bind_rows()`. The Python code stores dictionaries in a list and turns them into a `pandas` DataFrame.
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+#| label: analysis-targeted-gene-set-r
+#| message: false
+#| warning: false
+target_gene_sets_r <- list(
+  `IFN / antiviral response` = c(
+    "ISG15", "ISG20", "IFI6", "IFIT1", "IFIT2", "IFIT3",
+    "IRF7", "MX1", "OAS1", "BST2", "PLSCR1", "LY6E",
+    "TNFSF10", "RSAD2", "CXCL10", "IFITM3", "APOBEC3A"
+  ),
+  `Antigen presentation` = c(
+    "CD74", "HLA-DRA", "HLA-DRB1", "HLA-DPA1", "HLA-DPB1",
+    "HLA-DQB1", "HLA-DQA1", "HLA-DMA", "HLA-DMB", "HLA-DRB5"
+  )
+)
+
+gene_universe_r <- rownames(A_r)
+top_n_gene_set_r <- 50L
+
+gene_set_rows_r <- list()
+for (pattern_i in pattern_names_r) {
+  weights_i <- A_r[, pattern_i]
+  names(weights_i) <- rownames(A_r)
+  top_genes_i <- names(sort(weights_i, decreasing = TRUE))[seq_len(top_n_gene_set_r)]
+
+  for (set_name_i in names(target_gene_sets_r)) {
+    set_genes_i <- intersect(target_gene_sets_r[[set_name_i]], gene_universe_r)
+    overlap_genes_i <- intersect(top_genes_i, set_genes_i)
+
+    contingency_i <- matrix(
+      c(
+        length(overlap_genes_i),
+        length(top_genes_i) - length(overlap_genes_i),
+        length(set_genes_i) - length(overlap_genes_i),
+        length(gene_universe_r) - length(top_genes_i) - length(set_genes_i) + length(overlap_genes_i)
+      ),
+      nrow = 2
+    )
+
+    gene_set_rows_r[[length(gene_set_rows_r) + 1L]] <- tibble::tibble(
+      pattern = pattern_i,
+      gene_set = set_name_i,
+      set_genes_present = length(set_genes_i),
+      top50_overlap = length(overlap_genes_i),
+      example_overlap_genes = paste(head(overlap_genes_i, 8), collapse = ", "),
+      enrichment_p_value = fisher.test(contingency_i, alternative = "greater")$p.value
+    )
   }
-  ifn_by_celltype_r <- data.frame(
-    pattern = ifn_pattern_r,
-    cell_type = tmp_r$cell_type,
-    condition = tmp_r$condition,
-    mean_activity = stats_r[, "mean"],
-    median_activity = stats_r[, "median"],
-    n_cells = stats_r[, "n_cells"],
-    row.names = NULL
-  )
-} else {
-  ifn_by_celltype_r <- NULL
 }
 
-if (!is.null(ifn_by_celltype_r)) {
-  ifn_by_celltype_r[order(ifn_by_celltype_r$cell_type, ifn_by_celltype_r$condition), ]
-}
+targeted_gene_set_results_r <- dplyr::bind_rows(gene_set_rows_r) |>
+  dplyr::arrange(gene_set, enrichment_p_value)
+
+targeted_gene_set_display_r <- targeted_gene_set_results_r |>
+  dplyr::mutate(
+    enrichment_p_value = format.pval(enrichment_p_value, digits = 3, eps = 0.001)
+  )
+
+knitr::kable(
+  targeted_gene_set_display_r,
+  col.names = c(
+    "Pattern",
+    "Targeted gene set",
+    "Set genes present",
+    "Top-50 overlap",
+    "Example overlapping genes",
+    "Enrichment p-value"
+  )
+)
 ```
+
+#### Python
+
+```{python}
+#| label: analysis-targeted-gene-set-python
+#| results: asis
+target_gene_sets = {
+    "IFN / antiviral response": [
+        "ISG15", "ISG20", "IFI6", "IFIT1", "IFIT2", "IFIT3",
+        "IRF7", "MX1", "OAS1", "BST2", "PLSCR1", "LY6E",
+        "TNFSF10", "RSAD2", "CXCL10", "IFITM3", "APOBEC3A",
+    ],
+    "Antigen presentation": [
+        "CD74", "HLA-DRA", "HLA-DRB1", "HLA-DPA1", "HLA-DPB1",
+        "HLA-DQB1", "HLA-DQA1", "HLA-DMA", "HLA-DMB", "HLA-DRB5",
+    ],
+}
+
+def hypergeom_tail(overlap, set_size, draws, universe_size):
+    """Probability of seeing at least this overlap by chance."""
+    max_overlap = min(set_size, draws)
+    denominator = comb(universe_size, draws)
+    numerator = 0
+    for k in range(overlap, max_overlap + 1):
+        if draws - k <= universe_size - set_size:
+            numerator += comb(set_size, k) * comb(universe_size - set_size, draws - k)
+    return numerator / denominator
+
+gene_universe = set(A_py.index)
+top_n_gene_set = 50
+gene_set_records = []
+
+for pattern in pattern_columns(A_py):
+    top_genes = set(A_py[pattern].sort_values(ascending=False).head(top_n_gene_set).index)
+    for gene_set_name, genes in target_gene_sets.items():
+        set_genes = set(genes).intersection(gene_universe)
+        overlap_genes = sorted(top_genes.intersection(set_genes))
+        p_value = hypergeom_tail(
+            overlap=len(overlap_genes),
+            set_size=len(set_genes),
+            draws=top_n_gene_set,
+            universe_size=len(gene_universe),
+        )
+        gene_set_records.append(
+            {
+                "Pattern": pattern,
+                "Targeted gene set": gene_set_name,
+                "Set genes present": len(set_genes),
+                "Top-50 overlap": len(overlap_genes),
+                "Example overlapping genes": ", ".join(overlap_genes[:8]),
+                "Enrichment p-value": p_value,
+            }
+        )
+
+targeted_gene_set_results = (
+    pd.DataFrame(gene_set_records)
+    .sort_values(["Targeted gene set", "Enrichment p-value"])
+)
+
+targeted_gene_set_display = targeted_gene_set_results.copy()
+targeted_gene_set_display["Enrichment p-value"] = targeted_gene_set_display[
+    "Enrichment p-value"
+].apply(lambda p: "<0.001" if p < 0.001 else f"{p:.3g}")
+
+print(render_table(targeted_gene_set_display))
+```
+
+:::
+
+Here is how to read the table. **Pattern** is the run-specific CoGAPS label. **Targeted gene set** tells you which reference list is being checked. **Set genes present** is the number of genes from that reference list that are available in the 3,000-gene modeling space. **Top-50 overlap** counts how many of those genes appear among the 50 highest-weight genes for that pattern. **Example overlapping genes** shows some of the actual genes driving the overlap. **Enrichment p-value** summarizes how surprising that overlap would be if the top 50 genes were drawn without regard to the targeted biology.
+
+The IFN / antiviral rows show that interferon-response genes are concentrated in stimulation-linked patterns. In the selected R run, the IFN-associated pattern, `Pattern4`, has 16 of the 17 targeted IFN / antiviral genes among its top 50 genes. `Pattern5` also has strong IFN / antiviral gene support, which is why it was described earlier as monocyte-biased stimulation-linked rather than ignored. This is a useful reminder that gene-set support does not name a pattern by itself. The broader interpretation still depends on the activity evidence: `Pattern4` is the broad IFN-associated pattern because it combines IFN-linked genes with the strongest stimulation correlation and paired donor shift.
+
+The antigen-presentation rows give a different kind of evidence. In the selected R run, `Pattern3` has the strongest antigen-presentation support, with 8 of the 10 targeted antigen-presentation genes among its top 50 genes. The overlapping genes include `CD74` and HLA class II genes such as `HLA-DRA`, `HLA-DRB1`, `HLA-DPA1`, and `HLA-DPB1`. That result supports using `Pattern3` as a contrast pattern: it looks less like a broad IFN-beta stimulation response and more like dendritic-cell / antigen-presentation-linked structure.
+
+The main takeaway is not that one p-value settles the biology. Instead, the targeted gene-set check adds a second layer of evidence to the earlier activity summaries. It shows that the model contains both interferon-response gene structure and non-IFN immune structure, which is exactly what you need if the goal is to separate stimulation-associated activity from cell-type-linked biology.
+
+### Use An Identity-Linked Pattern As A Contrast
+
+It is tempting to focus only on the IFN-associated pattern, but that would miss an important lesson. A good latent-variable analysis should also ask what the other patterns capture. The targeted gene-set check above points to an antigen-presentation-linked pattern whose top genes include `CD74` and HLA class II genes. This pattern is useful as a contrast because it looks more like immune-cell identity or antigen-presentation structure than a broad stimulation response.
+
+The code below selects the pattern with the strongest antigen-presentation targeted enrichment and summarizes its top genes and direction. This gives you a second example of why CoGAPS gene weights and expression direction should be interpreted together.
+
+The selection step uses the targeted gene-set table you just created. It keeps only the rows for the antigen-presentation gene set, sorts those rows by enrichment p-value, and takes the top row. That top row gives the pattern whose highest-weight genes are most enriched for the targeted antigen-presentation markers. After that, the code goes back to the directionality table, keeps only genes from that selected pattern, sorts them by CoGAPS gene-weight rank, and prints the first 12 genes.
+
+In the R tab, `filter()` keeps the antigen-presentation rows, `arrange()` puts the smallest p-value first, `slice(1)` keeps the strongest row, and `pull(pattern)` extracts the pattern label as a single value. The next pipe uses that label to filter `direction_global_r`, then formats the log2 fold-change and pair-consistency columns for display. In the Python tab, the same idea is written with `pandas`: `.loc[...]` keeps antigen-presentation rows, `.sort_values(...)` orders them by p-value, `.iloc[0]` takes the first pattern label, and the second method chain filters `direction_global` to the selected pattern.
+
+::: {.panel-tabset}
+
+#### R
 
 ```{r}
-if (!is.null(ifn_by_celltype_r)) {
-  ggplot(ifn_by_celltype_r, aes(x = cell_type, y = mean_activity, fill = condition)) +
-    geom_col(position = "dodge") +
-    labs(
-      title = "Mean selected R K6 IFN-associated pattern activity by cell type and condition",
-      x = "Cell type",
-      y = "Mean IFN-associated pattern activity"
-    ) +
-    theme_minimal(base_size = 11) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+#| label: analysis-identity-pattern-r
+#| message: false
+#| warning: false
+antigen_pattern_r <- targeted_gene_set_results_r |>
+  dplyr::filter(gene_set == "Antigen presentation") |>
+  dplyr::arrange(enrichment_p_value) |>
+  dplyr::slice(1) |>
+  dplyr::pull(pattern)
+
+identity_pattern_direction_r <- direction_global_r |>
+  dplyr::filter(pattern == antigen_pattern_r) |>
+  dplyr::arrange(rank) |>
+  dplyr::mutate(
+    mean_log2fc_stim_vs_ctrl = round(mean_log2fc_stim_vs_ctrl, 3),
+    sign_consistency = round(sign_consistency, 2)
+  ) |>
+  dplyr::select(
+    rank,
+    gene,
+    cogaps_weight,
+    mean_log2fc_stim_vs_ctrl,
+    direction,
+    sign_consistency,
+    evidence_strength
+  )
+
+knitr::kable(
+  head(identity_pattern_direction_r, 12),
+  col.names = c(
+    "Rank",
+    "Gene",
+    "CoGAPS weight",
+    "Mean log2FC: IFN-beta vs control",
+    "Direction",
+    "Pair consistency",
+    "Evidence strength"
+  )
+)
+```
+
+#### Python
+
+```{python}
+#| label: analysis-identity-pattern-python
+#| results: asis
+targeted_gene_set_results_numeric = targeted_gene_set_results.copy()
+targeted_gene_set_results_numeric["Enrichment p-value numeric"] = targeted_gene_set_results_numeric[
+    "Enrichment p-value"
+].astype(float)
+
+antigen_pattern_py = (
+    targeted_gene_set_results_numeric.loc[
+        targeted_gene_set_results_numeric["Targeted gene set"] == "Antigen presentation"
+    ]
+    .sort_values("Enrichment p-value numeric")
+    ["Pattern"]
+    .iloc[0]
+)
+
+identity_pattern_direction = (
+    direction_global.loc[direction_global["pattern"] == antigen_pattern_py]
+    .sort_values("rank")
+    .head(12)
+    .copy()
+)
+identity_pattern_direction["mean_log2fc_stim_vs_ctrl"] = identity_pattern_direction[
+    "mean_log2fc_stim_vs_ctrl"
+].round(3)
+identity_pattern_direction["sign_consistency"] = identity_pattern_direction[
+    "sign_consistency"
+].round(2)
+
+print(render_table(
+    identity_pattern_direction[
+        [
+            "rank",
+            "gene",
+            "cogaps_weight",
+            "mean_log2fc_stim_vs_ctrl",
+            "direction",
+            "sign_consistency",
+            "evidence_strength",
+        ]
+    ].rename(
+        columns={
+            "rank": "Rank",
+            "gene": "Gene",
+            "cogaps_weight": "CoGAPS weight",
+            "mean_log2fc_stim_vs_ctrl": "Mean log2FC: IFN-beta vs control",
+            "direction": "Direction",
+            "sign_consistency": "Pair consistency",
+            "evidence_strength": "Evidence strength",
+        }
+    )
+))
+```
+
+:::
+
+Here is how to read the table. **Rank** orders genes by their CoGAPS weight within the selected antigen-presentation-linked pattern. **Gene** names the feature being inspected. **CoGAPS weight** tells you how strongly that gene helps define the pattern. **Mean log2FC: IFN-beta vs control** is the paired expression contrast: positive values mean the gene is higher after stimulation, while negative values mean it is lower after stimulation. **Direction** turns that contrast into a readable label. **Pair consistency** summarizes how consistently the direction appears across donor pairs. **Evidence strength** is a compact label from the prepared directionality summary.
+
+The antigen-presentation-linked pattern has a different biological role from the IFN-associated pattern. Its top genes help mark antigen-presentation biology, especially MHC class II-related structure. That matters because PBMC data contain immune-cell identity structure before any stimulation comparison is made. A dendritic-cell-associated pattern can be biologically meaningful even if it is not the strongest IFN-beta response.
+
+This contrast also protects the IFN interpretation from becoming too broad. The IFN-associated pattern is supported by a stimulation shift, an ISG-score correlation, and IFN / antiviral top genes. The antigen-presentation-linked pattern is supported by a different kind of evidence: antigen-presentation genes and identity-linked activity. Seeing both kinds of patterns in the same selected model supports the idea that CoGAPS is separating at least two useful layers of the PBMC data: a broad stimulation-associated layer and a cell-identity-linked immune-function layer.
+
+### Question 2 Answer: Broad Stimulation And Identity-Linked Structure Are Both Present
+
+Question 2 asked whether CoGAPS can help distinguish broad stimulation-associated activity from cell-type-linked immune programs. The evidence in this section supports a cautious yes.
+
+The paired donor test showed that the IFN-associated pattern is higher after IFN-beta stimulation in all eight matched donor pairs. The mixed model reached the same conclusion while accounting for donor baselines. The ISG-score check showed that cells with higher IFN-associated CoGAPS activity also tend to have higher expression of a compact interferon-stimulated gene score. The targeted gene-set check then connected the same pattern to IFN / antiviral genes among its highest-weight genes.
+
+The contrast pattern adds the other half of the answer. The model does not only contain a stimulation signal. It also contains a pattern whose evidence points toward dendritic-cell / antigen-presentation-linked biology. That is important because the PBMC mixture is not a blank background. It contains immune-cell identities, and a useful latent-variable model should preserve some of that structure rather than forcing every signal to be interpreted as stimulation.
+
+Together, these checks show why the case study does not rely on one diagnostic alone. A stimulation-associated pattern should be active in the expected cells, shift in the expected condition, agree with known interferon biology, and have genes that support the interpretation. A cell-identity-linked pattern should have a different evidence profile. With that distinction in place, the next question turns from where the IFN-associated pattern is active to which genes define it and whether those genes rise or fall after stimulation.
+
+## Question 3: Which Genes Define The IFN-Associated Pattern, And In Which Direction?
+
+This question asks which genes make the IFN-associated pattern interpretable and whether those genes are higher or lower after stimulation. That distinction matters because CoGAPS gene weights identify genes that define a pattern, while expression contrasts identify direction.
+
+### Inspect Direction Within The IFN-Associated Pattern
+
+Now return to the key point from the visualization section: CoGAPS weights and expression direction are different quantities. A high gene weight means the gene helps define the pattern. {{< glossary "Directionality" display="Directionality" >}} asks whether the gene is higher or lower after IFN-beta stimulation.
+
+The table below focuses on the top genes from the IFN-associated pattern. It shows their CoGAPS weight alongside a donor-aware {{< glossary "Pseudobulk" display="pseudobulk" >}} log2 fold-change. Pseudobulk means that the single-cell counts are first added up within a meaningful group, such as one donor's control cells or the same donor's stimulated cells, before conditions are compared. That keeps the paired donor design visible and avoids treating thousands of cells from the same donor as thousands of independent donors.
+
+The directionality summaries were generated before this section from the saved selected-model outputs and the count layer in the prepared PBMC dataset. The workflow did five things:
+
+1. extracted the top genes for each CoGAPS pattern from the gene-weight matrix,
+2. aggregated raw counts for those genes by donor and condition,
+3. converted each pseudobulk profile to counts per million, or CPM, so groups with different total counts are more comparable,
+4. computed `log2(stimulated CPM + 0.5) - log2(control CPM + 0.5)` for each donor pair, and
+5. summarized the mean direction, pair consistency, and adjusted Wilcoxon evidence for each pattern gene.
+
+The `+ 0.5` term is a small pseudocount. It prevents zeros from causing undefined logarithms. A positive mean log2 fold-change means the gene is higher after IFN-beta stimulation; a negative value means it is lower after stimulation.
+
+:::{.reproducibility_box}
+::::{.reproducibility_box_header}
+Reproducibility note
+::::
+::::{.inner_block}
+The main analysis path reads saved directionality tables. To regenerate them in the validated environment, use the scripts listed in the [Full Reproduction Guide](#full-reproduction-guide):
+
+```bash
+Rscript scripts/pattern_directionality_analysis_r.R
+python scripts/pattern_directionality_analysis.py
+```
+
+These scripts write the R and Python directionality summaries under `data/processed/selected_model_k6/`. They perform a targeted directionality analysis for top CoGAPS pattern genes; they are not a genome-wide differential-expression workflow.
+::::
+:::
+
+The R and Python chunks below do the same display task. They do not recompute pseudobulk counts. Instead, each chunk starts from the saved global directionality table, keeps the run-specific IFN-associated pattern, orders genes by CoGAPS rank, rounds the numeric columns for reading, and prints the top 15 genes. This is a useful programming pattern: load a larger result table once, then filter and format the rows needed for the current question.
+
+::: {.panel-tabset}
+
+#### R
+
+In R, `dplyr::filter()` keeps only the IFN-associated pattern from the selected R run. `arrange(rank)` restores the CoGAPS gene-weight order, so the highest-weight gene appears first. The `mutate()` step rounds values for display, and `select()` keeps only the columns needed to answer the question.
+
+```{r}
+#| label: analysis-ifn-direction-r
+#| message: false
+#| warning: false
+ifn_direction_r <- direction_global_r |>
+  dplyr::filter(pattern == ifn_pattern_r) |>
+  dplyr::arrange(rank) |>
+  dplyr::mutate(
+    mean_log2fc_stim_vs_ctrl = round(mean_log2fc_stim_vs_ctrl, 3),
+    sign_consistency = round(sign_consistency, 2),
+    wilcoxon_fdr = signif(wilcoxon_fdr, 3)
+  ) |>
+  dplyr::select(
+    rank,
+    gene,
+    cogaps_weight,
+    mean_log2fc_stim_vs_ctrl,
+    direction,
+    sign_consistency,
+    evidence_strength,
+    wilcoxon_fdr
+  )
+
+knitr::kable(
+  head(ifn_direction_r, 15),
+  col.names = c(
+    "Rank",
+    "Gene",
+    "CoGAPS weight",
+    "Mean log2FC: IFN-beta vs control",
+    "Direction",
+    "Pair consistency",
+    "Evidence strength",
+    "FDR"
+  )
+)
+```
+
+#### Python
+
+In Python, `.loc[...]` keeps only the IFN-associated pattern from the saved Python-compatible output. `.sort_values("rank")` orders genes by CoGAPS weight rank, `.head(15)` keeps the top genes, and `.copy()` makes a safe editable table for display formatting. The final `rename()` step gives the displayed columns clear, descriptive names.
+
+```{python}
+#| label: analysis-ifn-direction-python
+#| results: asis
+ifn_direction = (
+    direction_global.loc[direction_global["pattern"] == ifn_pattern_py]
+    .sort_values("rank")
+    .head(15)
+    .copy()
+)
+ifn_direction["mean_log2fc_stim_vs_ctrl"] = ifn_direction[
+    "mean_log2fc_stim_vs_ctrl"
+].round(3)
+ifn_direction["sign_consistency"] = ifn_direction["sign_consistency"].round(2)
+ifn_direction["wilcoxon_fdr"] = ifn_direction["wilcoxon_fdr"].map(lambda value: f"{value:.3g}")
+
+print(render_table(
+    ifn_direction[
+        [
+            "rank",
+            "gene",
+            "cogaps_weight",
+            "mean_log2fc_stim_vs_ctrl",
+            "direction",
+            "sign_consistency",
+            "evidence_strength",
+            "wilcoxon_fdr",
+        ]
+    ].rename(
+        columns={
+            "rank": "Rank",
+            "gene": "Gene",
+            "cogaps_weight": "CoGAPS weight",
+            "mean_log2fc_stim_vs_ctrl": "Mean log2FC: IFN-beta vs control",
+            "direction": "Direction",
+            "sign_consistency": "Pair consistency",
+            "evidence_strength": "Evidence strength",
+            "wilcoxon_fdr": "FDR",
+        }
+    )
+))
+```
+
+:::
+
+Here is how to read the table. **Rank** orders genes by their CoGAPS weight within the IFN-associated pattern. **CoGAPS weight** tells you how strongly each gene helps define that pattern. **Mean log2FC: IFN-beta vs control** is the donor-aware expression contrast from the pseudobulk analysis. **Direction** translates the sign of that contrast into a readable label. **Pair consistency** tells you how often donor pairs agree in direction; a value of `1.00` means every usable donor pair moved in the same direction. **FDR** is the Benjamini-Hochberg-adjusted Wilcoxon result from this targeted paired summary.
+
+The main result is clear in both implementations: 14 of the top 15 IFN-associated pattern genes are higher after IFN-beta stimulation. Many of those genes, including `ISG15`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `OAS1`, and `BST2`, are familiar interferon-stimulated genes, so the direction of change supports the IFN-associated interpretation. The one exception among the top 15 is `FTH1`, which has a high pattern weight but is lower after stimulation in this targeted summary.
+
+That exception is important rather than problematic. It shows why the analysis keeps gene weight and expression direction separate. CoGAPS says that `FTH1` helps define the pattern; the pseudobulk contrast says that its expression moves opposite the main ISG group after stimulation. A careful interpretation therefore describes the IFN-associated pattern as dominated by up-shifted interferon-stimulated genes, while noting that not every high-weight gene is up-regulated.
+
+## Question 4: How Does The IFN-Associated Pattern Vary Across PBMC Identities?
+
+This question asks whether the IFN-associated signal is broad across the PBMC mixture or mostly driven by one annotated immune-cell identity. The next check keeps the same IFN-associated top genes but summarizes their stimulation direction inside each annotated PBMC identity.
+
+### Check Whether The Direction Holds Across PBMC Identities
+
+The IFN-associated pattern is broad, but PBMCs are a mixture of immune-cell identities. A responsible analysis asks whether the same direction appears across those identities or whether the global result is driven by one large cell type.
+
+The next summary counts, within each annotated PBMC identity, how many of the IFN-associated pattern's top genes are higher in stimulation, lower in stimulation, or mixed/unclear. The code uses `group_by()` and `summarise()` in R, and `groupby()` with `size()` in Python. These methods are common data-analysis skills: they split a table into groups, compute a summary inside each group, and return a smaller table.
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+#| label: analysis-ifn-direction-celltype-r
+#| message: false
+#| warning: false
+#| fig-width: 8.2
+#| fig-height: 4.8
+#| fig-cap: "Direction summary for top IFN-associated pattern genes within annotated PBMC identities. Orange bars indicate top genes that are higher after IFN-beta stimulation; blue bars indicate top genes that are lower after stimulation."
+ifn_direction_by_celltype_r <- direction_celltype_r |>
+  dplyr::filter(pattern == ifn_pattern_r) |>
+  dplyr::group_by(cell_type, direction) |>
+  dplyr::summarise(n_genes = dplyr::n(), .groups = "drop")
+
+ggplot(
+  ifn_direction_by_celltype_r,
+  aes(x = cell_type, y = n_genes, fill = direction)
+) +
+  geom_col(position = "stack", width = 0.75) +
+  scale_fill_manual(
+    values = c(
+      "up_in_stim" = "#E76F51",
+      "down_in_stim" = "#2F8FBD",
+      "mixed_or_unclear" = "#9CA3AF"
+    ),
+    breaks = c("up_in_stim", "down_in_stim", "mixed_or_unclear"),
+    labels = c("higher in stimulation", "lower in stimulation", "mixed or unclear")
+  ) +
+  labs(
+    title = "IFN-associated top genes mostly rise across PBMC identities",
+    x = "Annotated PBMC identity",
+    y = "Number of top pattern genes",
+    fill = "Expression direction"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    axis.text.x = element_text(angle = 35, hjust = 1),
+    legend.position = "bottom"
+  )
+```
+
+#### Python
+
+```{python}
+#| label: analysis-ifn-direction-celltype-python
+ifn_direction_by_celltype = (
+    direction_celltype.loc[direction_celltype["pattern"] == ifn_pattern_py]
+    .groupby(["cell_type", "direction"], observed=True)
+    .size()
+    .reset_index(name="n_genes")
+)
+
+direction_order = ["up_in_stim", "down_in_stim", "mixed_or_unclear"]
+plot_table = (
+    ifn_direction_by_celltype.pivot_table(
+        index="cell_type",
+        columns="direction",
+        values="n_genes",
+        fill_value=0,
+    )
+    .reindex(columns=direction_order, fill_value=0)
+)
+
+colors = {
+    "up_in_stim": "#E76F51",
+    "down_in_stim": "#2F8FBD",
+    "mixed_or_unclear": "#9CA3AF",
 }
-```
 
-### Python
-
-```{python}
-if HAS_PY_PATTERN_ACTIVITY_BY_CELLTYPE:
-    ifn_by_celltype = (
-        pd.read_csv(PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV)
-        .loc[lambda df: df["pattern"] == ifn_pattern]
-        .sort_values(["cell_type", "condition"])
-    )
-else:
-    ifn_by_celltype = (
-        adata_with_patterns.obs.groupby(["cell_type", "condition"], observed=True)[ifn_pattern]
-        .agg(["mean", "median", "count"])
-        .reset_index()
-        .rename(columns={"mean": "mean_activity", "median": "median_activity", "count": "n_cells"})
-        .sort_values(["cell_type", "condition"])
-    )
-
-ifn_by_celltype
-```
-
-```{python}
-plot_df = ifn_by_celltype.pivot(index="cell_type", columns="condition", values="mean_activity")
-plot_df = plot_df.sort_values(by=STIM_LABEL, ascending=False)
-
-ax = plot_df.plot(kind="bar", figsize=(9, 4))
-ax.set_ylabel(f"Mean {ifn_pattern} activity")
-ax.set_xlabel("Cell type")
-ax.set_title("Mean selected Python K6 IFN-associated pattern activity by cell type and condition")
-plt.xticks(rotation=45, ha="right")
-plt.tight_layout()
+ax = plot_table.plot(
+    kind="bar",
+    stacked=True,
+    color=[colors[col] for col in plot_table.columns],
+    figsize=(9.2, 6.2),
+    width=0.75,
+)
+ax.set_title("IFN-associated top genes mostly rise across PBMC identities")
+ax.set_xlabel("")
+ax.set_ylabel("Number of top pattern genes")
+ax.legend(
+    ["higher in stimulation", "lower in stimulation", "mixed or unclear"],
+    loc="upper center",
+    bbox_to_anchor=(0.5, -0.28),
+    ncol=3,
+    frameon=False,
+)
+plt.xticks(rotation=35, ha="right")
+plt.subplots_adjust(bottom=0.30)
 plt.show()
 ```
 
 :::
 
-The IFN-associated pattern activity is broad across PBMC cell types but not uniform. This supports an activity-like interpretation: the pattern is not simply a marker of one immune cell type.
+This cell-type-stratified view supports a broad IFN-beta response rather than a signal restricted to one annotated identity. It also leaves room for differences in response strength. Some PBMC identities show stronger activity or clearer direction than others, which is biologically plausible in a mixed immune-cell system.
 
-## Directionality across cell types
+## Pull The Evidence Together
 
-::: {.panel-tabset}
+The four main research questions are now connected to specific evidence. The table below makes that map explicit before the final synthesis.
 
-### R
+| Main research question | Evidence used in this section | Current answer |
+|---|---|---|
+| **1. What latent transcriptional programs are present?** | R/Python pattern matching, candidate-program inventory, targeted gene-set checks, and identity-linked contrast. | The selected model contains a strong IFN-associated pattern plus additional immune-cell-linked structure, including antigen-presentation-linked biology. |
+| **2. Can CoGAPS distinguish broad stimulation-associated activity from cell-type-linked immune programs?** | Donor-paired IFN activity shift, donor-adjusted mixed-model check, canonical ISG-score agreement, IFN/antiviral enrichment, antigen-presentation enrichment, and identity-linked contrast. | Yes, the evidence supports a broad stimulation-associated signal while retaining non-IFN immune structure. |
+| **3. Which genes define the strongest IFN-associated pattern, and what is their direction in stimulation?** | IFN-associated gene weights paired with donor-aware pseudobulk directionality. | Top genes such as `ISG15`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `OAS1`, and `BST2` define the pattern and are mostly higher after IFN-beta stimulation. |
+| **4. How does the IFN-associated pattern vary across annotated PBMC cell types?** | Cell-type-stratified direction summaries for the IFN-associated pattern's top genes. | The IFN-associated direction is broadly visible across annotated PBMC identities, with room for differences in response strength across cell types. |
 
-```{r}
-if (file.exists(R_DIRECTION_CELLTYPE_CSV_R)) {
-  direction_celltype_r <- read.csv(R_DIRECTION_CELLTYPE_CSV_R, stringsAsFactors = FALSE)
-  ifn_celltype_direction_r <- subset(direction_celltype_r, pattern == ifn_pattern_r)
-  ifn_celltype_direction_r <- as.data.frame.matrix(
-    table(ifn_celltype_direction_r$cell_type, ifn_celltype_direction_r$direction)
-  )
-  ifn_celltype_direction_r$cell_type <- rownames(ifn_celltype_direction_r)
-  rownames(ifn_celltype_direction_r) <- NULL
-  ifn_celltype_direction_r
-} else {
-  cat("R by-cell-type directionality outputs are unavailable in this render context.\n")
-}
-```
+Taken together, these checks support a coherent interpretation rather than a single-metric label. The selected R model has enough diagnostic support to interpret cautiously: the chi-square trace reaches a plateau-like region, the snapshot checks show stable top genes for the major patterns, and the posterior uncertainty summaries do not suggest that the IFN-associated pattern is too unstable to use. Those checks do not prove that `K = 6` is universally best. They do support using this selected model to ask the biological questions posed in the case study.
 
-### Python
+The first answer is that the model contains more than one kind of latent structure. The IFN-associated pattern is the clearest stimulation-linked signal: in the selected R run it is `Pattern4`, and in the Python saved output it is `Pattern5`. The number changes because CoGAPS pattern labels are run-specific, but the evidence points to the same biological signal: high activity after IFN-beta stimulation, high agreement with an interferon-stimulated gene score, and top genes such as `ISG15`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `OAS1`, and `BST2`. The model also retains immune-cell-linked patterns, including monocyte-linked structure, a dendritic / antigen-presentation-linked pattern, and a T-cell / lymphocyte-linked baseline pattern. That matters because the analysis is not simply rediscovering "stimulated versus control"; it is separating stimulation-associated activity from other structure already present in the PBMC mixture.
 
-```{python}
-direction_celltype = pd.read_csv(PY_DIRECTION_CELLTYPE_CSV)
+The second answer is that the stimulation-associated signal is broad, but not identical in every cell type. The donor-paired analysis shows higher IFN-associated activity after stimulation in all eight matched donor pairs, and the mixed model reaches the same conclusion while accounting for donor baselines. The visualization section prepared the same idea visually: the UMAP activity maps showed that this pattern cuts across the cell-identity map rather than sitting in only one neighborhood. The cell-type-stratified summaries then showed that annotated PBMC identities can share the IFN-associated direction while still differing in response strength. This is the useful middle ground for a mixed immune-cell dataset: a shared perturbation response can be visible without erasing cell identity.
 
-ifn_celltype_direction = (
-    direction_celltype.loc[direction_celltype["pattern"] == ifn_pattern]
-    .groupby(["cell_type", "direction"], observed=True)
-    .size()
-    .unstack(fill_value=0)
-    .reset_index()
-)
+The third answer is that CoGAPS gene weights and expression direction have to be read together. The top genes for the IFN-associated pattern are strongly consistent with interferon biology, but the weights alone only say that those genes help define the pattern. The pseudobulk directionality summaries add the missing piece: among the top IFN-associated genes, most are higher after IFN-beta stimulation, while an exception such as `FTH1` shows why direction cannot be assumed from the CoGAPS weight. The identity-linked contrast reinforces the same lesson. A dendritic / antigen-presentation-linked pattern can be defined by genes such as `CD74` and HLA class II genes without behaving like the broad IFN-associated stimulation pattern.
 
-ifn_celltype_direction
-```
+The fourth answer is that the IFN-associated pattern varies across annotated PBMC identities in a biologically interpretable way. PBMCs contain T cells, B cells, NK cells, monocytes, dendritic cells, and smaller related populations. The lupus and interferon literature discussed in the context section makes this mixture important: type I interferon biology can connect multiple immune-cell populations through interferon-stimulated genes, antigen presentation, monocyte and dendritic-cell activity, and lymphocyte responses. In this dataset, the controlled IFN-beta stimulation lets you see one part of that biology under an experimental perturbation. The CoGAPS result is consistent with a shared interferon-response program layered on top of immune-cell identity.
 
-:::
-
-In each annotated cell type, most top IFN-associated pattern genes are up in stimulation under the targeted pseudobulk summary, while `FTH1` remains the main down-in-stimulation exception. This reinforces the interpretation that the selected K6 IFN-associated pattern captures a broad IFN-beta response, while also reminding us that the analysis is targeted and descriptive.
+The conclusion is therefore bounded but useful. For this public PBMC perturbation dataset from lupus donors, the selected R `K = 6` sparse CoGAPS model is suitable for interpreting the main case-study question. It recovers a broad IFN-beta-associated pattern, preserves additional immune-cell-linked structure, and links the IFN-associated pattern to both expected interferon-stimulated genes and upward expression direction after stimulation. The result should not be read as a clinical lupus mechanism, a treatment analysis, or proof that the same numbered pattern will appear in every run. It does show that latent-pattern analysis can help separate a shared interferon-response signal from cell identity in a mixed immune-cell system, which is the key analysis skill this case study is designed to teach.
 
 ***
