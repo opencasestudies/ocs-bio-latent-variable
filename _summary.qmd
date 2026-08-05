@@ -19,15 +19,4 @@ The IFN-associated pattern activity appears broad across PBMC cell types, suppor
 
 ![](img/ifn_pattern_by_celltype_split_condition.png){fig-alt="Boxplots of selected R K6 IFN-associated CoGAPS pattern activity across PBMC cell types, split by control and IFN-beta stimulated conditions." width=800 .lightbox}
 
-## **Main Questions Revisited**
-***
-
-Question | Current answer | Caveat
--------- | -------------- | ------
-What latent transcriptional programs are present? | The selected `K = 6` model contains six patterns, including a strong IFN-associated pattern and several compartment-linked candidates. | Not every pattern has a settled biological label.
-Can CoGAPS distinguish stimulation activity from cell-type-linked structure? | The IFN-associated pattern is consistent with a broad activity-like IFN program, while other patterns are more compartment-linked. | This is descriptive interpretation, not formal validation of all patterns.
-Which genes define the strongest IFN-associated pattern? | The IFN-associated pattern is anchored by canonical interferon-stimulated genes. | Enrichment analysis would strengthen the final biological claim.
-Are those genes up or down in stimulation? | Most top IFN-associated pattern genes are up in stimulation; `FTH1` is down. | This is targeted directionality, not genome-wide differential expression.
-How does the IFN-associated pattern vary across cell types? | It is broad but non-uniform across PBMC cell types. | Cell-type differences are descriptive unless additional donor-aware inference is added.
-
 ***
