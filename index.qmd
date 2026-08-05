@@ -96,8 +96,64 @@ include-sections:
 ## **Session Info**
 ***
 
+The session information below records the software environment used to render this case study. These version details can help diagnose differences if you rerun the code in another environment.
+
+::: {.panel-tabset}
+
+## R
+
 ```{r}
-devtools::session_info()
+if (requireNamespace("sessioninfo", quietly = TRUE)) {
+  sessioninfo::session_info()
+} else {
+  sessionInfo()
+}
 ```
+
+## Python
+
+```{python}
+#| results: asis
+
+import platform
+import sys
+from importlib.metadata import PackageNotFoundError, version
+
+import pandas as pd
+
+python_packages = {
+    "PyCoGAPS": "pycogaps",
+    "AnnData": "anndata",
+    "pandas": "pandas",
+    "NumPy": "numpy",
+    "SciPy": "scipy",
+    "Matplotlib": "matplotlib",
+}
+
+python_session = [
+    {"Component": "Python", "Version": sys.version.split()[0]},
+    {"Component": "Platform", "Version": platform.platform()},
+]
+
+for display_name, package_name in python_packages.items():
+    try:
+        package_version = version(package_name)
+    except PackageNotFoundError:
+        package_version = "not installed"
+    python_session.append(
+        {"Component": display_name, "Version": package_version}
+    )
+
+python_session_table = pd.DataFrame(python_session)
+print(
+    python_session_table.to_html(
+        index=False,
+        classes="table table-striped table-hover",
+        border=0,
+    )
+)
+```
+
+:::
 
 {{< include _acknowledgements.qmd >}}
