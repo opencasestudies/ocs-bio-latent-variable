@@ -1,19 +1,19 @@
 ---
-title: "**Biomedical Open Case Studies: Finding latent immune-response programs in single-cell RNA-seq with CoGAPS**"
+title: "**Biomedical Open Case Studies: {Fill In Title}**"
 bibliography: resources/references.bib
 include-sections:
-  stat-los: true
+  stat-los: false
+  lo-map: true
   data-import: true
-  data-exploration: true
+  data-exploration: false
   data-wrangling: true
   data-viz: true
   data-analysis: true
-execute:
-  warning: false
-  message: false
+  main-q-table: true
 ---
 
 <!--
+  Update above to exclude optional or new sections by changing from true to false.
   Update the various qmd documents below with each component of a Bio-OCS case study.
   Besides filling in the title in the header of this document, no other changes should be necessary within this file.
   Use the `include-sections` within the header to toggle section inclusion/exclusion as needed.
@@ -25,12 +25,19 @@ execute:
 
 {{< include _ocs_frontmatter.qmd >}}
 
-
 {{< include _motivation.qmd >}}
 
 {{< include _main_question.qmd >}}
 
 {{< include _los.qmd >}}
+
+::: {.content-hidden unless-meta="include-sections.lo-map"}
+
+{{< include _lo_map.qmd >}}
+
+:::
+
+{{< include _packages.qmd >}}
 
 {{< include _context.qmd >}}
 
@@ -39,8 +46,6 @@ execute:
 {{< include _limitations.qmd >}}
 
 {{< include _bioethics.qmd >}}
-
-{{< include _packages.qmd >}}
 
 ::: {.content-hidden unless-meta="include-sections.data-import"}
 
@@ -74,9 +79,13 @@ execute:
 
 {{< include _summary.qmd >}}
 
-{{< include _suggested_hw.qmd >}}
+::: {.content-hidden unless-meta="include-sections.main-q-table"}
 
-{{< include _full_reproduction_guide.qmd >}}
+{{< include _main_qs_answers_table.qmd >}}
+
+:::
+
+{{< include _suggested_hw.qmd >}}
 
 {{< include _additional_info.qmd >}}
 
@@ -87,64 +96,8 @@ execute:
 ## **Session Info**
 ***
 
-The session information below records the software environment used to render this case study. These version details can help diagnose differences if you rerun the code in another environment.
-
-::: {.panel-tabset}
-
-## R
-
 ```{r}
-if (requireNamespace("sessioninfo", quietly = TRUE)) {
-  sessioninfo::session_info()
-} else {
-  sessionInfo()
-}
+devtools::session_info()
 ```
-
-## Python
-
-```{python}
-#| results: asis
-
-import platform
-import sys
-from importlib.metadata import PackageNotFoundError, version
-
-import pandas as pd
-
-python_packages = {
-    "PyCoGAPS": "pycogaps",
-    "AnnData": "anndata",
-    "pandas": "pandas",
-    "NumPy": "numpy",
-    "SciPy": "scipy",
-    "Matplotlib": "matplotlib",
-}
-
-python_session = [
-    {"Component": "Python", "Version": sys.version.split()[0]},
-    {"Component": "Platform", "Version": platform.platform()},
-]
-
-for display_name, package_name in python_packages.items():
-    try:
-        package_version = version(package_name)
-    except PackageNotFoundError:
-        package_version = "not installed"
-    python_session.append(
-        {"Component": display_name, "Version": package_version}
-    )
-
-python_session_table = pd.DataFrame(python_session)
-print(
-    python_session_table.to_html(
-        index=False,
-        classes="table table-striped table-hover",
-        border=0,
-    )
-)
-```
-
-:::
 
 {{< include _acknowledgements.qmd >}}
