@@ -22,7 +22,7 @@ The main learner path uses included teaching files and saved model evidence so y
 
 The small file that records this distinction is the {{< glossary "Artifact manifest" display="file manifest" >}}. It tells you which files are included in the repository, which files are optional, and which files are intentionally excluded from the normal learner path.
 
-In the next chunk, the code reads `data/artifact_manifest.json`. A JSON file stores structured information as named fields. In R, `jsonlite::read_json()` turns that file into R lists and data frames. In Python, `json.load()` reads the same file into dictionaries and lists. The Python tab also defines a small `render_table()` helper so pandas tables appear as readable HTML tables in the case study.
+In the next chunk, the code reads `data/artifact_manifest.json`. A JSON file stores structured information as named fields. In R, `jsonlite::read_json()` turns that file into R lists and data frames. In Python, `json.load()` reads the same file into dictionaries and lists. The Python tab uses `print(render_table(...))` to display a plain-text table in your Terminal. Compare its contents with the table shown below. See [Python output instructions](#python-terminal-output) if you need to return to the setup steps.
 
 ::: {.panel-tabset}
 
@@ -67,14 +67,7 @@ knitr::kable(
 
 ```{python}
 #| results: asis
-def render_table(data_frame):
-    """Render a pandas DataFrame as a readable HTML table in Quarto."""
-    return data_frame.to_html(
-        index=False,
-        escape=False,
-        border=0,
-        classes="table table-sm table-striped"
-    )
+from scripts.helpers.case_study_display import render_table
 
 with open(ARTIFACT_MANIFEST_JSON) as f:
     artifact_manifest = json.load(f)
@@ -226,6 +219,8 @@ The model-selection evidence comes from a precomputed {{< glossary "Rank sweep" 
 
 You will not rerun the full sweep here. Instead, you will inspect saved summary files from the sweep and use them as evidence for which selected-model outputs should be imported for the rest of the case study.
 
+The sweep first considered several resolutions, including `K = 2` through `K = 8`; the longer comparisons focused on `K = 4` through `K = 7`. The learner comparison highlights `K = 4`, `5`, and `6` because it asks how a compact model changes as additional patterns are allowed.
+
 ::: {.aside}
 **Draft note:** In the full reproduction section, explain how sweep-derived summary files such as `CANDIDATE_PATTERN_SUMMARY_CSV_R`, `PHASE1B_LOWERK_LONG_SUMMARY_CSV_R`, and the related Python paths were created. We do not need to walk through every line of HPC sweep code, but learners should see enough detail to understand the sweep design, how individual CoGAPS runs were summarized, how those run-level outputs became decision tables, and how they might design comparable sweep summaries for their own data.
 :::
@@ -238,13 +233,38 @@ You will not rerun the full sweep here. Instead, you will inspect saved summary 
 | IFN-associated evidence | IFN correlation and top-gene stability | Tests whether a pattern consistently tracks IFN-beta stimulation and recovers interferon-stimulated genes. |
 | Broader model evidence | Pattern matching across candidate models, {{< glossary "Biological compression" display="biological compression" >}} checks, runtime, and high-K diagnostics | Helps separate "strong IFN signal" from "good overall model for this teaching analysis." |
 
-Before looking at the numbers, ask: would you choose the model with the strongest IFN correlation if it collapsed several immune-cell-linked signals into one broad pattern? The next few tables use that question to motivate why the selected model balances IFN recovery, biological resolution, stability, and runtime.
+:::{.think_question}
+::::{.think_question_header}
+Stop and think
+::::
+::::{.inner_block}
+Would you choose the model with the strongest IFN correlation if it collapsed several immune-cell-linked signals into one broad pattern?
+
+<details>
+<summary>Show answer</summary>
+
+Not on that evidence alone. A high IFN correlation supports recovery of stimulation-associated activity, but it does not show whether cell-type-linked structure remains distinguishable. The following comparisons examine both aspects of the model.
+
+</details>
+::::
+:::
+
+The next few tables use that question to motivate why the selected model balances IFN recovery, biological resolution, stability, and runtime.
 
 ## What Does IFN Correlation Measure?
 
 The first model-selection metric to understand is {{< glossary "IFN correlation" display="IFN correlation" >}}. For each CoGAPS pattern, the sweep compared that pattern's cell activity with the control-versus-IFN-beta stimulation label. A high positive value means that cells with stronger activity for that pattern tend to be IFN-beta-stimulated cells.
 
-This is useful because the dataset comes from a paired perturbation experiment. If CoGAPS learns an interferon-response pattern, that pattern should be more active in stimulated cells than in control cells. But IFN correlation is only a screening metric. By itself, it does not prove that the pattern is biologically interpretable, that the same top genes are stable across seeds, or that the model preserves non-IFN immune-cell structure.
+This is useful because the dataset comes from a paired perturbation experiment. If CoGAPS learns an interferon-response pattern, that pattern should be more active in stimulated cells than in control cells.
+
+:::{.disclaimer_box}
+::::{.disclaimer_box_header}
+What IFN correlation does not establish
+::::
+::::{.inner_block}
+IFN correlation is only a screening metric. By itself, it does not prove that the pattern is biologically interpretable, that the same top genes are stable across seeds, or that it retains patterns associated with immune-cell identity as well as the broad IFN-associated response.
+::::
+:::
 
 The next table shows the strongest stimulation-associated candidate in nearby lower-rank models. The pattern number is included only as a run-specific label. Do not memorize it as the name of the biology.
 
@@ -355,24 +375,33 @@ The table should show the main biological signal you expect: a strong stimulatio
 
 :::{.definition_box}
 ::::{.definition_box_header}
-Pattern labels are not biological names
+Pattern numbers are specific to a fitted run
 ::::
 ::::{.inner_block}
-A row may refer to `Pattern4`, `Pattern5`, or another number, depending on the run. Those labels are bookkeeping labels inside a specific model fit. The biological question is whether the pattern's activity and genes support an interferon-associated interpretation.
+Pattern numbers label the learned patterns within a fitted run. For example, `Pattern4` in one run need not correspond to `Pattern4` in another. Pattern order can change between runs. CoGAPS uses random sampling during fitting, so repeated runs can also recover genuinely different patterns rather than simply reorder the same ones.
+
+Before treating two patterns as corresponding, compare their gene-weight and cell-activity profiles on shared genes and cells. Similar top genes and relationships to condition and cell type provide supporting evidence; matching numbers alone do not establish correspondence.
 ::::
 :::
 
 ## Compare K4, K5, And K6 Candidate Models
 
-The next checkpoint asks whether the IFN-associated signal is reproducible across seeds and whether the candidate model resolutions behave similarly. Here you will inspect K4, K5, and K6 at 2,000, 10,000, and 20,000 iterations.
+The next checkpoint asks whether the IFN-associated signal is reproducible across seeds and whether the candidate model resolutions behave similarly. Here you will inspect K4, K5, and K6 at 2,000, 10,000, and 20,000 iterations per phase.
 
 The column named {{< glossary "Top-gene Jaccard" display="top-gene Jaccard" >}} summarizes overlap among top-gene lists across seeds. Values closer to 1 mean the same top genes are repeatedly recovered. This matters because a pattern is easier to trust when its defining genes are not changing dramatically from seed to seed.
 
-The code below turns a full sweep-summary file into a smaller decision table. This is a useful programming pattern: read a data file, keep only the rows relevant to the current question, rename technical columns into readable labels, round numeric values, and display only the columns the learner needs. In R, this uses the pipe operator `|>`, row filtering with `dplyr::filter()`, and column construction with `dplyr::transmute()`. In Python, the same idea uses pandas method chaining with `.query()`, `.assign()`, `.rename()`, and final column selection.
+The code below turns a full sweep-summary file into a smaller decision table. This is a useful programming pattern: read a data file, keep only the rows relevant to the current question, rename technical columns into readable labels, round numeric values, and display only the columns the learner needs.
 
 ::: {.panel-tabset}
 
 ### R
+
+<details>
+<summary>How this R code works</summary>
+
+In R, this uses the pipe operator `|>`, row filtering with `dplyr::filter()`, and column construction with `dplyr::transmute()`.
+
+</details>
 
 ```{r}
 # Read the long-run lower-K sweep summary.
@@ -400,6 +429,13 @@ knitr::kable(lower_rank_evidence_r)
 ```
 
 ### Python
+
+<details>
+<summary>How this Python code works</summary>
+
+In Python, the same idea uses pandas method chaining with `.query()`, `.assign()`, `.rename()`, and final column selection.
+
+</details>
 
 ```{python}
 #| results: asis
@@ -449,16 +485,20 @@ print(render_table(lower_rank_evidence))
 Read this table as a stability and practicality check:
 
 - `K` is the number of latent patterns in the candidate model.
-- `iterations` is the number of CoGAPS iterations used for that group of runs.
+- `iterations` is the number of iterations in each of the two CoGAPS phases: equilibration, followed by sampling. It is not the combined total across both phases.
 - `seeds` is the number of successful random seeds summarized.
 - `Mean runtime (min)` shows the average runtime across those seeds.
 - `Mean IFN correlation` summarizes how strongly the IFN-associated pattern tracks stimulation.
 - `IFN correlation SD` shows how much that IFN correlation varies across seeds. Smaller values mean the stimulation association is more consistent.
 - `Mean top-gene Jaccard` and `Minimum top-gene Jaccard` summarize whether the same top genes are recovered across seeds. The minimum is useful because it flags the weakest seed-to-seed agreement, not only the average.
 
+For `K = 6`, mean IFN correlation and top-gene agreement were similar across these iteration settings, while runtime increased. Longer runs did reduce the seed-to-seed variation in IFN correlation, so the shorter setting is a trade-off rather than evidence that additional iterations have no value.
+
+We retain 2,000 iterations per phase for the selected teaching model because it recovered the IFN-associated signal at lower computational cost in these comparisons. This is a dataset- and diagnostic-specific choice, not a general recommendation for CoGAPS. These IFN-focused summaries do not establish convergence or equally strong stability for every pattern.
+
 This table gives an important clue: K4, K5, and K6 all recover a stable IFN-associated gene program. K4 has the strongest mean IFN correlation, and K6 has especially strong top-gene agreement across seeds. If the case study only needed to recover one broad interferon signal, K4 would be tempting.
 
-But the case study asks a harder question. It asks whether CoGAPS can recover an interferon-associated signal while still respecting other immune-cell-linked structure in the same PBMC mixture. That means stability and IFN correlation are necessary, but not sufficient.
+A strong IFN correlation is not enough for our goal: we also inspect whether lower-rank models combine cell-type-linked structure that becomes more distinguishable at `K = 6`.
 
 ## Check For Biological Compression
 
@@ -468,13 +508,16 @@ To check that risk in the main learner path, inspect the pattern inventory for r
 
 The code below turns a pattern-level table into a model-level inventory. This is a useful data-analysis move: when a table has one row per pattern, you can group those rows by model and ask what the model as a whole is doing.
 
-In R, the pipe operator `|>` passes the table from one `dplyr` step to the next. `dplyr::filter()` keeps only one representative run for each candidate `K`. `dplyr::group_by(K, model)` tells R that the next summaries should be calculated separately for each candidate model. Inside `dplyr::summarise()`, `dplyr::n()` counts total patterns, `sum(candidate_label == "IFN/ISG candidate")` counts patterns that meet a logical condition, and `dplyr::n_distinct(dominant_cell_type)` counts how many different dominant cell-type labels appear. The expression `unique()` removes repeated labels, and `paste(..., collapse = ", ")` turns those labels into a short readable preview.
-
-In Python, the pandas code follows the same logic. `.query()` keeps the representative K4, K5, and K6 runs, and `.copy()` creates a separate working table. A first `.groupby()` plus `.agg()` builds the non-IFN preview by collecting distinct `dominant_cell_type` values with `pd.unique()`. Then `.assign()` creates an `is_ifn` helper column, where `True` marks IFN/ISG candidate patterns. The second `.groupby(["K", "model"]).agg(...)` counts total patterns, IFN-labeled patterns, non-IFN-labeled patterns, and distinct dominant cell types. Finally, `.merge()` joins the readable preview back onto the model-level summary.
-
 ::: {.panel-tabset}
 
 ### R
+
+<details>
+<summary>How this R code works</summary>
+
+In R, the pipe operator `|>` passes the table from one `dplyr` step to the next. `dplyr::filter()` keeps only one representative run for each candidate `K`. `dplyr::group_by(K, model)` tells R that the next summaries should be calculated separately for each candidate model. Inside `dplyr::summarise()`, `dplyr::n()` counts total patterns, `sum(candidate_label == "IFN/ISG candidate")` counts patterns that meet a logical condition, and `dplyr::n_distinct(dominant_cell_type)` counts how many different dominant cell-type labels appear. The expression `unique()` removes repeated labels, and `paste(..., collapse = ", ")` turns those labels into a short readable preview.
+
+</details>
 
 ```{r}
 pattern_inventory_r <- candidate_patterns_r |>
@@ -501,6 +544,13 @@ knitr::kable(pattern_inventory_r)
 ```
 
 ### Python
+
+<details>
+<summary>How this Python code works</summary>
+
+In Python, the pandas code follows the same logic. `.query()` keeps the representative K4, K5, and K6 runs, and `.copy()` creates a separate working table. A first `.groupby()` plus `.agg()` builds the non-IFN preview by collecting distinct `dominant_cell_type` values with `pd.unique()`. Then `.assign()` creates an `is_ifn` helper column, where `True` marks IFN/ISG candidate patterns. The second `.groupby(["K", "model"]).agg(...)` counts total patterns, IFN-labeled patterns, non-IFN-labeled patterns, and distinct dominant cell types. Finally, `.merge()` joins the readable preview back onto the model-level summary.
+
+</details>
 
 ```{python}
 #| results: asis
@@ -563,13 +613,16 @@ The sweep also tested higher values of `K`. Higher rank gives the model more pat
 
 The code below reads the high-K sweep summary and compresses it into a small diagnostic table. This is different from the previous checkpoint: instead of comparing a few candidate rows directly, this chunk summarizes a wider exploratory range by reporting key extremes.
 
-In R, `readr::read_csv()` loads the high-K summary file. `dplyr::slice_max()` finds the row with the largest mean IFN correlation and the row with the largest mean runtime, while `dplyr::slice_min()` finds the row with the weakest minimum top-gene Jaccard value. The `min()` and `max()` functions then summarize ranges across all high-K ranks, and `tibble::tibble()` collects the results into a two-column table.
-
-In Python, `pd.read_csv()` loads the same summary file. `.idxmax()` and `.idxmin()` find the row positions for the largest or smallest diagnostic values. The code then uses `.loc[]` to pull out those rows, and `min()`, `max()`, and a small `pd.DataFrame()` build the same learner-facing table.
-
 ::: {.panel-tabset}
 
 ### R
+
+<details>
+<summary>How this R code works</summary>
+
+In R, `readr::read_csv()` loads the high-K summary file. `dplyr::slice_max()` finds the row with the largest mean IFN correlation and the row with the largest mean runtime, while `dplyr::slice_min()` finds the row with the weakest minimum top-gene Jaccard value. The `min()` and `max()` functions then summarize ranges across all high-K ranks, and `tibble::tibble()` collects the results into a two-column table.
+
+</details>
 
 ```{r}
 high_k_summary_r <- readr::read_csv(
@@ -644,6 +697,13 @@ knitr::kable(high_k_takeaway_r)
 ```
 
 ### Python
+
+<details>
+<summary>How this Python code works</summary>
+
+In Python, `pd.read_csv()` loads the same summary file. `.idxmax()` and `.idxmin()` find the row positions for the largest or smallest diagnostic values. The code then uses `.loc[]` to pull out those rows, and `min()`, `max()`, and a small `pd.DataFrame()` build the same learner-facing table.
+
+</details>
 
 ```{python}
 #| results: asis

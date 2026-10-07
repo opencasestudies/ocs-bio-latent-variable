@@ -112,6 +112,8 @@ from importlib.metadata import PackageNotFoundError, version
 
 import pandas as pd
 
+from scripts.helpers.case_study_display import render_table
+
 python_packages = {
     "PyCoGAPS": "pycogaps",
     "AnnData": "anndata",
@@ -137,10 +139,10 @@ for display_name, package_name in python_packages.items():
 
 python_session_table = pd.DataFrame(python_session)
 print(
-    python_session_table.to_html(
-        index=False,
+    render_table(
+        python_session_table,
         classes="table table-striped table-hover",
-        border=0,
+        escape=True,
     )
 )
 ```
