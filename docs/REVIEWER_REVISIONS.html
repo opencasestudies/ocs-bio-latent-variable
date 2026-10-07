@@ -188,6 +188,7 @@ gtag('config', 'G-TPVRZESY0B', { 'anonymize_ip': true});
   <li><a href="#validation" id="toc-validation" class="nav-link" data-scroll-target="#validation">Validation</a>
   <ul class="collapse">
   <li><a href="#pr-preparation-local-only-rstudio-access" id="toc-pr-preparation-local-only-rstudio-access" class="nav-link" data-scroll-target="#pr-preparation-local-only-rstudio-access">PR Preparation: Local-Only RStudio Access</a></li>
+  <li><a href="#pr-check-maintenance" id="toc-pr-check-maintenance" class="nav-link" data-scroll-target="#pr-check-maintenance">PR Check Maintenance</a></li>
   </ul></li>
   <li><a href="#not-resolved-by-this-pr" id="toc-not-resolved-by-this-pr" class="nav-link" data-scroll-target="#not-resolved-by-this-pr">Not Resolved by This PR</a></li>
   </ul></li>
@@ -316,6 +317,12 @@ gtag('config', 'G-TPVRZESY0B', { 'anonymize_ip': true});
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/cogaps-venv/bin/python</span> <span class="at">-m</span> unittest discover <span class="at">-s</span> scripts/reproduction <span class="at">-p</span> <span class="st">'test_*.py'</span> <span class="at">-v</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> scripts/reproduction/test_trace_timing_r.R</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Page rendering is a maintainer validation step, not an added learner instruction.</p>
+</section>
+<section id="pr-check-maintenance" class="level3">
+<h3 class="anchored" data-anchor-id="pr-check-maintenance">PR Check Maintenance</h3>
+<p>The first GitHub run passed preview rendering, code style, and URL checks. The spelling report flagged valid technical terms and names, plus fragments of the source file’s checksum. Added the terms to the existing spelling dictionary and marked the checksum as Markdown code, retaining its exact value and line wrapping. No scientific text or analysis changed.</p>
+<p>The readability action returned <code>Bad credentials</code>. It now uses GitHub’s temporary workflow token with read access to repository contents and permission to comment on pull requests, rather than a separate personal token. No secret was changed. Both checks remain enabled with their existing settings.</p>
+<p><strong>Files:</strong> <code>resources/dictionary.txt</code>, <code>_data_description.qmd</code>, <code>.github/workflows/pull_request.yml</code>.</p>
 </section>
 </section>
 <section id="not-resolved-by-this-pr" class="level2">

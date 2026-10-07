@@ -253,6 +253,22 @@ Rscript scripts/reproduction/test_trace_timing_r.R
 
 Page rendering is a maintainer validation step, not an added learner instruction.
 
+### PR Check Maintenance
+
+The first GitHub run passed preview rendering, code style, and URL checks.
+The spelling report flagged valid technical terms and names, plus fragments of
+the source file's checksum. Added the terms to the existing spelling dictionary
+and marked the checksum as Markdown code, retaining its exact value and line
+wrapping. No scientific text or analysis changed.
+
+The readability action returned `Bad credentials`. It now uses GitHub's
+temporary workflow token with read access to repository contents and permission
+to comment on pull requests, rather than a separate personal token. No secret
+was changed. Both checks remain enabled with their existing settings.
+
+**Files:** `resources/dictionary.txt`, `_data_description.qmd`,
+`.github/workflows/pull_request.yml`.
+
 ## Not Resolved by This PR
 
 - **R12:** the UMAP/PCA explanation and additional metadata views have not started.
