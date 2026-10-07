@@ -1590,11 +1590,12 @@ Figure&nbsp;3: Workflow map for the case study setup. The left column shows the 
 <div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> pull <span class="at">--platform</span> linux/amd64 othomas2/pycogaps-runtime-guide:0.3.1</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">--platform</span> linux/amd64 <span class="at">--rm</span> <span class="at">-it</span> <span class="dt">\</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-p</span> 8787:8787 <span class="dt">\</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-p</span> 127.0.0.1:8787:8787 <span class="dt">\</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-e</span> PASSWORD=<span class="st">"Password12"</span> <span class="dt">\</span></span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">-v</span> <span class="st">"</span><span class="va">$PWD</span><span class="st">"</span>:/home/rstudio/project:rw <span class="dt">\</span></span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  othomas2/pycogaps-runtime-guide:0.3.1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This command starts RStudio Server inside the container and mounts your downloaded project at <code>/home/rstudio/project</code>. The mount is writable (<code>rw</code>), so small outputs you create in the project folder are saved back to your local project folder, whether you cloned it or extracted a ZIP.</p>
+<p>The <code>127.0.0.1</code> port mapping makes RStudio available only from your own computer. Keep that address in the command when using the example password below.</p>
 <p>The <code>--platform linux/amd64</code> option keeps the runtime consistent with the validated case-study image. On Apple silicon Macs, Docker may use emulation for this image, so long model-fitting runs can be slower than they would be on native Linux hardware. The main learner path avoids that problem by using included CoGAPS evidence.</p>
 </section>
 </section>
@@ -7898,10 +7899,10 @@ yes
 Cached dense PyCoGAPS input file
 </td>
 <td>
-available
+not included
 </td>
 <td>
-available
+not included
 </td>
 <td>
 genes
@@ -9841,7 +9842,7 @@ Figure&nbsp;13: Pattern 6 is interpreted cautiously as a T-cell and baseline lym
 <span id="cb87-55"><a href="#cb87-55" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="ss">f"</span><span class="sc">{</span>pattern_to_map<span class="sc">}</span><span class="ss"> activity on the PBMC UMAP"</span>)</span>
 <span id="cb87-56"><a href="#cb87-56" aria-hidden="true" tabindex="-1"></a>fig.colorbar(scatter, ax<span class="op">=</span>axes[<span class="dv">1</span>], label<span class="op">=</span><span class="st">"Pattern activity"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;matplotlib.colorbar.Colorbar object at 0x7fffb3b3ad70&gt;</code></pre>
+<pre><code>&lt;matplotlib.colorbar.Colorbar object at 0x7fffb3b3e380&gt;</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb89"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>show_plot(fig, <span class="st">"visualization_umap_pattern_activity.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -10084,7 +10085,7 @@ Figure&nbsp;16: Condition shifts for every selected-model pattern across annotat
 <span id="cb95-22"><a href="#cb95-22" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"CoGAPS pattern"</span>)</span>
 <span id="cb95-23"><a href="#cb95-23" aria-hidden="true" tabindex="-1"></a>fig.colorbar(im, ax<span class="op">=</span>ax, label<span class="op">=</span><span class="st">"stim - control"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;matplotlib.colorbar.Colorbar object at 0x7fffb3a40f10&gt;</code></pre>
+<pre><code>&lt;matplotlib.colorbar.Colorbar object at 0x7fffb388ece0&gt;</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb97"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>show_plot(fig, <span class="st">"visualization_pattern_celltype_shift.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -14070,7 +14071,7 @@ strong
 <span id="cb132-6"><a href="#cb132-6" aria-hidden="true" tabindex="-1"></a>    frameon<span class="op">=</span><span class="va">False</span>,</span>
 <span id="cb132-7"><a href="#cb132-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;matplotlib.legend.Legend object at 0x7fffb31dcb20&gt;</code></pre>
+<pre><code>&lt;matplotlib.legend.Legend object at 0x7fffb31afbe0&gt;</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb134"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb134-1"><a href="#cb134-1" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">35</span>, ha<span class="op">=</span><span class="st">"right"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -14452,7 +14453,7 @@ Working-project destination
 <span id="cb137-7"><a href="#cb137-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb137-8"><a href="#cb137-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Launch the validated case-study image.</span></span>
 <span id="cb137-9"><a href="#cb137-9" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">--platform</span> linux/amd64 <span class="at">--rm</span> <span class="at">-it</span> <span class="dt">\</span></span>
-<span id="cb137-10"><a href="#cb137-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">-p</span> 8787:8787 <span class="dt">\</span></span>
+<span id="cb137-10"><a href="#cb137-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">-p</span> 127.0.0.1:8787:8787 <span class="dt">\</span></span>
 <span id="cb137-11"><a href="#cb137-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">-e</span> PASSWORD=<span class="st">"Password12"</span> <span class="dt">\</span></span>
 <span id="cb137-12"><a href="#cb137-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">-v</span> <span class="st">"</span><span class="va">$PWD</span><span class="st">"</span>:/home/rstudio/project:rw <span class="dt">\</span></span>
 <span id="cb137-13"><a href="#cb137-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">--mount</span> <span class="st">"type=bind,source=</span><span class="va">$CS4_REPRODUCTION_ARCHIVE</span><span class="st">,target=/home/rstudio/project/data/external/reproduction_archive,readonly"</span> <span class="dt">\</span></span>
@@ -22753,7 +22754,7 @@ ITERS=2000</code></pre>
 <tr class="even">
 <td>Port 8787 is already in use</td>
 <td>Another RStudio Server container or local process is using that port.</td>
-<td>Stop the older container or map another local port, such as <code>-p 8788:8787</code>, and open <code>http://localhost:8788</code>.</td>
+<td>Stop the older container or map another local port, such as <code>-p 127.0.0.1:8788:8787</code>, and open <code>http://localhost:8788</code>. Keep <code>127.0.0.1</code> so the example login is only reachable from your own computer.</td>
 </tr>
 <tr class="odd">
 <td>RStudio Server opens but the project files are absent</td>
@@ -24122,7 +24123,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>
   </div>
 </footer>
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","loop":false,"openEffect":"zoom","selector":".lightbox","descPosition":"bottom"});
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","openEffect":"zoom","selector":".lightbox","loop":false,"descPosition":"bottom"});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {
