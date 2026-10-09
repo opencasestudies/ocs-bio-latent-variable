@@ -12,7 +12,7 @@ Known items to finalize:
 
 - repository landing page and public documentation polish for `https://github.com/opencasestudies/ocs-bio-latent-variable`
 - author list and citation text
-- package/environment instructions beyond the current OpenMP runtime image `othomas2/pycogaps-runtime-guide:0.3.0`
+- package/environment instructions beyond the current OpenMP runtime image `othomas2/pycogaps-runtime-guide:0.3.1`
 - final policy for distributing optional full model objects separately from lightweight GitHub artifacts
 - final decision about mentioning dengue in the motivation
 - optional enrichment analysis for the selected K6 IFN-associated pattern and secondary stimulation-associated pattern
@@ -102,10 +102,23 @@ From this folder, try:
 quarto render
 ```
 
-This draft uses R-first / Python-second tabbed chunks. The intended local validation environment is the OpenMP-enabled Docker image `othomas2/pycogaps-runtime-guide:0.3.0`, which preinstalls:
+This draft uses R-first / Python-second tabbed chunks. The intended local validation environment is the OpenMP-enabled Docker image `othomas2/pycogaps-runtime-guide:0.3.1`, which preinstalls:
 
 - R/Bioconductor `CoGAPS`, `zellkonverter`, `SingleCellExperiment`, and the supporting R packages used by the primary R chunks
 - Python `PyCoGAPS`, `anndata`, `pandas`, `numpy`, `scipy`, `matplotlib`, and Jupyter for the Python chunks
+- `scanpy` and pinned `scikit-misc==0.3.1` for Seurat-v3 highly variable gene selection in source preprocessing
+
+The `0.3.1` runtime adds the missing preprocessing dependency to the tested
+`0.3.0` stack without upgrading the other packages. The repository's preparation
+script validates `ctrl`/`stim` labels and copies source `label` to `condition`
+only when the latter is absent. Use both the updated script and the updated
+image for source-data reproduction; a new image does not replace scripts in a
+mounted project.
+
+## Reviewer Revisions
+
+See [Reviewer Revision Record](REVIEWER_REVISIONS.md) for the implemented R01-R11
+changes, reviewer-request dispositions, validation, and unresolved release issues.
 
 ## Scientific Caveats
 

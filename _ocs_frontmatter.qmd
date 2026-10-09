@@ -105,19 +105,19 @@ Include bioOCSdata package information once ready/applicable
 Prerequisites
 ::::
 ::::{.inner_block}
-You do not need to be an expert in immunology, single-cell analysis, or latent-variable models before you begin. If you can follow a file path, read a small table, and run a short command, you have enough background to start. New biological and modeling concepts are introduced before you use them.
+You do not need previous experience with CoGAPS or this dataset. To run the code, you should be comfortable with basic R or Python: variables, function calls, data frames, and file paths. You only need one language. The case study introduces the biological and modeling concepts as you encounter them, and you can read the rendered analysis without installing software.
 
 You can also complete the main analysis without installing R, Python, CoGAPS, or single-cell packages one at a time. A validated Docker image provides the software environment, and the GitHub repository provides the prepared PBMC data, model-selection summaries, and lightweight outputs from the selected CoGAPS models.
 
-Before you begin, you should have:
+To run the code, you should have:
 
-- **Docker installed and running.** Install Docker Desktop using the official instructions for [Mac](https://docs.docker.com/desktop/setup/install/mac-install/){target="_blank"}, [Windows](https://docs.docker.com/desktop/setup/install/windows-install/){target="_blank"}, or [Linux](https://docs.docker.com/desktop/setup/install/linux-install/){target="_blank"}. Docker provides the R and Python environment used throughout the case study.
-- **Git installed, or another way to download a GitHub repository.** The setup instructions use `git clone` to place the case-study pages, scripts, figures, and included data in one project folder.
+- **Docker installed and running.** Install Docker Desktop using the official instructions for [Mac](https://docs.docker.com/desktop/setup/install/mac-install/){target="_blank"}, [Windows](https://docs.docker.com/desktop/setup/install/windows-install/){target="_blank"}, or [Linux](https://docs.docker.com/desktop/setup/install/linux-install/){target="_blank"}. Docker provides the R and Python environment used throughout the case study. The [Main learner setup](#main-learner-setup) shows how to check that Docker is ready with `docker info`.
+- **A downloaded copy of the case-study repository.** You can use Git to clone it or choose **Code > Download ZIP** on GitHub and extract the download. Git is not required for the ZIP route; both routes are explained in the [Main learner setup](#main-learner-setup).
 - **A stable internet connection for the initial setup.** You will download the repository and a Docker image of approximately 4.3 GB. After those files are available locally, most of the main analysis can be completed without repeated large downloads.
-- **A web browser and a Terminal or command prompt.** You will use the browser to read the case study and open RStudio Server. The Terminal is used to start Docker and, when needed, run Python or reproduction scripts. The Packages and Setup section walks through these steps.
+- **A web browser and a Host Terminal.** You will use the browser to read the case study and open RStudio Server. The Host Terminal is a terminal on your computer, outside RStudio and the case-study container. The [Main learner setup](#main-learner-setup) explains which terminal to use for the launch commands, including on Windows.
 - **Basic familiarity with either R or Python.** You do not need to use both languages. It helps to recognize variables, function calls, data frames, and common operations for selecting, filtering, grouping, and summarizing rows. The code explanations identify the language-specific functions as they appear.
 - **Basic table and file-path skills.** You should be comfortable reading rows and columns and following a path from a project folder to a data file. The case study introduces CSV, JSON, H5AD, long-format, wide-format, and single-cell data structures when they first become relevant.
-- **Introductory biology knowledge.** It is helpful to know that genes can have different expression levels across cells and that blood contains several immune-cell populations. No previous lupus, interferon, single-cell RNA-seq, Bayesian modeling, or CoGAPS experience is required; the Motivation and Context sections provide that foundation.
+- **Introductory biology knowledge.** It is helpful to know that genes can have different expression levels across cells and that blood contains several immune-cell populations. No previous systemic lupus erythematosus, interferon, single-cell RNA-seq, Bayesian modeling, or CoGAPS experience is required; the Motivation and Context sections provide that foundation.
 
 **Computer, storage, and time expectations**
 

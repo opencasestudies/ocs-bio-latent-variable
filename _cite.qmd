@@ -7,4 +7,4 @@ Thomas, Oshane O. and Wright, Carrie. (2026). [https://github.com/opencasestudie
 ::::
 :::
 
-This case study uses the PBMC IFN-beta stimulation single-cell RNA-seq dataset from Kang et al. and introduces latent-pattern analysis with CoGAPS using R/Bioconductor CoGAPS as the primary implementation and Python/PyCoGAPS-compatible artifacts as a parallel implementation.
+This case study uses the PBMC IFN-beta stimulation single-cell RNA-seq dataset from @kang2018multiplexed and introduces latent-pattern analysis with CoGAPS using R/Bioconductor CoGAPS as the primary implementation and Python/PyCoGAPS-compatible artifacts as a parallel implementation.

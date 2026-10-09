@@ -8,3 +8,19 @@ We also acknowledge the CoGAPS, PyCoGAPS, Bioconductor, SingleCellExperiment, An
 We would also like to acknowledge the National Institute of General Medical Sciences for funding this work (1R25GM160622).
 
 Icons are from [IconPacks](https://www.iconpacks.net/){target="_blank"}.
+
+### AI Attribution Statement
+
+This case study was developed with human-directed assistance from OpenAI Codex and ChatGPT.
+
+OpenAI Codex assisted with revising explanatory text, organizing the instructional narrative, clarifying analytical methods and interpretations, and incorporating reviewer feedback. Codex was used to revise the Motivation, Learning Objectives, Context, Packages and Setup, Data Import, Data Exploration, Data Wrangling, Data Visualization, Data Analysis, and Full Reproduction Guide sections. It also supported literature and data-provenance checks and identification of potential scientific and reproducibility issues.
+
+OpenAI Codex and ChatGPT assisted with developing and debugging analysis and visualization code. Codex additionally supported reproducibility scripts, Docker environment configuration, and automated checks. ChatGPT was used to create illustrations, but not to prepare earlier narrative drafts. These contributions built on existing project materials, published methods, and established software packages.
+
+AI assistance was initiated and directed by the author. AI-assisted text, code, and illustrations underwent human review and revision. The authors retain responsibility for the final content, analytical decisions, illustrations, and scientific conclusions.
+
+The applications used were OpenAI Codex and ChatGPT. Models used included GPT-5.5, GPT-5.6, and Astra.
+
+AIA Human-AI blend, Human-initiated, Reviewed, OpenAI Codex and ChatGPT (GPT-5.5, GPT-5.6, Astra)
+
+More information about this AI attribution can be found [here](https://aiattribution.github.io/){target="_blank"}.

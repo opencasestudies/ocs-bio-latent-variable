@@ -34,49 +34,90 @@ The selected local model uses `K = 6`, `seed = 2`, 2,000 iterations per phase, a
 
 Full reproduction uses the validated Docker image introduced in [Packages and Setup](#packages-and-setup). The image provides R, Python, CoGAPS, PyCoGAPS, Quarto, and the packages used by the scripts. It does not contain the project data.
 
+Additional source and saved-model files are available from [Zenodo record 21208760](https://zenodo.org/records/21208760){target="_blank"}, DOI [10.5281/zenodo.21208760](https://doi.org/10.5281/zenodo.21208760){target="_blank"}. Use this fixed release so that the downloaded files match the identities recorded for this case study. Complete downloads without a login were verified against their recorded sizes and checksums on October 5, 2026.
+
+The main learner path uses the included files and does not require these downloads. For reproduction, download only the inputs for your chosen route below. Creating an archive folder does not download anything. The archive makes the supplied files available; it does not resolve the [upstream annotation and preparation questions](#what-is-inherited-from-the-source-object).
+
+### Download The Files For Your Route
+
+Open the record's **Files** list and use **Download** beside each file you need. Save the individual files together in a separate reference folder, keeping their downloaded names. The table below identifies additional inputs; prepared data and compact summaries are already included in the project.
+
+| Your goal | Additional files to download |
+| --- | --- |
+| Follow the main learner path or redraw figures from included tables | None |
+| Rebuild preprocessing from the supplied source (Stage 2) | `kang_counts_25k.h5ad` |
+| Fit a new R model from included prepared data (Stage 3) | None; the full R result is an output, not an input |
+| Inspect the saved R model or regenerate its exports (Stage 4) | `cogaps_K6_seed2_iter2000.rds` |
+| Fit a new Python model (optional extension) | `cogaps_input_genesxcells_hvg3000_float64.h5ad`, unless you generated it in Stage 2 |
+| Inspect the saved Python model (optional extension) | `cogaps_K6_seed2_iter2000_python.h5ad` |
+
+For the full R route starting at Stage 2, download the source file; the later stages generate the prepared data and full R model. If you instead want to use the saved model, begin with the R inspection/export route. Do not download a full model as a prerequisite for fitting a new one, and do not download the Python model for an R-only route.
+
+The record also preserves copies of the included prepared data and preprocessing record, an R checkpoint, and release documentation. You do not need to download all of these files for every route. Keep the release documentation separate from the working project's `README.md` and manifests; do not replace those project files with archive copies. The checkpoint is optional run provenance; resuming from it is not a validated route in this guide.
+
+<details>
+<summary><strong>Open the file-placement table</strong></summary>
+
+Keep each downloaded reference file under its original name. After the Stage 1 check verifies an archive copy, copy it to the destination below in your separate working project. Destinations are relative to the project root containing `index.qmd`, `scripts/`, and `data/`. Copy only files required for your next stage, not outputs that stage will generate.
+
+<table id="reproduction-file-placement" class="table table-sm" style="width:100%; table-layout:fixed; overflow-wrap:anywhere; font-size:0.88rem; line-height:1.35;">
+<colgroup><col style="width:40%;"><col style="width:60%;"></colgroup>
+<thead><tr><th scope="col">Downloaded filename</th><th scope="col">Working-project destination</th></tr></thead>
+<tbody>
+<tr><td><code>kang_counts_25k.h5ad</code></td><td><code>data/source/kang_counts_25k.h5ad</code></td></tr>
+<tr><td><code>preprocessed_cells_hvg3000.h5ad</code></td><td><code>data/processed/input/preprocessed_cells_hvg3000.h5ad</code></td></tr>
+<tr><td><code>preprocess_config_hvg3000.json</code></td><td><code>data/processed/input/preprocess_config_hvg3000.json</code></td></tr>
+<tr><td><code>cogaps_input_genesxcells_hvg3000_float64.h5ad</code></td><td><code>data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad</code></td></tr>
+<tr><td><code>cogaps_K6_seed2_iter2000.rds</code></td><td><code>data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds</code></td></tr>
+<tr><td><code>cogaps_K6_seed2_iter2000.checkpoint.out</code></td><td><code>data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.checkpoint.out</code></td></tr>
+<tr><td><code>cogaps_K6_seed2_iter2000_python.h5ad</code></td><td><code>data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad</code></td></tr>
+</tbody>
+</table>
+
+Only the Python model needs a filename change: remove `_python` from the working copy's filename. Keep the downloaded reference copy unchanged. Do not overwrite an existing working file; if it fails verification, investigate it or use a clean working project before proceeding. Stage 1 shows a non-overwriting copy example and how to check again after placement.
+
+</details>
+
+### Keep Reference Files Separate From Your Work
+
 Keep these three local folders distinct:
 
-- **Case-study repository:** the GitHub clone containing the pages, scripts, included data, and output folders.
-- **Reproduction archive:** the downloaded Zenodo or local folder containing larger source files and full saved model objects. It is mounted read-only so the downloaded files remain unchanged.
-- **Writable work folder:** a local folder for regenerated files, logs, and trial outputs.
+- **Main learner project:** your original GitHub clone or extracted ZIP containing the pages, scripts, included data, and saved results.
+- **Reproduction archive:** a separate folder containing the obtained source and saved-model files. Keep this reference copy unchanged and mount it read-only.
+- **Reproduction working project:** a separate clone or ZIP extraction in which scripts can write regenerated files to their usual project-relative locations. Creating an unused `reproduction_work/` subfolder does not redirect those scripts.
 
 Before starting a long run, confirm that you have enough local storage for the downloaded archive and regenerated model files. Runtime depends on the computer, Docker architecture, diagnostic settings, and thread support. The selected-model section therefore shows what progress should look like instead of promising one universal runtime.
 
-Use the commands below from your computer's Terminal. If you already cloned the repository, skip the `git clone` command and move into your existing repository folder.
+Obtain a separate working project using either download route in [Main learner setup](#main-learner-setup). In the **Host Terminal**, change to that working project's root and confirm it contains `index.qmd`, `scripts/`, and `data/`. Use image `0.3.1` and the updated preparation script described in Stage 2; the image alone does not update scripts in a mounted project.
+
+For a route requiring archive files, use the reference folder populated by the downloads above. This release provides individual files, not a ZIP preserving project folders; there is no archive to extract. Replace the example archive path below with that real, populated folder. Do not point Docker to an empty directory or to your browser's general Downloads folder containing unrelated files.
+
+**Host Terminal**
 
 ```bash
-# Get the case-study repository if you have not already cloned it.
-git clone https://github.com/opencasestudies/ocs-bio-latent-variable.git
-cd ocs-bio-latent-variable
+# Check that you are in the separate reproduction working project.
+pwd
+ls -d index.qmd scripts data
 
-# Point to the downloaded Zenodo or local reproduction archive.
-mkdir -p "$HOME/cs4_reproduction_archive"
-export CS4_REPRODUCTION_ARCHIVE="$HOME/cs4_reproduction_archive"
-
-# Create a writable folder for regenerated outputs.
-mkdir -p "$PWD/reproduction_work"
+# Point to files you have already obtained, not a folder to be created.
+export CS4_REPRODUCTION_ARCHIVE="/full/path/to/your/reproduction_archive"
 
 # Launch the validated case-study image.
 docker run --platform linux/amd64 --rm -it \
-  -p 8787:8787 \
+  -p 127.0.0.1:8787:8787 \
   -e PASSWORD="Password12" \
   -v "$PWD":/home/rstudio/project:rw \
-  -v "$CS4_REPRODUCTION_ARCHIVE":/home/rstudio/project/data/external/reproduction_archive:ro \
-  othomas2/pycogaps-runtime-guide:0.3.0
+  --mount "type=bind,source=$CS4_REPRODUCTION_ARCHIVE,target=/home/rstudio/project/data/external/reproduction_archive,readonly" \
+  othomas2/pycogaps-runtime-guide:0.3.1
 ```
 
-Inside Docker, the repository appears at `/home/rstudio/project`, and the reproduction archive appears at `/home/rstudio/project/data/external/reproduction_archive`. Write regenerated files to the repository's expected output folders or to `reproduction_work/` while testing.
+Inside Docker, the working project appears at `/home/rstudio/project`, and the reference archive appears at `/home/rstudio/project/data/external/reproduction_archive`. The archive mount is read-only; the working project's output folders are writable. A missing archive directory causes this bind mount to fail instead of silently creating one. An existing but empty directory still needs the Stage 1 check.
 
-After the container starts, inspect the downloaded archive before copying or linking anything:
+If you are fitting R from the included prepared data without downloading an archive, use the main setup launch command with your separate working project. No archive mount or pre-existing full R result is required for that route.
 
-```bash
-cd /home/rstudio/project
-find data/external/reproduction_archive -maxdepth 5 -type f | sort
-```
+Run the Stage 1 check before copying files or starting a long computation. It verifies readable, nonempty inputs and compares original archive inputs with the recorded byte sizes and SHA-256 checksums. If a needed input is absent from the working project but a verified archive copy exists, the check reports its source and destination; it does not copy or alter anything. Exact filename mappings are in `data/external/README.md`, including the Python model's required rename.
 
-The scripts use the paths shown in the file inventory below. If the archive preserves those project-relative folders, copy the files you need into the matching writable locations or pass the archive path through the relevant command-line option. For example, the preprocessing script accepts `--source-h5ad`, so it can read the source H5AD directly from the mounted archive without changing the downloaded copy.
-
-Keep model fitting visible in Terminal. The progress messages show whether CoGAPS has loaded the data, entered equilibration, moved into sampling, and completed the requested iterations. They also report atom counts, chi-square values, and elapsed time that can help diagnose a stalled or unexpectedly slow run.
+Keep model fitting visible in the Host Terminal. The progress messages show whether CoGAPS has loaded the data, entered equilibration, moved into sampling, and completed the requested iterations. They also report atom counts, chi-square values, and elapsed time that can help diagnose a stalled or unexpectedly slow run.
 
 ### Complete File Inventory
 
@@ -176,68 +217,69 @@ The included files are enough to read the case study, rerun its summaries, and i
 
 ## Stage 1: Confirm The Environment And Files
 
-Begin by checking which files are already present. These commands do not change the data or fit a model. They report whether each expected file can be found and, when it is present, show its size. This lets you distinguish a missing input from a problem inside a later script.
+Choose the stage you intend to run. Use the same file-check command whether you plan to work in R or Python; it runs in the **RStudio Terminal inside the container** and does not require writing Python code. It reads files only: it does not download, copy, install, or fit anything.
 
-Choose either tab. Both checks look for the same files and should report the same availability results.
+| Value for `--route` | Required inputs | Outputs, not downloads |
+| --- | --- | --- |
+| `learner-r` or `learner-python` | Included prepared data, preprocessing record, and the chosen language's pattern summary | None in this check; this is a starting-file check, not an audit of every lesson file |
+| `preprocess` | Larger source count file | Prepared data, preprocessing record, and dense Python input |
+| `fit-r` | Prepared data | Full R model and checkpoint |
+| `export-r` | Prepared data and a full R model | Compact R exports, including the pattern summary |
+| `fit-python` | Prepared data and dense Python input | Full Python model |
+| `inspect-python` | Prepared data and a full Python model | None |
 
-::: {.panel-tabset}
+For example, before Stage 2, run:
 
-### R
-
-```bash
-Rscript - <<'RS'
-checks <- c(
-  "prepared PBMC data" = "data/processed/input/preprocessed_cells_hvg3000.h5ad",
-  "preprocessing record" = "data/processed/input/preprocess_config_hvg3000.json",
-  "R lightweight pattern summary" = "data/processed/selected_model_k6/r/pattern_summary.csv",
-  "Python lightweight pattern summary" = "data/processed/selected_model_k6/python/pattern_summary.csv",
-  "mounted reproduction archive" = "data/external/reproduction_archive",
-  "source count file" = "data/source/kang_counts_25k.h5ad",
-  "dense Python CoGAPS input" = "data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad",
-  "full R selected model" = "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds",
-  "full Python selected model" = "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad"
-)
-
-for (label in names(checks)) {
-  path <- checks[[label]]
-  exists <- file.exists(path)
-  size <- if (exists) sprintf("%.1f MB", file.info(path)$size / 1e6) else ""
-  cat(sprintf("%-34s %-8s %10s  %s\n", label, if (exists) "present" else "missing", size, path))
-}
-RS
-```
-
-### Python
+**RStudio Terminal inside the container**
 
 ```bash
-/opt/cogaps-venv/bin/python - <<'PY'
-from pathlib import Path
-
-checks = {
-    "prepared PBMC data": "data/processed/input/preprocessed_cells_hvg3000.h5ad",
-    "preprocessing record": "data/processed/input/preprocess_config_hvg3000.json",
-    "R lightweight pattern summary": "data/processed/selected_model_k6/r/pattern_summary.csv",
-    "Python lightweight pattern summary": "data/processed/selected_model_k6/python/pattern_summary.csv",
-    "mounted reproduction archive": "data/external/reproduction_archive",
-    "source count file": "data/source/kang_counts_25k.h5ad",
-    "dense Python CoGAPS input": "data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad",
-    "full R selected model": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds",
-    "full Python selected model": "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad",
-}
-
-for label, path in checks.items():
-    p = Path(path)
-    status = "present" if p.exists() else "missing"
-    size = f"{p.stat().st_size / 1_000_000:.1f} MB" if p.exists() else ""
-    print(f"{label:34s} {status:8s} {size:>10s}  {path}")
-PY
+cd /home/rstudio/project
+/opt/cogaps-venv/bin/python scripts/reproduction/check_reproduction_inputs.py \
+  --route preprocess
 ```
 
-:::
+Replace `preprocess` with the route you need. To fit R from the included prepared data, use `--route fit-r`: a full Python model and a pre-existing R model are not prerequisites.
 
-Interpret `missing` in relation to your goal. A missing included file can prevent the corresponding analysis or page from running. A missing larger file only prevents the reproduction stage that uses it. For example, you can rebuild figures without the source-count file, but you cannot rebuild preprocessing without it.
+| Reported status | What to do |
+| --- | --- |
+| `ready` | The required file is readable and nonempty. Original archive inputs also match their recorded byte size and SHA-256 digest. |
+| `missing required input` | Obtain and place this input before continuing. A verified archive copy, when available, is reported with its destination. |
+| `invalid required input` | Stop and investigate an empty, unreadable, wrong-sized, or checksum-mismatched file. Do not treat it as an original archive input. |
+| `not needed for this route` | No download is required for this stage. |
+| `output to be generated` | This stage produces the file. Do not download it as a prerequisite. Existing full-model outputs stop fitting checks because the launchers refuse to overwrite them. |
+| `archive directory empty` | No files were found in the mounted archive folder. Creating or mounting the folder did not download anything. This prevents a route only when its required inputs are unavailable. |
 
-**Stage 1 checkpoint:** The repository is visible inside Docker, and every input required for the stage you intend to run is reported as `present`. It is acceptable for unused optional files to be reported as `missing`.
+When the check identifies a verified archive copy of the source, copy it into the separate working project, then run the same check again:
+
+**RStudio Terminal inside the container**
+
+```bash
+cd /home/rstudio/project
+mkdir -p data/source
+cp -n data/external/reproduction_archive/kang_counts_25k.h5ad \
+  data/source/kang_counts_25k.h5ad
+```
+
+Here `-n` prevents overwriting an existing file. If the destination already exists but fails verification, investigate it or use a clean working copy; the command above will not repair it. For other files, use the placement table in `data/external/README.md`. In particular, the downloaded `cogaps_K6_seed2_iter2000_python.h5ad` belongs at `data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad`.
+
+<details>
+<summary><strong>Checking an input you regenerated in an earlier stage</strong></summary>
+
+Newly generated data and models need not have the original archive's checksum. After completing and checking the preceding stage, declare each regenerated input explicitly. For example, after rebuilding the prepared data in Stage 2:
+
+**RStudio Terminal inside the container**
+
+```bash
+cd /home/rstudio/project
+/opt/cogaps-venv/bin/python scripts/reproduction/check_reproduction_inputs.py \
+  --route fit-r --generated-input prepared
+```
+
+After both preprocessing and fitting a new R model, check Stage 4 with `--route export-r --generated-input prepared --generated-input r_model`. The command still requires readable, nonempty files, but labels them as regenerated instead of claiming they match the original archive. This flag is not a workaround for a corrupted download, cannot exempt the source count file, and does not replace the dimension, metadata, and model checks later in the guide.
+
+</details>
+
+**Stage 1 checkpoint:** Continue only when the check reports **File prerequisites ready** for your chosen route. It exits with a nonzero status when a required input is missing or invalid, or fitting would collide with an existing full model. This confirms file prerequisites, not software availability, scientific correctness, or successful completion of later stages.
 
 ## Reproduction Roadmap
 
@@ -245,7 +287,7 @@ The local reproduction route has six stages. Each stage answers one practical qu
 
 | Stage | Question | Main result | A reasonable stopping point |
 |---|---|---|---|
-| 1. Confirm the setup | Can the container see the repository and the files needed for your chosen goal? | A successful environment and file check. | Stop here if you only wanted to verify that reproduction is possible. |
+| 1. Confirm the setup | Can the container see the repository and the files needed for your chosen goal? | Verified file prerequisites for the chosen route. | Stop here if you only wanted to check input availability; this does not verify the later computations. |
 | 2. Prepare the PBMC data | Can the source counts be transformed into the same cells-by-genes dataset used in the analysis? | Prepared PBMC data, an optional genes-by-cells input, and a preprocessing record. | Stop here if you are checking preprocessing only. |
 | 3. Fit the selected R model | Can the selected CoGAPS settings be rerun to completion? | Full R CoGAPS object, run metrics, checkpoint, and visible progress log. | Stop here if you only need the full fitted model. |
 | 4. Create diagnostic and analysis tables | Can the full model be converted into the compact evidence inspected earlier? | Trace, uncertainty, gene-weight, cell-activity, top-gene, and activity-summary files. | Stop here if you need refreshed model evidence but not new figures. |
@@ -258,11 +300,7 @@ The route is cumulative only when you begin from the source data. If you already
 
 Use this stage when you want to reconstruct the expression dataset that CoGAPS received. The source file contains the larger single-cell count dataset; the prepared file keeps the cells, metadata, normalized expression values, and 3,000 highly variable genes used in the analysis.
 
-```text
-data/processed/input/preprocessed_cells_hvg3000.h5ad
-```
-
-If you already have the included prepared file and do not want to revisit preprocessing, you can continue to Stage 3. Reading the explanation is still useful because filtering, normalization, transformation, and gene selection determine the exact matrix available to the model.
+This stage writes the prepared dataset to `data/processed/input/preprocessed_cells_hvg3000.h5ad`. Skip preprocessing if you want to inspect the included dataset without replacing it: go directly to [Check The Prepared Dataset](#check-the-prepared-dataset) below. Reading the explanation is still useful because filtering, normalization, transformation, and gene selection determine the exact matrix available to the model.
 
 The preprocessing script is:
 
@@ -279,9 +317,14 @@ It performs six main jobs:
 1. selects 3,000 highly variable genes; and
 1. writes both the prepared case-study data file and the optional dense PyCoGAPS input.
 
-The recorded preprocessing workflow is implemented in Python. Run the complete script inside Docker from `/home/rstudio/project` after the source file is available:
+The recorded preprocessing workflow is implemented in Python, but you launch the complete script from the **RStudio Terminal inside the container**, not the RStudio Console or a Python session. R users run the same command; you do not need to translate the preprocessing into R. First complete the Stage 1 `preprocess` file check so that the larger source is available at the expected path.
+
+**Before you run this command:** it replaces the prepared H5AD, dense Python input, and preprocessing JSON at the three output paths below if they already exist, without an overwrite prompt. Run it only in the **separate reproduction working project** described in [Before You Begin](#before-you-begin). Keep your original learner project and read-only archive unchanged. This command prepares data; it does not fit CoGAPS.
+
+**RStudio Terminal inside the container**
 
 ```bash
+cd /home/rstudio/project
 /opt/cogaps-venv/bin/python scripts/reproduction/prepare_preprocessed_hvg3000.py \
   --source-h5ad data/source/kang_counts_25k.h5ad \
   --out-h5ad data/processed/input/preprocessed_cells_hvg3000.h5ad \
@@ -289,9 +332,13 @@ The recorded preprocessing workflow is implemented in Python. Run the complete s
   --config-json data/processed/input/preprocess_config_hvg3000.json
 ```
 
+After it finishes, expect three `Wrote ...` messages naming those output files. If it stops with an error, do not assume that all three files were completed; resolve the error before proceeding. The following sections explain the script. Their Python blocks are **excerpts, not separate commands**: run the complete command above, not the fragments individually. To inspect the saved file now, continue to [Check The Prepared Dataset](#check-the-prepared-dataset).
+
 ### The Script Starts By Making The Choices Visible
 
 The first important design choice is that preprocessing settings are command-line arguments, not hidden constants. The script has defaults, but the command above could override them if you wanted to test another preprocessing recipe.
+
+**Script excerpt (not a separate command)**
 
 ```python
 parser.add_argument("--min-cells", type=int, default=3)
@@ -313,20 +360,27 @@ This is a useful reproducibility habit. If a later model result changes, you can
 
 The source file is an AnnData `.h5ad` object. In single-cell analysis, an AnnData object usually stores cells as rows and genes as columns. The main expression matrix is `adata.X`, and additional versions of the matrix can be stored in `adata.layers`.
 
-The script reads the source file and makes sure there is a `counts` layer:
+The script reads the source file, checks the treatment labels, and makes sure there is a `counts` layer:
+
+**Script excerpt (not a separate command)**
 
 ```python
 adata = ad.read_h5ad(args.source_h5ad)
+condition_source = ensure_condition_column(adata)
 
 if "counts" not in adata.layers:
     adata.layers["counts"] = adata.X.copy()
 ```
+
+The script's `ensure_condition_column()` helper keeps an existing `condition` column or copies the source's `label` column into `condition` when it is absent. It requires both `ctrl` and `stim` labels and stops if labels are missing or unexpected. The source file itself is not changed. This gives the R and Python workflows the treatment field they need for later comparisons.
 
 This matters because the workflow uses expression values in more than one way. The normalized, log-transformed matrix is easier to compare across cells and is the matrix used for the prepared case-study file. The count-scale layer is kept so highly variable gene selection can use count-like values, and so later full-reproduction steps have a clear record of where count-scale information came from.
 
 ### Filtering Removes Genes With Too Little Information
 
 The first filtering step removes genes detected in too few cells:
+
+**Script excerpt (not a separate command)**
 
 ```python
 sc.pp.filter_genes(adata, min_cells=args.min_cells)
@@ -337,6 +391,8 @@ This step does not decide which immune cells are important. It only removes gene
 ### Normalization And Log Transformation Put Cells On A Comparable Scale
 
 Single cells can differ in total captured RNA or sequencing depth. Before comparing expression values across cells, the script rescales each cell and then log-transforms the normalized values:
+
+**Script excerpt (not a separate command)**
 
 ```python
 sc.pp.normalize_total(adata, target_sum=args.target_sum)
@@ -352,6 +408,8 @@ For this case study, the important point is not the specific number 10,000 by it
 The source study measured many genes, but the selected model uses 3,000 highly variable genes. Highly variable genes are genes whose expression varies enough across cells to help distinguish cell states, cell identities, stimulation responses, or other structure.
 
 The script marks highly variable genes, then creates a reduced AnnData object:
+
+**Script excerpt (not a separate command)**
 
 ```python
 sc.pp.highly_variable_genes(
@@ -377,11 +435,15 @@ The result is the prepared matrix used by the case study:
 
 The main prepared file is written as cells by genes, which is the usual AnnData orientation:
 
+**Script excerpt (not a separate command)**
+
 ```python
 adata_hvg.write_h5ad(args.out_h5ad)
 ```
 
 The script also creates an optional dense genes-by-cells file for the Python/PyCoGAPS full rerun:
+
+**Script excerpt (not a separate command)**
 
 ```python
 def build_cogaps_input(preprocessed_cells: ad.AnnData) -> ad.AnnData:
@@ -406,6 +468,8 @@ The two outputs are therefore different views of the same prepared expression sp
 
 At the end, the script writes a compact JSON record:
 
+**Script excerpt (not a separate command)**
+
 ```python
 config = {
     "raw_h5ad": args.source_h5ad.name,
@@ -413,60 +477,116 @@ config = {
     "target_sum": args.target_sum,
     "hvg_flavor": args.hvg_flavor,
     "n_top_genes": args.n_top_genes,
+    "condition_source_column": condition_source,
     "prepared_h5ad": str(args.out_h5ad),
     "cogaps_input_h5ad": str(args.cogaps_input_h5ad),
 }
 args.config_json.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
 ```
 
-After the script finishes, inspect `data/processed/input/preprocess_config_hvg3000.json`. That record should name the source file, minimum cell threshold, library-size target, highly variable gene method, number of selected genes, and output paths.
+After the script finishes, inspect `data/processed/input/preprocess_config_hvg3000.json`. That record should name the source file, minimum cell threshold, library-size target, highly variable gene method, number of selected genes, treatment-label source column, and output paths.
 
 This file records the expression space given to CoGAPS before model interpretation begins. It answers questions such as why the selected model has 3,000 genes and whether the expression matrix was normalized before model fitting.
 
 ### Check The Prepared Dataset
 
-After preprocessing finishes, inspect the saved file in either R or Python. The two snippets check the same properties: matrix dimensions, availability of the count layer, and the cell metadata fields used later for donor-, condition-, and cell-type-aware analyses.
+Choose **one** language to inspect either the included prepared file or the file you just regenerated with the documented settings. These checks only read the file; they do not preprocess data or fit a model. They check dimensions, assays, identifiers, treatment/donor/cell-type metadata, and the saved UMAP coordinates. UMAP coordinates are stored separately from the cell-metadata columns.
+
+The checks below expect the case study's 3,000 genes and 24,673 cells. If you deliberately changed preprocessing settings, investigate the expected differences rather than removing failed checks just to continue.
 
 ::: {.panel-tabset}
 
 #### R
 
+Use the **RStudio Console**, or save this code in an R script and run it from that Console. `setwd()` sets the R session's directory; changing the Terminal directory does not do this for R. The native reader, `reader = "R"`, reads the H5AD without creating a Python environment. Its [documentation](https://theislab.github.io/zellkonverter/reference/readH5AD.html) notes that conversion can differ from the Python reader, so check the contents as well as the dimensions.
+
+**RStudio Console**
+
 ```r
+setwd("/home/rstudio/project")
 prepared_r <- zellkonverter::readH5AD(
-  "data/processed/input/preprocessed_cells_hvg3000.h5ad"
+  "data/processed/input/preprocessed_cells_hvg3000.h5ad",
+  reader = "R"
+)
+required_metadata <- c("condition", "replicate", "cell_type")
+stopifnot(nrow(prepared_r) == 3000L, ncol(prepared_r) == 24673L)
+stopifnot(all(c("X", "counts") %in% SummarizedExperiment::assayNames(prepared_r)))
+metadata_r <- as.data.frame(SummarizedExperiment::colData(prepared_r))
+stopifnot(all(required_metadata %in% names(metadata_r)))
+stopifnot(!anyNA(metadata_r[required_metadata]))
+stopifnot(setequal(as.character(metadata_r$condition), c("ctrl", "stim")))
+
+barcodes_r <- colnames(prepared_r)
+genes_r <- rownames(prepared_r)
+stopifnot(
+  length(barcodes_r) == ncol(prepared_r), length(genes_r) == nrow(prepared_r),
+  !anyNA(barcodes_r), !anyNA(genes_r),
+  all(nzchar(barcodes_r)), all(nzchar(genes_r)),
+  !anyDuplicated(barcodes_r), !anyDuplicated(genes_r)
+)
+stopifnot("X_umap" %in% SingleCellExperiment::reducedDimNames(prepared_r))
+umap_r <- SingleCellExperiment::reducedDim(prepared_r, "X_umap")
+stopifnot(
+  nrow(umap_r) == ncol(prepared_r), ncol(umap_r) == 2L,
+  all(is.finite(umap_r))
 )
 
 data.frame(
   cells = ncol(prepared_r),
   genes = nrow(prepared_r),
   count_layer_present = "counts" %in% SummarizedExperiment::assayNames(prepared_r),
-  metadata_fields = paste(
-    colnames(SummarizedExperiment::colData(prepared_r)),
-    collapse = ", "
-  )
+  metadata_complete = !anyNA(metadata_r[required_metadata]),
+  umap_columns = ncol(umap_r)
 )
 ```
 
 #### Python
 
-```python
-import anndata as ad
+Start the [Python session described in setup](#open-rstudio-server) using the container's `/opt/cogaps-venv/bin/python`. Run the following at its `>>>` prompt, not at the Terminal's shell prompt. `os.chdir()` sets that Python session's working directory.
 
+**Python session**
+
+```python
+import os
+import anndata as ad
+import numpy as np
+
+os.chdir("/home/rstudio/project")
 prepared_py = ad.read_h5ad(
     "data/processed/input/preprocessed_cells_hvg3000.h5ad"
 )
+required_metadata = ["condition", "replicate", "cell_type"]
+assert prepared_py.shape == (24673, 3000)
+assert prepared_py.X is not None and prepared_py.X.shape == prepared_py.shape
+assert "counts" in prepared_py.layers
+assert prepared_py.layers["counts"].shape == prepared_py.shape
+assert all(field in prepared_py.obs.columns for field in required_metadata)
+assert not prepared_py.obs[required_metadata].isna().any().any()
+assert set(prepared_py.obs["condition"]) == {"ctrl", "stim"}
 
-{
+for identifiers in (prepared_py.obs_names, prepared_py.var_names):
+    assert identifiers.is_unique and not identifiers.hasnans
+    assert all(len(identifier) > 0 for identifier in identifiers)
+
+assert "X_umap" in prepared_py.obsm
+umap_py = prepared_py.obsm["X_umap"]
+assert umap_py.shape == (prepared_py.n_obs, 2)
+assert np.isfinite(umap_py).all()
+
+print({
     "cells": prepared_py.n_obs,
     "genes": prepared_py.n_vars,
     "count_layer_present": "counts" in prepared_py.layers,
-    "metadata_fields": list(prepared_py.obs.columns),
-}
+    "metadata_complete": not prepared_py.obs[required_metadata].isna().any().any(),
+    "umap_columns": umap_py.shape[1],
+})
 ```
 
 :::
 
-The prepared dataset should contain 24,673 cells and 3,000 genes. The metadata should retain the fields needed to connect each cell with its condition, donor, annotated PBMC identity, and UMAP coordinates.
+Expect 24,673 cells, 3,000 genes, `TRUE`/`True` for the count-layer and metadata checks, and two UMAP columns. Reaching this summary without an error also confirms that the identifiers are present and unique, both treatment labels are present, and the saved UMAP coordinates are finite. These are structural checks, not proof that the source annotations or embedding are biologically correct.
+
+If the R check starts a conda environment solve, stop that check and confirm that you are using the code above with `reader = "R"` in the case-study container. Repeatedly reinstalling packages is not the first remedy. If a process is killed with exit code 137, retain its error output and inspect the Docker/system logs and resource settings: insufficient memory is one possible cause, but that code alone does not establish the cause. Resolve the failure before continuing.
 
 :::{.reproducibility_box}
 ::::{.reproducibility_box_header}
@@ -485,7 +605,7 @@ Together, they tell you where the data started, what matrix the case study uses,
 ::::
 :::
 
-**Stage 2 checkpoint:** The prepared H5AD file contains 24,673 cells and 3,000 genes, the count layer is available, and the preprocessing JSON records the settings used to create it. If those checks pass, the expression data are ready for the selected-model fit.
+**Stage 2 checkpoint:** The read-only check passes for dimensions, assays, identifiers, required metadata, and UMAP structure. If you regenerated the data, also inspect the new preprocessing JSON and confirm that all three output files were written. This completes the prepared-data check; it does not start or validate a CoGAPS fit. Continue to Stage 3 only if you intend to fit a model, or to Stage 4 if you are using the corresponding saved R model and prepared data.
 
 ## Stage 3: Fit The Selected R CoGAPS Model
 
@@ -551,19 +671,41 @@ The complete R output map is available below for reference. You do not need to m
 
 ### Run The Model Where You Can See Its Progress
 
-Run the launcher from your normal computer Terminal or from the Docker/RStudio Terminal while you can watch the output:
+First complete the Stage 1 `fit-r` file check and the Stage 2 prepared-data check in your separate reproduction working project. Fitting needs the prepared H5AD, not a downloaded full R or Python model. If you want to use the corresponding saved R model instead of fitting again, skip this stage and continue to Stage 4 with that model and its prepared data.
+
+Keep Docker Desktop running and use the same local reproduction working project that you mounted for RStudio. If the RStudio Server launch occupies your first **Host Terminal**, open a second window or tab. Replace the example path below with the path on your computer, then check the project root. Do not use `/home/rstudio/project` here: that is the path inside the RStudio container, not the host path.
+
+**Host Terminal**
+
+```bash
+cd "/full/path/to/your/project"
+pwd
+ls -d index.qmd scripts data
+```
+
+Keep your RStudio container running. The command below automatically starts a temporary container, using the same Docker image, to fit the model. It saves the results into your working project, where you can inspect them afterward in RStudio.
+
+Run this command in your computer's Terminal, not in the RStudio Terminal. When it finishes, return to the RStudio Terminal for the export commands below.
+
+**This next command starts model fitting**, not just a readiness check. Keep its progress visible until the run finishes.
+
+**Host Terminal**
 
 ```bash
 bash scripts/reproduction/run_selected_model_r.sh
 ```
 
-The launcher writes selected-model outputs to:
+The launcher first checks that Docker is available and that its engine can be reached. If either check fails, no model is started. Follow the error message in the Host Terminal; do not install Docker inside the RStudio container or move the command into the RStudio Console. Once those checks pass, the model runs inside the new container, using the image's R installation and packages rather than a host R installation.
+
+Both containers write to the same reproduction working project even though its internal path differs: `/workspace/case-study` in the model-fitting container and `/home/rstudio/project` in RStudio. The launcher writes selected-model outputs to:
 
 ```text
 data/processed/selected_model_k6/r/
 ```
 
-If a full R selected-model object already exists, the launcher stops before overwriting it. To intentionally rerun the model, set `FORCE_RERUN=1`:
+If a full R selected-model object already exists, the launcher stops before contacting Docker or overwriting it. Prefer a fresh reproduction working project if you want to retain the existing run. Use the command below only when you intentionally want to replace the model and associated run outputs in this working project; `FORCE_RERUN=1` is not needed for export or inspection:
+
+**Host Terminal**
 
 ```bash
 FORCE_RERUN=1 bash scripts/reproduction/run_selected_model_r.sh
@@ -591,7 +733,7 @@ Chi-square values do not need to decrease at every sampling update. CoGAPS is a 
 
 The first files to check after this stage are the full selected R CoGAPS object, the metrics JSON, and the checkpoint file. The `.rds` object is the source for later exports. The metrics JSON provides a compact record of settings, runtime, dimensions, and headline model summaries. The checkpoint is mainly useful for debugging or resuming a run.
 
-**Stage 3 checkpoint:** The Terminal shows that equilibration and sampling completed, and `data/processed/selected_model_k6/r/` contains the full `.rds` model and metrics JSON. Do not continue to the export stage if the fit ended with an error or stopped before completing sampling.
+**Stage 3 checkpoint:** The Host Terminal shows that equilibration and sampling completed, and `data/processed/selected_model_k6/r/` contains the full `.rds` model and metrics JSON. Do not continue to the export stage if the fit ended with an error or stopped before completing sampling. After a successful run, return to the **RStudio Terminal inside the container** for Stage 4.
 
 ## Stage 4: Create Diagnostic And Analysis Tables
 
@@ -602,11 +744,31 @@ The full model object contains much more information than is practical to displa
 
 These are not additional model fits. They are different views of the same selected R result.
 
+For the export commands in this stage, return to the **RStudio Terminal inside the container**, where the required R packages are installed. These `Rscript` commands run R inside that container; you do not need R installed on your computer. If RStudio Server is no longer running, reopen it using the setup instructions and mount the same reproduction working project.
+
+You need the full R `.rds` result and its corresponding prepared H5AD. A Python model is not required. Set the Terminal's working directory and check these inputs before exporting:
+
+**RStudio Terminal inside the container**
+
+```bash
+cd /home/rstudio/project
+pwd
+/opt/cogaps-venv/bin/python scripts/reproduction/check_reproduction_inputs.py \
+  --route export-r
+```
+
+If you regenerated the prepared data or R model, add the relevant `--generated-input prepared` and/or `--generated-input r_model` flags as explained in Stage 1. Continue only when the check reports **File prerequisites ready**, and use the prepared data associated with that model. The file check does not establish that a model and dataset belong together.
+
+The next two export commands replace existing diagnostic and compact analysis files in `data/processed/selected_model_k6/r/`. Run them only in the separate reproduction working project, keeping your original learner files and reference archive unchanged. They read the full model without refitting or replacing it.
+
 ### Export Diagnostics From The Full R Model
 
 The full `.rds` object is useful, but it is not the easiest format to inspect directly. The diagnostic export script reads the full result and writes smaller files that are easy to plot or summarize:
 
+**RStudio Terminal inside the container**
+
 ```bash
+cd /home/rstudio/project
 Rscript scripts/export_cogaps_diagnostics_r.R
 ```
 
@@ -674,7 +836,10 @@ These files are the bridge between model fitting and model diagnosis. They let y
 
 The next export script turns the same full R result into the matrices and summaries used throughout the main analysis sections:
 
+**RStudio Terminal inside the container**
+
 ```bash
+cd /home/rstudio/project
 Rscript scripts/export_lightweight_cogaps_derivatives_r.R
 ```
 
@@ -718,13 +883,18 @@ These files are not separate models. They are smaller views of the selected R mo
 
 ### Check The Exported Tables In R Or Python
 
-The export scripts are written in R because they read the full R CoGAPS object. Once the CSV and compressed TSV files have been created, you can inspect them in either language.
+The export scripts are written in R because they read the full R CoGAPS object. Once the CSV and compressed TSV files have been created, choose either language below to inspect the summary. These checks only read a table; they do not fit or export anything. You can also use them to inspect the included summary without running Stages 3 or 4.
 
 ::: {.panel-tabset}
 
 #### R
 
+Use the **RStudio Console** inside the container. Its working directory is separate from the Terminal's, so set it here too.
+
+**RStudio Console**
+
 ```r
+setwd("/home/rstudio/project")
 pattern_summary_r <- readr::read_csv(
   "data/processed/selected_model_k6/r/pattern_summary.csv",
   show_col_types = FALSE
@@ -742,21 +912,29 @@ pattern_summary_r |>
 
 #### Python
 
+Use the **Python session** opened with `/opt/cogaps-venv/bin/python` in the RStudio Terminal, as described in [Packages and Setup](#open-rstudio-server). Paste the following into the Python prompt, not the shell prompt.
+
+**Python session**
+
 ```python
+import os
 import pandas as pd
 
+os.chdir("/home/rstudio/project")
 pattern_summary_py = pd.read_csv(
     "data/processed/selected_model_k6/r/pattern_summary.csv"
 )
 
-pattern_summary_py[
-    [
-        "pattern",
-        "corr_with_stim",
-        "dominant_cell_type",
-        "top_genes_top8",
-    ]
-]
+print(
+    pattern_summary_py[
+        [
+            "pattern",
+            "corr_with_stim",
+            "dominant_cell_type",
+            "top_genes_top8",
+        ]
+    ].to_string(index=False)
+)
 ```
 
 :::
@@ -767,23 +945,33 @@ Both snippets read the same R-selected-model summary. The check should return on
 
 ## Stage 5: Rebuild Directionality And Figures
 
-The selected-model exports show which genes have high CoGAPS weights and where each pattern is active. They do not show whether a high-weight gene increases or decreases after IFN-beta stimulation. This stage adds that expression-direction evidence and rebuilds the figures that display the combined results.
+The selected-model exports show which genes have high CoGAPS weights and where each pattern is active. They do not show whether a high-weight gene increases or decreases after IFN-beta stimulation. This stage separates recalculating that expression-direction evidence from redrawing figures using saved tables.
+
+If you only want to redraw the included selected R figures, skip directly to [Regenerate The Displayed Figures](#regenerate-the-displayed-figures). That step uses compact files already included in the project; it does not need a full model, a source H5AD, or a new fit. Work in the separate reproduction working project described in [Before You Begin](#before-you-begin), because the commands below replace outputs at their usual paths.
 
 ### Rebuild Directionality Evidence
 
 The R model export tells you which genes have high CoGAPS weights. It does not tell you whether those genes are higher after IFN-beta stimulation. Directionality is rebuilt with a separate expression-contrast script. Choose the command that matches the selected-model outputs you are rebuilding.
 
+Unlike the figure builder below, these scripts read the **full saved model** and its corresponding prepared H5AD. The R command needs the `.rds` result; the Python command needs the full Python model `.h5ad`. Each script extracts top genes from that model, calculates expression contrasts, and replaces directionality outputs in that language's selected-model folder. The Python script also replaces `pattern_top_genes.csv` and its output-folder `README.md`. Neither command fits a model. Skip these commands when you only want to plot the included results.
+
 ::: {.panel-tabset}
 
 #### R
 
+**RStudio Terminal inside the container**
+
 ```bash
+cd /home/rstudio/project
 Rscript scripts/pattern_directionality_analysis_r.R
 ```
 
 #### Python
 
+**RStudio Terminal inside the container**
+
 ```bash
+cd /home/rstudio/project
 /opt/cogaps-venv/bin/python scripts/pattern_directionality_analysis.py
 ```
 
@@ -829,7 +1017,7 @@ The main outputs are:
 </tr>
 <tr>
 <td><code style="overflow-wrap:anywhere;">pattern_gene_directionality_heatmap.png</code></td>
-<td>Compact visual summary of directionality across patterns and cell types.</td>
+<td>Heatmap of global top-gene contrasts, grouped by pattern; not a cell-type-specific heatmap.</td>
 <td>Useful for quick review after rerunning the directionality script.</td>
 </tr>
 </tbody>
@@ -839,33 +1027,167 @@ The directionality step is part of the evidence chain because CoGAPS weights and
 
 ### Check The R Output Folder
 
-After running the R fit and export scripts, inspect the output folder:
+After completing the R stages you chose, inspect the output folder. A figure-only route uses the included compact files and does not require the full `.rds` result to appear here.
+
+**RStudio Terminal inside the container**
 
 ```bash
+cd /home/rstudio/project
 find data/processed/selected_model_k6/r -maxdepth 1 -type f | sort
 ```
 
-You should see the full selected model, diagnostic files, lightweight matrices, activity summaries, top-gene tables, and directionality summaries. If a later case-study section cannot find a file, start by checking whether it appears in this folder and whether it was regenerated after the latest model run.
+For a full R rebuild, expect the full selected model, diagnostic files, lightweight matrices, activity summaries, top-gene tables, and directionality summaries. For a figure-only check, use the input list below. A directory listing confirms file presence only; it does not establish that tables came from the same run or are scientifically current.
 
 ### Regenerate The Displayed Figures
 
-Most displayed figures are built from processed evidence tables rather than directly from a live model fit. That separation makes it possible to update a visualization without waiting for CoGAPS to run again.
+The existing figure builder redraws the static selected R figures and their figure-source tables. R users run this same command in the container Terminal; it uses Python internally but does not require a Python model. It does not recreate every plot or illustration on the page.
 
-Regenerate the shared selected-model figures with:
+The default command reads these eight files from `data/processed/selected_model_k6/r/`:
+
+<details>
+<summary><strong>Required compact inputs for the R figure builder</strong></summary>
+
+```text
+cogaps_K6_seed2_iter2000.metrics.json
+pattern_summary.csv
+pattern_activity_by_celltype_condition.csv
+pattern_activity_by_replicate_condition.csv
+pattern_cell_activities_with_metadata.csv.gz
+pattern_gene_directionality_global.csv
+pseudobulk_counts_global.csv
+pseudobulk_counts_by_celltype.csv
+```
+
+The metrics identify this run's IFN-associated pattern. The summary and activity tables supply the pattern, cell-type, donor, and UMAP views. The directionality and pseudobulk tables supply the gene-expression comparisons. All eight must describe the same selected R result. A ninth file, `pattern_gene_directionality_heatmap.png`, is optional for the builder: if present, it is copied unchanged, not recalculated.
+
+</details>
+
+**Before running:** the default command replaces generated figures in `data/processed/figures/`, matching display copies in `img/`, and seven figure-source tables in `data/processed/figures/source_tables/r/`. Use your separate reproduction working project. It leaves the selected-model input tables and the Python figure-source tables unchanged.
+
+**RStudio Terminal inside the container**
 
 ```bash
+cd /home/rstudio/project
 /opt/cogaps-venv/bin/python scripts/build_selected_k6_figures.py
 ```
 
-The script writes figures under `data/processed/figures/` and updates selected display copies under `img/`. Figures generated directly by R and Python code chunks are refreshed when the complete Quarto page is rendered:
+Wait for the command to finish without an error and print `Wrote figures to` and `Wrote source tables to`. With the included six-pattern R inputs, it draws **15 PNGs** and writes **seven source tables**. If the optional directionality heatmap is present, it copies that file to both figure folders as a sixteenth PNG. If it is absent, the script does not create it or remove an older copy already in a destination folder; do not mistake an old image for a newly rebuilt one.
 
-```bash
-quarto render
+<details>
+<summary><strong>Exact static-figure and source-table outputs</strong></summary>
+
+The following 15 PNGs are generated under both `data/processed/figures/` and `img/`:
+
+```text
+figure_viz_pattern_condition_overview.png
+figure_viz_umap_pattern1_identity_activity.png
+figure_viz_umap_pattern2_identity_activity.png
+figure_viz_umap_pattern3_identity_activity.png
+figure_viz_umap_pattern4_identity_activity.png
+figure_viz_umap_pattern5_identity_activity.png
+figure_viz_umap_pattern6_identity_activity.png
+figure_viz_ifn_replicate_pairs.png
+figure_viz_ifn_celltype_condition.png
+figure_viz_pattern_celltype_shift_heatmap.png
+figure_viz_top_gene_directionality.png
+figure_viz_identity_pattern_directionality.png
+ifn_pattern_by_celltype_split_condition.png
+ifn_pattern_by_celltype_all.png
+mean_pattern_by_condition.png
 ```
 
-Before interpreting a rebuilt figure, confirm that its source table was regenerated from the same selected-model output. A newly rendered image does not correct an older source table by itself.
+The optional copied file is `pattern_gene_directionality_heatmap.png`. Creating a new version of that image requires the directionality script, not this figure builder.
 
-**Stage 5 checkpoint:** Directionality tables and pseudobulk support files are present for the selected output, the expected figures have been regenerated, and the Quarto render completes without missing-file errors.
+The following seven tables are written under `data/processed/figures/source_tables/r/`:
+
+```text
+figure_viz_pattern_condition_overview_source.csv
+figure_viz_umap_pattern_activity_pairs_source.csv.gz
+figure_viz_ifn_replicate_pairs_source.csv
+figure_viz_ifn_celltype_condition_source.csv
+figure_viz_pattern_celltype_shift_source.csv
+figure_viz_top_gene_directionality_source.csv
+figure_viz_identity_pattern_directionality_source.csv
+```
+
+The six UMAP images share one long-format source table. The three additional activity-summary PNGs use the selected-model cell-activity input directly and do not have separate figure-source CSVs.
+
+</details>
+
+### Open Your Figures
+
+In RStudio's **Files** pane, open **Home > project > data > processed > figures**. Refresh the file listing and click a PNG, such as `figure_viz_ifn_replicate_pairs.png`.
+
+Check that the axes, labels, and plotted values are clear, then compare the figure with its corresponding source table.
+
+### Draw The R Diagnostic Plots
+
+The full-run trace, sampling-only trace, and snapshot plot use two small CSVs from Stage 4. You can also use the included CSVs without downloading a full model. Start with the code below in your RStudio session; it loads just the tables needed for these three plots.
+
+The trace CSV must include the verified `phase`, `iteration_in_phase`, `iteration_overall`, and `phase_source` columns. If a plotting check reports missing or unresolved timing, use the current included CSV or repeat the Stage 4 diagnostic export with the matching run metrics. Do not infer phases from the row count.
+
+**RStudio Console**
+
+```r
+setwd("/home/rstudio/project")
+library(ggplot2)
+r_results <- "data/processed/selected_model_k6/r"
+trace_r <- readr::read_csv(
+  file.path(r_results, "cogaps_K6_seed2_iter2000.trace.csv"),
+  show_col_types = FALSE
+)
+snapshot_summary_r <- readr::read_csv(
+  file.path(r_results, "cogaps_K6_seed2_iter2000.snapshot_summary.csv"),
+  show_col_types = FALSE
+)
+dir.create("data/processed/figures", recursive = TRUE, showWarnings = FALSE)
+```
+
+Go to [Carry-Forward Check: Is The Selected Model Appropriate To Interpret?](#carry-forward-check-is-the-selected-model-appropriate-to-interpret) and run its first plotting chunk, the full-run chi-square trace, in the same R session. The plot appears in RStudio's **Plots** pane and is stored as `trace_full_plot_r`. Save it with the code below. Each save replaces an existing PNG with the same name in your working project.
+
+**RStudio Console**
+
+```r
+ggplot2::ggsave(
+  "data/processed/figures/diagnostic_trace_r.png",
+  plot = trace_full_plot_r,
+  width = 8.5, height = 4.8, units = "in", dpi = 150
+)
+```
+
+Next, run the sampling-only plotting chunk directly below the full trace. It uses the checked data from the first chunk and stores the expanded-scale plot as `trace_sampling_plot_r`. Save that view separately:
+
+**RStudio Console**
+
+```r
+ggplot2::ggsave(
+  "data/processed/figures/diagnostic_sampling_trace_r.png",
+  plot = trace_sampling_plot_r,
+  width = 8.5, height = 4.8, units = "in", dpi = 150
+)
+```
+
+Next, run the snapshot plotting chunk in that section, then save it immediately afterward:
+
+**RStudio Console**
+
+```r
+ggplot2::ggsave(
+  "data/processed/figures/diagnostic_snapshot_stability_r.png",
+  plot = ggplot2::last_plot(),
+  width = 8.5, height = 4.8, units = "in", dpi = 150
+)
+```
+
+Open the three PNGs from the **Files** pane using the folder described above. Check that the full trace shows both phases, the sampling-only trace shows smaller changes on its explicitly expanded vertical scale, and the snapshot plot shows gene-weight overlap for both phases. Use the discussion beside the original plotting chunks to interpret them; successfully saving a plot is not itself evidence of model convergence.
+
+### Which Plots Are Built Somewhere Else?
+
+- **Full-run trace, sampling-only trace, and snapshot stability:** follow [Draw The R Diagnostic Plots](#draw-the-r-diagnostic-plots) above to use the R plotting chunks and save three PNGs. The Stage 4 diagnostic exporter creates the CSVs, not PNGs. The static figure builder does not create these plots.
+- **Plots produced by the lesson's R and Python chunks:** these are created when you run those chunks in the appropriate session. They are separate drawings, not necessarily pixel-identical copies of the static figures. The default R figure-builder command does not refresh `data/processed/figures/source_tables/python/`.
+- **Opening atlas, setup illustrations, and externally sourced figures:** these are separate assets and are not rebuilt by this command.
+
+**Stage 5 checkpoint:** For a figure-only check, the command completes, the 15 generated PNGs and seven source tables are present, and you can open and inspect a PNG directly. Account separately for the optional copied heatmap and the plots generated by lesson chunks. If you also recalculated directionality, check its output tables and their correspondence to the selected model before using the new figures for interpretation.
 
 ## Stage 6: Confirm The Reproduction
 
@@ -880,13 +1202,16 @@ A successful script exit is necessary, but it is not the only check. Confirm tha
 | Directionality | Global, cell-type, paired, and pseudobulk support tables are present | Confirms that expression direction can be interpreted separately from CoGAPS weights. |
 | Display files | Figures were rebuilt after their source tables | Confirms that the page displays the current evidence. |
 
-The checks below summarize the selected-model folder from either language. They do not decide whether the biological interpretation is correct; they confirm that the expected evidence files are available and internally complete.
+The checks below summarize the selected-model folder. Choose the tab matching the result you rebuilt; the Python tab is only needed for the optional Python extension. These checks do not decide whether the biological interpretation is correct; they confirm that the expected evidence files are available and internally complete.
 
 ::: {.panel-tabset}
 
 ### R
 
+**RStudio Console**
+
 ```r
+setwd("/home/rstudio/project")
 r_dir <- "data/processed/selected_model_k6/r"
 
 r_check <- data.frame(
@@ -898,7 +1223,7 @@ r_check <- data.frame(
     "full R model"
   ),
   value = c(
-    nrow(readr::read_csv(file.path(r_dir, "pattern_summary.csv"), show_col_types = FALSE)),
+    as.character(nrow(readr::read_csv(file.path(r_dir, "pattern_summary.csv"), show_col_types = FALSE))),
     file.exists(file.path(r_dir, "cogaps_K6_seed2_iter2000.trace.csv")),
     file.exists(file.path(r_dir, "cogaps_K6_seed2_iter2000.pattern_uncertainty_summary.csv")),
     file.exists(file.path(r_dir, "pattern_gene_directionality_global.csv")),
@@ -911,10 +1236,14 @@ knitr::kable(r_check)
 
 ### Python
 
+**Python session**
+
 ```python
+import os
 from pathlib import Path
 import pandas as pd
 
+os.chdir("/home/rstudio/project")
 py_dir = Path("data/processed/selected_model_k6/python")
 
 py_check = pd.DataFrame(
@@ -934,7 +1263,7 @@ py_check = pd.DataFrame(
     }
 )
 
-py_check
+print(py_check.to_string(index=False))
 ```
 
 :::
@@ -955,7 +1284,9 @@ The Python-compatible fit requires the dense genes-by-cells input:
 data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad
 ```
 
-Run the launcher in a visible Terminal:
+Run the launcher in a visible **Host Terminal**, with Docker Desktop running, from the same local project root you mounted for RStudio. Use the host project-root check in [Stage 3](#run-the-model-where-you-can-see-its-progress) if you opened a new Terminal. This launcher also starts its own Docker container; do not run it in the RStudio Terminal inside the container.
+
+**Host Terminal**
 
 ```bash
 bash scripts/reproduction/run_selected_model_python.sh
@@ -963,13 +1294,18 @@ bash scripts/reproduction/run_selected_model_python.sh
 
 The result is written under `data/processed/selected_model_k6/python/`. If a full result already exists, the launcher stops before replacing it. Use `FORCE_RERUN=1` only when you have intentionally chosen to replace that result:
 
+**Host Terminal**
+
 ```bash
 FORCE_RERUN=1 bash scripts/reproduction/run_selected_model_python.sh
 ```
 
-The Python-compatible launcher uses `nSnapshots = 0` because its snapshot-conversion route does not provide the same reliable diagnostic export used by R. After model fitting completes, create the compact tables and directionality summaries:
+The Python-compatible launcher uses `nSnapshots = 0` because its snapshot-conversion route does not provide the same reliable diagnostic export used by R. After model fitting completes, return to the **RStudio Terminal inside the container** to create the compact tables and directionality summaries:
+
+**RStudio Terminal inside the container**
 
 ```bash
+cd /home/rstudio/project
 /opt/cogaps-venv/bin/python scripts/export_lightweight_cogaps_derivatives.py
 /opt/cogaps-venv/bin/python scripts/pattern_directionality_analysis.py
 ```
@@ -1363,7 +1699,7 @@ for (script in scripts_to_show) {
 The validated runtime image is:
 
 ```text
-othomas2/pycogaps-runtime-guide:0.3.0
+othomas2/pycogaps-runtime-guide:0.3.1
 ```
 
 Full reproduction assumes that the image provides the following software families:
@@ -1408,12 +1744,14 @@ Use the checkpoint at the end of each stage to decide where to begin. If Stage 1
 
 | What you see | What it usually means | What to check and do |
 |---|---|---|
-| Docker reports that the image cannot be found | The image has not been pulled, or its name or tag is misspelled. | Run `docker pull othomas2/pycogaps-runtime-guide:0.3.0`, then copy the image name directly into the launch command. |
-| Port 8787 is already in use | Another RStudio Server container or local process is using that port. | Stop the older container or map another local port, such as `-p 8788:8787`, and open `http://localhost:8788`. |
+| Docker reports that the image cannot be found | The image has not been pulled, or its name or tag is misspelled. | In the Host Terminal, run `docker pull --platform linux/amd64 othomas2/pycogaps-runtime-guide:0.3.1`, then copy the image name directly into the launch command. |
+| Port 8787 is already in use | Another RStudio Server container or local process is using that port. | Stop the older container or map another local port, such as `-p 127.0.0.1:8788:8787`, and open `http://localhost:8788`. Keep `127.0.0.1` so the example login is only reachable from your own computer. |
 | RStudio Server opens but the project files are absent | The repository was mounted from the wrong local folder. | Stop the container, move to the repository root, and confirm that `index.qmd` is visible before rerunning Docker. |
 | Files can be read but regenerated outputs cannot be written | The repository or output mount is read-only. | Confirm that the repository mount ends in `:rw`. Keep only the downloaded reproduction archive read-only. |
 
-From the RStudio Server Terminal, this command should list `index.qmd`, `data/`, and `scripts/`:
+From the **RStudio Terminal inside the container**, these commands should list `index.qmd`, `data/`, and `scripts/`:
+
+**RStudio Terminal inside the container**
 
 ```bash
 cd /home/rstudio/project
@@ -1438,15 +1776,18 @@ After correcting the problem, rerun the Stage 2 dataset check. Do not begin mode
 
 | What you see | What it usually means | What to check and do |
 |---|---|---|
+| A selected-model launcher reports `docker: command not found` in RStudio | The launcher was run inside the RStudio container, but it starts Docker from the host. | Return to the Host Terminal, change to your local project root, and confirm that `docker info` succeeds before running the launcher there. |
 | The R launcher stops before model fitting | The prepared H5AD is missing, CoGAPS is unavailable, or OpenMP support failed its check. | Rerun Stage 1, then use the software checks below to confirm `CoGAPS` and OpenMP support. |
 | The launcher refuses to replace an existing model | A full output already exists and is being protected from accidental replacement. | Keep the existing result, move it to a backup folder, or use `FORCE_RERUN=1` only when replacement is intentional. |
-| No progress appears after the run begins | Output may be redirected, or the model may still be loading data. | Run the launcher directly in a visible Terminal and wait for the data-loading and phase messages before deciding that the run is stalled. |
+| No progress appears after the run begins | Output may be redirected, or the model may still be loading data. | Run the launcher directly in a visible Host Terminal and wait for the data-loading and phase messages before deciding that the run is stalled. |
 | The run is much slower than expected | Docker emulation, hardware, diagnostics, dense data handling, or thread settings differ. | Check the printed platform, OpenMP result, thread count, sparse-optimization setting, and whether snapshots and checkpoints are enabled. |
 | The run ends during equilibration or sampling | The process may have exceeded memory, reached a time limit, or encountered an input problem. | Read the first error, inspect available memory and disk space, and confirm the input dimensions and model settings before restarting. |
 
 A valid R run should print the selected settings, complete equilibration, enter sampling, and reach the final sampling iteration. Keep the complete Terminal log when investigating a failure; the last chi-square value alone is not enough to identify the cause.
 
 ### The Model Finished But Tables Or Figures Are Missing
+
+Run the export and figure commands below in the **RStudio Terminal inside the container**, from `/home/rstudio/project`, not in the Host Terminal used for model fitting.
 
 | What you see | What it usually means | What to check and do |
 |---|---|---|

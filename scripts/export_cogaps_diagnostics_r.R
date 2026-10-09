@@ -20,6 +20,7 @@ default_out_dir <- file.path(ROOT, "data", "processed", "selected_model_k6", "r"
 option_list <- list(
   make_option("--preprocessed-h5ad", type = "character", dest = "preprocessed_h5ad", default = default_preprocessed, help = "Processed cells x genes AnnData (.h5ad) [default %default]"),
   make_option("--result-rds", type = "character", dest = "result_rds", default = default_result_rds, help = "Saved CoGAPS R result (.rds) [default %default]"),
+  make_option("--run-metrics", type = "character", dest = "run_metrics", default = NULL, help = "Run metrics JSON for trace timing [default: sibling .metrics.json of --result-rds]"),
   make_option("--outdir", type = "character", default = default_out_dir, help = "Output directory [default %default]"),
   make_option("--top-n", type = "integer", dest = "top_n", default = 15, help = "Top features used in stability summaries [default %default]")
 )
@@ -28,6 +29,9 @@ opt <- parse_args(OptionParser(option_list = option_list))
 
 PREPROCESSED_H5AD <- opt$preprocessed_h5ad
 RESULT_RDS <- opt$result_rds
+RUN_METRICS <- opt$run_metrics %||% file.path(
+  dirname(RESULT_RDS), paste0(tools::file_path_sans_ext(basename(RESULT_RDS)), ".metrics.json")
+)
 OUT_DIR <- opt$outdir
 TOP_N <- opt$top_n
 
@@ -100,7 +104,7 @@ param_to_list <- function(params) {
   out
 }
 
-build_trace_df <- function(md) {
+build_trace_df <- function(md, run_metrics = NULL, result_name = NULL) {
   n <- max(length(md$chisq %||% numeric()), length(md$atomsA %||% numeric()), length(md$atomsP %||% numeric()))
   if (!is.finite(n) || n == 0) {
     return(data.frame())
@@ -119,6 +123,72 @@ build_trace_df <- function(md) {
   out$delta_chisq <- c(NA_real_, diff(out$chisq))
   out$delta_atomsA <- c(NA_real_, diff(out$atomsA))
   out$delta_atomsP <- c(NA_real_, diff(out$atomsP))
+  out$phase <- NA_character_
+  out$iteration_in_phase <- NA_integer_
+  out$iteration_overall <- NA_integer_
+  out$phase_source <- "unresolved"
+
+  same_number <- function(x, y) {
+    is.numeric(x) && is.numeric(y) && length(x) == 1L && length(y) == 1L &&
+      is.finite(x) && is.finite(y) && x == y
+  }
+  positive_integer <- function(x) {
+    is.numeric(x) && length(x) == 1L && is.finite(x) && x > 0 && x == floor(x)
+  }
+  params <- param_to_list(md$params)
+  iterations <- params$nIterations
+  frequency <- run_metrics$outputFrequency
+  schedule_valid <- positive_integer(iterations) && positive_integer(frequency)
+  points_per_phase <- if (schedule_valid) floor(iterations / frequency) else NA_real_
+
+  # CoGAPS 3.22.0 appends status points after each output-frequency multiple,
+  # then resets the iteration counter between equilibration and sampling.
+  # Verified source: GapsRunner.cpp, commit 4118fd66c028954ddddce9455c0aaa25e2e58968.
+  checks <- c(
+    supported_saved_version = identical(as.character(md$version), "3.22.0"),
+    successful_R_run = identical(run_metrics$status, "ok") &&
+      identical(run_metrics$language, "R") && identical(run_metrics$package, "CoGAPS"),
+    matching_result_name = !is.null(result_name) && identical(run_metrics$result_path, result_name),
+    matching_iterations = same_number(run_metrics$nIterations, iterations),
+    matching_patterns = same_number(run_metrics$nPatterns, params$nPatterns),
+    matching_seed = same_number(run_metrics$seed, params$seed),
+    matching_sparse_setting = identical(run_metrics$sparseOptimization, params$sparseOptimization),
+    matching_run_statistics = same_number(run_metrics$totalUpdates, md$totalUpdates) &&
+      same_number(run_metrics$totalRunningTime, md$totalRunningTime) &&
+      same_number(run_metrics$meanChiSq, md$meanChiSq),
+    unfixed_matrices = identical(params$whichMatrixFixed, "N"),
+    valid_output_schedule = schedule_valid,
+    complete_two_phase_trace = schedule_valid && points_per_phase > 0 && n == 2 * points_per_phase,
+    matching_trace_lengths = length(md$chisq) == n && length(md$atomsA) == n && length(md$atomsP) == n &&
+      same_number(run_metrics$chisq_trace_length, n) && same_number(run_metrics$atomsA_trace_length, n) &&
+      same_number(run_metrics$atomsP_trace_length, n),
+    finite_trace_values = all(is.finite(out$chisq)) && all(is.finite(out$atomsA)) && all(is.finite(out$atomsP))
+  )
+  timing <- list(
+    status = "unresolved",
+    checks = as.list(checks),
+    relative_progress_definition = "Trace-point index divided by saved point count; not a recorded iteration."
+  )
+  if (all(checks)) {
+    within_phase <- seq_len(points_per_phase) * frequency
+    out$phase <- rep(c("equilibration", "sampling"), each = points_per_phase)
+    out$iteration_in_phase <- rep(within_phase, 2)
+    out$iteration_overall <- c(within_phase, iterations + within_phase)
+    out$phase_source <- "reconstructed_from_run_metrics"
+    timing$status <- "reconstructed"
+    timing$method <- "Saved parameters and matching run metrics, using the verified CoGAPS 3.22.0 output schedule; not directly recorded phase labels."
+    timing$iterations_per_phase <- iterations
+    timing$output_frequency <- frequency
+    timing$points_per_phase <- points_per_phase
+    timing$source_file <- "src/GapsRunner.cpp: displayStatus, runOnePhase, and runCoGAPSAlgorithm"
+    timing$source_commit <- "4118fd66c028954ddddce9455c0aaa25e2e58968"
+    timing$source_repository <- "https://git.bioconductor.org/packages/CoGAPS"
+  } else {
+    timing$reason <- paste(names(checks)[!checks], collapse = ", ")
+    warning("Trace timing unresolved: ", timing$reason,
+      ". Raw values are retained; no phase or iteration labels were guessed.", call. = FALSE)
+  }
+  attr(out, "trace_timing") <- timing
   out
 }
 
@@ -190,6 +260,13 @@ summarize_uncertainty <- function(A, P, A_sd, P_sd, top_n) {
 sce <- zellkonverter::readH5AD(PREPROCESSED_H5AD, reader = "R")
 result <- readRDS(RESULT_RDS)
 md <- slot(result, "metadata")
+if (!is.null(opt$run_metrics) && !file.exists(RUN_METRICS)) {
+  stop("Run metrics file not found: ", RUN_METRICS)
+}
+run_metrics <- if (file.exists(RUN_METRICS)) read_json(RUN_METRICS, simplifyVector = TRUE) else NULL
+if (!is.null(run_metrics) && !is.list(run_metrics)) {
+  stop("Run metrics must be a JSON object: ", RUN_METRICS)
+}
 
 A <- as.matrix(getFeatureLoadings(result))
 P <- as.matrix(getSampleFactors(result))
@@ -214,7 +291,14 @@ if (is.null(colnames(P))) {
 colnames(A_sd) <- colnames(A)
 colnames(P_sd) <- colnames(P)
 
-trace_df <- build_trace_df(md)
+trace_df <- build_trace_df(md, run_metrics, basename(RESULT_RDS))
+trace_timing <- attr(trace_df, "trace_timing")
+if (!is.null(trace_timing)) {
+  trace_timing$result_rds_md5 <- unname(tools::md5sum(RESULT_RDS))
+  trace_timing$run_metrics <- if (!is.null(run_metrics)) list(
+    file = basename(RUN_METRICS), md5 = unname(tools::md5sum(RUN_METRICS))
+  ) else NULL
+}
 snapshot_summary <- rbind(
   summarize_snapshots(md$equilibrationSnapshotsA %||% list(), A, "equilibration", "A", TOP_N),
   summarize_snapshots(md$equilibrationSnapshotsP %||% list(), P, "equilibration", "P", TOP_N),
@@ -261,6 +345,7 @@ diagnostics_summary <- list(
     pumpStatDim = dim(md$pumpStat %||% matrix(numeric(), nrow = 0, ncol = 0)),
     meanPatternAssignmentDim = dim(md$meanPatternAssignment %||% matrix(numeric(), nrow = 0, ncol = 0))
   ),
+  trace_timing = trace_timing,
   trace_summary = if (nrow(trace_df)) list(
     chisq_start = trace_df$chisq[1],
     chisq_end = trace_df$chisq[nrow(trace_df)],

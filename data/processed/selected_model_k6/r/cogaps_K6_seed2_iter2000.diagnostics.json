@@ -41,6 +41,37 @@
     "pumpStatDim": [3000, 6],
     "meanPatternAssignmentDim": [3000, 6]
   },
+  "trace_timing": {
+    "status": "reconstructed",
+    "checks": {
+      "supported_saved_version": true,
+      "successful_R_run": true,
+      "matching_result_name": true,
+      "matching_iterations": true,
+      "matching_patterns": true,
+      "matching_seed": true,
+      "matching_sparse_setting": true,
+      "matching_run_statistics": true,
+      "unfixed_matrices": true,
+      "valid_output_schedule": true,
+      "complete_two_phase_trace": true,
+      "matching_trace_lengths": true,
+      "finite_trace_values": true
+    },
+    "relative_progress_definition": "Trace-point index divided by saved point count; not a recorded iteration.",
+    "method": "Saved parameters and matching run metrics, using the verified CoGAPS 3.22.0 output schedule; not directly recorded phase labels.",
+    "iterations_per_phase": 2000,
+    "output_frequency": 100,
+    "points_per_phase": 20,
+    "source_file": "src/GapsRunner.cpp: displayStatus, runOnePhase, and runCoGAPSAlgorithm",
+    "source_commit": "4118fd66c028954ddddce9455c0aaa25e2e58968",
+    "source_repository": "https://git.bioconductor.org/packages/CoGAPS",
+    "result_rds_md5": "dd40750f8118b7f66390d7ea81c830fc",
+    "run_metrics": {
+      "file": "cogaps_K6_seed2_iter2000.metrics.json",
+      "md5": "33ecde249d3104654c6a6cf04ed1cfac"
+    }
+  },
   "trace_summary": {
     "chisq_start": 253439072,
     "chisq_end": 222432704,

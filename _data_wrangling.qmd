@@ -18,13 +18,15 @@ How to use this section
 
 ## Follow The Preprocessing Trail
 
-The prepared PBMC dataset did not start as a 3,000-gene matrix. It traces back to the Kang et al. GEO record, where the batch 2 control and IFN-beta-stimulated PBMC samples are available as Matrix Market count files and barcode files. Those GEO files were converted into the larger local source count file, then filtered, normalized, transformed, and reduced to highly variable genes before the prepared case-study dataset was saved. Those choices matter because CoGAPS can only learn patterns from the cells, genes, and expression scale it is given.
+The prepared PBMC dataset did not start as a 3,000-gene matrix. Local preprocessing begins with `kang_counts_25k.h5ad`, the annotated Kang PBMC count object distributed through Figshare and Pertpy and preserved in the case-study Zenodo archive. It contains 24,673 cells and 15,706 genes. The local script filters genes, normalizes and log-transforms expression, and keeps 3,000 highly variable genes. Those choices matter because CoGAPS can only learn patterns from the cells, genes, and expression scale it is given.
 
-The flow map below shows the preprocessing path. Read it from top to bottom. The first nodes name the public GEO record and the batch 2 input files. The highlighted green node marks the prepared PBMC file that the main learner path actually loads. The steps after that check that the saved files can support CoGAPS interpretation without rerunning a model in this section.
+Read the flow map from top to bottom. The dashed connection links the original Kang study and GEO record to the distributed annotated object. Its upstream preparation details are not yet known; that connection is not a step reproduced by the local script. The solid arrows below the source object describe the local preparation and later modeling/export steps. The nodes explicitly mark where full reproduction and the main learner path begin.
 
 ```{mermaid}
 %%{init: {"theme": "base", "themeVariables": {"fontSize": "18px"}} }%%
 flowchart TB
+  accTitle: Source history and local PBMC preprocessing
+  accDescr: The Kang study and GEO record connect by a dashed arrow to an annotated Figshare and Pertpy object because upstream preparation details remain unresolved. Full reproduction starts with that object. Local gene filtering, normalization, log transformation, and count-based variable-gene selection produce the prepared dataset where the main learner path begins. Donor labels, cell types, and PCA and UMAP coordinates are inherited, not inferred by these steps.
   classDef source fill:#eaf3ff,stroke:#2d6da3,stroke-width:2px,color:#102a43
   classDef process fill:#f7f9fb,stroke:#6b7c8f,stroke-width:1.5px,color:#102a43
   classDef decision fill:#fff4df,stroke:#b36b00,stroke-width:2px,color:#102a43
@@ -32,33 +34,32 @@ flowchart TB
   classDef prepared fill:#d7f5df,stroke:#1b7f43,stroke-width:4px,color:#102a43
   classDef optional fill:#f3eefc,stroke:#6b46c1,stroke-width:1.5px,color:#102a43
 
-  A["NCBI GEO GSE96583<br/>Kang et al. PBMC IFN-beta study"]:::source
-  B["Batch 2 GEO inputs<br/>GSM2560248_2.1.mtx.gz<br/>GSM2560248_barcodes.tsv.gz<br/>GSM2560249_2.2.mtx.gz<br/>GSM2560249_barcodes.tsv.gz"]:::source
-  C["Local source count file<br/>data/source/kang_counts_25k.h5ad<br/>cells + genes + metadata"]:::source
+  A["Kang et al. source study<br/>GEO GSE96583<br/>Batch 2 control and IFN-beta PBMC samples"]:::source
+  C["Full reproduction starts here<br/>Annotated Figshare / Pertpy count object<br/>kang_counts_25k.h5ad<br/>24,673 cells x 15,706 genes"]:::source
   D{{"Keep genes detected<br/>in at least 3 cells"}}:::decision
   E["Normalize each cell<br/>to 10,000 total counts"]:::process
   F["Log-transform<br/>normalized expression"]:::process
-  G{{"Select 3,000<br/>highly variable genes"}}:::decision
-  H["Prepared PBMC dataset<br/>data/processed/input/preprocessed_cells_hvg3000.h5ad<br/>24,673 cells x 3,000 genes + counts layer"]:::prepared
+  G{{"Select 3,000 highly variable genes<br/>using retained counts"}}:::decision
+  H["Main learner path starts here<br/>Prepared PBMC dataset<br/>preprocessed_cells_hvg3000.h5ad<br/>24,673 cells x 3,000 genes + counts layer"]:::prepared
   I["R selected-model input<br/>genes x cells"]:::output
   J["Optional Python dense input<br/>genes x cells"]:::optional
   K["Lightweight CoGAPS tables<br/>gene weights + cell activities"]:::output
 
-  A --> B --> C --> D --> E --> F --> G --> H --> I --> K
-  H --> J --> K
+  A -.->|"Upstream preparation<br/>details not yet known"| C
+  C --> D --> E --> F --> G --> H
+  H --> I -->|"Fit model and export"| K
+  H --> J -->|"Fit model and export"| K
 ```
 
-The main learner path starts at the highlighted prepared PBMC dataset, `data/processed/input/preprocessed_cells_hvg3000.h5ad`. You do not need the larger GEO-derived source file to continue. The full reproduction path starts earlier, at the GEO and local source-count-file steps, and rebuilds the prepared dataset from the recorded preprocessing settings.
+The main learner path loads `data/processed/input/preprocessed_cells_hvg3000.h5ad`, the prepared dataset marked in green. You do not need the larger source object or a new model fit to continue. Full reproduction starts with a copy of the archived source object at `data/source/kang_counts_25k.h5ad`; the full reproduction guide explains how to rebuild the prepared dataset and, optionally, fit and export a model. The earlier route from GEO files to the annotated source object is not reconstructed here.
 
-::: {.aside}
-**Draft note:** In the full reproduction guide, keep enough detail to show how the source count file, preprocessing settings, and selected-model exports are regenerated. The larger source and dense model-input files should be listed as Zenodo/local files rather than ordinary GitHub assets.
-:::
+The source object's cells, donor labels, cell-type labels, and PCA and UMAP coordinates are retained rather than newly selected or inferred by local preprocessing. These inherited fields let you compare the same cells before and after gene selection. The script also copies the supplied `label` values into `condition`; it does not infer treatment assignments. See the [source-object provenance table](#what-is-inherited-from-the-source-object) for the distribution credits and the upstream processing details that remain unresolved.
 
 ## Quality Control Protects The Input Signal
 
-Quality control is not about making the dataset look cleaner for its own sake. It protects the latent-pattern analysis from learning patterns that mostly reflect unreliable measurements. In a single-cell PBMC perturbation study, that matters because a technical artifact can be mistaken for an immune-response signal if the model is allowed to learn from unstable cells or nearly empty genes.
+Sparse measurements can make weak signals difficult to distinguish from sampling variation. The documented preprocessing step removes genes detected in fewer than three cells. It does not perform a new cell-level quality-control screen; the retained cells and their upstream filtering are inherited from the source object.
 
-The case-study preprocessing record starts from a larger source count file that already contains the PBMC cells used for this lesson. Within the documented local preprocessing step, the visible quality-control rule is gene-level filtering: a gene must be detected in at least three cells to remain in the prepared dataset. This rule removes genes with too little evidence to support stable pattern interpretation. If a learner were starting from raw 10x files, additional cell-level quality-control checks would usually be needed upstream; those upstream raw-data decisions are not rerun in the main learner path.
+Detected refers to a nonzero count in a cell, not a minimum of three counts within each cell. Passing this filter does not establish that a gene's variation is biological.
 
 The programming idea is a filter. A filter asks a yes/no question for each row or column: does this gene pass the detection rule? Genes that pass stay in the matrix; genes that fail are removed before normalization and model fitting. That simple decision changes the biological search space, because CoGAPS cannot recover a pattern from genes that were excluded.
 
@@ -80,11 +81,13 @@ The original count information is still important. The prepared dataset keeps a 
 
 ## Highly Variable Genes Define The Modeled Gene Space
 
-Single-cell RNA-seq measures many genes, but not every measured gene is equally informative for a case-study model. Some genes are nearly constant across cells, and others vary too little to help separate stimulation-associated activity from immune-cell identity. {{< glossary "Highly variable gene" display="Highly variable gene" >}} selection keeps genes with stronger cell-to-cell variation.
+Single-cell RNA-seq measures many genes, but the model does not have to use all of them. {{< glossary "Highly variable gene" display="Highly variable gene" >}} selection identifies genes with relatively strong cell-to-cell variation. The recorded `seurat_v3` method uses the retained counts layer to compare gene variability while accounting for differences in average expression. This is a separate step from the minimum-three-cell detection filter: HVG selection is not simply a low-expression filter.
 
-The prepared PBMC dataset keeps 3,000 highly variable genes using the recorded `seurat_v3` method. This is a modeling decision, not a statement that all other genes are biologically unimportant. It defines the expression space that CoGAPS is allowed to learn from. Interferon-stimulated genes may be included because they vary with stimulation, but immune-cell identity genes may also be included because PBMC cell types differ strongly from one another.
+We use 3,000 highly variable genes, abbreviated HVGs, as a practical modeling choice for this teaching analysis. CoGAPS does not require this exact number or require an HVG-only input. Restricting the gene set reduces computation and focuses the model on variable features, but it can exclude relevant biology. All gene-weight rankings and gene-set interpretations here are conditional on the retained genes.
 
-That is why later sections do not interpret a CoGAPS pattern from one number alone. They compare pattern activity with condition, cell type, top genes, directionality, and diagnostics. HVG selection gives the model an informative starting matrix; it does not by itself decide which pattern is the IFN-associated pattern.
+Interferon-stimulated genes may be included because they vary with stimulation, but immune-cell identity genes may also be included because PBMC cell types differ strongly from one another. Genes outside the retained set cannot receive a weight in the fitted model; their absence from a pattern's gene list is not evidence that they are biologically unimportant.
+
+That is why later sections do not interpret a CoGAPS pattern from one number alone. They compare pattern activity with condition, cell type, top genes, directionality, and diagnostics. HVG selection defines the model's starting gene set; it does not by itself decide which pattern is the IFN-associated pattern.
 
 ## Inspect The Preprocessing Record
 
@@ -111,7 +114,7 @@ preprocess_settings_r <- tibble::tribble(
   "Minimum cells per gene",
   as.character(preprocess_config_r$min_cells),
   "Removed genes detected in too few cells.",
-  "Reduces unstable rare-gene noise before model fitting.",
+  "Excludes genes detected in fewer than three cells; this threshold does not establish that retained genes represent biological signal.",
   "Library-size target",
   format(preprocess_config_r$target_sum, big.mark = ","),
   "Scaled cells to a common total expression level.",
@@ -164,7 +167,7 @@ preprocess_settings = pd.DataFrame(
         ],
         "Why it matters": [
             "Keeps the prepared dataset connected to its source data.",
-            "Reduces unstable rare-gene noise before model fitting.",
+            "Excludes genes detected in fewer than three cells; this threshold does not establish that retained genes represent biological signal.",
             "Makes cells more comparable when sequencing depth differs.",
             "Focuses CoGAPS on genes with informative variation.",
             "Keeps the case study realistic while making rendering and analysis manageable.",
@@ -380,11 +383,26 @@ The joined activity table is in {{< glossary "Wide format" display="wide format"
 
 The next chunk practices that reshaping step. In R, `tidyr::pivot_longer()` moves the pattern columns into two columns named `pattern` and `activity`. In Python, `melt()` performs the same transformation. After reshaping, the code groups by `pattern` and `condition` to make a compact activity summary.
 
+Every cell contributes one activity value to every pattern, including an activity of zero. We do not use an activity cutoff here. The number of cells is therefore the same across patterns within each condition: 12,315 control cells and 12,358 stimulated cells. The difference is between conditions, not between patterns.
+
+The checks below flag missing values before summarizing and confirm that each pattern includes all cells in its condition. Zero is a valid activity value, not a missing value.
+
 ::: {.panel-tabset}
 
 ### R
 
 ```{r}
+stopifnot(
+  "Expected six distinct pattern columns." =
+    length(r_pattern_cols_wrangled) == 6L && dplyr::n_distinct(r_pattern_cols_wrangled) == 6L,
+  "Cell barcodes must be present and unique." =
+    !anyNA(r_cell_activity_metadata$cell_barcode) &&
+      !anyDuplicated(r_cell_activity_metadata$cell_barcode),
+  "Condition labels must be present and contain ctrl and stim." =
+    !anyNA(r_cell_activity_metadata$condition) &&
+      setequal(r_cell_activity_metadata$condition, c("ctrl", "stim"))
+)
+
 r_pattern_activity_long <- r_cell_activity_metadata |>
   dplyr::select(
     cell_barcode,
@@ -399,6 +417,10 @@ r_pattern_activity_long <- r_cell_activity_metadata |>
     values_to = "activity"
   )
 
+stopifnot(
+  "Activity values must be present and finite." = all(is.finite(r_pattern_activity_long$activity))
+)
+
 r_activity_by_condition <- r_pattern_activity_long |>
   dplyr::group_by(pattern, condition) |>
   dplyr::summarise(
@@ -408,6 +430,28 @@ r_activity_by_condition <- r_pattern_activity_long |>
     .groups = "drop"
   ) |>
   dplyr::arrange(pattern, condition)
+
+r_expected_condition_counts <- r_cell_activity_metadata |>
+  dplyr::count(condition, name = "expected_cells")
+r_condition_count_checks <- r_activity_by_condition |>
+  dplyr::left_join(r_expected_condition_counts, by = "condition") |>
+  dplyr::group_by(condition) |>
+  dplyr::summarise(
+    counts_match = all(n_cells == expected_cells),
+    pattern_rows = dplyr::n(),
+    patterns_match = setequal(pattern, r_pattern_cols_wrangled),
+    distinct_cell_counts = dplyr::n_distinct(n_cells),
+    .groups = "drop"
+  )
+stopifnot(
+  "The summary must retain both conditions." =
+    setequal(r_condition_count_checks$condition, r_expected_condition_counts$condition),
+  "Each pattern must include all cells in its condition." = all(r_condition_count_checks$counts_match),
+  "Each condition must have one row for each of the six patterns." =
+    all(r_condition_count_checks$pattern_rows == 6L & r_condition_count_checks$patterns_match),
+  "Cell counts must be equal across patterns within a condition." =
+    all(r_condition_count_checks$distinct_cell_counts == 1L)
+)
 
 knitr::kable(
   r_activity_by_condition,
@@ -420,12 +464,26 @@ knitr::kable(
 
 ```{python}
 #| results: asis
+assert len(python_pattern_cols_wrangled) == len(set(python_pattern_cols_wrangled)) == 6, (
+    "Expected six distinct pattern columns."
+)
+assert (
+    python_cell_activity_metadata["cell_barcode"].notna().all()
+    and python_cell_activity_metadata["cell_barcode"].is_unique
+), "Cell barcodes must be present and unique."
+assert (
+    python_cell_activity_metadata["condition"].notna().all()
+    and set(python_cell_activity_metadata["condition"]) == {"ctrl", "stim"}
+), "Condition labels must be present and contain ctrl and stim."
+
 python_pattern_activity_long = python_cell_activity_metadata.melt(
     id_vars=["cell_barcode", "condition", "cell_type", "replicate"],
     value_vars=python_pattern_cols_wrangled,
     var_name="pattern",
     value_name="activity",
 )
+
+assert np.isfinite(python_pattern_activity_long["activity"]).all(), "Activity values must be present and finite."
 
 python_activity_by_condition = (
     python_pattern_activity_long
@@ -438,6 +496,27 @@ python_activity_by_condition = (
     .reset_index()
     .sort_values(["pattern", "condition"])
 )
+
+python_expected_condition_counts = (
+    python_cell_activity_metadata.groupby("condition", observed=True)
+    .size().rename("expected_cells").reset_index()
+)
+python_condition_count_checks = python_activity_by_condition.merge(
+    python_expected_condition_counts, on="condition", how="left", validate="many_to_one"
+)
+assert set(python_condition_count_checks["condition"]) == set(
+    python_expected_condition_counts["condition"]
+), "The summary must retain both conditions."
+assert python_condition_count_checks["n_cells"].eq(
+    python_condition_count_checks["expected_cells"]
+).all(), "Each pattern must include all cells in its condition."
+for condition, rows in python_condition_count_checks.groupby("condition", observed=True):
+    assert len(rows) == 6 and set(rows["pattern"]) == set(python_pattern_cols_wrangled), (
+        "Each condition must have one row for each of the six patterns."
+    )
+    assert rows["n_cells"].nunique() == 1, (
+        "Cell counts must be equal across patterns within a condition."
+    )
 
 print(render_table(
     python_activity_by_condition.rename(
