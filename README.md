@@ -115,11 +115,6 @@ only when the latter is absent. Use both the updated script and the updated
 image for source-data reproduction; a new image does not replace scripts in a
 mounted project.
 
-## Reviewer Revisions
-
-See [Reviewer Revision Record](REVIEWER_REVISIONS.md) for the implemented R01-R11
-changes, reviewer-request dispositions, validation, and unresolved release issues.
-
 ## Scientific Caveats
 
 - The dataset tests IFN-beta stimulation in PBMCs, not direct dengue infection.
