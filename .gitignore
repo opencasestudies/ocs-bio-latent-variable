@@ -52,6 +52,9 @@ data/results_r/cogaps_K7_seed2_iter2000.trace.csv
 scripts/__pycache__/
 **/__pycache__/
 
+# Personal plots created while running the Python learner path.
+/learner_outputs/
+
 # Local scratch and render-test folders outside the teaching repo.
 _tmp*
 _render_check*/

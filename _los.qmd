@@ -17,7 +17,7 @@ The objectives are organized into data analysis and programming skills, latent-v
 
 | Learning goal | What this helps you do | Where it appears |
 | --- | --- | --- |
-| Understand the biological setting | Explain why lupus PBMCs exposed to IFN-beta are useful for studying interferon-response structure. | [Motivation](#motivation); [Context](#context); [What are the data?](#what-are-the-data) |
+| Understand the biological setting | Explain why IFN-beta-stimulated PBMCs from donors with SLE are useful for studying interferon-response structure. | [Motivation](#motivation); [Context](#context); [What are the data?](#what-are-the-data) |
 | Trace the main learner path | Use included files and saved CoGAPS results while knowing where optional full reproduction belongs. | [Packages and Setup](#packages-and-setup); [Data Import](#data-import); [Full Reproduction Guide](#full-reproduction-guide) |
 | Inspect data and metadata | Check cells, genes, conditions, donors, and annotated cell types before interpreting patterns. | [Data Import](#data-import); [Data Exploration](#data-exploration) |
 | Prepare CoGAPS-ready data | Understand genes-by-cells orientation and the difference between the R and Python data representations. | [Data Wrangling](#data-wrangling); [Full Reproduction Guide](#full-reproduction-guide) |

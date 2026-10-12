@@ -121,15 +121,7 @@ knitr::kable(
 ```{python}
 #| label: analysis-load-python
 #| results: asis
-if "render_table" not in globals():
-    def render_table(data_frame):
-        """Render a pandas DataFrame as a readable HTML table in Quarto."""
-        return data_frame.to_html(
-            index=False,
-            escape=False,
-            border=0,
-            classes="table table-sm table-striped"
-        )
+from scripts.helpers.case_study_display import render_table, show_plot
 
 with open(PY_CHOSEN_METRICS_JSON) as f:
     analysis_metrics = json.load(f)
@@ -193,13 +185,17 @@ print(render_table(selected_run_overview))
 
 :::
 
+Read the settings above as a record of these saved runs, not as recommended defaults for a new dataset. The selected R model uses 2,000 iterations per phase for the [dataset-specific reasons discussed in Data Import](#compare-k4-k5-and-k6-candidate-models). The diagnostics below let you inspect that saved run more closely.
+
 The R run labels the IFN-associated pattern as `Pattern4`. The Python-compatible output labels the corresponding signal as `Pattern5`. That difference is not a contradiction. CoGAPS pattern numbers are labels assigned inside a run; they are not stable biological names.
 
 ## Carry-Forward Check: Is The Selected Model Appropriate To Interpret?
 
-Before interpreting a latent pattern, ask whether the model run looks stable enough to support interpretation. CoGAPS is a {{< glossary "Bayesian model" display="Bayesian" >}} matrix-factorization method, not a simple optimizer that must make the {{< glossary "Chi-square" display="chi-square" >}} smaller at every printed step. Some movement during sampling is expected. What you want to see is a large early improvement followed by a much flatter region where the trace changes only modestly.
+Before interpreting a latent pattern, inspect how the model changed during the run. CoGAPS is a {{< glossary "Bayesian model" display="Bayesian" >}} matrix-factorization method, not a simple optimizer that must make the {{< glossary "Chi-square" display="chi-square" >}} smaller at every recorded step. Compare the full run with a closer view of sampling so that the large early change does not hide the later variation.
 
-The {{< glossary "Diagnostic trace" display="diagnostic trace" >}} below comes from the selected R run because the R implementation is the primary model for this case study and has the richest saved diagnostic record. The dashed line marks the transition between {{< glossary "Equilibration" display="equilibration" >}} and the {{< glossary "Sampling phase" display="sampling phase" >}}. Equilibration is the burn-in-like phase in which the sampler moves away from its starting state. Sampling is the phase used to summarize the final pattern matrices.
+The {{< glossary "Diagnostic trace" display="diagnostic trace" >}} below comes from the selected R run, the primary model for this case study. Its setting `n_iter = 2000` means 2,000 equilibration iterations followed by 2,000 sampling iterations in this saved run. {{< glossary "Equilibration" display="Equilibration" >}} is the burn-in-like phase in which the sampler moves away from its starting state. The {{< glossary "Sampling phase" display="sampling phase" >}} is used to summarize the final pattern matrices.
+
+Each plotted point is a saved status value, recorded every 100 iterations, rather than every sampler update. The CSV's phase and iteration labels were reconstructed from the saved run settings and the verified CoGAPS output schedule; they were not directly recorded with each point. There are 20 saved points per phase. The dashed line in the full-run plot marks the transition after iteration 2,000.
 
 :::{.disclaimer_box}
 ::::{.disclaimer_box_header}
@@ -212,7 +208,7 @@ How to use this model-check section
 ::::
 :::
 
-The first plotting chunk builds the chi-square trace in two steps. It first adds a `phase` column so each printed iteration is labeled as either equilibration or sampling. Then `ggplot()` draws the trace as a connected line, adds colored points for the two phases, and places a dashed vertical line at relative progress `0.5`, where sampling begins.
+The first plotting chunk checks that the exported timing labels are present and consistent, then orders the saved points by `iteration_overall`. `ggplot()` draws the full trace, colors points by phase, and marks the phase boundary using the difference between the overall and within-phase sampling iterations. If the checks stop, use the current included trace CSV or regenerate it with the matching run metrics; do not assign phases by splitting an unverified trace in half.
 
 ```{r}
 #| label: analysis-r-trace-plot
@@ -220,34 +216,91 @@ The first plotting chunk builds the chi-square trace in two steps. It first adds
 #| warning: false
 #| fig-width: 8.5
 #| fig-height: 4.8
-#| fig-cap: "Diagnostic chi-square trace for the selected R K6 CoGAPS run. The trace drops steeply early, then changes much more slowly during the sampling half of the run. A perfectly flat trace is not required for an MCMC sampler, but the later plateau is evidence that the run has moved into a more stable region before interpretation."
+#| fig-cap: "Full-run chi-square trace for the selected R K6 CoGAPS model. The dashed line separates equilibration from sampling. Timing labels are reconstructed from verified run settings. The large early decrease determines the vertical scale; inspect the sampling-only view below for smaller later changes."
+#| fig-alt: "Forty saved chi-square values across 4,000 iterations. Values fall sharply early in equilibration and later changes are difficult to see on this scale. A dashed line marks the phase transition at iteration 2,000."
+trace_fields_r <- c("phase", "iteration_in_phase", "iteration_overall", "phase_source", "chisq")
+trace_numeric_fields_r <- c("iteration_in_phase", "iteration_overall", "chisq")
+stopifnot(
+  "Use the current trace CSV with verified timing columns." = all(trace_fields_r %in% names(trace_r))
+)
+stopifnot(
+  "Trace timing must be resolved; check the CSV and matching run metrics." =
+    !anyNA(trace_r[trace_fields_r]) && all(trace_r$phase_source == "reconstructed_from_run_metrics"),
+  "The full trace must contain equilibration and sampling." =
+    setequal(trace_r$phase, c("equilibration", "sampling")),
+  "Iterations and chi-square must be finite numeric values." =
+    all(vapply(trace_r[trace_numeric_fields_r], is.numeric, logical(1))) &&
+      all(is.finite(as.matrix(trace_r[trace_numeric_fields_r])))
+)
 trace_plot_r <- trace_r |>
-  dplyr::mutate(
-    phase = dplyr::if_else(relative_progress <= 0.5, "equilibration", "sampling")
-  )
+  dplyr::arrange(iteration_overall) |>
+  dplyr::mutate(phase = factor(phase, levels = c("equilibration", "sampling")))
+is_sampling_r <- trace_plot_r$phase == "sampling"
+phase_boundary_r <- unique(
+  trace_plot_r$iteration_overall[is_sampling_r] - trace_plot_r$iteration_in_phase[is_sampling_r]
+)
+stopifnot(
+  "Trace iterations must follow one consistent two-phase schedule." =
+    length(phase_boundary_r) == 1L && phase_boundary_r > 0 &&
+      all(trace_plot_r$iteration_in_phase > 0) && !anyDuplicated(trace_plot_r$iteration_overall) &&
+      all(trace_plot_r$iteration_overall[!is_sampling_r] == trace_plot_r$iteration_in_phase[!is_sampling_r]) &&
+      all(trace_plot_r$iteration_overall[!is_sampling_r] <= phase_boundary_r)
+)
 
-ggplot(trace_plot_r, aes(x = relative_progress, y = chisq)) +
+trace_full_plot_r <- ggplot(trace_plot_r, aes(x = iteration_overall, y = chisq)) +
   geom_line(color = "#2F5D8C", linewidth = 1) +
   geom_point(aes(color = phase), size = 2.4) +
-  geom_vline(xintercept = 0.5, linetype = "dashed", color = "#102A43") +
+  geom_vline(xintercept = phase_boundary_r, linetype = "dashed", color = "#102A43") +
   scale_color_manual(values = c("equilibration" = "#E76F51", "sampling" = "#2A9D8F")) +
+  scale_x_continuous(labels = scales::label_number(big.mark = ",")) +
   scale_y_continuous(labels = scales::label_number(big.mark = ",")) +
   labs(
-    title = "Selected R model reaches a chi-square plateau",
-    subtitle = "Relative progress 0.5 marks the end of equilibration and the start of sampling.",
-    x = "Relative progress through the full run",
+    title = "Selected R model: full-run trace",
+    subtitle = "Equilibration and sampling; dashed line marks the phase transition.",
+    x = "Iteration across both phases",
     y = "Chi-square",
     color = "Phase"
   ) +
   theme_minimal(base_size = 13) +
   theme(legend.position = "bottom")
+
+trace_full_plot_r
 ```
 
-The plot supports using the model, but it should not be oversold. The trace still has small stochastic changes late in the run. That is normal for a sampler. The important point is that the large early changes have mostly settled before the final summaries are interpreted.
+The large initial decrease determines the scale of the full-run plot. To inspect later variation, keep this overview and select only rows labeled `sampling`. The next plot retains the recorded chi-square values but gives them an expanded vertical scale. Its horizontal axis shows the iteration within sampling, starting with the first saved point at iteration 100.
 
-Snapshots give a second stability check. A snapshot is a saved view of the model state during the run. The code below focuses on the gene-loading matrix, because top genes are central to biological interpretation. The column `mean_top_overlap` asks whether the top genes in each snapshot resemble the top genes in the final summary.
+```{r}
+#| label: analysis-r-sampling-trace-plot
+#| message: false
+#| warning: false
+#| fig-width: 8.5
+#| fig-height: 4.8
+#| fig-cap: "Sampling-only chi-square trace for the same selected R model, using the 20 saved sampling points. The vertical scale is expanded relative to the full-run view; the chi-square values have not been transformed. Visible variation alone does not establish good mixing or convergence."
+#| fig-alt: "Twenty saved sampling-phase chi-square values between 222,414,208 and 222,438,496, shown against sampling iterations 100 through 2,000. The expanded vertical scale reveals fluctuations hidden in the full-run view."
+sampling_trace_r <- trace_plot_r |>
+  dplyr::filter(phase == "sampling")
 
-The plotting code filters the snapshot table to matrix `A`, the gene-weight matrix, because this check is about top-gene stability. It then orders snapshots by phase, draws `mean_top_overlap` over time, and adds a dotted reference line at `0.9`. Values near the top of the plot mean the snapshot top genes are very similar to the final top genes.
+trace_sampling_plot_r <- ggplot(sampling_trace_r, aes(x = iteration_in_phase, y = chisq)) +
+  geom_line(color = "#2A9D8F", linewidth = 1) +
+  geom_point(color = "#2A9D8F", size = 2.4) +
+  scale_x_continuous(labels = scales::label_number(big.mark = ",")) +
+  scale_y_continuous(labels = scales::label_number(big.mark = ",", accuracy = 1)) +
+  labs(
+    title = "Selected R model: sampling trace",
+    subtitle = "Sampling phase only; expanded vertical scale.",
+    x = "Iteration within sampling",
+    y = "Chi-square"
+  ) +
+  theme_minimal(base_size = 13)
+
+trace_sampling_plot_r
+```
+
+The full trace shows the large early change. The sampling-only view lets you inspect the smaller changes that are difficult to see on that scale. Variation during sampling is expected; a flat-looking trace is not itself evidence of good mixing. These saved diagnostics can reveal obvious problems, but they do not establish convergence or show that every pattern is equally stable.
+
+Snapshots give a second stability check. A snapshot is a saved view of the model state during the run. The code below focuses on the gene-loading matrix, because top genes are central to biological interpretation. For each pattern, the diagnostic export compares the 15 highest-weight genes in a snapshot with the 15 highest-weight genes in the final summary and calculates the fraction shared. The column `mean_top_overlap` averages these fractions across all six patterns.
+
+The plotting code filters the snapshot table to matrix `A`, the gene-weight matrix, and draws the average overlap for each saved snapshot in each phase. The dotted line at `0.9` is a visual reference, not a convergence cutoff. Values near one mean high average agreement in top-gene membership; they do not show whether the individual gene weights have stopped changing.
 
 ```{r}
 #| label: analysis-r-snapshot-plot
@@ -255,7 +308,8 @@ The plotting code filters the snapshot table to matrix `A`, the gene-weight matr
 #| warning: false
 #| fig-width: 8.5
 #| fig-height: 4.8
-#| fig-cap: "Snapshot stability for the selected R gene-loading matrix. Mean top-gene overlap rises during equilibration and remains high during sampling, supporting the use of the final top-gene summaries for interpretation."
+#| fig-cap: "Top-15-gene overlap with the final selected R summary, averaged across six patterns at each saved snapshot. The sampling averages are high, but an average can hide differences among patterns. The dotted 0.9 line is a visual reference, not a convergence cutoff."
+#| fig-alt: "Average top-15-gene overlap across six patterns at snapshots every 200 iterations in each phase. The equilibration average rises from about 0.54 to 1; the sampling averages range from about 0.978 to 1. The dotted line marks 0.9."
 snapshot_a_r <- snapshot_summary_r |>
   dplyr::filter(matrix == "A", !is.na(mean_top_overlap)) |>
   dplyr::mutate(
@@ -269,8 +323,8 @@ ggplot(snapshot_a_r, aes(x = snapshot_label, y = mean_top_overlap, color = phase
   scale_color_manual(values = c("equilibration" = "#E76F51", "sampling" = "#2A9D8F")) +
   scale_y_continuous(limits = c(0, 1), labels = scales::label_number(accuracy = 0.01)) +
   labs(
-    title = "Top genes stabilize before the final summary",
-    subtitle = "Higher overlap means the snapshot top genes resemble the final top genes.",
+    title = "Snapshot top-gene overlap with the final summary",
+    subtitle = "Average across six patterns; top 15 genes per pattern.",
     x = "Iteration within phase",
     y = "Mean top-gene overlap",
     color = "Phase"
@@ -279,13 +333,16 @@ ggplot(snapshot_a_r, aes(x = snapshot_label, y = mean_top_overlap, color = phase
   theme(legend.position = "bottom")
 ```
 
-A third diagnostic looks at {{< glossary "Posterior uncertainty" display="posterior uncertainty" >}}. The table below is not a pass/fail test. It helps you notice which patterns have more variability in their gene weights or cell activities. The IFN-associated pattern has a strong biological signal and interpretable top genes, but its uncertainty is still worth carrying forward as part of the evidence.
+In this saved run, the average overlap ranges from about `0.978` to `1` across the ten sampling snapshots. This supports consistency of the top-gene lists on average. It does not establish equal stability across individual patterns, stability of every gene weight, or convergence of the whole model.
 
-Two columns matter most here. **Mean cell-activity SD** summarizes the average posterior standard deviation of the pattern's cell activity scores. A larger value means that, across cells, the model sampled a wider range of plausible activity values for that pattern. **Median top-gene loading CV** summarizes uncertainty in the gene weights for the pattern's strongest genes; the {{< glossary "Coefficient of variation" display="coefficient of variation" >}} compares uncertainty with the size of the estimated loading, and the median keeps one unusually noisy top gene from dominating the summary.
+A third diagnostic looks at {{< glossary "Posterior uncertainty" display="posterior uncertainty" >}}: the variability summarized by the sampler for its estimated cell activities and gene weights. The table below reports two different quantities, not a pass/fail test or a single ranking of pattern reliability.
 
-These statistics are uncertainty summaries, not biological effect sizes. A high cell-activity SD does not mean the pattern is more biologically important, and a lower loading CV does not by itself name the pattern. Instead, use them beside the trace, snapshot stability, top genes, and stimulation/cell-type evidence.
+- **Mean cell-activity SD:** for each cell, the saved model reports a posterior standard deviation (SD) for that pattern's activity. This column averages those SDs across cells. It is not the spread of activity estimates between cells, and it remains on the activity scale.
+- **Median top-gene loading CV:** for each of the pattern's 15 highest-weight genes, the export divides the posterior loading SD by its estimated gene weight, then takes the median of these ratios. This {{< glossary "Coefficient of variation" display="coefficient of variation" >}} (CV) describes relative uncertainty in gene weights, not in cell activities.
 
-The table marks the run-specific IFN-associated pattern, then shows the two uncertainty summaries beside the other selected-model patterns. First find the IFN-associated row, then compare its uncertainty values with the rest of the model.
+Activity scales differ among patterns, so a larger raw activity SD alone does not make one pattern less reliable than another. Likewise, loading CV is not an activity CV. Neither column measures biological importance or accuracy. Read them alongside the trace, snapshot overlap, top genes, and donor-level activity evidence.
+
+The table marks the run-specific IFN-associated pattern. Find that row and read each uncertainty column according to the quantity it summarizes.
 
 ```{r}
 #| label: analysis-r-uncertainty-table
@@ -321,9 +378,9 @@ knitr::kable(
 )
 ```
 
-In this run, the IFN-associated pattern is `Pattern4`. Its mean cell-activity SD is `0.0105`, which is higher than several other patterns but lower than `Pattern6`. Its median top-gene loading CV is `0.0233`, similar to `Pattern6` and higher than the other rows. That means the IFN-associated pattern is not the least uncertain pattern in the model, so you should not interpret a single cell's exact activity score too literally. The more important question is whether the same pattern is supported by several kinds of evidence. Here, the uncertainty table does not stand alone: it is read beside the chi-square trace, the snapshot top-gene stability check, the IFN-linked top genes, and the paired donor activity results below.
+For the selected R IFN-associated pattern (`Pattern4`), the mean posterior cell-activity SD is about `0.0105`. `Pattern6` has a larger value. The IFN-associated pattern's median top-gene loading CV is about `0.0233`, the largest in this table and close to `Pattern6`'s `0.0229`. These summarize different quantities: activity SD concerns cell activities, whereas loading CV concerns gene weights. Neither is a direct measure of biological importance or an accuracy score. Interpret the activities with their uncertainty and the donor-level evidence, rather than treating an individual cell's estimate as exact.
 
-Together, the trace, snapshot, and uncertainty summaries support proceeding with interpretation. They do not prove that this is the only possible model. They show that the selected R run behaved coherently enough for the focused biological questions in this case study.
+Together, these diagnostics help you inspect the selected run and identify limits to its interpretation. They do not establish convergence or validate a biological label. Next, check whether the top genes, cell-type activity, and donor-level comparisons support the same biological interpretation.
 
 ## Question 1: What Latent Transcriptional Programs Are Present?
 
@@ -957,7 +1014,7 @@ With only eight donor pairs, the p-value should still be interpreted as a compac
 
 The IFN-associated pattern should not only separate stimulated and control cells. Its activity should also agree with known interferon biology. One simple way to check that is to build a small score from canonical {{< glossary "Interferon-stimulated gene" display="interferon-stimulated genes" >}}, often called ISGs.
 
-This is a teaching check, not a new cell-type annotation. The short list below is a compact guidepost drawn from interferon-response resources rather than a new signature discovered in this case study. Many of the genes appear in the MSigDB Hallmark interferon-response gene sets, and Interferome provides a broader catalog of interferon-regulated genes [@liberzon2015hallmark; @rusinova2013interferome]. The Kang source study supplies the IFN-beta PBMC perturbation context, while the lupus/interferon literature explains why an interferon-gene score is relevant in SLE [@kang2018multiplexed; @catalina2019interferonSLE; @chyuan2019interferons].
+This is a teaching check, not a new cell-type annotation. The short list below is a compact guidepost drawn from interferon-response resources rather than a new signature discovered in this case study. Many of the genes appear in the MSigDB Hallmark interferon-response gene sets, and Interferome provides a broader catalog of interferon-regulated genes [@liberzon2015hallmark; @rusinova2013interferome]. The Kang source study supplies the IFN-beta PBMC perturbation context, while the SLE/interferon literature explains why an interferon-gene score is relevant in SLE [@kang2018multiplexed; @catalina2019interferonSLE; @chyuan2019interferons].
 
 The code below turns that biological guidepost into a small, checkable table. Both tabs do the same four things. First, the code defines the compact ISG list. Second, it checks which of those genes are actually present in the prepared single-cell dataset. Third, it averages the expression of the available ISGs within each cell, producing one ISG score per cell. Fourth, it compares that per-cell ISG score with the run-specific IFN-associated CoGAPS activity. In the selected R run, that activity comes from `Pattern4`; in the Python output, it comes from the matched IFN-associated pattern for that implementation.
 
@@ -1602,7 +1659,7 @@ ax.legend(
 )
 plt.xticks(rotation=35, ha="right")
 plt.subplots_adjust(bottom=0.30)
-plt.show()
+show_plot(ax.figure, "analysis_ifn_direction_by_celltype.png")
 ```
 
 :::
@@ -1620,7 +1677,7 @@ The four main research questions are now connected to specific evidence. The tab
 | **3. Which genes define the strongest IFN-associated pattern, and what is their direction in stimulation?** | IFN-associated gene weights paired with donor-aware pseudobulk directionality. | Top genes such as `ISG15`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `OAS1`, and `BST2` define the pattern and are mostly higher after IFN-beta stimulation. |
 | **4. How does the IFN-associated pattern vary across annotated PBMC cell types?** | Cell-type-stratified direction summaries for the IFN-associated pattern's top genes. | The IFN-associated direction is broadly visible across annotated PBMC identities, with room for differences in response strength across cell types. |
 
-Taken together, these checks support a coherent interpretation rather than a single-metric label. The selected R model has enough diagnostic support to interpret cautiously: the chi-square trace reaches a plateau-like region, the snapshot checks show stable top genes for the major patterns, and the posterior uncertainty summaries do not suggest that the IFN-associated pattern is too unstable to use. Those checks do not prove that `K = 6` is universally best. They do support using this selected model to ask the biological questions posed in the case study.
+Taken together, these checks support a coherent interpretation rather than a single-metric label. The full-run and sampling-only traces show changes at two different scales, while the snapshot plot shows high average top-gene overlap during sampling. The posterior summaries describe variability in cell activities and gene weights; they do not provide an overall accuracy score or certify convergence. The biological interpretation therefore rests on the combined gene, cell-type, and donor evidence, not on a claim that every pattern is equally stable or that `K = 6` is universally best.
 
 The first answer is that the model contains more than one kind of latent structure. The IFN-associated pattern is the clearest stimulation-linked signal: in the selected R run it is `Pattern4`, and in the Python saved output it is `Pattern5`. The number changes because CoGAPS pattern labels are run-specific, but the evidence points to the same biological signal: high activity after IFN-beta stimulation, high agreement with an interferon-stimulated gene score, and top genes such as `ISG15`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `OAS1`, and `BST2`. The model also retains immune-cell-linked patterns, including monocyte-linked structure, a dendritic / antigen-presentation-linked pattern, and a T-cell / lymphocyte-linked baseline pattern. That matters because the analysis is not simply rediscovering "stimulated versus control"; it is separating stimulation-associated activity from other structure already present in the PBMC mixture.
 
@@ -1628,8 +1685,8 @@ The second answer is that the stimulation-associated signal is broad, but not id
 
 The third answer is that CoGAPS gene weights and expression direction have to be read together. The top genes for the IFN-associated pattern are strongly consistent with interferon biology, but the weights alone only say that those genes help define the pattern. The pseudobulk directionality summaries add the missing piece: among the top IFN-associated genes, most are higher after IFN-beta stimulation, while an exception such as `FTH1` shows why direction cannot be assumed from the CoGAPS weight. The identity-linked contrast reinforces the same lesson. A dendritic / antigen-presentation-linked pattern can be defined by genes such as `CD74` and HLA class II genes without behaving like the broad IFN-associated stimulation pattern.
 
-The fourth answer is that the IFN-associated pattern varies across annotated PBMC identities in a biologically interpretable way. PBMCs contain T cells, B cells, NK cells, monocytes, dendritic cells, and smaller related populations. The lupus and interferon literature discussed in the context section makes this mixture important: type I interferon biology can connect multiple immune-cell populations through interferon-stimulated genes, antigen presentation, monocyte and dendritic-cell activity, and lymphocyte responses. In this dataset, the controlled IFN-beta stimulation lets you see one part of that biology under an experimental perturbation. The CoGAPS result is consistent with a shared interferon-response program layered on top of immune-cell identity.
+The fourth answer is that the IFN-associated pattern varies across annotated PBMC identities in a biologically interpretable way. PBMCs contain T cells, B cells, NK cells, monocytes, dendritic cells, and smaller related populations. The SLE and interferon literature discussed in the context section makes this mixture important: type I interferon biology can connect multiple immune-cell populations through interferon-stimulated genes, antigen presentation, monocyte and dendritic-cell activity, and lymphocyte responses. In this dataset, the controlled IFN-beta stimulation lets you see one part of that biology under an experimental perturbation. The CoGAPS result is consistent with a shared interferon-response program layered on top of immune-cell identity.
 
-The conclusion is therefore bounded but useful. For this public PBMC perturbation dataset from lupus donors, the selected R `K = 6` sparse CoGAPS model is suitable for interpreting the main case-study question. It recovers a broad IFN-beta-associated pattern, preserves additional immune-cell-linked structure, and links the IFN-associated pattern to both expected interferon-stimulated genes and upward expression direction after stimulation. The result should not be read as a clinical lupus mechanism, a treatment analysis, or proof that the same numbered pattern will appear in every run. It does show that latent-pattern analysis can help separate a shared interferon-response signal from cell identity in a mixed immune-cell system, which is the key analysis skill this case study is designed to teach.
+The conclusion is therefore bounded but useful. For this public PBMC perturbation dataset from donors with SLE, the selected R `K = 6` sparse CoGAPS model is suitable for interpreting the main case-study question. It recovers a broad IFN-beta-associated pattern, preserves additional immune-cell-linked structure, and links the IFN-associated pattern to both expected interferon-stimulated genes and upward expression direction after stimulation. The result should not be read as a clinical SLE mechanism, a treatment analysis, or proof that the same numbered pattern will appear in every run. It does show that latent-pattern analysis can help separate a shared interferon-response signal from cell identity in a mixed immune-cell system, which is the key analysis skill this case study is designed to teach.
 
 ***

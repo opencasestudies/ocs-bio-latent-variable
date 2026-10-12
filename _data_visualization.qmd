@@ -88,6 +88,8 @@ knitr::kable(
 ```{python}
 #| label: visualization-source-tables-python
 #| results: asis
+from scripts.helpers.case_study_display import render_table, show_plot
+
 source_table_dir = "data/processed/figures/source_tables/python"
 
 pattern_condition_source = f"{source_table_dir}/figure_viz_pattern_condition_overview_source.csv"
@@ -141,15 +143,6 @@ viz_source_inventory = pd.DataFrame(
         ],
     }
 )
-
-def render_table(data_frame):
-    """Render a pandas DataFrame as a readable HTML table in Quarto."""
-    return data_frame.to_html(
-        index=False,
-        escape=False,
-        border=0,
-        classes="table table-sm table-striped"
-    )
 
 print(render_table(viz_source_inventory))
 ```
@@ -228,7 +221,7 @@ ax.set_ylabel("")
 ax.set_title("Pattern activity compared with IFN-beta stimulation")
 ax.grid(axis="x", alpha=0.25)
 plt.tight_layout()
-plt.show()
+show_plot(fig, "visualization_pattern_screen.png")
 ```
 
 :::
@@ -403,7 +396,7 @@ axes[1].set_xlabel("UMAP 1")
 axes[1].set_ylabel("UMAP 2")
 axes[1].set_title(f"{pattern_to_map} activity on the PBMC UMAP")
 fig.colorbar(scatter, ax=axes[1], label="Pattern activity")
-plt.show()
+show_plot(fig, "visualization_umap_pattern_activity.png")
 ```
 
 :::
@@ -472,7 +465,7 @@ ax.set_ylabel("Matched donor pair")
 ax.set_title("Donor-paired shifts in IFN-associated activity")
 ax.grid(axis="x", alpha=0.25)
 plt.tight_layout()
-plt.show()
+show_plot(fig, "visualization_paired_donor_activity.png")
 ```
 
 :::
@@ -531,7 +524,7 @@ ax.set_title("IFN-associated activity by PBMC identity")
 ax.legend(frameon=False)
 ax.grid(axis="x", alpha=0.25)
 plt.tight_layout()
-plt.show()
+show_plot(fig, "visualization_ifn_celltype_condition.png")
 ```
 
 :::
@@ -608,7 +601,7 @@ ax.set_xlabel("Annotated PBMC identity")
 ax.set_ylabel("CoGAPS pattern")
 fig.colorbar(im, ax=ax, label="stim - control")
 plt.tight_layout()
-plt.show()
+show_plot(fig, "visualization_pattern_celltype_shift.png")
 ```
 
 :::
@@ -678,7 +671,7 @@ ax.set_ylabel("")
 ax.set_title("Direction of top pattern genes")
 ax.grid(axis="x", alpha=0.25)
 plt.tight_layout()
-plt.show()
+show_plot(fig, "visualization_ifn_top_gene_directionality.png")
 ```
 
 :::
@@ -804,7 +797,7 @@ legend_handles = [
 ]
 fig.legend(handles=legend_handles, loc="lower center", ncol=2, frameon=False)
 plt.tight_layout(rect=[0, 0.1, 1, 0.96])
-plt.show()
+show_plot(fig, "visualization_identity_pattern_directionality.png")
 ```
 
 :::

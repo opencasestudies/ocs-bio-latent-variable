@@ -1,25 +1,35 @@
 # **Limitations**
 ***
 
-Limitations help define how far an interpretation can travel. They do not erase the evidence in a study. Instead, they clarify which questions the data can answer and which conclusions would require more samples, measurements, or analyses.
+This analysis describes a six-hour IFN-beta perturbation in PBMCs from eight donors with SLE. It does not compare patients with healthy controls or establish a clinical mechanism. The following limitations explain how the study design, inherited data preparation and fitted model constrain the conclusions.
 
 ## The experiment captures one acute response
 
-The Kang et al. experiment compared matched control and IFN-beta-stimulated PBMC aliquots from eight lupus donors. The stimulated cells were exposed to IFN-beta for six hours outside the body before single-cell profiling [@kang2018multiplexed]. This {{< glossary "Paired design" display="paired design" >}} provides a controlled view of an acute response because each donor contributes cells to both conditions.
+The Kang et al. experiment compared matched control and IFN-beta-stimulated PBMC aliquots from eight donors with SLE. The stimulated cells were exposed to IFN-beta for six hours outside the body before single-cell profiling [@kang2018multiplexed]. This {{< glossary "Paired design" display="paired design" >}} provides a controlled view of an acute response because each donor contributes cells to both conditions.
 
-The experiment does not show how the response develops across several time points, changes with different exposure conditions, or behaves in tissues outside the blood. The analyzed data also do not include a healthy comparison group, and this case study does not model disease activity, medication history, treatment response, or clinical outcomes. The results therefore cannot establish a chronic lupus mechanism, predict how a patient will respond to therapy, or represent every person with lupus.
+The experiment does not show how the response develops across several time points, changes with different exposure conditions, or behaves in tissues outside the blood. The analyzed data also do not include a healthy comparison group, and this case study does not model disease activity, medication history, treatment response, or clinical outcomes. The results therefore cannot establish a chronic SLE mechanism, predict how a patient will respond to therapy, or represent every person with SLE.
 
 ## The cells come from eight donors
 
 The prepared dataset contains 24,673 cells, but those cells do not represent 24,673 independent people. The main {{< glossary "Experimental unit" display="experimental unit" >}} is the donor. Measuring many cells gives a detailed view of each donor's PBMC mixture, but it does not increase the number of independent donors.
 
-Later donor-paired summaries and donor-aware models preserve this study structure rather than treating every cell as an independent replicate. Even with that protection, eight donors provide limited {{< glossary "Generalizability" display="generalizability" >}}. The study can reveal a response that is consistent within these matched donor samples, but it is not large enough to characterize the full range of lupus heterogeneity or support detailed clinical subgroup comparisons.
+Later donor-paired summaries and donor-aware models preserve this study structure rather than treating every cell as an independent replicate. Even with that protection, eight donors provide limited {{< glossary "Generalizability" display="generalizability" >}}. The study can reveal a response that is consistent within these matched donor samples, but it is not large enough to characterize the full range of SLE heterogeneity or support detailed clinical subgroup comparisons.
 
 ## The prepared dataset defines what the model can learn
 
 The main analysis uses a processed single-cell dataset with 3,000 {{< glossary "Highly variable gene" display="highly variable genes" >}}. Genes outside that selected set cannot contribute to a pattern in the fitted model. Filtering, normalization, log transformation, and variable-gene selection make the analysis tractable, but they also define the expression space available to CoGAPS. A different preprocessing recipe could emphasize somewhat different structure.
 
-The case study also uses the broad immune-cell annotations supplied with the prepared data rather than performing a new cell-annotation or subclustering analysis. Cell types are represented unequally, and smaller groups provide less information than abundant populations. For that reason, activity differences across annotated cell types should be interpreted as evidence within this prepared dataset, not as a complete map of every PBMC subtype or activation state.
+This case study has not tested whether the main findings remain the same with a different retained gene set, such as 5,000 rather than 3,000 highly variable genes. The comparisons of pattern number and random seed shown later do not test this separate preprocessing choice. The reported patterns and gene-set interpretations therefore remain conditional on these retained genes.
+
+## Source annotations and embeddings are inherited
+
+Full reproduction begins with the annotated Kang PBMC object distributed through Figshare and Pertpy, not a reconstruction from the GEO files. Donor labels, cell-type labels, and PCA and UMAP coordinates are inherited from that object. The exact upstream cell-selection and annotation methods, embedding settings, and conversion steps are **not yet known**; the [source-object provenance table](#what-is-inherited-from-the-source-object) separates these questions from the verified distribution and file identity.
+
+Use the supplied cell-type labels as groups for interpreting the analysis, not as annotations independently validated by this lesson. We do not perform new cell annotation or subclustering. Cell types are represented unequally, and smaller groups provide less information than abundant populations. For that reason, activity differences across annotated cell types should be interpreted as evidence within this prepared dataset, not as a complete map of every PBMC subtype or activation state.
+
+The PCA and UMAP coordinates are not recalculated during local preprocessing or learned by CoGAPS. When you view pattern activity on UMAP, you are placing the model's results on an inherited layout. A visually coherent map does not by itself validate the supplied labels or the fitted model.
+
+The supplied object contains **24,673 cells**, whereas the paper reports **24,305 singlets** for the IFN-beta experiment [@kang2018multiplexed]. The reason for these **368 additional cells** is **not yet known**. Local preprocessing filters genes and retains the supplied cells, so it does not explain the difference. Do not assume that this object contains exactly the paper's reported singlet set.
 
 ## Model resolution is a choice, not a biological constant
 
@@ -39,6 +49,6 @@ CoGAPS patterns are inferred signals, not directly observed cell types, pathways
 
 A {{< glossary "Gene weight" display="gene weight" >}} shows how strongly a gene helps define a pattern, but it does not show whether that gene is higher or lower after stimulation. The case study therefore uses a separate, donor-aware directionality analysis for selected pattern genes. That analysis is targeted rather than genome-wide, and cell-type-specific directionality summaries remain descriptive unless they are tested with a sufficiently powered donor-aware interaction model. These checks support careful pattern interpretation, but they do not establish that a pattern causes a biological response.
 
-Within these boundaries, the case study can ask whether a selected latent-pattern model separates stimulation-associated activity from immune-cell-linked structure in this prepared eight-donor PBMC dataset. It cannot determine the true number of biological programs in all patients, identify every IFN-responsive gene, establish a clinical lupus mechanism, or show how the response changes across tissues, exposure conditions, or time.
+Within these boundaries, the case study can ask whether a selected latent-pattern model separates stimulation-associated activity from immune-cell-linked structure in this prepared eight-donor PBMC dataset. It cannot determine the true number of biological programs in all patients, identify every IFN-responsive gene, establish a clinical SLE mechanism, or show how the response changes across tissues, exposure conditions, or time.
 
 ***

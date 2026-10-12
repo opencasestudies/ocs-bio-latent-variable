@@ -1,0 +1,34 @@
+PYTHON | result: AnnData | SAVED-OBJECT CONTENTS
+File: cogaps_K6_seed2_iter2000.h5ad
+Orientation: 3,000 genes in obs x 24,673 cells in var (not cells x genes).
+TOP-LEVEL CONTENTS
+  X                        Dataset [3,000 x 24,673]          stored expression: genes x cells
+  obs                      DataFrame [3,000 x 6]             genes; 6 Pattern columns (A)
+  var                      DataFrame [24,673 x 6]            cells; 6 Pattern columns (P)
+  layers["counts"]         csr_matrix [3,000 x 24,673]       stored counts
+  varm["X_pca"]            ndarray [24,673 x 30]             cell PCA coordinates
+  varm["X_umap"]           ndarray [24,673 x 2]              cell UMAP coordinates
+  uns                      dict [19 entries]                 uncertainty, diagnostics, run info
+  obsm, obsp, varp         empty mappings
+INSIDE uns (all 19 entries)
+  asd                        DataFrame [3,000 x 6]        posterior SD of gene weights
+  atomhistoryA               ndarray [4]                  saved A atom counts
+  atomhistoryP               ndarray [4]                  saved P atom counts
+  averageQueueLengthA        float64 [scalar]             A queue summary
+  averageQueueLengthP        float64 [scalar]             P queue summary
+  chisqHistory               ndarray [4]                  saved chi-square trace
+  equilibrationSnapshotsA    ndarray [0] (empty)          no A snapshots saved: equilibration
+  equilibrationSnapshotsP    ndarray [0] (empty)          no P snapshots saved: equilibration
+  hvg                        dict [1 entry]               inherited feature-selection metadata
+  log1p                      dict [0 entries] (empty)     inherited transformation field
+  meanChiSq                  float64 [scalar]             mean chi-square summary
+  meanPatternAssignment      ndarray [0 x 0] (empty)      no assignment summary saved
+  psd                        DataFrame [24,673 x 6]       posterior SD of cell activities
+  pumpMatrix                 ndarray [0 x 0] (empty)      no pump matrix saved
+  samplingSnapshotsA         ndarray [0] (empty)          no A snapshots saved: sampling
+  samplingSnapshotsP         ndarray [0] (empty)          no P snapshots saved: sampling
+  seed                       int64 [scalar]               internal value 0; run record says 2*
+  totalRunningTime           int64 [scalar]               runtime summary
+  totalUpdates               int64 [scalar]               update count
+* Seed conflict is unresolved. Read-only inspection; neither record was changed.
+Empty fields contain no diagnostic evidence; cell annotations are supplied separately.

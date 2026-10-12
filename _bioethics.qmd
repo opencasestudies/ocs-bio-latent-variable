@@ -25,7 +25,7 @@ Privacy protection also applies when you create new files. Share only the detail
 
 Poor data quality can lead to misleading conclusions about people or groups. In this case study, filtering, normalization, highly variable gene selection, broad cell-type annotations, donor labels, and condition labels all shape what CoGAPS can learn. Errors or undocumented decisions at any of these steps can be carried into the final patterns.
 
-That is why the analysis checks the prepared data, preserves donor pairing, documents preprocessing, examines model diagnostics, and keeps expression direction separate from CoGAPS gene weights. These are not only technical habits. They reduce the risk of presenting a computational artifact as biological evidence. Unequal cell-type representation and a cohort of eight lupus donors also mean that the results should not be generalized to every person with lupus or every immune-cell population.
+That is why the analysis checks the prepared data, preserves donor pairing, documents preprocessing, examines model diagnostics, and keeps expression direction separate from CoGAPS gene weights. These are not only technical habits. They reduce the risk of presenting a computational artifact as biological evidence. Unequal cell-type representation and a cohort of eight donors with SLE also mean that the results should not be generalized to every person with SLE or every immune-cell population.
 
 ## A latent pattern is not a diagnosis or a mechanism
 
@@ -48,6 +48,6 @@ Before sharing a derivative file, figure, or conclusion from human molecular dat
 1. **What does the model output actually measure?** Are you distinguishing inferred pattern activity from clinical status, causal mechanism, or participant identity?
 1. **Who could be harmed by an overclaim?** Could the result stigmatize a group, expose private information, or be misused for clinical decisions that the data cannot support?
 
-For this case study, a responsible conclusion stays close to the experiment: the analysis examines expression patterns in matched control and six-hour IFN-beta-stimulated PBMC samples from eight coded lupus donors. It does not identify participants, diagnose lupus, rank donors, predict treatment response, or justify clinical decisions. Responsible reuse means preserving that boundary while giving credit to the people and research team who made the data available.
+For this case study, a responsible conclusion stays close to the experiment: the analysis examines expression patterns in matched control and six-hour IFN-beta-stimulated PBMC samples from eight coded donors with SLE. It does not identify participants, diagnose SLE, rank donors, predict treatment response, or justify clinical decisions. Responsible reuse means preserving that boundary while giving credit to the people and research team who made the data available.
 
 ***

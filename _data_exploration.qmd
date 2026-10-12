@@ -103,7 +103,7 @@ print(render_table(exploration_structure))
 
 :::
 
-This confirms the working scale of the case study: 24,673 cells and 3,000 highly variable genes. The 3,000-gene subset keeps the analysis manageable while preserving genes that vary enough across cells to be informative. You will revisit how that prepared matrix was created in **Data Wrangling**. For exploration, the important point is that the prepared cell-level metadata and UMAP coordinates are present.
+This confirms the working scale of the case study: 24,673 cells and 3,000 highly variable genes (HVGs). The 3,000-gene subset is a practical choice for this teaching analysis, not a CoGAPS requirement; it can exclude biologically relevant genes. You will revisit how and why that prepared matrix was created in **Data Wrangling**. For exploration, the important point is that the prepared cell-level metadata and UMAP coordinates are present.
 
 ## Inspect The Cell Metadata
 
@@ -387,6 +387,8 @@ This table is reassuring for the main perturbation question. Each annotated cell
 
 The same comparison is easier to read as a plot. Each bar shows how many cells of one annotated PBMC type came from the control or stimulated aliquot.
 
+If you are using Python in the Terminal, this first plotting chunk saves `learner_outputs/python/exploration_celltype_condition_counts.png`. Open that file through RStudio's Files pane, as described in [Python output instructions](#python-terminal-output). Use the filename in the final `show_plot()` line to find your saved plot, then compare it with the example below.
+
 ::: {.panel-tabset}
 
 ### R
@@ -446,7 +448,7 @@ ax.set_xlabel("Number of cells")
 ax.set_title("PBMC cell types are represented in both conditions")
 ax.legend(title="Condition")
 plt.tight_layout()
-plt.show()
+show_plot(fig, "exploration_celltype_condition_counts.png")
 ```
 
 :::
@@ -549,7 +551,7 @@ ax.legend(
     frameon=False,
 )
 plt.tight_layout()
-plt.show()
+show_plot(fig, "exploration_cell_identity_umap.png")
 ```
 
 :::
@@ -559,10 +561,6 @@ This plot gives you two things to carry forward. First, several annotated cell t
 ## Preview The CoGAPS Output Structure
 
 The selected-model files include CoGAPS outputs, but the numbered patterns are still just labels. Before interpreting any one pattern, inspect what the output tables represent.
-
-::: {.aside}
-**Draft note:** In the full reproduction section, explain how the lightweight selected-model tables used here are created from the full R and Python CoGAPS outputs. Include enough detail for learners to understand how gene-weight tables, cell-activity tables, pattern summaries, top-gene tables, and metadata-joined activity tables are exported from a fitted model without rerunning the whole analysis in the main learner path.
-:::
 
 CoGAPS stores two linked views of each {{< glossary "Latent pattern" display="latent pattern" >}}:
 
@@ -662,6 +660,115 @@ print(render_table(selected_output_structure))
 :::
 
 This is the bridge from data exploration to model interpretation. The prepared PBMC data tell you what each cell is and where it came from. The CoGAPS tables tell you how learned patterns connect genes and cells. Later sections combine both views: a pattern will be interpreted by checking its cell activities, top genes, directionality, and diagnostic support.
+
+::: {#saved-object-overviews}
+
+**Connect the matrices to the included files**
+
+The core path uses compact exports. The full saved result also contains uncertainty estimates and information about the model run. The four matrices below connect those contents to files you can inspect without loading the full result.
+
+:::: {#object-export-reference style="overflow-wrap: anywhere;"}
+
+| Matrix | What one entry represents | Numeric dimensions | Compact R export |
+|---|---|---|---|
+| `A` | Mean gene weight for one gene in one pattern | 3,000 genes by 6 patterns | `pattern_gene_weights.tsv.gz` |
+| `P` | Mean cell activity for one cell in one pattern | 24,673 cells by 6 patterns | `pattern_cell_activities.tsv.gz` |
+| `A_sd` | Posterior standard deviation of one gene weight | 3,000 by 6 | `pattern_gene_weight_sd.tsv.gz` |
+| `P_sd` | Posterior standard deviation of one cell activity | 24,673 by 6 | `pattern_cell_activity_sd.tsv.gz` |
+
+::::
+
+All four files are included in `data/processed/selected_model_k6/r/`. The parallel `data/processed/selected_model_k6/python/` folder contains the two mean-matrix files under the same names. Python's SD matrices are stored in its optional full result, not in separate compact SD files. Each exported table has an additional `gene` or `cell_barcode` identifier column; that column is not part of the six-pattern numeric matrix.
+
+Here, `P` follows the software/export orientation: cells by patterns. The mathematical equation in Context writes it as patterns by cells. These are transposed views of the same kind of quantity, not different definitions of activity. Use identifiers, not row position alone, when connecting matrices to annotations.
+
+The posterior standard deviation (SD) describes uncertainty in an estimated weight or activity, not expression variation across cells or a measure of biological importance. Each SD entry corresponds to the same gene or cell and pattern as its mean entry. The later diagnostic section considers these uncertainties alongside the biological evidence.
+
+**Optional: look inside the saved objects**
+
+Choose your language below to see what its full saved result contains. No full-object download or new model fit is needed to continue. The screenshots show custom, read-only inspection summaries from the saved files, not the packages' default print output. `fit` and `result` are example names for the full R and Python objects; they are not additional objects you must create in the core path. The script paths visible in the screenshots belong to the capture session, not a command you need to run.
+
+Read each line as a component name, its storage type and size, and a short description. A matrix or data frame has rows and columns; a list or dictionary holds named components; a scalar is one value. Empty fields contain no stored entries. Start with the mean and SD matrices, then look at the diagnostics and run information.
+
+:::: {.panel-tabset}
+
+### R
+
+The saved `.rds` file contains a `CogapsResult`. Its named components are called **slots**. The first four slots hold the mean and SD matrices; the `metadata` slot holds a nested list of diagnostics and run information.
+
+![Contents of the selected saved R result, inspected without fitting a model. The summary shows component names and dimensions rather than thousands of matrix entries.](assets/object_overviews/r_object_overview.jpg){#fig-r-saved-object width="100%" fig-alt="RStudio Console inventory of seven CogapsResult slots and sixteen metadata entries. Gene-weight means and SDs are 3000 by 6; cell-activity means and SDs are 24673 by 6. Metadata includes forty-point histories, ten snapshots per matrix per phase, model parameters and version. A text inventory follows the image."}
+
+[Open the R image at full size](assets/object_overviews/r_object_overview.jpg) or [read the complete R inventory as selectable text](assets/object_overviews/r_object_overview.txt).
+
+- **Fitted matrices:** `featureLoadings` is `A`, and `sampleFactors` is the cells-by-patterns `P`. `loadingStdDev` and `factorStdDev` hold their corresponding posterior SDs. These are the sources of the four compact R exports above.
+- **Optional containers:** `factorData` has six rows but no metadata columns, and `NAMES` is `NULL` in this saved result. These empty slots do not mean that the fitted matrices lack gene or cell identifiers.
+- **Run diagnostics:** inside `metadata`, `chisq`, `atomsA`, and `atomsP` each have 40 recorded values. They describe changes during the run, not 40 cells or patterns. The chi-square trace tracks reconstruction fit; atom counts describe the algorithm's internal representation. `meanChiSq` is a single summary rather than a trace.
+- **Snapshots:** each of the four snapshot lists holds ten saved matrix states, covering gene weights (`A`) and cell activities (`P`) in equilibration and sampling. They support later checks of changes during the run. Having traces and snapshots does not establish convergence.
+- **Other run information:** `params` stores the model settings, and `version` records CoGAPS 3.22.0. Runtime, update-count, and queue summaries describe computation. `pumpStat` and `meanPatternAssignment` are additional stored summaries; this learner path does not use them to assign biological names to patterns.
+
+Here, **metadata means information about the model run**, not donor, condition, or cell-type labels. This R object does not contain the input expression matrix or those cell annotations. The export workflow combines its fitted matrices with the prepared PBMC data to create the metadata-joined activities, top-gene lists, and biological summary tables used in the lesson.
+
+<div id="r-cogaps-call-illustration">
+
+The shortened example below shows how the R fitting script creates a result of this kind. In that script, `data_matrix` contains the prepared, normalized and log-transformed expression values, with 3,000 genes in rows and 24,673 cells in columns. It is a placeholder here, not an additional object you need to create. No extra setup or download is needed to read this example.
+
+**Illustration only: do not run this code in the learner path.**
+
+```{r}
+#| label: illustration-selected-r-cogaps-call
+#| eval: false
+params <- CoGAPS::CogapsParams(
+  nPatterns = 6,
+  nIterations = 2000,
+  seed = 2,
+  sparseOptimization = TRUE
+)
+
+set.seed(2)
+fit <- CoGAPS::CoGAPS(
+  data_matrix,
+  params,
+  nThreads = 4,
+  asynchronousUpdates = TRUE
+)
+```
+
+`CogapsParams()` creates the settings, not the fitted model. Here, `nPatterns = 6` specifies six patterns, and `nIterations = 2000` means 2,000 equilibration iterations followed by 2,000 sampling iterations. The parameter `seed = 2` sets the CoGAPS seed; `set.seed(2)` also sets R's random-number seed, as in the full script. `sparseOptimization = TRUE` enables sparse optimization. These are the selected teaching run's settings, not general recommendations for other datasets.
+
+The `CoGAPS()` call would fit the supplied matrix and return a `CogapsResult` named `fit`. Four threads and asynchronous updates match the selected R run's computational settings. This excerpt omits input loading, diagnostic collection, checkpoints, and saving the result, so it is not the complete reproduction command. [Stage 3 of the Full Reproduction Guide](#stage-3-fit-the-selected-r-cogaps-model) provides the complete launcher, `scripts/reproduction/run_selected_model_r.sh`, for readers deliberately choosing to fit a model. For the main learner path, continue with the included saved tables below.
+
+</div>
+
+### Python
+
+The saved `.h5ad` result is an `AnnData` object, but its orientation differs from the prepared single-cell object used earlier: **genes are in `obs`, and cells are in `var`**. Read the labels and dimensions before deciding what a row represents. This saved result contains both fitted outputs and retained input information.
+
+![Contents of the selected saved Python result, with genes in obs and cells in var. Populated uncertainty matrices and empty diagnostic fields are distinguished; the seed-record discrepancy remains unresolved.](assets/object_overviews/python_object_overview.jpg){#fig-python-saved-object width="100%" fig-alt="RStudio Terminal inventory of a 3000-gene by 24673-cell AnnData result. Means are in obs and var; SDs are in uns asd and psd. Counts and embeddings are retained. Histories have four points; snapshot, pump and assignment fields are empty. Internal seed zero conflicts with run-record seed two. A text inventory follows the image."}
+
+[Open the Python image at full size](assets/object_overviews/python_object_overview.jpg) or [read the complete Python inventory as selectable text](assets/object_overviews/python_object_overview.txt).
+
+- **Fitted matrices:** the six pattern columns in `obs` hold gene weights (`A`); those in `var` hold cell activities (`P`). Gene and cell identifiers are their row labels. The `uns` dictionary holds the matching SD matrices as `asd` and `psd`. Their presence here does not mean separate compact Python SD files are included.
+- **Expression and counts:** `X` retains the expression matrix, while `layers["counts"]` retains counts on the same gene-by-cell axes. The screenshot calls `X` a `Dataset` because the file was opened read-only with disk-backed access. This storage choice does not change its meaning or orientation.
+- **Embeddings and preprocessing fields:** `varm["X_pca"]` and `varm["X_umap"]` contain inherited cell coordinates, not new CoGAPS embeddings. `uns["hvg"]` and `uns["log1p"]` retain preprocessing fields. The empty `log1p` dictionary alone does not tell you whether expression was transformed; consult the preprocessing record.
+- **Run diagnostics and information:** `chisqHistory`, `atomhistoryA`, and `atomhistoryP` each contain four recorded values in this file. `meanChiSq`, runtime, update-count, and queue fields are single summaries. This file does not provide the same detailed diagnostic record as the selected R result.
+- **Empty fields:** the four snapshot arrays, `pumpMatrix`, and `meanPatternAssignment` contain no entries. The auxiliary `obsm`, `obsp`, and `varp` mappings are also empty. In particular, an empty diagnostic field does not mean a matrix of zero estimates or evidence that a model is stable.
+
+The Python result's `var` table contains pattern activities but not donor, condition, or cell-type columns. As in R, the export workflow joins those annotations from the prepared PBMC data. Top-gene lists, condition comparisons, and biological pattern summaries are derived afterward; they are not biological labels supplied by the fitted object.
+
+::::: {.disclaimer_box}
+:::::: {.disclaimer_box_header}
+Unresolved seed-record discrepancy
+::::::
+:::::: {.inner_block}
+This saved Python object's `uns["seed"]` is `0`, while its filename and accompanying run-metrics file record seed `2`. The cause is not yet known, so the internal field should not be treated as a verified account of the seed used for fitting. Neither record has been changed. You can continue inspecting the included saved outputs, but this discrepancy limits exact run provenance until it is resolved.
+::::::
+:::::
+
+::::
+
+You do not need to memorize every stored field. Before continuing, distinguish the fitted mean matrices, their uncertainty, the saved diagnostics, and the annotations added from the prepared data. Pattern numbers remain specific to each fitted run; shared dimensions do not establish that an R pattern and a Python pattern represent the same biology.
+
+:::
 
 The pattern summary table has several columns that are useful as a first-pass guide. The next small dictionary explains how to read those columns without treating any one metric as a final answer.
 

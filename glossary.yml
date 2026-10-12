@@ -73,7 +73,7 @@ IFNAR: |
 IFN-associated pattern: |
   A learned CoGAPS pattern whose cell activities and top genes are consistent with an interferon response; the numbered pattern label can differ by run.
 Immune complex: |
-  A structure formed when antibodies bind to molecules they recognize; in lupus, immune complexes can include self-derived material and can stimulate immune signaling.
+  A structure formed when antibodies bind to molecules they recognize; in SLE, immune complexes can include self-derived material and can stimulate immune signaling.
 Immune-cell identity: |
   The immune-cell type or lineage a cell most resembles, such as a T cell, B cell, monocyte, natural killer cell, or dendritic cell.
 Interferon: |
@@ -105,7 +105,7 @@ Monocyte: |
 Natural killer cell: |
   An immune cell type involved in cytotoxic responses against infected or abnormal cells.
 Neutrophil extracellular trap: |
-  A web-like structure released by neutrophils that can contain DNA and proteins; in lupus biology, these can contribute nucleic-acid material that stimulates interferon pathways.
+  A web-like structure released by neutrophils that can contain DNA and proteins; in SLE biology, these can contribute nucleic-acid material that stimulates interferon pathways.
 Non-negative matrix factorization: |
   A matrix-factorization approach that represents a non-negative data matrix using additive, non-negative patterns and activities.
 Paired design: |

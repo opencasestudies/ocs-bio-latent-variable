@@ -111,6 +111,9 @@ jobs:
     needs: yaml-check
     runs-on: ubuntu-latest
     if: ${{needs.yaml-check.outputs.toggle_readability == 'true'}}
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - name: Checkout repo
@@ -121,7 +124,7 @@ jobs:
       - name: Readability report
         uses: Rebilly/lexi@v2
         with:
-          github-token: ${{ secrets.GH_PAT }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           glob: '**/*.md'
 
 ############################# Render Preview ###################################

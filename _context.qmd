@@ -1,11 +1,7 @@
 # **Context**
 ***
 
-The Motivation section introduced the biological puzzle for this case study: a mixed population of blood immune cells is exposed to {{< glossary "IFN-beta" display="IFN-beta" >}}, and the resulting single-cell data contain both immune-cell identity and stimulation-response information. This Context section gives you the background needed to read those signals carefully.
-
-The section has two jobs. First, it gives a short immunology primer: what systemic lupus erythematosus is, why interferon biology is relevant, why PBMCs are useful but mixed, and what the Kang et al. source study measured. Second, it introduces the modeling frame: why clustering alone is not enough for this question, how latent patterns and non-negative matrix factorization work, and how CoGAPS turns a genes-by-cells matrix into evidence you can interpret later.
-
-By the end of this section, you should be ready to enter Data Import with a map in mind. You will know what biological signals the literature suggests you might see, what the source study already established, and why later sections focus on pattern activity, gene weights, directionality, rank choice, and diagnostics.
+To interpret the patterns, you need to connect the experimental design, immune-cell biology, and the model's outputs. This section develops that background, starting with SLE, interferon signaling, and the PBMC mixture, then explaining the Kang study and how CoGAPS represents gene expression as combinations of patterns.
 
 ## What is systemic lupus erythematosus?
 
@@ -13,19 +9,19 @@ By the end of this section, you should be ready to enter Data Import with a map 
 
 The word **systemic** matters. SLE is not limited to one tissue or one immune-cell type. A person with SLE can have immune signals in blood that relate to inflammation elsewhere in the body. That is one reason blood immune-cell data are useful for teaching this case study: PBMCs are accessible, contain multiple immune-cell populations, and can carry molecular evidence of immune activation.
 
-SLE is also heterogeneous. Two people with the same diagnosis may have different symptoms, affected tissues, autoantibodies, treatment histories, and immune-cell composition. That heterogeneity is part of what makes lupus difficult to study. It also explains why this case study will avoid overclaiming. We are not trying to diagnose SLE, predict disease activity, or prove a clinical mechanism. We are using a lupus PBMC perturbation dataset to learn how an interpretable interferon-associated signal can be separated from immune-cell identity in single-cell RNA-seq data.
+SLE is also heterogeneous. Two people with the same diagnosis may have different symptoms, affected tissues, autoantibodies, treatment histories, and immune-cell composition. That heterogeneity is part of what makes SLE difficult to study. It also explains why this case study will avoid overclaiming. We are not trying to diagnose SLE, predict disease activity, or prove a clinical mechanism. We are using a PBMC perturbation dataset from donors with SLE to learn how an interpretable interferon-associated signal can be separated from immune-cell identity in single-cell RNA-seq data.
 
-## Interferon-beta and its role in lupus
+## Interferon-beta and its role in SLE {#interferon-beta-and-its-role-in-lupus}
 
 {{< glossary "Interferon" display="Interferons" >}} are cytokines: signaling proteins that help immune cells coordinate responses to infection, tissue damage, and other danger signals. {{< glossary "Type I interferon" display="Type I interferons" >}} include IFN-alpha, IFN-beta, IFN-omega, IFN-epsilon, and IFN-kappa [@chyuan2019interferons]. This case study focuses on IFN-beta because IFN-beta is the controlled stimulation used in the source dataset.
 
-A useful way to understand interferon signaling is to follow the signal from outside the cell to the genome. Type I interferons bind the type I interferon receptor, also called {{< glossary "IFNAR" display="IFNAR" >}}. That receptor activates the {{< glossary "JAK-STAT signaling" display="JAK-STAT signaling" >}} pathway, including JAK1, TYK2, STAT1, STAT2, and IRF9. These proteins help turn on many {{< glossary "Interferon-stimulated gene" display="interferon-stimulated genes" >}}, often abbreviated ISGs [@chyuan2019interferons]. In plain language, interferon signaling can leave a recognizable gene-expression footprint.
+A useful way to understand interferon signaling is to follow how a signal at the cell surface changes gene transcription. Type I interferons bind the type I interferon receptor, also called {{< glossary "IFNAR" display="IFNAR" >}}. That receptor activates the {{< glossary "JAK-STAT signaling" display="JAK-STAT signaling" >}} pathway, including JAK1, TYK2, STAT1, STAT2, and IRF9. These proteins help turn on many {{< glossary "Interferon-stimulated gene" display="interferon-stimulated genes" >}}, often abbreviated ISGs [@chyuan2019interferons]. In plain language, interferon signaling can leave a recognizable gene-expression footprint.
 
-In lupus, this footprint is often called an {{< glossary "Interferon gene signature" display="interferon gene signature" >}}. Several lupus studies have reported interferon-associated gene-expression signatures in blood, PBMCs, purified immune-cell populations, and affected tissues [@chyuan2019interferons; @catalina2019interferonSLE]. Catalina and colleagues found that interferon signatures in SLE datasets can include prominent IFNB1-like signatures and can be strongly related to monocyte-associated transcripts [@catalina2019interferonSLE]. That observation is important for this case study because it points to a recurring interpretive issue: an interferon signal may be broad, but it may also vary by cell type.
+In SLE, this footprint is often called an {{< glossary "Interferon gene signature" display="interferon gene signature" >}}. Several SLE studies have reported interferon-associated gene-expression signatures in blood, PBMCs, purified immune-cell populations, and affected tissues [@chyuan2019interferons; @catalina2019interferonSLE]. Catalina and colleagues found that interferon signatures in SLE datasets can include prominent IFNB1-like signatures and can be strongly related to monocyte-associated transcripts [@catalina2019interferonSLE]. That observation is important for this case study because it points to a recurring interpretive issue: an interferon signal may be broad, but it may also vary by cell type.
 
-The immune-cell players are worth naming. {{< glossary "Plasmacytoid dendritic cell" display="Plasmacytoid dendritic cells" >}} are known for producing large amounts of type I interferon in response to nucleic-acid sensing. Monocytes and macrophages can participate in inflammatory responses and antigen presentation. Dendritic cells can help connect innate sensing to T-cell and B-cell responses. B cells can contribute to antibody responses, including autoantibody-related processes. T cells help coordinate or carry out adaptive immune responses. Natural killer cells contribute to cytotoxic responses. Neutrophils can release neutrophil extracellular traps, which may provide nucleic-acid material that stimulates interferon pathways in lupus [@chyuan2019interferons].
+Several immune-cell populations contribute to interferon signaling and its downstream effects. {{< glossary "Plasmacytoid dendritic cell" display="Plasmacytoid dendritic cells" >}} are known for producing large amounts of type I interferon in response to nucleic-acid sensing. Monocytes and macrophages can participate in inflammatory responses and antigen presentation. Dendritic cells can help connect innate sensing to T-cell and B-cell responses. B cells can contribute to antibody responses, including autoantibody-related processes. T cells help coordinate or carry out adaptive immune responses. Natural killer cells contribute to cytotoxic responses. Neutrophils can release neutrophil extracellular traps, which may provide nucleic-acid material that stimulates interferon pathways in SLE [@chyuan2019interferons].
 
-The main idea is not that every cell type does the same thing. The main idea is that interferon biology connects several immune-cell populations. That makes it plausible that a single-cell analysis could contain both a shared interferon-response signal and cell-type-linked structure at the same time.
+These populations need not respond identically. Their interactions make it plausible to observe both shared interferon-associated activity and cell-type-linked expression structure.
 
 ## PBMCs as a mixed immune-cell system
 
@@ -47,7 +43,7 @@ No single metadata label captures all of these layers. A cell-type label tells y
 
 The source study for this case study is Kang et al. 2018, which introduced demuxlet and used multiplexed droplet single-cell RNA-seq to study PBMC responses to IFN-beta [@kang2018multiplexed]. The original paper's main methodological contribution was demuxlet: a computational approach that uses natural genetic variation to assign each droplet to a donor and detect droplets that likely contain cells from more than one person.
 
-The IFN-beta part of that study used PBMCs from eight lupus patients. For each donor, the researchers split PBMCs into two matched portions, or {{< glossary "Aliquot" display="aliquots" >}}. One aliquot was left untreated as a control. The other was stimulated with recombinant IFN-beta for six hours. After stimulation, cells were pooled by condition and profiled using droplet single-cell RNA-seq [@kang2018multiplexed].
+The IFN-beta part of that study used PBMCs from eight donors with SLE. For each donor, the researchers split PBMCs into two matched portions, or {{< glossary "Aliquot" display="aliquots" >}}. One aliquot was left untreated as a control. The other was stimulated with recombinant IFN-beta for six hours. After stimulation, cells were pooled by condition and profiled using droplet single-cell RNA-seq [@kang2018multiplexed].
 
 That design has two features that matter for the rest of the case study.
 
@@ -57,7 +53,7 @@ Second, it is a {{< glossary "Paired design" display="paired design" >}}. Contro
 
 Kang et al. also used {{< glossary "Demultiplexing" display="demultiplexing" >}} and {{< glossary "Doublet" display="doublet" >}} detection. In droplet single-cell RNA-seq, a droplet ideally contains RNA from one cell. A doublet occurs when material from two cells is captured together and treated as one observation. Demuxlet helped assign cells back to donors and remove likely doublets, improving confidence that later summaries reflected singlet cells rather than mixed droplets [@kang2018multiplexed].
 
-The exact files and teaching data objects used in this case study are described in the next section, **What are the data?** Here, the important source-study point is conceptual: the dataset was designed to compare matched control and IFN-beta-stimulated PBMCs from lupus donors while retaining single-cell and cell-type information.
+The exact files and teaching data objects used in this case study are described in the next section, **What are the data?** Here, the important source-study point is conceptual: the dataset was designed to compare matched control and IFN-beta-stimulated PBMCs from donors with SLE while retaining single-cell and cell-type information.
 
 ## Source-study findings to carry forward
 
@@ -67,7 +63,7 @@ Several source-study findings should guide your expectations before you see the 
 
 - IFN-beta stimulation produced broad transcriptional changes across PBMCs.
 - The source study identified thousands of genes with differential expression in at least one cell type after IFN-beta stimulation [@kang2018multiplexed].
-- The IFN-beta response included antiviral, chemokine, and lupus-related pathway signals.
+- The IFN-beta response included antiviral, chemokine, and SLE-related pathway signals.
 - IFN-beta stimulation did not erase cell identity. The original analysis still recovered major immune-cell groups after stimulation.
 - Cell-type composition and donor-to-donor variation both mattered, which is why the case study keeps cell type and donor metadata visible.
 
@@ -120,6 +116,8 @@ A stimulated monocyte carries at least two interpretable signals: it still has m
 
 Single-cell RNA-seq data can be organized as a matrix. In this case study, the modeling input is a genes-by-cells matrix. Each row represents a gene, each column represents a cell, and each entry is a non-negative expression value.
 
+Here, an expression value is a nonnegative, library-size-normalized and log-transformed RNA measurement for one gene in one cell. It is not the original molecule count. The prepared dataset keeps the original counts for the retained genes in a separate `counts` layer for later expression-direction comparisons.
+
 {{< glossary "Non-negative matrix factorization" display="Non-negative matrix factorization" >}}, or NMF, asks whether a large non-negative matrix can be approximated as the product of two smaller non-negative matrices. At the intuition level:
 
 ```text
@@ -153,7 +151,7 @@ NMF is not magic. It does not know biology by itself. It produces matrices that 
 
 ## How CoGAPS extends vanilla NMF
 
-{{< glossary "CoGAPS" display="CoGAPS" >}} is the NMF-family method used in this case study. The name stands for Coordinated Gene Activity in Pattern Sets. CoGAPS was introduced as an R/C++ package for identifying patterns and biological process activity in transcriptomic data [@fertig2010cogaps]. Later single-cell CoGAPS work extended this latent-pattern framework to sparse single-cell RNA-seq data [@steinobrien2019transferLearning]. The official [CoGAPS User Guide](https://fertiglab.github.io/CoGAPSGuide/){target="_blank"} introduces the method and software workflows for R and Python users.
+{{< glossary "CoGAPS" display="CoGAPS" >}} is the NMF-family method used in this case study. The name stands for Coordinated Gene Activity in Pattern Sets. CoGAPS was introduced as an R/C++ package for identifying patterns and biological process activity in transcriptomic data [@fertig2010cogaps]. Later single-cell CoGAPS work extended this latent-pattern framework to sparse single-cell RNA-seq data [@steinobrien2019transferLearning]. A later workflow paper describes CoGAPS analysis in R, Python, and GenePattern Notebook [@johnson2023cogapsWorkflow]. The official [CoGAPS User Guide](https://fertiglab.github.io/CoGAPSGuide/){target="_blank"} introduces the method and software workflows for R and Python users.
 
 :::: {.columns}
 ::: {.column width="22%"}
@@ -177,6 +175,8 @@ You do not need to understand every sampling detail to use the case study. The l
 1. **Diagnostics matter.** A biologically tempting pattern still needs evidence that the model ran sensibly and that the interpretation is stable enough to use.
 
 The case study uses the R/Bioconductor CoGAPS workflow as the primary implementation. Python/PyCoGAPS-compatible outputs are provided as a secondary implementation path in later tabbed examples. That implementation detail matters for reproducibility, but the interpretation frame is the same: connect pattern activity, gene weights, source-study design, and biological expectations.
+
+PatternMarkers uses a gene's weights across patterns to identify associations with particular patterns [@steinobrien2017patternMarkers]. This differs from ranking genes only by their weight within one pattern. The top-gene lists in this case study rank saved CoGAPS gene weights; they are not PatternMarkers results.
 
 ## What choosing `K` means
 
@@ -221,7 +221,7 @@ These evidence types are intentionally separate. A pattern can have plausible ge
 
 ## Interpretive boundaries before analysis
 
-The Context section should give you expectations, not conclusions. The source data come from lupus donors, but the main analysis studies an in vitro IFN-beta stimulation response. The case study does not test a lupus therapy, predict patient outcomes, or prove a disease mechanism. Those limitations are discussed more fully later.
+The Context section should give you expectations, not conclusions. The source data come from donors with SLE, but the main analysis studies an in vitro IFN-beta stimulation response. The case study does not test an SLE therapy, predict patient outcomes, or prove a disease mechanism. Those limitations are discussed more fully later.
 
 For now, carry forward a narrower and more useful question: can a latent-pattern model help separate a broad interferon-response signal from immune-cell identity in a mixed PBMC single-cell dataset?
 

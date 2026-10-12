@@ -1,0 +1,31 @@
+R | fit: CogapsResult | SAVED-OBJECT CONTENTS
+File: cogaps_K6_seed2_iter2000.rds
+Read-only inspection; no model fitting
+TOP-LEVEL COMPONENTS (all 7 slots)
+  featureLoadings        matrix [3,000 x 6]                    gene weights (A)
+  sampleFactors          matrix [24,673 x 6]                   cell activities (P)
+  loadingStdDev          matrix [3,000 x 6]                    posterior SD of A
+  factorStdDev           matrix [24,673 x 6]                   posterior SD of P
+  factorData             DFrame [6 x 0] (no metadata columns)  pattern metadata container
+  NAMES                  NULL (empty)                          optional names slot
+  metadata               list [16 entries]                     diagnostics and run information
+INSIDE metadata (all 16 entries)
+  meanChiSq                  numeric [scalar]            mean chi-square summary
+  chisq                      numeric [40 values]         saved chi-square trace
+  atomsA                     numeric [40 values]         saved A atom counts
+  atomsP                     numeric [40 values]         saved P atom counts
+  pumpStat                   matrix [3,000 x 6]          stored pump statistic
+  meanPatternAssignment      matrix [3,000 x 6]          stored assignment summary
+  averageQueueLengthA        numeric [scalar]            A queue summary
+  averageQueueLengthP        numeric [scalar]            P queue summary
+  totalUpdates               numeric [scalar]            update count
+  totalRunningTime           numeric [scalar]            runtime summary
+  equilibrationSnapshotsA    list [10 entries]           saved A snapshots: equilibration
+  equilibrationSnapshotsP    list [10 entries]           saved P snapshots: equilibration
+  samplingSnapshotsA         list [10 entries]           saved A snapshots: sampling
+  samplingSnapshotsP         list [10 entries]           saved P snapshots: sampling
+  params                     CogapsParams [26 slots]     saved model parameters
+  version                    version 3.22.0              recorded CoGAPS version
+
+Posterior SDs describe uncertainty in fitted weights and activities.
+Input expression and cell annotations are separate; biological summaries are derived later.
