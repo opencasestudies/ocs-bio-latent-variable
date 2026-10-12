@@ -183,14 +183,16 @@ gtag('config', 'G-TPVRZESY0B', { 'anonymize_ip': true});
   <li><a href="#r09-rank-choice-and-optional-code-explanations" id="toc-r09-rank-choice-and-optional-code-explanations" class="nav-link" data-scroll-target="#r09-rank-choice-and-optional-code-explanations">R09: Rank Choice and Optional Code Explanations</a></li>
   <li><a href="#r10-contents-of-the-saved-objects" id="toc-r10-contents-of-the-saved-objects" class="nav-link" data-scroll-target="#r10-contents-of-the-saved-objects">R10: Contents of the Saved Objects</a></li>
   <li><a href="#r11-motivation-and-opening-explanation" id="toc-r11-motivation-and-opening-explanation" class="nav-link" data-scroll-target="#r11-motivation-and-opening-explanation">R11: Motivation and Opening Explanation</a></li>
+  <li><a href="#r12-method-comparison-and-optional-metadata-views" id="toc-r12-method-comparison-and-optional-metadata-views" class="nav-link" data-scroll-target="#r12-method-comparison-and-optional-metadata-views">R12: Method Comparison and Optional Metadata Views</a></li>
   <li><a href="#ai-attribution" id="toc-ai-attribution" class="nav-link" data-scroll-target="#ai-attribution">AI Attribution</a></li>
   </ul></li>
   <li><a href="#validation" id="toc-validation" class="nav-link" data-scroll-target="#validation">Validation</a>
   <ul class="collapse">
+  <li><a href="#r12-validation" id="toc-r12-validation" class="nav-link" data-scroll-target="#r12-validation">R12 Validation</a></li>
   <li><a href="#pr-preparation-local-only-rstudio-access" id="toc-pr-preparation-local-only-rstudio-access" class="nav-link" data-scroll-target="#pr-preparation-local-only-rstudio-access">PR Preparation: Local-Only RStudio Access</a></li>
   <li><a href="#pr-check-maintenance" id="toc-pr-check-maintenance" class="nav-link" data-scroll-target="#pr-check-maintenance">PR Check Maintenance</a></li>
   </ul></li>
-  <li><a href="#not-resolved-by-this-pr" id="toc-not-resolved-by-this-pr" class="nav-link" data-scroll-target="#not-resolved-by-this-pr">Not Resolved by This PR</a></li>
+  <li><a href="#outside-the-completed-revisions" id="toc-outside-the-completed-revisions" class="nav-link" data-scroll-target="#outside-the-completed-revisions">Outside the Completed Revisions</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -207,11 +209,11 @@ gtag('config', 'G-TPVRZESY0B', { 'anonymize_ip': true});
 
 <section id="reviewer-revision-record" class="level1">
 <h1>Reviewer Revision Record</h1>
-<p>Updated: 2026-10-07</p>
+<p>Updated: 2026-10-12</p>
 <section id="scope" class="level2">
 <h2 class="anchored" data-anchor-id="scope">Scope</h2>
-<p>This record covers the approved revisions through R11, including the Python display repair and AI attribution. The identifiers refer to the project’s revision plan, not issue numbers assigned by reviewers. It summarizes the changes and their disposition without reproducing private review correspondence.</p>
-<p>This is an interim review checkpoint, not a declaration that the case study is ready for scientific release. R12 and later revisions are not included. In particular, the downstream expression-normalization correction in R13/F1 remains outstanding.</p>
+<p>This record covers the approved revisions through R12, including the Python display repair and AI attribution. The identifiers refer to the project’s revision plan, not issue numbers assigned by reviewers. It summarizes the changes and their disposition without reproducing private review correspondence.</p>
+<p>This is an interim review checkpoint, not a declaration that the case study is ready for scientific release. Revisions after R12 are not included. In particular, the downstream expression-normalization correction in R13/F1 remains outstanding.</p>
 <p>The selected model is unchanged: R CoGAPS, six patterns, seed 2, 2,000 iterations per phase, and sparse optimization. The selected R IFN-associated label is Pattern4; the parallel Python output uses Pattern5. Pattern numbers are run-specific. No CoGAPS model was refitted for these revisions.</p>
 </section>
 <section id="changes-and-reviewer-responses" class="level2">
@@ -289,6 +291,14 @@ gtag('config', 'G-TPVRZESY0B', { 'anonymize_ip': true});
 <p>Clarified that self nucleic acids discussed in the text are not explicitly labeled in the reproduced SLE pathway diagram. Kept its artwork and attribution unchanged and moved the redraw note out of the learner page. This adapts the missing-label concern; it does not add labels to the artwork. The pathway adaptation and opening-image internal-title decisions remain separate.</p>
 <p><strong>Files:</strong> <code>_motivation.qmd</code>, <code>_context.qmd</code>.</p>
 </section>
+<section id="r12-method-comparison-and-optional-metadata-views" class="level3">
+<h3 class="anchored" data-anchor-id="r12-method-comparison-and-optional-metadata-views">R12: Method Comparison and Optional Metadata Views</h3>
+<p><strong>Responds to:</strong> Ryan’s R02 and R08 recommendations.</p>
+<p>Added a short Context comparison of UMAP, PCA, and CoGAPS. It distinguishes a two-dimensional cell display, signed PCA loadings and scores, and nonnegative CoGAPS weights and activities. Biological interpretation is not automatic for either factorization, and no new benchmark or superiority claim is made.</p>
+<p>Preserved the main cell-type UMAP and added separate, closed optional condition and donor views with R/Python code. The condition panels use identical coordinates and scales, each highlighting one condition against all cells. The interpretation explains that sharing a neighborhood does not imply an equivalent expression state or absence of a stimulation response.</p>
+<p>The donor view retains all eight inherited labels, uses categorical colors, and gives each donor’s cell count. The text explains unequal cell contributions and the display-only shuffled drawing order. The caution about inherited coordinates, batch effects, and distances remains visible even when the donor foldout is closed. Both views reuse existing coordinates and included learner data; neither supplies a hidden prerequisite for later core code. No embedding or CoGAPS model was fitted.</p>
+<p><strong>Files:</strong> <code>_context.qmd</code>, <code>_data_exploration.qmd</code>, four generated plot PNGs, and the generated site. The existing spelling dictionary adds only <code>loadings</code>.</p>
+</section>
 <section id="ai-attribution" class="level3">
 <h3 class="anchored" data-anchor-id="ai-attribution">AI Attribution</h3>
 <p><strong>Requested by:</strong> the author.</p>
@@ -298,11 +308,24 @@ gtag('config', 'G-TPVRZESY0B', { 'anonymize_ip': true});
 </section>
 <section id="validation" class="level2">
 <h2 class="anchored" data-anchor-id="validation">Validation</h2>
+<section id="r12-validation" class="level3">
+<h3 class="anchored" data-anchor-id="r12-validation">R12 Validation</h3>
+<p>The R12 submission is separate from the earlier R01-R11 changes. Its checks cover the actual learner plotting chunks, not only a separate preview script:</p>
+<ul>
+<li>Both language versions retain all 24,673 cells and their exact coordinates, identifiers, condition labels, and donor labels. Condition totals remain 12,315 control and 12,358 stimulated cells; all eight donors include both conditions.</li>
+<li>Plot-layer checks verify cell membership, coordinates, colors, axis scaling, legends, and point sizes. Eight invalid condition inputs and ten invalid donor inputs are rejected per language. Donor drawing-order randomization leaves the original data and global random-number state unchanged.</li>
+<li>The Python Terminal helper saves the new plots. The R donor test image matches the approved preview exactly. The generated PNGs were visually inspected.</li>
+<li>All 53 executable Python learner chunks run in a clean copy, producing 12 nonblank PNGs and readable Terminal tables without display warnings. The disabled reproduction chunk remains skipped.</li>
+<li>A clean learner copy renders all 231 case-study steps in runtime 0.3.1 without optional full-model or source files. Spelling checks pass with no changed thresholds or exclusions.</li>
+<li>All 79 existing scientific tables and the original 24 scientific PNGs remain unchanged. Four metadata-view PNGs are added. The foldouts start closed, contain both language tabs, and link to the inherited-source provenance note.</li>
+</ul>
+<p>These checks do not constitute a new interactive desktop/mobile browser test or a scientific release approval. Broader technical-covariate and provenance questions remain separate from these descriptive views.</p>
+</section>
 <section id="pr-preparation-local-only-rstudio-access" class="level3">
 <h3 class="anchored" data-anchor-id="pr-preparation-local-only-rstudio-access">PR Preparation: Local-Only RStudio Access</h3>
 <p>During PR review, the author approved restricting both Docker launch examples and the alternate-port troubleshooting example to <code>127.0.0.1</code>. RStudio remains available at the same localhost URL, but the published example credentials are not exposed through all host interfaces. This is a setup safety correction, not R12 or an analysis change.</p>
 <p><strong>Files:</strong> <code>_packages.qmd</code>, <code>_full_reproduction_guide.qmd</code>.</p>
-<p>Each checkpoint was rendered and checked locally. For this PR, validation uses the documented Docker runtime and does not fit CoGAPS models or download the optional full model files.</p>
+<p>Each checkpoint was rendered and checked locally. The following checks were performed for the earlier R01-R11 submission using the documented Docker runtime, without fitting CoGAPS models or downloading optional full model files.</p>
 <ul>
 <li>36 Python reproduction-script unit tests pass.</li>
 <li>27 R trace-reconstruction checks pass, including missing/mismatched metadata.</li>
@@ -325,10 +348,9 @@ gtag('config', 'G-TPVRZESY0B', { 'anonymize_ip': true});
 <p><strong>Files:</strong> <code>resources/dictionary.txt</code>, <code>_data_description.qmd</code>, <code>.github/workflows/pull_request.yml</code>.</p>
 </section>
 </section>
-<section id="not-resolved-by-this-pr" class="level2">
-<h2 class="anchored" data-anchor-id="not-resolved-by-this-pr">Not Resolved by This PR</h2>
+<section id="outside-the-completed-revisions" class="level2">
+<h2 class="anchored" data-anchor-id="outside-the-completed-revisions">Outside the Completed Revisions</h2>
 <ul>
-<li><strong>R12:</strong> the UMAP/PCA explanation and additional metadata views have not started.</li>
 <li><strong>R13/F1:</strong> directionality still uses the 3,000-HVG denominator. Its normalization and affected scientific interpretations require correction before final release.</li>
 <li><strong>F3:</strong> upstream cell filtering, annotations, embedding settings, and the cell-count discrepancy are not resolved by distributing an identified source object.</li>
 <li><strong>Python seed provenance:</strong> the saved object’s internal seed is 0 while its filename/run record says 2. The discrepancy is disclosed, not silently fixed.</li>

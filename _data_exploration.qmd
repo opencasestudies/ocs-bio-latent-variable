@@ -558,6 +558,327 @@ show_plot(fig, "exploration_cell_identity_umap.png")
 
 This plot gives you two things to carry forward. First, several annotated cell types occupy distinct neighborhoods, which means immune-cell identity is a strong part of the data structure. Second, the plot does not tell you which CoGAPS pattern is stimulation-associated. Later visualizations will return to these same cells and coordinates, but will recolor them by pattern activity rather than by cell type.
 
+<details id="condition-umap-view">
+<summary>Where are control and stimulated cells on this map?</summary>
+
+Do control and stimulated cells occupy different regions, or are both conditions represented in the same broad neighborhoods? The cell-type map above provides the reference. Here, you will keep the cell positions fixed and highlight the experimental condition instead.
+
+Each panel shows all 24,673 cells in faint gray, then highlights only the cells from one condition. The left panel highlights 12,315 control cells; the right highlights 12,358 cells from the six-hour IFN-beta culture. These are different cells in a shared display, not the same cells measured before and after stimulation. Both panels use the same axis limits, equal axis scaling, and point sizes.
+
+::: {.panel-tabset}
+
+### R
+
+The checks confirm that `umap_data_r` still contains every cell and has complete condition labels and coordinates. `select()` creates a background table without a condition column, so `facet_wrap()` repeats all cells in both panels. The second `geom_point()` layer highlights only the condition named in each panel; `coord_equal()` keeps the axes comparable.
+
+```{r}
+#| label: exploration-condition-umap-r
+#| fig-width: 11.4
+#| fig-height: 7
+#| fig-alt: "Two panels of the same inherited UMAP. The left highlights 12,315 control cells in blue-gray and the right highlights 12,358 IFN-beta-stimulated cells in coral. Both have all 24,673 cells in faint gray; highlighted cells occupy many of the same broad neighborhoods."
+stopifnot(
+  nrow(umap_data_r) == 24673L,
+  !anyNA(umap_data_r$cell_barcode),
+  !anyDuplicated(umap_data_r$cell_barcode),
+  !anyNA(umap_data_r$condition),
+  setequal(as.character(umap_data_r$condition), c("ctrl", "stim")),
+  all(is.finite(umap_data_r$UMAP1)),
+  all(is.finite(umap_data_r$UMAP2)),
+  sum(umap_data_r$condition == "ctrl") == 12315L,
+  sum(umap_data_r$condition == "stim") == 12358L
+)
+
+condition_umap_r <- umap_data_r |>
+  dplyr::mutate(condition = factor(condition, levels = c("ctrl", "stim")))
+condition_background_r <- condition_umap_r |>
+  dplyr::select(UMAP1, UMAP2)
+condition_panel_labels_r <- c(
+  ctrl = "Control\n12,315 cells highlighted",
+  stim = "IFN-beta, 6 hours\n12,358 cells highlighted"
+)
+
+condition_umap_plot_r <- ggplot(condition_umap_r, aes(UMAP1, UMAP2)) +
+  geom_point(
+    data = condition_background_r,
+    color = "#D6DADD", alpha = 0.6, size = 0.45, stroke = 0
+  ) +
+  geom_point(aes(color = condition), alpha = 0.8, size = 0.45, stroke = 0) +
+  facet_wrap(
+    vars(condition), nrow = 1, scales = "fixed",
+    labeller = as_labeller(condition_panel_labels_r)
+  ) +
+  scale_color_manual(values = c(ctrl = "#64748B", stim = "#E76F51"), guide = "none") +
+  coord_equal(xlim = range(condition_umap_r$UMAP1), ylim = range(condition_umap_r$UMAP2)) +
+  labs(
+    title = "Control and stimulated cells on the same UMAP",
+    subtitle = "Each panel highlights one condition against a faint background of all cells.",
+    x = "UMAP 1", y = "UMAP 2",
+    caption = "Gray background: all 24,673 cells. Both panels use the same inherited coordinates and axis scales."
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "#C6CBCF", linewidth = 0.35),
+    axis.ticks = element_line(color = "#C6CBCF", linewidth = 0.35),
+    axis.text = element_text(color = "#46515C", size = 11),
+    strip.text = element_text(face = "bold", size = 14, margin = margin(b = 12)),
+    panel.spacing = grid::unit(1.1, "cm"),
+    plot.title = element_text(face = "bold", size = 19, margin = margin(b = 8)),
+    plot.subtitle = element_text(color = "#46515C", size = 12, margin = margin(b = 16)),
+    plot.caption = element_text(color = "#46515C", size = 10, hjust = 0, margin = margin(t = 14)),
+    plot.title.position = "plot",
+    plot.caption.position = "plot",
+    plot.margin = margin(16, 20, 14, 14)
+  )
+condition_umap_plot_r
+```
+
+### Python
+
+The checks confirm that `umap_data` still contains every cell and has complete condition labels and coordinates. `plt.subplots()` creates panels with shared axes. Inside the loop, the first `scatter()` draws all cells in gray; the second draws only the selected condition. `set_aspect("equal")` keeps one unit the same length on both axes. In a Python Terminal session, the final `show_plot()` call saves `learner_outputs/python/exploration_condition_umap.png`.
+
+```{python}
+#| label: exploration-condition-umap-python
+#| fig-width: 11.4
+#| fig-height: 7
+#| fig-alt: "Two panels of the same inherited UMAP. The left highlights 12,315 control cells in blue-gray and the right highlights 12,358 IFN-beta-stimulated cells in coral. Both have all 24,673 cells in faint gray; highlighted cells occupy many of the same broad neighborhoods."
+assert len(umap_data) == 24673
+assert umap_data["cell_barcode"].notna().all()
+assert umap_data["cell_barcode"].is_unique
+assert umap_data["condition"].notna().all()
+assert set(umap_data["condition"]) == {"ctrl", "stim"}
+assert np.isfinite(umap_data[["UMAP1", "UMAP2"]].to_numpy()).all()
+assert umap_data["condition"].value_counts().to_dict() == {"ctrl": 12315, "stim": 12358}
+
+condition_xlim = (umap_data["UMAP1"].min(), umap_data["UMAP1"].max())
+condition_ylim = (umap_data["UMAP2"].min(), umap_data["UMAP2"].max())
+condition_xpad = (condition_xlim[1] - condition_xlim[0]) * 0.05
+condition_ypad = (condition_ylim[1] - condition_ylim[0]) * 0.05
+condition_panels = [
+    ("ctrl", "Control", "#64748B"),
+    ("stim", "IFN-beta, 6 hours", "#E76F51"),
+]
+
+condition_fig, condition_axes = plt.subplots(1, 2, figsize=(11.4, 7), sharex=True, sharey=True)
+for ax, (condition, label, color) in zip(condition_axes, condition_panels):
+    subset = umap_data.loc[umap_data["condition"] == condition]
+    ax.scatter(
+        umap_data["UMAP1"], umap_data["UMAP2"],
+        s=1.6, color="#D6DADD", alpha=0.6, linewidths=0,
+    )
+    ax.scatter(subset["UMAP1"], subset["UMAP2"], s=1.6, color=color, alpha=0.8, linewidths=0)
+    ax.set_xlim(condition_xlim[0] - condition_xpad, condition_xlim[1] + condition_xpad)
+    ax.set_ylim(condition_ylim[0] - condition_ypad, condition_ylim[1] + condition_ypad)
+    ax.set_aspect("equal", adjustable="box")
+    ax.set_title(f"{label}\n{len(subset):,} cells highlighted", fontsize=14, fontweight="bold", pad=14)
+    ax.grid(False)
+    ax.spines[["top", "right"]].set_visible(False)
+    for spine in ["left", "bottom"]:
+        ax.spines[spine].set_color("#C6CBCF")
+    ax.tick_params(labelsize=11, labelcolor="#46515C", color="#C6CBCF")
+
+condition_axes[0].set_ylabel("UMAP 2", fontsize=13)
+condition_fig.supxlabel("UMAP 1", fontsize=13, y=0.09)
+condition_fig.suptitle(
+    "Control and stimulated cells on the same UMAP",
+    fontsize=19, fontweight="bold", x=0.06, y=0.98, ha="left",
+)
+condition_fig.text(
+    0.06, 0.91, "Each panel highlights one condition against a faint background of all cells.",
+    fontsize=12, color="#46515C",
+)
+condition_fig.text(
+    0.06, 0.035,
+    "Gray background: all 24,673 cells. Both panels use the same inherited coordinates and axis scales.",
+    fontsize=10, color="#46515C",
+)
+condition_fig.subplots_adjust(left=0.08, right=0.98, bottom=0.15, top=0.78, wspace=0.14)
+show_plot(condition_fig, "exploration_condition_umap.png")
+```
+
+:::
+
+Control and stimulated cells occupy many of the same neighborhoods in this inherited UMAP. Sharing a neighborhood does not mean sharing the same expression state: cells can retain cell-type-associated features while responding to interferon. Later, you will inspect CoGAPS activities and matched-donor comparisons to evaluate that response.
+
+The coordinates are [inherited from the supplied dataset](#what-is-inherited-from-the-source-object), not recalculated here. Similar-looking panels do not establish equivalent gene expression or an absence of stimulation effects. Separation or mixing is not a test for the presence or absence of batch effects, and distances between groups are not biological effect sizes.
+
+</details>
+
+<details id="donor-umap-view">
+<summary>Where are the donors on this map?</summary>
+
+Do the broad cell neighborhoods contain cells from several donors, or are some regions dominated by one donor label? Keep the cell positions fixed and use color to locate the eight donors. This view includes both conditions for every donor; it does not compare each donor's response to stimulation.
+
+The `replicate` column contains the [inherited donor labels](#what-is-inherited-from-the-source-object). The legend keeps those labels and gives each donor's total cell count. All 24,673 cells are included, so donors with more cells contribute more points. The counts are not equalized. The drawing order is shuffled so one whole donor group is not consistently drawn over the others.
+
+::: {.panel-tabset}
+
+### R
+
+The checks confirm complete cell identifiers, donor and condition labels, and coordinates. `table()` counts cells for the legend and checks that every donor has both conditions. `withr::with_seed()` shuffles only the drawing order, without changing the random-number state used elsewhere. The seed of 12 here is a display choice, not the CoGAPS model seed. `scale_color_manual()` assigns one color to each donor label.
+
+```{r}
+#| label: exploration-donor-umap-r
+#| fig-width: 10.8
+#| fig-height: 8
+#| fig-alt: "Inherited UMAP of all 24,673 cells, colored by eight donor labels. Both conditions are included for each donor. Several donor colors occur within many broad neighborhoods, with uneven representation in some regions. The legend lists each donor's total cell count. Mixing or separation does not establish the presence or absence of batch effects."
+stopifnot(
+  nrow(umap_data_r) == 24673L,
+  !anyNA(umap_data_r$cell_barcode),
+  !anyDuplicated(umap_data_r$cell_barcode),
+  !anyNA(umap_data_r$replicate),
+  all(nzchar(as.character(umap_data_r$replicate))),
+  length(unique(umap_data_r$replicate)) == 8L,
+  !anyNA(umap_data_r$condition),
+  setequal(as.character(umap_data_r$condition), c("ctrl", "stim")),
+  sum(umap_data_r$condition == "ctrl") == 12315L,
+  sum(umap_data_r$condition == "stim") == 12358L,
+  all(is.finite(umap_data_r$UMAP1)),
+  all(is.finite(umap_data_r$UMAP2))
+)
+
+donor_labels_r <- sort(unique(as.character(umap_data_r$replicate)))
+donor_umap_r <- umap_data_r |>
+  dplyr::mutate(donor = factor(replicate, levels = donor_labels_r))
+donor_counts_r <- table(donor_umap_r$donor)
+stopifnot(all(table(donor_umap_r$donor, donor_umap_r$condition) > 0L))
+donor_colors_r <- setNames(c(
+  "#1B9E77", "#D95F02", "#7570B3", "#E7298A",
+  "#66A61E", "#E6AB02", "#A6761D", "#666666"
+), donor_labels_r)
+donor_legend_r <- paste0(
+  donor_labels_r, "  (n = ", format(as.integer(donor_counts_r), big.mark = ","), ")"
+)
+donor_order_r <- withr::with_seed(12, sample.int(nrow(donor_umap_r)))
+donor_plot_data_r <- donor_umap_r[donor_order_r, ]
+donor_caution_r <- paste(
+  "These coordinates are inherited from the supplied dataset.",
+  "Donor separation or mixing in this display does not establish the presence or absence of a batch effect.",
+  "Distances between groups should not be interpreted as biological effect sizes.",
+  sep = "\n"
+)
+
+donor_umap_plot_r <- ggplot(donor_plot_data_r, aes(UMAP1, UMAP2, color = donor)) +
+  geom_point(size = 0.45, alpha = 0.85, stroke = 0) +
+  scale_color_manual(values = donor_colors_r, breaks = donor_labels_r, labels = donor_legend_r, drop = FALSE) +
+  coord_equal(xlim = range(donor_umap_r$UMAP1), ylim = range(donor_umap_r$UMAP2)) +
+  labs(
+    title = "Donor labels on the inherited UMAP",
+    subtitle = "All 24,673 cells; both control and IFN-beta-stimulated cells are included.",
+    x = "UMAP 1", y = "UMAP 2", color = "Donor label (cell count)",
+    caption = donor_caution_r
+  ) +
+  guides(color = guide_legend(override.aes = list(size = 3.6, alpha = 1))) +
+  theme_minimal(base_size = 13) +
+  theme(
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "#C6CBCF", linewidth = 0.35),
+    axis.ticks = element_line(color = "#C6CBCF", linewidth = 0.35),
+    axis.text = element_text(color = "#46515C", size = 11),
+    legend.position = "right",
+    legend.title = element_text(face = "bold", size = 11),
+    legend.text = element_text(size = 11),
+    legend.key.height = grid::unit(0.6, "cm"),
+    plot.title = element_text(face = "bold", size = 19, margin = margin(b = 8)),
+    plot.subtitle = element_text(color = "#46515C", size = 12, margin = margin(b = 14)),
+    plot.caption = element_text(color = "#46515C", size = 10, hjust = 0, margin = margin(t = 14)),
+    plot.title.position = "plot", plot.caption.position = "plot",
+    plot.margin = margin(16, 20, 14, 14)
+  )
+donor_umap_plot_r
+```
+
+### Python
+
+The checks confirm complete cell identifiers, donor and condition labels, and coordinates. `pd.crosstab()` counts cells for each donor and condition. `sample()` shuffles only the drawing order; its `random_state=12` is a display choice, not the CoGAPS model seed. One `scatter()` call draws the shuffled cells with their assigned colors, and `Line2D()` supplies the matching legend symbols. In a Python Terminal session, `show_plot()` saves `learner_outputs/python/exploration_donor_umap.png`.
+
+```{python}
+#| label: exploration-donor-umap-python
+#| fig-width: 10.8
+#| fig-height: 8
+#| fig-alt: "Inherited UMAP of all 24,673 cells, colored by eight donor labels. Both conditions are included for each donor. Several donor colors occur within many broad neighborhoods, with uneven representation in some regions. The legend lists each donor's total cell count. Mixing or separation does not establish the presence or absence of batch effects."
+from matplotlib.lines import Line2D
+
+assert len(umap_data) == 24673
+assert umap_data["cell_barcode"].notna().all() and umap_data["cell_barcode"].is_unique
+assert umap_data["replicate"].notna().all()
+assert umap_data["replicate"].astype(str).str.len().gt(0).all()
+assert umap_data["replicate"].nunique() == 8
+assert umap_data["condition"].notna().all()
+assert umap_data["condition"].value_counts().to_dict() == {"ctrl": 12315, "stim": 12358}
+assert np.isfinite(umap_data[["UMAP1", "UMAP2"]].to_numpy()).all()
+
+donor_umap = umap_data.copy()
+donor_umap["donor"] = donor_umap["replicate"].astype(str)
+donor_labels = sorted(donor_umap["donor"].unique())
+donor_counts = donor_umap["donor"].value_counts().reindex(donor_labels)
+assert (pd.crosstab(donor_umap["donor"], donor_umap["condition"]) > 0).all().all()
+donor_colors = dict(zip(donor_labels, [
+    "#1B9E77", "#D95F02", "#7570B3", "#E7298A",
+    "#66A61E", "#E6AB02", "#A6761D", "#666666",
+]))
+donor_plot_data = donor_umap.sample(frac=1, random_state=12)
+
+donor_fig, donor_ax = plt.subplots(figsize=(10.8, 8))
+donor_ax.scatter(
+    donor_plot_data["UMAP1"], donor_plot_data["UMAP2"],
+    c=[donor_colors[label] for label in donor_plot_data["donor"]],
+    s=1.6, alpha=0.85, linewidths=0,
+)
+donor_xrange = (donor_umap["UMAP1"].min(), donor_umap["UMAP1"].max())
+donor_yrange = (donor_umap["UMAP2"].min(), donor_umap["UMAP2"].max())
+donor_xpad = (donor_xrange[1] - donor_xrange[0]) * 0.05
+donor_ypad = (donor_yrange[1] - donor_yrange[0]) * 0.05
+donor_ax.set_xlim(donor_xrange[0] - donor_xpad, donor_xrange[1] + donor_xpad)
+donor_ax.set_ylim(donor_yrange[0] - donor_ypad, donor_yrange[1] + donor_ypad)
+donor_ax.set_aspect("equal", adjustable="box")
+donor_ax.set_xlabel("UMAP 1", fontsize=13)
+donor_ax.set_ylabel("UMAP 2", fontsize=13)
+donor_ax.spines[["top", "right"]].set_visible(False)
+for donor_spine in ["left", "bottom"]:
+    donor_ax.spines[donor_spine].set_color("#C6CBCF")
+donor_ax.tick_params(labelsize=11, labelcolor="#46515C", color="#C6CBCF")
+donor_ax.grid(False)
+donor_legend = [
+    Line2D([], [], marker="o", linestyle="none", color=donor_colors[label],
+           markersize=7, label=f"{label}  (n = {donor_counts[label]:,})")
+    for label in donor_labels
+]
+donor_ax.legend(
+    handles=donor_legend, title="Donor label (cell count)",
+    loc="center left", bbox_to_anchor=(1.02, 0.5), frameon=False,
+    fontsize=11, title_fontsize=11, labelspacing=0.7,
+)
+donor_fig.suptitle("Donor labels on the inherited UMAP", x=0.06, y=0.98, ha="left", fontsize=19, fontweight="bold")
+donor_fig.text(
+    0.06, 0.925, "All 24,673 cells; both control and IFN-beta-stimulated cells are included.",
+    fontsize=12, color="#46515C",
+)
+donor_caution = (
+    "These coordinates are inherited from the supplied dataset.\n"
+    "Donor separation or mixing in this display does not establish the presence or absence of a batch effect.\n"
+    "Distances between groups should not be interpreted as biological effect sizes."
+)
+donor_fig.text(0.06, 0.03, donor_caution, fontsize=10, color="#46515C", linespacing=1.4)
+donor_fig.subplots_adjust(left=0.09, right=0.69, bottom=0.17, top=0.87)
+show_plot(donor_fig, "exploration_donor_umap.png")
+```
+
+:::
+
+Several donor colors occur within many of the broad neighborhoods, with uneven representation in some regions. This helps you locate donors on the map; it does not explain why a region contains more cells from one donor. Keep the different donor totals in mind when comparing the colors. Later, matched-donor comparisons will use each donor's control and stimulated cells to assess changes in pattern activity.
+
+</details>
+
+::: {#donor-umap-caution .disclaimer_box}
+:::: {.disclaimer_box_header}
+Interpreting the donor map
+::::
+:::: {.inner_block}
+These coordinates are inherited from the supplied dataset. Donor separation or mixing in this display does not establish the presence or absence of a batch effect. Distances between groups should not be interpreted as biological effect sizes.
+::::
+:::
+
 ## Preview The CoGAPS Output Structure
 
 The selected-model files include CoGAPS outputs, but the numbered patterns are still just labels. Before interpreting any one pattern, inspect what the output tables represent.

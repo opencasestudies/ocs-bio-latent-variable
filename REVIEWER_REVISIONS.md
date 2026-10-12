@@ -1,16 +1,16 @@
 # Reviewer Revision Record
 
-Updated: 2026-10-07
+Updated: 2026-10-12
 
 ## Scope
 
-This record covers the approved revisions through R11, including the Python
+This record covers the approved revisions through R12, including the Python
 display repair and AI attribution. The identifiers refer to the project's
 revision plan, not issue numbers assigned by reviewers. It summarizes the
 changes and their disposition without reproducing private review correspondence.
 
 This is an interim review checkpoint, not a declaration that the case study is
-ready for scientific release. R12 and later revisions are not included. In
+ready for scientific release. Revisions after R12 are not included. In
 particular, the downstream expression-normalization correction in R13/F1
 remains outstanding.
 
@@ -197,6 +197,32 @@ adaptation and opening-image internal-title decisions remain separate.
 
 **Files:** `_motivation.qmd`, `_context.qmd`.
 
+### R12: Method Comparison and Optional Metadata Views
+
+**Responds to:** Ryan's R02 and R08 recommendations.
+
+Added a short Context comparison of UMAP, PCA, and CoGAPS. It distinguishes a
+two-dimensional cell display, signed PCA loadings and scores, and nonnegative
+CoGAPS weights and activities. Biological interpretation is not automatic for
+either factorization, and no new benchmark or superiority claim is made.
+
+Preserved the main cell-type UMAP and added separate, closed optional condition
+and donor views with R/Python code. The condition panels use identical
+coordinates and scales, each highlighting one condition against all cells.
+The interpretation explains that sharing a neighborhood does not imply an
+equivalent expression state or absence of a stimulation response.
+
+The donor view retains all eight inherited labels, uses categorical colors,
+and gives each donor's cell count. The text explains unequal cell contributions
+and the display-only shuffled drawing order. The caution about inherited
+coordinates, batch effects, and distances remains visible even when the donor
+foldout is closed. Both views reuse existing coordinates and included learner
+data; neither supplies a hidden prerequisite for later core code. No embedding
+or CoGAPS model was fitted.
+
+**Files:** `_context.qmd`, `_data_exploration.qmd`, four generated plot PNGs,
+and the generated site. The existing spelling dictionary adds only `loadings`.
+
 ### AI Attribution
 
 **Requested by:** the author.
@@ -209,6 +235,36 @@ for illustrations and code rather than earlier narrative drafts.
 
 ## Validation
 
+### R12 Validation
+
+The R12 submission is separate from the earlier R01-R11 changes. Its checks
+cover the actual learner plotting chunks, not only a separate preview script:
+
+- Both language versions retain all 24,673 cells and their exact coordinates,
+  identifiers, condition labels, and donor labels. Condition totals remain
+  12,315 control and 12,358 stimulated cells; all eight donors include both
+  conditions.
+- Plot-layer checks verify cell membership, coordinates, colors, axis scaling,
+  legends, and point sizes. Eight invalid condition inputs and ten invalid donor
+  inputs are rejected per language. Donor drawing-order randomization leaves
+  the original data and global random-number state unchanged.
+- The Python Terminal helper saves the new plots. The R donor test image
+  matches the approved preview exactly. The generated PNGs were visually
+  inspected.
+- All 53 executable Python learner chunks run in a clean copy, producing 12
+  nonblank PNGs and readable Terminal tables without display warnings. The
+  disabled reproduction chunk remains skipped.
+- A clean learner copy renders all 231 case-study steps in runtime 0.3.1
+  without optional full-model or source files. Spelling checks pass with no
+  changed thresholds or exclusions.
+- All 79 existing scientific tables and the original 24 scientific PNGs remain
+  unchanged. Four metadata-view PNGs are added. The foldouts start closed,
+  contain both language tabs, and link to the inherited-source provenance note.
+
+These checks do not constitute a new interactive desktop/mobile browser test
+or a scientific release approval. Broader technical-covariate and provenance
+questions remain separate from these descriptive views.
+
 ### PR Preparation: Local-Only RStudio Access
 
 During PR review, the author approved restricting both Docker launch examples
@@ -219,9 +275,9 @@ R12 or an analysis change.
 
 **Files:** `_packages.qmd`, `_full_reproduction_guide.qmd`.
 
-Each checkpoint was rendered and checked locally. For this PR, validation uses
-the documented Docker runtime and does not fit CoGAPS models or download the
-optional full model files.
+Each checkpoint was rendered and checked locally. The following checks were
+performed for the earlier R01-R11 submission using the documented Docker
+runtime, without fitting CoGAPS models or downloading optional full model files.
 
 - 36 Python reproduction-script unit tests pass.
 - 27 R trace-reconstruction checks pass, including missing/mismatched metadata.
@@ -269,9 +325,8 @@ was changed. Both checks remain enabled with their existing settings.
 **Files:** `resources/dictionary.txt`, `_data_description.qmd`,
 `.github/workflows/pull_request.yml`.
 
-## Not Resolved by This PR
+## Outside the Completed Revisions
 
-- **R12:** the UMAP/PCA explanation and additional metadata views have not started.
 - **R13/F1:** directionality still uses the 3,000-HVG denominator. Its normalization
   and affected scientific interpretations require correction before final release.
 - **F3:** upstream cell filtering, annotations, embedding settings, and the cell-count

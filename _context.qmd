@@ -99,6 +99,8 @@ The difficult part is that a single cell can express both kinds of programs. A m
 
 A {{< glossary "Latent pattern" display="latent pattern" >}} is an inferred signal learned from the expression matrix. It is not a metadata column recorded by the experiment. A useful latent pattern might be identity-like, stimulation-associated, donor-linked, technical, or mixed. The analysis task is not simply to name every pattern. The task is to evaluate each pattern using evidence.
 
+UMAP, principal component analysis (PCA), and CoGAPS offer different ways to explore expression data. Here, we use UMAP as a two-dimensional display of the cells, which we can color by cell type, condition, or pattern activity. PCA produces gene loadings and cell scores along perpendicular directions that explain variation in the data; those loadings and scores can be positive or negative. CoGAPS instead represents expression using nonnegative, additive gene weights and cell activities. This lets us investigate overlapping candidate programs, such as cell identity and an interferon response within the same cell. Neither PCA nor CoGAPS automatically assigns biological meaning to its components.
+
 :::{.think_question}
 ::::{.think_question_header}
 Stop and think
