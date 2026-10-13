@@ -1,0 +1,125 @@
+replicate,condition,cell_type,n_cells,passes_min_cells,paired_eligible,exclusion_reason
+patient_101,ctrl,CD4 T cells,353,True,True,included
+patient_101,ctrl,CD14+ Monocytes,207,True,True,included
+patient_101,ctrl,B cells,106,True,True,included
+patient_101,ctrl,NK cells,65,True,True,included
+patient_101,ctrl,CD8 T cells,29,True,True,included
+patient_101,ctrl,FCGR3A+ Monocytes,72,True,True,included
+patient_101,ctrl,Dendritic cells,25,True,True,included
+patient_101,ctrl,Megakaryocytes,1,False,False,below_min_cells
+patient_101,stim,CD4 T cells,467,True,True,included
+patient_101,stim,CD14+ Monocytes,269,True,True,included
+patient_101,stim,B cells,141,True,True,included
+patient_101,stim,NK cells,84,True,True,included
+patient_101,stim,CD8 T cells,54,True,True,included
+patient_101,stim,FCGR3A+ Monocytes,112,True,True,included
+patient_101,stim,Dendritic cells,39,True,True,included
+patient_107,ctrl,CD4 T cells,180,True,True,included
+patient_107,ctrl,CD14+ Monocytes,210,True,True,included
+patient_107,ctrl,B cells,44,True,True,included
+patient_107,ctrl,NK cells,37,True,True,included
+patient_107,ctrl,CD8 T cells,8,False,False,below_min_cells
+patient_107,ctrl,FCGR3A+ Monocytes,24,True,True,included
+patient_107,ctrl,Dendritic cells,14,False,False,below_min_cells
+patient_107,stim,CD4 T cells,199,True,True,included
+patient_107,stim,CD14+ Monocytes,179,True,True,included
+patient_107,stim,B cells,60,True,True,included
+patient_107,stim,NK cells,40,True,True,included
+patient_107,stim,CD8 T cells,10,False,False,below_min_cells
+patient_107,stim,FCGR3A+ Monocytes,20,True,True,included
+patient_107,stim,Dendritic cells,16,False,False,below_min_cells
+patient_107,stim,Megakaryocytes,1,False,False,below_min_cells
+patient_1015,ctrl,CD4 T cells,951,True,True,included
+patient_1015,ctrl,CD14+ Monocytes,859,True,True,included
+patient_1015,ctrl,B cells,459,True,True,included
+patient_1015,ctrl,NK cells,179,True,True,included
+patient_1015,ctrl,CD8 T cells,85,True,True,included
+patient_1015,ctrl,FCGR3A+ Monocytes,164,True,True,included
+patient_1015,ctrl,Dendritic cells,40,True,True,included
+patient_1015,ctrl,Megakaryocytes,1,False,False,below_min_cells
+patient_1015,stim,CD4 T cells,835,True,True,included
+patient_1015,stim,CD14+ Monocytes,718,True,True,included
+patient_1015,stim,B cells,366,True,True,included
+patient_1015,stim,NK cells,175,True,True,included
+patient_1015,stim,CD8 T cells,60,True,True,included
+patient_1015,stim,FCGR3A+ Monocytes,159,True,True,included
+patient_1015,stim,Dendritic cells,36,True,True,included
+patient_1015,stim,Megakaryocytes,3,False,False,below_min_cells
+patient_1016,ctrl,CD4 T cells,502,True,True,included
+patient_1016,ctrl,CD14+ Monocytes,393,True,True,included
+patient_1016,ctrl,B cells,125,True,True,included
+patient_1016,ctrl,NK cells,90,True,True,included
+patient_1016,ctrl,CD8 T cells,504,True,True,included
+patient_1016,ctrl,FCGR3A+ Monocytes,81,True,True,included
+patient_1016,ctrl,Dendritic cells,27,True,True,included
+patient_1016,ctrl,Megakaryocytes,1,False,False,below_min_cells
+patient_1016,stim,CD4 T cells,461,True,True,included
+patient_1016,stim,CD14+ Monocytes,355,True,True,included
+patient_1016,stim,B cells,123,True,True,included
+patient_1016,stim,NK cells,98,True,True,included
+patient_1016,stim,CD8 T cells,489,True,True,included
+patient_1016,stim,FCGR3A+ Monocytes,89,True,True,included
+patient_1016,stim,Dendritic cells,20,True,True,included
+patient_1039,ctrl,CD4 T cells,201,True,True,included
+patient_1039,ctrl,CD14+ Monocytes,126,True,True,included
+patient_1039,ctrl,B cells,26,True,True,included
+patient_1039,ctrl,NK cells,21,True,True,included
+patient_1039,ctrl,CD8 T cells,9,False,False,below_min_cells
+patient_1039,ctrl,FCGR3A+ Monocytes,15,False,False,below_min_cells
+patient_1039,ctrl,Dendritic cells,10,False,False,below_min_cells
+patient_1039,ctrl,Megakaryocytes,53,True,True,included
+patient_1039,stim,CD4 T cells,302,True,True,included
+patient_1039,stim,CD14+ Monocytes,164,True,True,included
+patient_1039,stim,B cells,41,True,True,included
+patient_1039,stim,NK cells,22,True,True,included
+patient_1039,stim,CD8 T cells,11,False,False,below_min_cells
+patient_1039,stim,FCGR3A+ Monocytes,25,True,False,counterpart_missing_or_below_min_cells
+patient_1039,stim,Dendritic cells,18,False,False,below_min_cells
+patient_1039,stim,Megakaryocytes,58,True,True,included
+patient_1244,ctrl,CD4 T cells,1108,True,True,included
+patient_1244,ctrl,CD14+ Monocytes,418,True,True,included
+patient_1244,ctrl,B cells,118,True,True,included
+patient_1244,ctrl,NK cells,102,True,True,included
+patient_1244,ctrl,CD8 T cells,29,True,False,counterpart_missing_or_below_min_cells
+patient_1244,ctrl,FCGR3A+ Monocytes,41,True,False,counterpart_missing_or_below_min_cells
+patient_1244,ctrl,Dendritic cells,62,True,True,included
+patient_1244,ctrl,Megakaryocytes,1,False,False,below_min_cells
+patient_1244,stim,CD4 T cells,892,True,True,included
+patient_1244,stim,CD14+ Monocytes,300,True,True,included
+patient_1244,stim,B cells,96,True,True,included
+patient_1244,stim,NK cells,107,True,True,included
+patient_1244,stim,CD8 T cells,12,False,False,below_min_cells
+patient_1244,stim,FCGR3A+ Monocytes,17,False,False,below_min_cells
+patient_1244,stim,Dendritic cells,37,True,True,included
+patient_1244,stim,Megakaryocytes,3,False,False,below_min_cells
+patient_1256,ctrl,CD4 T cells,1049,True,True,included
+patient_1256,ctrl,CD14+ Monocytes,402,True,True,included
+patient_1256,ctrl,B cells,218,True,True,included
+patient_1256,ctrl,NK cells,242,True,True,included
+patient_1256,ctrl,CD8 T cells,114,True,True,included
+patient_1256,ctrl,FCGR3A+ Monocytes,47,True,True,included
+patient_1256,ctrl,Dendritic cells,34,True,True,included
+patient_1256,ctrl,Megakaryocytes,2,False,False,below_min_cells
+patient_1256,stim,CD4 T cells,993,True,True,included
+patient_1256,stim,CD14+ Monocytes,387,True,True,included
+patient_1256,stim,B cells,219,True,True,included
+patient_1256,stim,NK cells,186,True,True,included
+patient_1256,stim,CD8 T cells,132,True,True,included
+patient_1256,stim,FCGR3A+ Monocytes,57,True,True,included
+patient_1256,stim,Dendritic cells,48,True,True,included
+patient_1256,stim,Megakaryocytes,4,False,False,below_min_cells
+patient_1488,ctrl,CD4 T cells,1216,True,True,included
+patient_1488,ctrl,CD14+ Monocytes,317,True,True,included
+patient_1488,ctrl,B cells,220,True,True,included
+patient_1488,ctrl,NK cells,119,True,True,included
+patient_1488,ctrl,CD8 T cells,33,True,True,included
+patient_1488,ctrl,FCGR3A+ Monocytes,76,True,True,included
+patient_1488,ctrl,Dendritic cells,46,True,True,included
+patient_1488,ctrl,Megakaryocytes,4,False,False,below_min_cells
+patient_1488,stim,CD4 T cells,1529,True,True,included
+patient_1488,stim,CD14+ Monocytes,393,True,True,included
+patient_1488,stim,B cells,289,True,True,included
+patient_1488,stim,NK cells,149,True,True,included
+patient_1488,stim,CD8 T cells,42,True,True,included
+patient_1488,stim,FCGR3A+ Monocytes,90,True,True,included
+patient_1488,stim,Dendritic cells,57,True,True,included

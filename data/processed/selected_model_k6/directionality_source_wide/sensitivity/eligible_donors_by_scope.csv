@@ -1,0 +1,18 @@
+scope,cell_type,n_pairs,eligible_donors,replication_note
+stimulation_global,all,8,patient_101;patient_1015;patient_1016;patient_1039;patient_107;patient_1244;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+stimulation_celltype,B cells,8,patient_101;patient_1015;patient_1016;patient_1039;patient_107;patient_1244;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+stimulation_celltype,CD14+ Monocytes,8,patient_101;patient_1015;patient_1016;patient_1039;patient_107;patient_1244;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+stimulation_celltype,CD4 T cells,8,patient_101;patient_1015;patient_1016;patient_1039;patient_107;patient_1244;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+stimulation_celltype,CD8 T cells,5,patient_101;patient_1015;patient_1016;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+stimulation_celltype,Dendritic cells,6,patient_101;patient_1015;patient_1016;patient_1244;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+stimulation_celltype,FCGR3A+ Monocytes,6,patient_101;patient_1015;patient_1016;patient_107;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+stimulation_celltype,Megakaryocytes,1,patient_1039,single donor pair; no across-donor replication
+stimulation_celltype,NK cells,8,patient_101;patient_1015;patient_1016;patient_1039;patient_107;patient_1244;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+identity,B cells,8,patient_101;patient_1015;patient_1016;patient_1039;patient_107;patient_1244;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+identity,CD14+ Monocytes,8,patient_101;patient_1015;patient_1016;patient_1039;patient_107;patient_1244;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+identity,CD4 T cells,8,patient_101;patient_1015;patient_1016;patient_1039;patient_107;patient_1244;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+identity,CD8 T cells,5,patient_101;patient_1015;patient_1016;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+identity,Dendritic cells,6,patient_101;patient_1015;patient_1016;patient_1244;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+identity,FCGR3A+ Monocytes,6,patient_101;patient_1015;patient_1016;patient_107;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score
+identity,Megakaryocytes,1,patient_1039,single donor pair; no across-donor replication
+identity,NK cells,8,patient_101;patient_1015;patient_1016;patient_1039;patient_107;patient_1244;patient_1256;patient_1488,descriptive comparison; sample size is not a confidence score

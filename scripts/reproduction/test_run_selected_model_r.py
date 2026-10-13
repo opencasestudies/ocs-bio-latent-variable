@@ -148,7 +148,7 @@ class RWrapperTests(unittest.TestCase):
             "run", "--rm", "--platform", "linux/amd64",
             "-v", f"{self.root}:/workspace/case-study",
             "-w", "/workspace/case-study",
-            "othomas2/pycogaps-runtime-guide:0.3.1", "bash", "-lc",
+            "othomas2/pycogaps-runtime-guide:0.3.2", "bash", "-lc",
         ])
         for setting in (
             "OMP_NUM_THREADS=4", "CoGAPS::compiledWithOpenMPSupport()",

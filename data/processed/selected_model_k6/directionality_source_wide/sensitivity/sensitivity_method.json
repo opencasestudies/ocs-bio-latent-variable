@@ -1,0 +1,182 @@
+{
+  "status": "Candidate; not a lesson release",
+  "normalization": {
+    "schema_version": "source-wide-counts-v1",
+    "source": {
+      "filename": "kang_counts_25k.h5ad",
+      "size_bytes": 38356412,
+      "sha256": "e6a5adac64dcdeb36eaba27db49b63e0c64bb0ed4a64c6705971506b41c39830"
+    },
+    "prepared": {
+      "filename": "preprocessed_cells_hvg3000.h5ad",
+      "size_bytes": 55888818,
+      "sha256": "f26df25334f60d24a95f7e90927bc034b8ecf385731486f39b8183a8fea51e32"
+    },
+    "exporter": {
+      "filename": "directionality_normalization.py",
+      "size_bytes": 10835,
+      "sha256": "81e9d2cce363984e56876d96f14671330671155abcf415c7c6b063c99b61baed"
+    },
+    "archive_manifest": {
+      "filename": "reproduction_files.json",
+      "size_bytes": 3555,
+      "sha256": "18b54a83e005a34833add8af1da9f8be4261aa20b7734d09a856b21ed79720ad"
+    },
+    "archive_record_url": "https://zenodo.org/records/21208760",
+    "source_count_location": "X",
+    "prepared_count_location": "layers/counts",
+    "source_gene_count": 15706,
+    "modeled_gene_count": 3000,
+    "n_cells": 24673,
+    "retained_counts_match_source": true,
+    "normalization_universe": "All genes in the supplied source object; not the entire transcriptome",
+    "totals": {
+      "filename": "source_library_totals.csv",
+      "size_bytes": 1389245,
+      "sha256": "5ee7431c88c15d81bd7d8f0179bd0c9e23fd1667cf966eaa7bd4c6717bc10497"
+    },
+    "source_genes": {
+      "filename": "source_genes.csv",
+      "size_bytes": 115568,
+      "sha256": "f2d0b68333f314a284da023e33e55e0ddfecc11a4528c1796840f234e10b4302"
+    },
+    "modeled_genes": {
+      "filename": "modeled_genes.csv",
+      "size_bytes": 20873,
+      "sha256": "276721f8906c1cbe54eb403ae53c7f39fb0bfbfa700ac06d7de52b1b804e7f71"
+    }
+  },
+  "tmm_script": {
+    "filename": "calculate_tmm_factors.R",
+    "size_bytes": 3875,
+    "sha256": "5ca9a46e0409a5384b8ee8135b889160108ba37f4fd01e42812bb0664c63205d"
+  },
+  "methods": [
+    "hvg_cpm",
+    "source_cpm",
+    "tmm_cpm"
+  ],
+  "pseudocount_CPM": 0.5,
+  "min_cells_per_group": 20,
+  "identity": "Focal versus ALL other cells pooled as raw counts within donor/condition; both groups >=20 in both conditions; mean of two condition log contrasts per donor then equal mean across donors",
+  "stimulation": "Same complete paired-donor sets for all methods; source or HVG library totals, or source totals multiplied by edgeR TMM factors",
+  "tmm_cohorts": "One global cohort; one stimulation cohort per cell type; one focal-versus-other cohort per focal type. Complete eligible donors only. All 15706 source genes supplied; all-zero genes omitted internally by edgeR.",
+  "hvg_identity_boundary": "Uses the legacy 3000-gene denominator with REPAIRED pooling/pairing and 0.5 pseudocount; does not reproduce the old figure's estimator",
+  "scope_boundary": "No absolute RNA claim, significance test, model refit, or confidence category. Identity TMM compares different cell populations and its reference assumption may be less plausible.",
+  "tmm": {
+    "package": "edgeR",
+    "version": "4.0.16",
+    "method": "TMM",
+    "logratioTrim": 0.3,
+    "sumTrim": 0.05,
+    "doWeighting": true,
+    "Acutoff": -10000000000,
+    "reference": "edgeR automatic reference per cohort",
+    "factor_centering": "geometric mean one per cohort",
+    "input": "Untransformed broad-source pseudobulk counts; no filterByExpr or HVG restriction",
+    "denominator": "source_library_size * norm_factor",
+    "cpm_check": "Matches edgeR::cpm(log=FALSE)",
+    "zero_handling": "edgeR removes all-zero genes and omits genes zero in either sample for pairwise TMM; standard TMM, not TMMwsp",
+    "limitation": "Descriptive sensitivity; no dispersion estimation or differential-expression fit; no absolute-transcript interpretation"
+  },
+  "schema_version": "directionality-sensitivity-v2",
+  "reporting_version": "donor-support-v1",
+  "script": {
+    "filename": "report_directionality_support.py",
+    "size_bytes": 2798,
+    "sha256": "477eda12709f0b9fcabf062aff22e4698393cd3b6c59331425eaf94b41e142c9"
+  },
+  "parent_contrast_manifest": {
+    "filename": "sensitivity_method.json",
+    "size_bytes": 6047,
+    "sha256": "2bcc4a96dfef06dc79622316eac7a0f51c826a1dda99d8b5429651627934d637"
+  },
+  "reporting_helper": {
+    "filename": "directionality_reporting.py",
+    "size_bytes": 1973,
+    "sha256": "bd89cbfada1fde2a46d1434995e1b8436ef1330798d090d9cbb62636c40bd613"
+  },
+  "sensitivity_script": {
+    "filename": "directionality_sensitivity.py",
+    "size_bytes": 16129,
+    "sha256": "fe4d592a92ba581e3de2b6c43d397dcec0654d3f09cee43009f089f4cb2f10eb"
+  },
+  "reporting": "Exact signs of unrounded saved donor values; zero-mean agreement undefined; no confidence categories or p-values. Normalization flag compares three mean signs, not effect magnitude or significance.",
+  "outputs": [
+    {
+      "filename": "contrast_summary.csv",
+      "size_bytes": 993598,
+      "sha256": "888fdecc8c2957a6ee1082b38dbedce3acf186bce846753200c8a7b880b8e5b1"
+    },
+    {
+      "filename": "donor_contrasts.csv",
+      "size_bytes": 1824694,
+      "sha256": "7e1bdf31b0e2ed6628bfcd33a6a1bf2e8ecf752d847fbdf560ccbd432d2a49b7"
+    },
+    {
+      "filename": "donor_eligibility.csv",
+      "size_bytes": 37787,
+      "sha256": "3841747399c974025ef030391c1259cef6f6f6c6a9a86a1a9e3509229a9e08c8"
+    },
+    {
+      "filename": "eligible_donors_by_scope.csv",
+      "size_bytes": 2968,
+      "sha256": "f2dc4c70e80db465158c33b892e4dbb4fa0bda2fdfbebe5fae414ce84570d889"
+    },
+    {
+      "filename": "identity_source_summary.csv",
+      "size_bytes": 154539,
+      "sha256": "087cbbb8baf49fa49ce18248af0e74e00b34e3a3aa2c3a15d685e2ecfa0569a9"
+    },
+    {
+      "filename": "normalization_comparison.csv",
+      "size_bytes": 151834,
+      "sha256": "ff378b09fb83ef51a3b68d561886c76af83a6b359c434c87dcf8cfa9ddb615d6"
+    },
+    {
+      "filename": "pattern_genes_python.csv",
+      "size_bytes": 3250,
+      "sha256": "f769ce50a4a2048c1e5d9d97ba6262553afa30024a765fac14429faa8b50c56d"
+    },
+    {
+      "filename": "pattern_genes_r.csv",
+      "size_bytes": 3130,
+      "sha256": "a8c2b8d33b056004d7165e5d16f29ba7953905c9a30c9db169cd07a5954c7d4e"
+    },
+    {
+      "filename": "python_gene_report_by_celltype.csv",
+      "size_bytes": 259772,
+      "sha256": "aed255d190a830109fd142e7869f006f526d3bb8090a2ce7a739fee1788f30d4"
+    },
+    {
+      "filename": "python_gene_report_global.csv",
+      "size_bytes": 33450,
+      "sha256": "c8d2dce194b28974f7137625a20186cae3efbc87d4adf4caa9c84fc21312d060"
+    },
+    {
+      "filename": "python_gene_report_identity.csv",
+      "size_bytes": 252854,
+      "sha256": "8aa189d0529b00d7bec1425a435298adc6c1f47455174ebbeaf5aee2570574f2"
+    },
+    {
+      "filename": "r_gene_report_by_celltype.csv",
+      "size_bytes": 258812,
+      "sha256": "10724d956fbd19bdb906479163a100e18d543f731639e46337791169499808cb"
+    },
+    {
+      "filename": "r_gene_report_global.csv",
+      "size_bytes": 33330,
+      "sha256": "818e1429de3819f46f4a8a6ba665f2ea44a7a84671f947034dfffe5d613e720a"
+    },
+    {
+      "filename": "r_gene_report_identity.csv",
+      "size_bytes": 251894,
+      "sha256": "facca2442437f55357a8f96f05a948744d1952d45654638580935a2a50e8fe01"
+    },
+    {
+      "filename": "stimulation_source_summary.csv",
+      "size_bytes": 20620,
+      "sha256": "89e52e45d44b5d58cd0c9d3728c705992ff46a22d4325a18c5a43a27845802d8"
+    }
+  ]
+}

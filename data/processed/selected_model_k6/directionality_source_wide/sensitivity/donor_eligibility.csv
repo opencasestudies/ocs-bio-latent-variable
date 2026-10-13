@@ -1,0 +1,401 @@
+cohort,scope,cell_type,replicate,condition,role,n_cells,source_library_size,hvg_library_size,pair_eligible,exclusion_reason
+cohort_00,stimulation_global,all,patient_101,ctrl,focal,858,1441428,469248,True,included
+cohort_00,stimulation_global,all,patient_101,stim,focal,1166,2093311,808913,True,included
+cohort_00,stimulation_global,all,patient_1015,ctrl,focal,2738,4324421,1431288,True,included
+cohort_00,stimulation_global,all,patient_1015,stim,focal,2352,4146416,1676196,True,included
+cohort_00,stimulation_global,all,patient_1016,ctrl,focal,1723,2262595,612872,True,included
+cohort_00,stimulation_global,all,patient_1016,stim,focal,1635,2283880,739167,True,included
+cohort_00,stimulation_global,all,patient_1039,ctrl,focal,461,833176,358839,True,included
+cohort_00,stimulation_global,all,patient_1039,stim,focal,641,1225675,565850,True,included
+cohort_00,stimulation_global,all,patient_107,ctrl,focal,517,889169,335745,True,included
+cohort_00,stimulation_global,all,patient_107,stim,focal,525,951660,397441,True,included
+cohort_00,stimulation_global,all,patient_1244,ctrl,focal,1879,2918530,781228,True,included
+cohort_00,stimulation_global,all,patient_1244,stim,focal,1464,2387354,744737,True,included
+cohort_00,stimulation_global,all,patient_1256,ctrl,focal,2108,3143054,873981,True,included
+cohort_00,stimulation_global,all,patient_1256,stim,focal,2026,3226356,1046933,True,included
+cohort_00,stimulation_global,all,patient_1488,ctrl,focal,2031,2772008,639805,True,included
+cohort_00,stimulation_global,all,patient_1488,stim,focal,2549,3768313,1007267,True,included
+cohort_01,stimulation_celltype,B cells,patient_101,ctrl,focal,106,124446,19161,True,included
+cohort_01,stimulation_celltype,B cells,patient_101,stim,focal,141,170293,32271,True,included
+cohort_01,stimulation_celltype,B cells,patient_1015,ctrl,focal,459,556570,87263,True,included
+cohort_01,stimulation_celltype,B cells,patient_1015,stim,focal,366,481886,96255,True,included
+cohort_01,stimulation_celltype,B cells,patient_1016,ctrl,focal,125,152335,22473,True,included
+cohort_01,stimulation_celltype,B cells,patient_1016,stim,focal,123,150619,26909,True,included
+cohort_01,stimulation_celltype,B cells,patient_1039,ctrl,focal,26,35016,4951,True,included
+cohort_01,stimulation_celltype,B cells,patient_1039,stim,focal,41,71578,16950,True,included
+cohort_01,stimulation_celltype,B cells,patient_107,ctrl,focal,44,52655,8336,True,included
+cohort_01,stimulation_celltype,B cells,patient_107,stim,focal,60,84791,16559,True,included
+cohort_01,stimulation_celltype,B cells,patient_1244,ctrl,focal,118,161291,24888,True,included
+cohort_01,stimulation_celltype,B cells,patient_1244,stim,focal,96,131709,22811,True,included
+cohort_01,stimulation_celltype,B cells,patient_1256,ctrl,focal,218,260261,39334,True,included
+cohort_01,stimulation_celltype,B cells,patient_1256,stim,focal,219,277533,50472,True,included
+cohort_01,stimulation_celltype,B cells,patient_1488,ctrl,focal,220,290330,45490,True,included
+cohort_01,stimulation_celltype,B cells,patient_1488,stim,focal,289,399790,68948,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_101,ctrl,focal,207,531210,260767,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_101,stim,focal,269,763769,448974,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_1015,ctrl,focal,859,1793578,904127,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_1015,stim,focal,718,1759808,1051613,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_1016,ctrl,focal,393,742765,334798,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_1016,stim,focal,355,732718,404081,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_1039,ctrl,focal,126,301741,154765,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_1039,stim,focal,164,452742,278099,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_107,ctrl,focal,210,466961,247325,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_107,stim,focal,179,445889,272952,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_1244,ctrl,focal,418,952289,460515,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_1244,stim,focal,300,732709,447377,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_1256,ctrl,focal,402,1007854,537781,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_1256,stim,focal,387,992093,605408,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_1488,ctrl,focal,317,563529,284525,True,included
+cohort_02,stimulation_celltype,CD14+ Monocytes,patient_1488,stim,focal,393,813315,482341,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_101,ctrl,focal,353,403847,54008,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_101,stim,focal,467,565611,86816,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_1015,ctrl,focal,951,1113617,142714,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_1015,stim,focal,835,1021882,157620,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_1016,ctrl,focal,502,528665,67599,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_1016,stim,focal,461,508830,73945,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_1039,ctrl,focal,201,249014,29708,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_1039,stim,focal,302,373856,53913,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_107,ctrl,focal,180,216841,25308,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_107,stim,focal,199,239836,33406,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_1244,ctrl,focal,1108,1344067,141533,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_1244,stim,focal,892,1192100,142248,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_1256,ctrl,focal,1049,1274913,126996,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_1256,stim,focal,993,1257613,146919,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_1488,ctrl,focal,1216,1415836,134565,True,included
+cohort_03,stimulation_celltype,CD4 T cells,patient_1488,stim,focal,1529,1938225,222698,True,included
+cohort_04,stimulation_celltype,CD8 T cells,patient_101,ctrl,focal,29,27892,4036,True,included
+cohort_04,stimulation_celltype,CD8 T cells,patient_101,stim,focal,54,58790,10345,True,included
+cohort_04,stimulation_celltype,CD8 T cells,patient_1015,ctrl,focal,85,94175,15514,True,included
+cohort_04,stimulation_celltype,CD8 T cells,patient_1015,stim,focal,60,72561,12886,True,included
+cohort_04,stimulation_celltype,CD8 T cells,patient_1016,ctrl,focal,504,457417,56837,True,included
+cohort_04,stimulation_celltype,CD8 T cells,patient_1016,stim,focal,489,484898,75459,True,included
+cohort_04,stimulation_celltype,CD8 T cells,patient_1039,ctrl,focal,9,8190,1150,False,below_min_cells
+cohort_04,stimulation_celltype,CD8 T cells,patient_1039,stim,focal,11,11683,2226,False,below_min_cells
+cohort_04,stimulation_celltype,CD8 T cells,patient_107,ctrl,focal,8,7227,1108,False,below_min_cells
+cohort_04,stimulation_celltype,CD8 T cells,patient_107,stim,focal,10,10199,2002,False,below_min_cells
+cohort_04,stimulation_celltype,CD8 T cells,patient_1244,ctrl,focal,29,32879,5030,False,required_partner_below_min_cells
+cohort_04,stimulation_celltype,CD8 T cells,patient_1244,stim,focal,12,12805,2473,False,below_min_cells
+cohort_04,stimulation_celltype,CD8 T cells,patient_1256,ctrl,focal,114,107109,14334,True,included
+cohort_04,stimulation_celltype,CD8 T cells,patient_1256,stim,focal,132,140685,27348,True,included
+cohort_04,stimulation_celltype,CD8 T cells,patient_1488,ctrl,focal,33,32339,4195,True,included
+cohort_04,stimulation_celltype,CD8 T cells,patient_1488,stim,focal,42,44486,7847,True,included
+cohort_05,stimulation_celltype,Dendritic cells,patient_101,ctrl,focal,25,95330,34926,True,included
+cohort_05,stimulation_celltype,Dendritic cells,patient_101,stim,focal,39,158532,71055,True,included
+cohort_05,stimulation_celltype,Dendritic cells,patient_1015,ctrl,focal,40,146189,53648,True,included
+cohort_05,stimulation_celltype,Dendritic cells,patient_1015,stim,focal,36,148671,66404,True,included
+cohort_05,stimulation_celltype,Dendritic cells,patient_1016,ctrl,focal,27,88298,32919,True,included
+cohort_05,stimulation_celltype,Dendritic cells,patient_1016,stim,focal,20,75025,33221,True,included
+cohort_05,stimulation_celltype,Dendritic cells,patient_1039,ctrl,focal,10,39648,17531,False,below_min_cells
+cohort_05,stimulation_celltype,Dendritic cells,patient_1039,stim,focal,18,55754,21351,False,below_min_cells
+cohort_05,stimulation_celltype,Dendritic cells,patient_107,ctrl,focal,14,45024,17440,False,below_min_cells
+cohort_05,stimulation_celltype,Dendritic cells,patient_107,stim,focal,16,63993,30340,False,below_min_cells
+cohort_05,stimulation_celltype,Dendritic cells,patient_1244,ctrl,focal,62,209299,80846,True,included
+cohort_05,stimulation_celltype,Dendritic cells,patient_1244,stim,focal,37,140708,69757,True,included
+cohort_05,stimulation_celltype,Dendritic cells,patient_1256,ctrl,focal,34,129281,50557,True,included
+cohort_05,stimulation_celltype,Dendritic cells,patient_1256,stim,focal,48,172946,74909,True,included
+cohort_05,stimulation_celltype,Dendritic cells,patient_1488,ctrl,focal,46,160656,60676,True,included
+cohort_05,stimulation_celltype,Dendritic cells,patient_1488,stim,focal,57,200890,86497,True,included
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_101,ctrl,focal,72,197588,84389,True,included
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_101,stim,focal,112,298116,143156,True,included
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_1015,ctrl,focal,164,438020,192285,True,included
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_1015,stim,focal,159,456242,237813,True,included
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_1016,ctrl,focal,81,208274,82304,True,included
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_1016,stim,focal,89,235690,106550,True,included
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_1039,ctrl,focal,15,51013,24348,False,below_min_cells
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_1039,stim,focal,25,87268,44490,False,required_partner_below_min_cells
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_107,ctrl,focal,24,67218,30692,True,included
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_107,stim,focal,20,61135,28782,True,included
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_1244,ctrl,focal,41,121163,50399,False,required_partner_below_min_cells
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_1244,stim,focal,17,56108,28092,False,below_min_cells
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_1256,ctrl,focal,47,143636,65834,True,included
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_1256,stim,focal,57,195509,95027,True,included
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_1488,ctrl,focal,76,188376,80300,True,included
+cohort_06,stimulation_celltype,FCGR3A+ Monocytes,patient_1488,stim,focal,90,231644,108223,True,included
+cohort_07,stimulation_celltype,Megakaryocytes,patient_101,ctrl,focal,1,3565,2707,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_101,stim,focal,0,0,0,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_1015,ctrl,focal,1,4312,3456,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_1015,stim,focal,3,13268,10368,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_1016,ctrl,focal,1,5759,4408,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_1016,stim,focal,0,0,0,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_1039,ctrl,focal,53,125753,122477,True,included
+cohort_07,stimulation_celltype,Megakaryocytes,patient_1039,stim,focal,58,148735,143655,True,included
+cohort_07,stimulation_celltype,Megakaryocytes,patient_107,ctrl,focal,0,0,0,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_107,stim,focal,1,5543,4377,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_1244,ctrl,focal,1,4176,2718,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_1244,stim,focal,3,11158,7706,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_1256,ctrl,focal,2,6911,5048,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_1256,stim,focal,4,12804,9428,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_1488,ctrl,focal,4,18121,14229,False,below_min_cells
+cohort_07,stimulation_celltype,Megakaryocytes,patient_1488,stim,focal,0,0,0,False,below_min_cells
+cohort_08,stimulation_celltype,NK cells,patient_101,ctrl,focal,65,57550,9254,True,included
+cohort_08,stimulation_celltype,NK cells,patient_101,stim,focal,84,78200,16296,True,included
+cohort_08,stimulation_celltype,NK cells,patient_1015,ctrl,focal,179,177960,32281,True,included
+cohort_08,stimulation_celltype,NK cells,patient_1015,stim,focal,175,192098,43237,True,included
+cohort_08,stimulation_celltype,NK cells,patient_1016,ctrl,focal,90,79082,11534,True,included
+cohort_08,stimulation_celltype,NK cells,patient_1016,stim,focal,98,96100,19002,True,included
+cohort_08,stimulation_celltype,NK cells,patient_1039,ctrl,focal,21,22801,3909,True,included
+cohort_08,stimulation_celltype,NK cells,patient_1039,stim,focal,22,24059,5166,True,included
+cohort_08,stimulation_celltype,NK cells,patient_107,ctrl,focal,37,33243,5536,True,included
+cohort_08,stimulation_celltype,NK cells,patient_107,stim,focal,40,40274,9023,True,included
+cohort_08,stimulation_celltype,NK cells,patient_1244,ctrl,focal,102,93366,15299,True,included
+cohort_08,stimulation_celltype,NK cells,patient_1244,stim,focal,107,110057,24273,True,included
+cohort_08,stimulation_celltype,NK cells,patient_1256,ctrl,focal,242,213089,34097,True,included
+cohort_08,stimulation_celltype,NK cells,patient_1256,stim,focal,186,177173,37422,True,included
+cohort_08,stimulation_celltype,NK cells,patient_1488,ctrl,focal,119,102821,15825,True,included
+cohort_08,stimulation_celltype,NK cells,patient_1488,stim,focal,149,139963,30713,True,included
+cohort_09,identity,B cells,patient_101,ctrl,focal,106,124446,19161,True,included
+cohort_09,identity,B cells,patient_101,ctrl,other,752,1316982,450087,True,included
+cohort_09,identity,B cells,patient_101,stim,focal,141,170293,32271,True,included
+cohort_09,identity,B cells,patient_101,stim,other,1025,1923018,776642,True,included
+cohort_09,identity,B cells,patient_1015,ctrl,focal,459,556570,87263,True,included
+cohort_09,identity,B cells,patient_1015,ctrl,other,2279,3767851,1344025,True,included
+cohort_09,identity,B cells,patient_1015,stim,focal,366,481886,96255,True,included
+cohort_09,identity,B cells,patient_1015,stim,other,1986,3664530,1579941,True,included
+cohort_09,identity,B cells,patient_1016,ctrl,focal,125,152335,22473,True,included
+cohort_09,identity,B cells,patient_1016,ctrl,other,1598,2110260,590399,True,included
+cohort_09,identity,B cells,patient_1016,stim,focal,123,150619,26909,True,included
+cohort_09,identity,B cells,patient_1016,stim,other,1512,2133261,712258,True,included
+cohort_09,identity,B cells,patient_1039,ctrl,focal,26,35016,4951,True,included
+cohort_09,identity,B cells,patient_1039,ctrl,other,435,798160,353888,True,included
+cohort_09,identity,B cells,patient_1039,stim,focal,41,71578,16950,True,included
+cohort_09,identity,B cells,patient_1039,stim,other,600,1154097,548900,True,included
+cohort_09,identity,B cells,patient_107,ctrl,focal,44,52655,8336,True,included
+cohort_09,identity,B cells,patient_107,ctrl,other,473,836514,327409,True,included
+cohort_09,identity,B cells,patient_107,stim,focal,60,84791,16559,True,included
+cohort_09,identity,B cells,patient_107,stim,other,465,866869,380882,True,included
+cohort_09,identity,B cells,patient_1244,ctrl,focal,118,161291,24888,True,included
+cohort_09,identity,B cells,patient_1244,ctrl,other,1761,2757239,756340,True,included
+cohort_09,identity,B cells,patient_1244,stim,focal,96,131709,22811,True,included
+cohort_09,identity,B cells,patient_1244,stim,other,1368,2255645,721926,True,included
+cohort_09,identity,B cells,patient_1256,ctrl,focal,218,260261,39334,True,included
+cohort_09,identity,B cells,patient_1256,ctrl,other,1890,2882793,834647,True,included
+cohort_09,identity,B cells,patient_1256,stim,focal,219,277533,50472,True,included
+cohort_09,identity,B cells,patient_1256,stim,other,1807,2948823,996461,True,included
+cohort_09,identity,B cells,patient_1488,ctrl,focal,220,290330,45490,True,included
+cohort_09,identity,B cells,patient_1488,ctrl,other,1811,2481678,594315,True,included
+cohort_09,identity,B cells,patient_1488,stim,focal,289,399790,68948,True,included
+cohort_09,identity,B cells,patient_1488,stim,other,2260,3368523,938319,True,included
+cohort_10,identity,CD14+ Monocytes,patient_101,ctrl,focal,207,531210,260767,True,included
+cohort_10,identity,CD14+ Monocytes,patient_101,ctrl,other,651,910218,208481,True,included
+cohort_10,identity,CD14+ Monocytes,patient_101,stim,focal,269,763769,448974,True,included
+cohort_10,identity,CD14+ Monocytes,patient_101,stim,other,897,1329542,359939,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1015,ctrl,focal,859,1793578,904127,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1015,ctrl,other,1879,2530843,527161,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1015,stim,focal,718,1759808,1051613,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1015,stim,other,1634,2386608,624583,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1016,ctrl,focal,393,742765,334798,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1016,ctrl,other,1330,1519830,278074,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1016,stim,focal,355,732718,404081,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1016,stim,other,1280,1551162,335086,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1039,ctrl,focal,126,301741,154765,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1039,ctrl,other,335,531435,204074,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1039,stim,focal,164,452742,278099,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1039,stim,other,477,772933,287751,True,included
+cohort_10,identity,CD14+ Monocytes,patient_107,ctrl,focal,210,466961,247325,True,included
+cohort_10,identity,CD14+ Monocytes,patient_107,ctrl,other,307,422208,88420,True,included
+cohort_10,identity,CD14+ Monocytes,patient_107,stim,focal,179,445889,272952,True,included
+cohort_10,identity,CD14+ Monocytes,patient_107,stim,other,346,505771,124489,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1244,ctrl,focal,418,952289,460515,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1244,ctrl,other,1461,1966241,320713,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1244,stim,focal,300,732709,447377,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1244,stim,other,1164,1654645,297360,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1256,ctrl,focal,402,1007854,537781,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1256,ctrl,other,1706,2135200,336200,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1256,stim,focal,387,992093,605408,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1256,stim,other,1639,2234263,441525,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1488,ctrl,focal,317,563529,284525,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1488,ctrl,other,1714,2208479,355280,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1488,stim,focal,393,813315,482341,True,included
+cohort_10,identity,CD14+ Monocytes,patient_1488,stim,other,2156,2954998,524926,True,included
+cohort_11,identity,CD4 T cells,patient_101,ctrl,focal,353,403847,54008,True,included
+cohort_11,identity,CD4 T cells,patient_101,ctrl,other,505,1037581,415240,True,included
+cohort_11,identity,CD4 T cells,patient_101,stim,focal,467,565611,86816,True,included
+cohort_11,identity,CD4 T cells,patient_101,stim,other,699,1527700,722097,True,included
+cohort_11,identity,CD4 T cells,patient_1015,ctrl,focal,951,1113617,142714,True,included
+cohort_11,identity,CD4 T cells,patient_1015,ctrl,other,1787,3210804,1288574,True,included
+cohort_11,identity,CD4 T cells,patient_1015,stim,focal,835,1021882,157620,True,included
+cohort_11,identity,CD4 T cells,patient_1015,stim,other,1517,3124534,1518576,True,included
+cohort_11,identity,CD4 T cells,patient_1016,ctrl,focal,502,528665,67599,True,included
+cohort_11,identity,CD4 T cells,patient_1016,ctrl,other,1221,1733930,545273,True,included
+cohort_11,identity,CD4 T cells,patient_1016,stim,focal,461,508830,73945,True,included
+cohort_11,identity,CD4 T cells,patient_1016,stim,other,1174,1775050,665222,True,included
+cohort_11,identity,CD4 T cells,patient_1039,ctrl,focal,201,249014,29708,True,included
+cohort_11,identity,CD4 T cells,patient_1039,ctrl,other,260,584162,329131,True,included
+cohort_11,identity,CD4 T cells,patient_1039,stim,focal,302,373856,53913,True,included
+cohort_11,identity,CD4 T cells,patient_1039,stim,other,339,851819,511937,True,included
+cohort_11,identity,CD4 T cells,patient_107,ctrl,focal,180,216841,25308,True,included
+cohort_11,identity,CD4 T cells,patient_107,ctrl,other,337,672328,310437,True,included
+cohort_11,identity,CD4 T cells,patient_107,stim,focal,199,239836,33406,True,included
+cohort_11,identity,CD4 T cells,patient_107,stim,other,326,711824,364035,True,included
+cohort_11,identity,CD4 T cells,patient_1244,ctrl,focal,1108,1344067,141533,True,included
+cohort_11,identity,CD4 T cells,patient_1244,ctrl,other,771,1574463,639695,True,included
+cohort_11,identity,CD4 T cells,patient_1244,stim,focal,892,1192100,142248,True,included
+cohort_11,identity,CD4 T cells,patient_1244,stim,other,572,1195254,602489,True,included
+cohort_11,identity,CD4 T cells,patient_1256,ctrl,focal,1049,1274913,126996,True,included
+cohort_11,identity,CD4 T cells,patient_1256,ctrl,other,1059,1868141,746985,True,included
+cohort_11,identity,CD4 T cells,patient_1256,stim,focal,993,1257613,146919,True,included
+cohort_11,identity,CD4 T cells,patient_1256,stim,other,1033,1968743,900014,True,included
+cohort_11,identity,CD4 T cells,patient_1488,ctrl,focal,1216,1415836,134565,True,included
+cohort_11,identity,CD4 T cells,patient_1488,ctrl,other,815,1356172,505240,True,included
+cohort_11,identity,CD4 T cells,patient_1488,stim,focal,1529,1938225,222698,True,included
+cohort_11,identity,CD4 T cells,patient_1488,stim,other,1020,1830088,784569,True,included
+cohort_12,identity,CD8 T cells,patient_101,ctrl,focal,29,27892,4036,True,included
+cohort_12,identity,CD8 T cells,patient_101,ctrl,other,829,1413536,465212,True,included
+cohort_12,identity,CD8 T cells,patient_101,stim,focal,54,58790,10345,True,included
+cohort_12,identity,CD8 T cells,patient_101,stim,other,1112,2034521,798568,True,included
+cohort_12,identity,CD8 T cells,patient_1015,ctrl,focal,85,94175,15514,True,included
+cohort_12,identity,CD8 T cells,patient_1015,ctrl,other,2653,4230246,1415774,True,included
+cohort_12,identity,CD8 T cells,patient_1015,stim,focal,60,72561,12886,True,included
+cohort_12,identity,CD8 T cells,patient_1015,stim,other,2292,4073855,1663310,True,included
+cohort_12,identity,CD8 T cells,patient_1016,ctrl,focal,504,457417,56837,True,included
+cohort_12,identity,CD8 T cells,patient_1016,ctrl,other,1219,1805178,556035,True,included
+cohort_12,identity,CD8 T cells,patient_1016,stim,focal,489,484898,75459,True,included
+cohort_12,identity,CD8 T cells,patient_1016,stim,other,1146,1798982,663708,True,included
+cohort_12,identity,CD8 T cells,patient_1039,ctrl,focal,9,8190,1150,False,below_min_cells
+cohort_12,identity,CD8 T cells,patient_1039,ctrl,other,452,824986,357689,False,required_partner_below_min_cells
+cohort_12,identity,CD8 T cells,patient_1039,stim,focal,11,11683,2226,False,below_min_cells
+cohort_12,identity,CD8 T cells,patient_1039,stim,other,630,1213992,563624,False,required_partner_below_min_cells
+cohort_12,identity,CD8 T cells,patient_107,ctrl,focal,8,7227,1108,False,below_min_cells
+cohort_12,identity,CD8 T cells,patient_107,ctrl,other,509,881942,334637,False,required_partner_below_min_cells
+cohort_12,identity,CD8 T cells,patient_107,stim,focal,10,10199,2002,False,below_min_cells
+cohort_12,identity,CD8 T cells,patient_107,stim,other,515,941461,395439,False,required_partner_below_min_cells
+cohort_12,identity,CD8 T cells,patient_1244,ctrl,focal,29,32879,5030,False,required_partner_below_min_cells
+cohort_12,identity,CD8 T cells,patient_1244,ctrl,other,1850,2885651,776198,False,required_partner_below_min_cells
+cohort_12,identity,CD8 T cells,patient_1244,stim,focal,12,12805,2473,False,below_min_cells
+cohort_12,identity,CD8 T cells,patient_1244,stim,other,1452,2374549,742264,False,required_partner_below_min_cells
+cohort_12,identity,CD8 T cells,patient_1256,ctrl,focal,114,107109,14334,True,included
+cohort_12,identity,CD8 T cells,patient_1256,ctrl,other,1994,3035945,859647,True,included
+cohort_12,identity,CD8 T cells,patient_1256,stim,focal,132,140685,27348,True,included
+cohort_12,identity,CD8 T cells,patient_1256,stim,other,1894,3085671,1019585,True,included
+cohort_12,identity,CD8 T cells,patient_1488,ctrl,focal,33,32339,4195,True,included
+cohort_12,identity,CD8 T cells,patient_1488,ctrl,other,1998,2739669,635610,True,included
+cohort_12,identity,CD8 T cells,patient_1488,stim,focal,42,44486,7847,True,included
+cohort_12,identity,CD8 T cells,patient_1488,stim,other,2507,3723827,999420,True,included
+cohort_13,identity,Dendritic cells,patient_101,ctrl,focal,25,95330,34926,True,included
+cohort_13,identity,Dendritic cells,patient_101,ctrl,other,833,1346098,434322,True,included
+cohort_13,identity,Dendritic cells,patient_101,stim,focal,39,158532,71055,True,included
+cohort_13,identity,Dendritic cells,patient_101,stim,other,1127,1934779,737858,True,included
+cohort_13,identity,Dendritic cells,patient_1015,ctrl,focal,40,146189,53648,True,included
+cohort_13,identity,Dendritic cells,patient_1015,ctrl,other,2698,4178232,1377640,True,included
+cohort_13,identity,Dendritic cells,patient_1015,stim,focal,36,148671,66404,True,included
+cohort_13,identity,Dendritic cells,patient_1015,stim,other,2316,3997745,1609792,True,included
+cohort_13,identity,Dendritic cells,patient_1016,ctrl,focal,27,88298,32919,True,included
+cohort_13,identity,Dendritic cells,patient_1016,ctrl,other,1696,2174297,579953,True,included
+cohort_13,identity,Dendritic cells,patient_1016,stim,focal,20,75025,33221,True,included
+cohort_13,identity,Dendritic cells,patient_1016,stim,other,1615,2208855,705946,True,included
+cohort_13,identity,Dendritic cells,patient_1039,ctrl,focal,10,39648,17531,False,below_min_cells
+cohort_13,identity,Dendritic cells,patient_1039,ctrl,other,451,793528,341308,False,required_partner_below_min_cells
+cohort_13,identity,Dendritic cells,patient_1039,stim,focal,18,55754,21351,False,below_min_cells
+cohort_13,identity,Dendritic cells,patient_1039,stim,other,623,1169921,544499,False,required_partner_below_min_cells
+cohort_13,identity,Dendritic cells,patient_107,ctrl,focal,14,45024,17440,False,below_min_cells
+cohort_13,identity,Dendritic cells,patient_107,ctrl,other,503,844145,318305,False,required_partner_below_min_cells
+cohort_13,identity,Dendritic cells,patient_107,stim,focal,16,63993,30340,False,below_min_cells
+cohort_13,identity,Dendritic cells,patient_107,stim,other,509,887667,367101,False,required_partner_below_min_cells
+cohort_13,identity,Dendritic cells,patient_1244,ctrl,focal,62,209299,80846,True,included
+cohort_13,identity,Dendritic cells,patient_1244,ctrl,other,1817,2709231,700382,True,included
+cohort_13,identity,Dendritic cells,patient_1244,stim,focal,37,140708,69757,True,included
+cohort_13,identity,Dendritic cells,patient_1244,stim,other,1427,2246646,674980,True,included
+cohort_13,identity,Dendritic cells,patient_1256,ctrl,focal,34,129281,50557,True,included
+cohort_13,identity,Dendritic cells,patient_1256,ctrl,other,2074,3013773,823424,True,included
+cohort_13,identity,Dendritic cells,patient_1256,stim,focal,48,172946,74909,True,included
+cohort_13,identity,Dendritic cells,patient_1256,stim,other,1978,3053410,972024,True,included
+cohort_13,identity,Dendritic cells,patient_1488,ctrl,focal,46,160656,60676,True,included
+cohort_13,identity,Dendritic cells,patient_1488,ctrl,other,1985,2611352,579129,True,included
+cohort_13,identity,Dendritic cells,patient_1488,stim,focal,57,200890,86497,True,included
+cohort_13,identity,Dendritic cells,patient_1488,stim,other,2492,3567423,920770,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_101,ctrl,focal,72,197588,84389,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_101,ctrl,other,786,1243840,384859,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_101,stim,focal,112,298116,143156,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_101,stim,other,1054,1795195,665757,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1015,ctrl,focal,164,438020,192285,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1015,ctrl,other,2574,3886401,1239003,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1015,stim,focal,159,456242,237813,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1015,stim,other,2193,3690174,1438383,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1016,ctrl,focal,81,208274,82304,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1016,ctrl,other,1642,2054321,530568,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1016,stim,focal,89,235690,106550,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1016,stim,other,1546,2048190,632617,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1039,ctrl,focal,15,51013,24348,False,below_min_cells
+cohort_14,identity,FCGR3A+ Monocytes,patient_1039,ctrl,other,446,782163,334491,False,required_partner_below_min_cells
+cohort_14,identity,FCGR3A+ Monocytes,patient_1039,stim,focal,25,87268,44490,False,required_partner_below_min_cells
+cohort_14,identity,FCGR3A+ Monocytes,patient_1039,stim,other,616,1138407,521360,False,required_partner_below_min_cells
+cohort_14,identity,FCGR3A+ Monocytes,patient_107,ctrl,focal,24,67218,30692,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_107,ctrl,other,493,821951,305053,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_107,stim,focal,20,61135,28782,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_107,stim,other,505,890525,368659,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1244,ctrl,focal,41,121163,50399,False,required_partner_below_min_cells
+cohort_14,identity,FCGR3A+ Monocytes,patient_1244,ctrl,other,1838,2797367,730829,False,required_partner_below_min_cells
+cohort_14,identity,FCGR3A+ Monocytes,patient_1244,stim,focal,17,56108,28092,False,below_min_cells
+cohort_14,identity,FCGR3A+ Monocytes,patient_1244,stim,other,1447,2331246,716645,False,required_partner_below_min_cells
+cohort_14,identity,FCGR3A+ Monocytes,patient_1256,ctrl,focal,47,143636,65834,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1256,ctrl,other,2061,2999418,808147,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1256,stim,focal,57,195509,95027,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1256,stim,other,1969,3030847,951906,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1488,ctrl,focal,76,188376,80300,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1488,ctrl,other,1955,2583632,559505,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1488,stim,focal,90,231644,108223,True,included
+cohort_14,identity,FCGR3A+ Monocytes,patient_1488,stim,other,2459,3536669,899044,True,included
+cohort_15,identity,Megakaryocytes,patient_101,ctrl,focal,1,3565,2707,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_101,ctrl,other,857,1437863,466541,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_101,stim,focal,0,0,0,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_101,stim,other,1166,2093311,808913,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1015,ctrl,focal,1,4312,3456,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1015,ctrl,other,2737,4320109,1427832,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1015,stim,focal,3,13268,10368,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1015,stim,other,2349,4133148,1665828,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1016,ctrl,focal,1,5759,4408,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1016,ctrl,other,1722,2256836,608464,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1016,stim,focal,0,0,0,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1016,stim,other,1635,2283880,739167,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1039,ctrl,focal,53,125753,122477,True,included
+cohort_15,identity,Megakaryocytes,patient_1039,ctrl,other,408,707423,236362,True,included
+cohort_15,identity,Megakaryocytes,patient_1039,stim,focal,58,148735,143655,True,included
+cohort_15,identity,Megakaryocytes,patient_1039,stim,other,583,1076940,422195,True,included
+cohort_15,identity,Megakaryocytes,patient_107,ctrl,focal,0,0,0,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_107,ctrl,other,517,889169,335745,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_107,stim,focal,1,5543,4377,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_107,stim,other,524,946117,393064,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1244,ctrl,focal,1,4176,2718,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1244,ctrl,other,1878,2914354,778510,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1244,stim,focal,3,11158,7706,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1244,stim,other,1461,2376196,737031,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1256,ctrl,focal,2,6911,5048,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1256,ctrl,other,2106,3136143,868933,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1256,stim,focal,4,12804,9428,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1256,stim,other,2022,3213552,1037505,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1488,ctrl,focal,4,18121,14229,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1488,ctrl,other,2027,2753887,625576,False,required_partner_below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1488,stim,focal,0,0,0,False,below_min_cells
+cohort_15,identity,Megakaryocytes,patient_1488,stim,other,2549,3768313,1007267,False,required_partner_below_min_cells
+cohort_16,identity,NK cells,patient_101,ctrl,focal,65,57550,9254,True,included
+cohort_16,identity,NK cells,patient_101,ctrl,other,793,1383878,459994,True,included
+cohort_16,identity,NK cells,patient_101,stim,focal,84,78200,16296,True,included
+cohort_16,identity,NK cells,patient_101,stim,other,1082,2015111,792617,True,included
+cohort_16,identity,NK cells,patient_1015,ctrl,focal,179,177960,32281,True,included
+cohort_16,identity,NK cells,patient_1015,ctrl,other,2559,4146461,1399007,True,included
+cohort_16,identity,NK cells,patient_1015,stim,focal,175,192098,43237,True,included
+cohort_16,identity,NK cells,patient_1015,stim,other,2177,3954318,1632959,True,included
+cohort_16,identity,NK cells,patient_1016,ctrl,focal,90,79082,11534,True,included
+cohort_16,identity,NK cells,patient_1016,ctrl,other,1633,2183513,601338,True,included
+cohort_16,identity,NK cells,patient_1016,stim,focal,98,96100,19002,True,included
+cohort_16,identity,NK cells,patient_1016,stim,other,1537,2187780,720165,True,included
+cohort_16,identity,NK cells,patient_1039,ctrl,focal,21,22801,3909,True,included
+cohort_16,identity,NK cells,patient_1039,ctrl,other,440,810375,354930,True,included
+cohort_16,identity,NK cells,patient_1039,stim,focal,22,24059,5166,True,included
+cohort_16,identity,NK cells,patient_1039,stim,other,619,1201616,560684,True,included
+cohort_16,identity,NK cells,patient_107,ctrl,focal,37,33243,5536,True,included
+cohort_16,identity,NK cells,patient_107,ctrl,other,480,855926,330209,True,included
+cohort_16,identity,NK cells,patient_107,stim,focal,40,40274,9023,True,included
+cohort_16,identity,NK cells,patient_107,stim,other,485,911386,388418,True,included
+cohort_16,identity,NK cells,patient_1244,ctrl,focal,102,93366,15299,True,included
+cohort_16,identity,NK cells,patient_1244,ctrl,other,1777,2825164,765929,True,included
+cohort_16,identity,NK cells,patient_1244,stim,focal,107,110057,24273,True,included
+cohort_16,identity,NK cells,patient_1244,stim,other,1357,2277297,720464,True,included
+cohort_16,identity,NK cells,patient_1256,ctrl,focal,242,213089,34097,True,included
+cohort_16,identity,NK cells,patient_1256,ctrl,other,1866,2929965,839884,True,included
+cohort_16,identity,NK cells,patient_1256,stim,focal,186,177173,37422,True,included
+cohort_16,identity,NK cells,patient_1256,stim,other,1840,3049183,1009511,True,included
+cohort_16,identity,NK cells,patient_1488,ctrl,focal,119,102821,15825,True,included
+cohort_16,identity,NK cells,patient_1488,ctrl,other,1912,2669187,623980,True,included
+cohort_16,identity,NK cells,patient_1488,stim,focal,149,139963,30713,True,included
+cohort_16,identity,NK cells,patient_1488,stim,other,2400,3628350,976554,True,included

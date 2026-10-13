@@ -11,7 +11,8 @@ How to use this guide
 ::::
 ::::{.inner_block}
 - **Understand where the included results came from:** read the roadmap and the explanations in each stage. You do not need the large files or a model rerun.
-- **Rebuild tables or figures:** begin with the included selected-model outputs, then run the export, directionality, or figure-building stage you want to check.
+- **Redraw figures from saved results:** go directly to [Regenerate The Displayed Figures](#regenerate-the-displayed-figures). This route uses included tables and saves new figures in a separate folder. It does not need a model download or the earlier reproduction stages.
+- **Recalculate expression comparisons:** follow [Rebuild Directionality Evidence](#rebuild-directionality-evidence) using the larger source-count file and included top-gene tables. You can check source-wide counts per million and the optional TMM comparison without fitting or downloading a model.
 - **Complete the full local R reproduction:** obtain the larger source files, rebuild preprocessing, fit the selected `K = 6` R model, and recreate its diagnostics and interpretation files.
 
 The high-performance-computing rank sweep is an optional extension. It is explained near the end so that you can study its design without making cluster work part of the local reproduction route.
@@ -20,12 +21,13 @@ The high-performance-computing rank sweep is an optional extension. It is explai
 
 ## Choose What You Want To Rebuild
 
-The three routes share the same scripts and output folders, but they begin at different points.
+The routes begin at different points. The figure-only command saves its outputs separately from the included results.
 
 | Your goal | Begin with | Stop when |
 |---|---|---|
 | Understand the evidence chain | The [Reproduction Roadmap](#reproduction-roadmap) | You can explain how source data become the tables and figures used in the analysis. |
 | Rebuild selected outputs | The full selected R model or the included compact tables | The diagnostic tables, directionality summaries, or figures you need have been recreated. |
+| Recalculate expression comparisons and check normalization | The larger source-count file, included prepared data and top-gene tables | New paired-donor comparisons and normalization checks are saved separately from the included results. |
 | Complete the full local R reproduction | The larger PBMC source file and the validated Docker image | The prepared dataset, selected R model, diagnostics, compact analysis tables, directionality summaries, and figures have all been checked. |
 
 The selected local model uses `K = 6`, `seed = 2`, 2,000 iterations per phase, and sparse optimization. R/Bioconductor CoGAPS is the primary implementation. A separate optional section shows how the Python-compatible output was produced, but it is not a required second route through the guide.
@@ -45,7 +47,7 @@ Open the record's **Files** list and use **Download** beside each file you need.
 | Your goal | Additional files to download |
 | --- | --- |
 | Follow the main learner path or redraw figures from included tables | None |
-| Rebuild preprocessing from the supplied source (Stage 2) | `kang_counts_25k.h5ad` |
+| Rebuild preprocessing (Stage 2) or recalculate expression comparisons (Stage 5) | `kang_counts_25k.h5ad` |
 | Fit a new R model from included prepared data (Stage 3) | None; the full R result is an output, not an input |
 | Inspect the saved R model or regenerate its exports (Stage 4) | `cogaps_K6_seed2_iter2000.rds` |
 | Fit a new Python model (optional extension) | `cogaps_input_genesxcells_hvg3000_float64.h5ad`, unless you generated it in Stage 2 |
@@ -88,7 +90,7 @@ Keep these three local folders distinct:
 
 Before starting a long run, confirm that you have enough local storage for the downloaded archive and regenerated model files. Runtime depends on the computer, Docker architecture, diagnostic settings, and thread support. The selected-model section therefore shows what progress should look like instead of promising one universal runtime.
 
-Obtain a separate working project using either download route in [Main learner setup](#main-learner-setup). In the **Host Terminal**, change to that working project's root and confirm it contains `index.qmd`, `scripts/`, and `data/`. Use image `0.3.1` and the updated preparation script described in Stage 2; the image alone does not update scripts in a mounted project.
+Obtain a separate working project using either download route in [Main learner setup](#main-learner-setup). In the **Host Terminal**, change to that working project's root and confirm it contains `index.qmd`, `scripts/`, and `data/`. Use image `0.3.2` and the updated project scripts; the image alone does not update scripts in a mounted project. This image includes `edgeR` for the optional Stage 5 normalization comparison. Follow the setup instructions to replace an older running container before using it.
 
 For a route requiring archive files, use the reference folder populated by the downloads above. This release provides individual files, not a ZIP preserving project folders; there is no archive to extract. Replace the example archive path below with that real, populated folder. Do not point Docker to an empty directory or to your browser's general Downloads folder containing unrelated files.
 
@@ -108,7 +110,7 @@ docker run --platform linux/amd64 --rm -it \
   -e PASSWORD="Password12" \
   -v "$PWD":/home/rstudio/project:rw \
   --mount "type=bind,source=$CS4_REPRODUCTION_ARCHIVE,target=/home/rstudio/project/data/external/reproduction_archive,readonly" \
-  othomas2/pycogaps-runtime-guide:0.3.1
+  othomas2/pycogaps-runtime-guide:0.3.2
 ```
 
 Inside Docker, the working project appears at `/home/rstudio/project`, and the reference archive appears at `/home/rstudio/project/data/external/reproduction_archive`. The archive mount is read-only; the working project's output folders are writable. A missing archive directory causes this bind mount to fail instead of silently creating one. An existing but empty directory still needs the Stage 1 check.
@@ -181,8 +183,8 @@ You only need files associated with the stage you intend to run. Open the invent
 <tr>
 <td><strong>Full local reproduction</strong></td>
 <td><code style="overflow-wrap:anywhere;">data/source/kang_counts_25k.h5ad</code></td>
-<td>Larger source PBMC IFN-beta single-cell count file used to rebuild preprocessing from source counts.</td>
-<td>Needed only if you rebuild the prepared PBMC dataset.</td>
+<td>Larger source PBMC IFN-beta count file containing all 15,706 source genes.</td>
+<td>Needed to rebuild preprocessing or recalculate expression comparisons and normalization checks.</td>
 </tr>
 <tr>
 <td><strong>Full local reproduction</strong></td>
@@ -211,7 +213,7 @@ You only need files associated with the stage you intend to run. Open the invent
 </tbody>
 </table>
 
-The included files are enough to read the case study, rerun its summaries, and inspect the selected model evidence. The larger files are only needed to rebuild preprocessing, refit a model, or inspect a full saved model object.
+The included files are enough to read the case study, rerun its summaries, and inspect the selected model evidence. The larger files are needed only for source-count recalculation, rebuilding preprocessing, refitting a model, or inspecting a full saved model object.
 
 </details>
 
@@ -239,6 +241,8 @@ cd /home/rstudio/project
 ```
 
 Replace `preprocess` with the route you need. To fit R from the included prepared data, use `--route fit-r`: a full Python model and a pre-existing R model are not prerequisites.
+
+For Stage 5 expression recalculation, use `--route preprocess` only to check and locate the same source-count file; you do not need to run preprocessing. Stage 5 then performs the additional count, metadata and checksum checks needed for its comparison.
 
 | Reported status | What to do |
 | --- | --- |
@@ -660,8 +664,8 @@ The complete R output map is available below for reference. You do not need to m
 </tr>
 <tr>
 <td><strong>Rebuild directionality evidence</strong><br><code style="overflow-wrap:anywhere;">pattern_directionality_analysis_r.R</code></td>
-<td>Prepared expression values, selected-model top genes, donor labels, condition labels, and annotated PBMC identities.</td>
-<td>Global and cell-type directionality tables, pattern direction summary, pseudobulk support tables, and directionality heatmap.</td>
+<td>Prepared raw counts and metadata, the full R model, and verified source-wide totals from Stage 5.</td>
+<td>Global and cell-type stimulation contrasts, donor and cell-count summaries, a method record and a heatmap in a new output folder. Normalization sensitivity is checked separately.</td>
 <td>Shows whether high-weight pattern genes are higher or lower after IFN-beta stimulation; this prevents interpreting CoGAPS weights as expression direction.</td>
 </tr>
 </tbody>
@@ -947,83 +951,149 @@ Both snippets read the same R-selected-model summary. The check should return on
 
 The selected-model exports show which genes have high CoGAPS weights and where each pattern is active. They do not show whether a high-weight gene increases or decreases after IFN-beta stimulation. This stage separates recalculating that expression-direction evidence from redrawing figures using saved tables.
 
-If you only want to redraw the included selected R figures, skip directly to [Regenerate The Displayed Figures](#regenerate-the-displayed-figures). That step uses compact files already included in the project; it does not need a full model, a source H5AD, or a new fit. Work in the separate reproduction working project described in [Before You Begin](#before-you-begin), because the commands below replace outputs at their usual paths.
+If you only want to redraw the included selected R figures, skip directly to [Regenerate The Displayed Figures](#regenerate-the-displayed-figures). That command uses saved tables already included in the project and writes to a new folder. It does not need a full model, a source H5AD, or a new fit. Keep using the separate reproduction working project described in [Before You Begin](#before-you-begin) for steps that recalculate results.
 
 ### Rebuild Directionality Evidence
 
-The R model export tells you which genes have high CoGAPS weights. It does not tell you whether those genes are higher after IFN-beta stimulation. Directionality is rebuilt with a separate expression-contrast script. Choose the command that matches the selected-model outputs you are rebuilding.
+This route recalculates the comparisons explained in Data Analysis from raw counts, not the normalized and log-transformed matrix supplied to CoGAPS. The source-wide calculation uses total counts across all 15,706 source genes for the same cells contributing to each numerator. The 3,000 modeled genes remain unchanged.
 
-Unlike the figure builder below, these scripts read the **full saved model** and its corresponding prepared H5AD. The R command needs the `.rds` result; the Python command needs the full Python model `.h5ad`. Each script extracts top genes from that model, calculates expression contrasts, and replaces directionality outputs in that language's selected-model folder. The Python script also replaces `pattern_top_genes.csv` and its output-folder `README.md`. Neither command fits a model. Skip these commands when you only want to plot the included results.
+Use the separate reproduction working project and obtain `kang_counts_25k.h5ad` through [Download The Files For Your Route](#download-the-files-for-your-route). Follow Stage 1 to verify and place it at `data/source/kang_counts_25k.h5ad`. Keep the included prepared dataset for a comparison with the lesson's saved results; you do not need to repeat Stages 2 through 4.
+
+All commands below run in the **RStudio Terminal inside the container**, for both R and Python learners. They save new files under `learner_outputs/recalculated_expression/`; they do not replace included results. Choose a new folder name throughout if you have used this example before. The scripts refuse nonempty output folders rather than overwrite earlier results.
+
+#### Verify The Source Counts
+
+First check that the source and prepared files describe the same cells and that their retained raw counts and donor, condition and cell-type labels agree. The command also verifies the source file against the archive checksum.
+
+**RStudio Terminal inside the container**
+
+```bash
+cd /home/rstudio/project
+/opt/cogaps-venv/bin/python scripts/directionality_normalization.py \
+  --source-h5ad data/source/kang_counts_25k.h5ad \
+  --preprocessed-h5ad data/processed/input/preprocessed_cells_hvg3000.h5ad \
+  --outdir learner_outputs/recalculated_expression/normalization
+```
+
+Expect `Verified 24673 cells; 3000 modeled genes; 15706 source genes.` The new `normalization/` folder contains per-cell source totals in `source_library_totals.csv`, gene lists in `source_genes.csv` and `modeled_genes.csv`, and `normalization_manifest.json`. This manifest records file identities and the checks just performed; later commands require it. If verification fails, check the source and prepared files rather than substituting totals from the 3,000 modeled genes or transformed expression values.
+
+#### Compare Normalization Methods
+
+This optional calculation repeats the stimulation and cell-identity comparisons under three normalization methods: counts per million (CPM) using the 3,000 modeled genes, CPM using all source genes, and the trimmed mean of M-values (TMM) adjustment described in Data Analysis. It holds the eligible donors and the 0.5-CPM pseudocount fixed. The cell-identity comparison pools raw counts from all other cell types within each donor and condition; it does not average cell-type CPM values.
+
+Check that you are using the environment with `edgeR` installed before starting:
+
+**RStudio Terminal inside the container**
+
+```bash
+Rscript -e 'stopifnot(as.character(packageVersion("edgeR")) == "4.0.16"); cat("edgeR", as.character(packageVersion("edgeR")), "\n")'
+```
+
+The following command uses the included R and Python top-gene exports. You do **not** need either full model file. The script calls `edgeR` through R automatically; do not run a second TMM command yourself.
+
+**RStudio Terminal inside the container**
+
+```bash
+cd /home/rstudio/project
+/opt/cogaps-venv/bin/python scripts/directionality_sensitivity.py \
+  --source-h5ad data/source/kang_counts_25k.h5ad \
+  --preprocessed-h5ad data/processed/input/preprocessed_cells_hvg3000.h5ad \
+  --normalization-manifest learner_outputs/recalculated_expression/normalization/normalization_manifest.json \
+  --r-directionality-dir data/processed/selected_model_k6/directionality_source_wide/r \
+  --python-directionality-dir data/processed/selected_model_k6/directionality_source_wide/python \
+  --outdir learner_outputs/recalculated_expression/sensitivity
+```
+
+The command checks that the top-gene exports and normalization files refer to the same source and prepared data. It prints a summary by comparison type when finished. In that summary, `size` counts the gene comparisons and `sum` counts those whose mean has the same sign under all three methods. In the **Files** pane, open **Home > project > learner_outputs > recalculated_expression > sensitivity** to inspect the new tables. No CoGAPS fitting or differential-expression test is performed.
+
+<table class="table table-sm" style="width:100%; table-layout:fixed; overflow-wrap:anywhere; font-size:0.88rem; line-height:1.35;">
+<colgroup><col style="width:43%;"><col style="width:57%;"></colgroup>
+<thead><tr><th scope="col">File in the new <code>sensitivity/</code> folder</th><th scope="col">What to inspect</th></tr></thead>
+<tbody>
+<tr><td><code>donor_contrasts.csv</code></td><td>Each eligible donor's contrast under each normalization.</td></tr>
+<tr><td><code>contrast_summary.csv</code><br><code>normalization_comparison.csv</code></td><td>Mean and median contrasts, positive/negative/zero donor counts, and whether the mean sign changes across methods.</td></tr>
+<tr><td><code>stimulation_source_summary.csv</code><br><code>identity_source_summary.csv</code></td><td>The two distinct comparisons using all-source-gene CPM, with normalization checks alongside them.</td></tr>
+<tr><td><code>r_gene_report_global.csv</code><br><code>r_gene_report_by_celltype.csv</code><br><code>r_gene_report_identity.csv</code></td><td>The same evidence joined to the R pattern gene lists. Matching <code>python_gene_report_*.csv</code> files use Python's pattern labels.</td></tr>
+<tr><td><code>donor_eligibility.csv</code><br><code>eligible_donors_by_scope.csv</code></td><td>Which donors meet the cell-count requirement and how many contribute to each comparison.</td></tr>
+<tr><td><code>tmm/tmm_factors.csv</code><br><code>tmm/tmm_method.json</code><br><code>sensitivity_method.json</code></td><td>Normalization factors, software settings and input/output file records.</td></tr>
+</tbody>
+</table>
+
+Keep donor counts separate from normalization agreement when interpreting these files. A mean can keep the same sign across methods even when donors differ in direction or only one donor contributes. Agreement is not a significance test or proof of an absolute RNA change. TMM is a sensitivity check, not a replacement for the source-wide CPM results used in the lesson.
+
+#### Check Your Recalculated Tables
+
+For the included inputs, the following check compares 15 regenerated summary and donor-level CSVs with the lesson's saved tables, allowing only tiny floating-point differences. It uses the default output folder above; adjust that path if you chose another name. Run this check only after completing the normalization comparison.
+
+**RStudio Terminal inside the container**
+
+```bash
+cd /home/rstudio/project
+/opt/cogaps-venv/bin/python - <<'PY'
+from pathlib import Path
+import pandas as pd
+
+saved = Path("data/processed/selected_model_k6/directionality_source_wide/sensitivity")
+rebuilt = Path("learner_outputs/recalculated_expression/sensitivity")
+files = sorted(saved.glob("*.csv"))
+assert len(files) == 15, "Expected the 15 included sensitivity tables"
+for path in files:
+    expected = pd.read_csv(path)
+    actual = pd.read_csv(rebuilt / path.name)
+    pd.testing.assert_frame_equal(expected, actual, check_exact=False,
+                                  rtol=1e-12, atol=1e-12)
+    print("Matches:", path.name)
+PY
+```
+
+Expect one `Matches:` line for every table and no error. This checks reproduction of the saved calculation, not its biological validity. If you intentionally change the data or gene lists, agreement is no longer expected: inspect and explain the differences before interpreting the new results. Do not replace included files merely to make a check pass.
+
+#### Optional: Extract Genes From A Full Saved Model
+
+<details>
+<summary><strong>Recreate source-wide stimulation tables from a full R or Python result</strong></summary>
+
+Skip this step if you used the included gene lists above. Use it only to extract top genes directly from a full saved model and recalculate their stimulation contrasts. Download and verify the model for your chosen language, or use a model you deliberately fitted in the separate working project. The R route does not require the Python model. Complete **Verify The Source Counts** first.
+
+Both commands use raw counts from the prepared `counts` layer and the verified all-source-gene totals. Each writes to its own new folder and neither fits a model. Run just the language you need.
 
 ::: {.panel-tabset}
 
-#### R
+##### R
 
 **RStudio Terminal inside the container**
 
 ```bash
 cd /home/rstudio/project
-Rscript scripts/pattern_directionality_analysis_r.R
+Rscript scripts/pattern_directionality_analysis_r.R \
+  --result-rds data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds \
+  --preprocessed-h5ad data/processed/input/preprocessed_cells_hvg3000.h5ad \
+  --normalization-manifest learner_outputs/recalculated_expression/normalization/normalization_manifest.json \
+  --outdir learner_outputs/recalculated_expression/r
 ```
 
-#### Python
+##### Python
 
 **RStudio Terminal inside the container**
 
 ```bash
 cd /home/rstudio/project
-/opt/cogaps-venv/bin/python scripts/pattern_directionality_analysis.py
+COGAPS_RESULT_H5AD=data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad \
+COGAPS_PREPROCESSED_H5AD=data/processed/input/preprocessed_cells_hvg3000.h5ad \
+COGAPS_NORMALIZATION_MANIFEST=learner_outputs/recalculated_expression/normalization/normalization_manifest.json \
+COGAPS_OUT_DIR=learner_outputs/recalculated_expression/python \
+  /opt/cogaps-venv/bin/python scripts/pattern_directionality_analysis.py
 ```
 
 :::
 
-This script uses the prepared expression values, selected model top genes, donor labels, condition labels, and annotated PBMC identities. It builds pseudobulk summaries and compares IFN-beta-stimulated aliquots with matched control aliquots.
+In your new language folder, inspect `pattern_gene_directionality_global.csv`, `pattern_gene_directionality_by_celltype.csv`, the corresponding `pattern_gene_directionality_pairs_*.csv` donor tables, and `pseudobulk_eligibility_*.csv`. `directionality_method.json` records the inputs and calculation. The R gene list is `pattern_top_genes_directionality.csv`; the Python gene list is `pattern_top_genes.csv`. The Python command also creates a README in this new folder, not in the included-results folder.
 
-The main outputs are:
+These exports report source-wide stimulation contrasts only. Their normalization field says **not assessed** because this command does not compare normalization methods or calculate the pooled-other cell-identity contrasts. Its heatmap is an additional stimulation view, not a replacement for the lesson's donor-count and normalization displays.
 
-<table class="table table-sm" style="width: 100%; table-layout: fixed; font-size: 0.88rem; line-height: 1.35;">
-<colgroup>
-<col style="width: 34%;">
-<col style="width: 44%;">
-<col style="width: 22%;">
-</colgroup>
-<thead>
-<tr>
-<th>Directionality output</th>
-<th>What it contains</th>
-<th>Why it matters</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code style="overflow-wrap:anywhere;">pattern_gene_directionality_global.csv</code></td>
-<td>Gene-level IFN-beta versus control contrasts across all cells.</td>
-<td>Checks whether top genes rise or fall overall.</td>
-</tr>
-<tr>
-<td><code style="overflow-wrap:anywhere;">pattern_gene_directionality_by_celltype.csv</code></td>
-<td>Gene-level contrasts within annotated PBMC identities.</td>
-<td>Checks whether direction is consistent or cell-type-specific.</td>
-</tr>
-<tr>
-<td><code style="overflow-wrap:anywhere;">pattern_direction_summary.csv</code></td>
-<td>One row per pattern summarizing how many top genes are higher or lower after stimulation.</td>
-<td>Supports pattern-level direction interpretation.</td>
-</tr>
-<tr>
-<td><code style="overflow-wrap:anywhere;">pseudobulk_counts_global.csv</code><br><code style="overflow-wrap:anywhere;">pseudobulk_counts_by_celltype.csv</code></td>
-<td>Support files showing how many observations contributed to the expression summaries.</td>
-<td>Helps check whether a contrast is based on enough cells.</td>
-</tr>
-<tr>
-<td><code style="overflow-wrap:anywhere;">pattern_gene_directionality_heatmap.png</code></td>
-<td>Heatmap of global top-gene contrasts, grouped by pattern; not a cell-type-specific heatmap.</td>
-<td>Useful for quick review after rerunning the directionality script.</td>
-</tr>
-</tbody>
-</table>
+To compare normalization using a newly exported gene list, rerun **Compare Normalization Methods** with its corresponding `--r-directionality-dir` or `--python-directionality-dir` pointing to the new language folder. Keep the other argument pointing to the included exports if you did not regenerate that language. Choose a new `--outdir`, such as `learner_outputs/recalculated_expression/sensitivity_from_exports`. Every input must refer to the same source and prepared data. For changed prepared data, do not mix new exports with the included exports; regenerate both gene lists from models based on that data before running this two-language comparison.
 
-The directionality step is part of the evidence chain because CoGAPS weights and expression fold-changes answer different questions. A gene can strongly define a pattern and still move in either direction after stimulation. The case study therefore interprets gene weights and expression direction together.
+</details>
 
 ### Check The R Output Folder
 
@@ -1036,16 +1106,20 @@ cd /home/rstudio/project
 find data/processed/selected_model_k6/r -maxdepth 1 -type f | sort
 ```
 
-For a full R rebuild, expect the full selected model, diagnostic files, lightweight matrices, activity summaries, top-gene tables, and directionality summaries. For a figure-only check, use the input list below. A directory listing confirms file presence only; it does not establish that tables came from the same run or are scientifically current.
+For a full R rebuild, expect the full selected model, diagnostic files, lightweight matrices, activity summaries and top-gene tables here. The Stage 5 commands write new expression comparisons separately under `learner_outputs/recalculated_expression/`, not into this selected-model folder. For a figure-only check, use the input list below. A directory listing confirms file presence only; it does not establish that tables came from the same run or are scientifically current.
 
 ### Regenerate The Displayed Figures
 
-The existing figure builder redraws the static selected R figures and their figure-source tables. R users run this same command in the container Terminal; it uses Python internally but does not require a Python model. It does not recreate every plot or illustration on the page.
+This command redraws the static selected R figures from the included saved results. It also saves the values plotted in each main figure as a table. Run it after completing [Main learner setup](#main-learner-setup); you can skip the earlier reproduction stages and all Zenodo downloads for this route.
 
-The default command reads these eight files from `data/processed/selected_model_k6/r/`:
+R users run this same command in the container Terminal. The script uses Python, which is already installed in the case-study image, but does not require a Python model or session. It does not fit CoGAPS, recalculate expression comparisons, or estimate normalization factors. It does not recreate every plot or illustration in the lesson.
+
+The command reads the selected R model summaries and the saved gene-expression comparisons used in the lesson:
 
 <details>
-<summary><strong>Required compact inputs for the R figure builder</strong></summary>
+<summary><strong>Which included files does this command use?</strong></summary>
+
+Five files in `data/processed/selected_model_k6/r/` provide the run settings, pattern summaries, cell activities, donor labels, and inherited UMAP coordinates:
 
 ```text
 cogaps_K6_seed2_iter2000.metrics.json
@@ -1053,30 +1127,31 @@ pattern_summary.csv
 pattern_activity_by_celltype_condition.csv
 pattern_activity_by_replicate_condition.csv
 pattern_cell_activities_with_metadata.csv.gz
-pattern_gene_directionality_global.csv
-pseudobulk_counts_global.csv
-pseudobulk_counts_by_celltype.csv
 ```
 
-The metrics identify this run's IFN-associated pattern. The summary and activity tables supply the pattern, cell-type, donor, and UMAP views. The directionality and pseudobulk tables supply the gene-expression comparisons. All eight must describe the same selected R result. A ninth file, `pattern_gene_directionality_heatmap.png`, is optional for the builder: if present, it is copied unchanged, not recalculated.
+The folder `data/processed/selected_model_k6/directionality_source_wide/` supplies the expression comparisons, donor counts, and normalization checks. Within it, the figures use `r/pattern_gene_directionality_global.csv`, `sensitivity/stimulation_source_summary.csv`, and `sensitivity/identity_source_summary.csv`. Keep the entire folder: its other tables and manifests let the script check file integrity and confirm that the inputs belong together.
+
+Before drawing, the script checks these files against their recorded checksums and checks that the stimulation comparisons agree. These checks detect missing, altered, or mismatched expression files; they do not establish scientific correctness. If a check fails, restore the matching included files rather than substituting older directionality tables.
 
 </details>
 
-**Before running:** the default command replaces generated figures in `data/processed/figures/`, matching display copies in `img/`, and seven figure-source tables in `data/processed/figures/source_tables/r/`. Use your separate reproduction working project. It leaves the selected-model input tables and the Python figure-source tables unchanged.
+**Before running:** choose a new output folder. The example creates `learner_outputs/rebuilt_r_figures/` and leaves the included data, figures, and page unchanged. If that folder already exists, the script stops. Choose another name, such as `learner_outputs/rebuilt_r_figures_2`, to repeat the check without replacing your earlier results.
 
 **RStudio Terminal inside the container**
 
 ```bash
 cd /home/rstudio/project
-/opt/cogaps-venv/bin/python scripts/build_selected_k6_figures.py
+/opt/cogaps-venv/bin/python scripts/build_selected_k6_figures.py \
+  --included-r-results \
+  --output-dir learner_outputs/rebuilt_r_figures
 ```
 
-Wait for the command to finish without an error and print `Wrote figures to` and `Wrote source tables to`. With the included six-pattern R inputs, it draws **15 PNGs** and writes **seven source tables**. If the optional directionality heatmap is present, it copies that file to both figure folders as a sixteenth PNG. If it is absent, the script does not create it or remove an older copy already in a destination folder; do not mistake an old image for a newly rebuilt one.
+Wait for the command to finish without an error and print `Wrote figures to` and `Wrote source tables to`. With the included six-pattern R inputs, it draws **15 PNGs** in your new folder and writes **seven source tables** in its `source_tables/` subfolder. All 15 images are drawn from the saved inputs; the command does not copy an older directionality heatmap into the output folder.
 
 <details>
 <summary><strong>Exact static-figure and source-table outputs</strong></summary>
 
-The following 15 PNGs are generated under both `data/processed/figures/` and `img/`:
+The following 15 PNGs are generated under `learner_outputs/rebuilt_r_figures/` when you use the example command:
 
 ```text
 figure_viz_pattern_condition_overview.png
@@ -1096,9 +1171,7 @@ ifn_pattern_by_celltype_all.png
 mean_pattern_by_condition.png
 ```
 
-The optional copied file is `pattern_gene_directionality_heatmap.png`. Creating a new version of that image requires the directionality script, not this figure builder.
-
-The following seven tables are written under `data/processed/figures/source_tables/r/`:
+The following seven tables are written under `learner_outputs/rebuilt_r_figures/source_tables/`:
 
 ```text
 figure_viz_pattern_condition_overview_source.csv
@@ -1116,9 +1189,9 @@ The six UMAP images share one long-format source table. The three additional act
 
 ### Open Your Figures
 
-In RStudio's **Files** pane, open **Home > project > data > processed > figures**. Refresh the file listing and click a PNG, such as `figure_viz_ifn_replicate_pairs.png`.
+In RStudio's **Files** pane, open **Home > project > learner_outputs > rebuilt_r_figures**. If you chose a different output folder, open that folder instead. Refresh the file listing and click a PNG, such as `figure_viz_ifn_replicate_pairs.png`.
 
-Check that the axes, labels, and plotted values are clear, then compare the figure with its corresponding source table.
+Check that the axes, labels, and plotted values are clear, then compare the figure with its corresponding table in `source_tables/`. In the top-gene directionality figure, for example, the donor counts beside each gene should match the table's positive, negative, and zero counts. These figures describe the included saved R run, not a new model you may have fitted separately. You can stop here if redrawing these figures was your goal.
 
 ### Draw The R Diagnostic Plots
 
@@ -1179,19 +1252,19 @@ ggplot2::ggsave(
 )
 ```
 
-Open the three PNGs from the **Files** pane using the folder described above. Check that the full trace shows both phases, the sampling-only trace shows smaller changes on its explicitly expanded vertical scale, and the snapshot plot shows gene-weight overlap for both phases. Use the discussion beside the original plotting chunks to interpret them; successfully saving a plot is not itself evidence of model convergence.
+These R commands save to a different folder: open **Home > project > data > processed > figures** in the **Files** pane to inspect the three diagnostic PNGs. Check that the full trace shows both phases, the sampling-only trace shows smaller changes on its explicitly expanded vertical scale, and the snapshot plot shows gene-weight overlap for both phases. Use the discussion beside the original plotting chunks to interpret them; successfully saving a plot is not itself evidence of model convergence.
 
 ### Which Plots Are Built Somewhere Else?
 
 - **Full-run trace, sampling-only trace, and snapshot stability:** follow [Draw The R Diagnostic Plots](#draw-the-r-diagnostic-plots) above to use the R plotting chunks and save three PNGs. The Stage 4 diagnostic exporter creates the CSVs, not PNGs. The static figure builder does not create these plots.
-- **Plots produced by the lesson's R and Python chunks:** these are created when you run those chunks in the appropriate session. They are separate drawings, not necessarily pixel-identical copies of the static figures. The default R figure-builder command does not refresh `data/processed/figures/source_tables/python/`.
+- **Plots produced by the lesson's R and Python chunks:** these are created when you run those chunks in the appropriate session. They are separate drawings, not necessarily pixel-identical copies of the static figures. The included-R figure command does not change the Python figure-source tables.
 - **Opening atlas, setup illustrations, and externally sourced figures:** these are separate assets and are not rebuilt by this command.
 
-**Stage 5 checkpoint:** For a figure-only check, the command completes, the 15 generated PNGs and seven source tables are present, and you can open and inspect a PNG directly. Account separately for the optional copied heatmap and the plots generated by lesson chunks. If you also recalculated directionality, check its output tables and their correspondence to the selected model before using the new figures for interpretation.
+**Stage 5 checkpoint:** For a figure-only check, the command completes, the 15 generated PNGs and seven source tables are present in your new output folder, and you can open and inspect a PNG directly. The original results remain unchanged. Diagnostic plots and plots generated by lesson chunks are separate from these 15 images. If you also recalculated directionality, check its output tables and their correspondence to the selected model before using those new results for interpretation; the command above redraws the included results only.
 
 ## Stage 6: Confirm The Reproduction
 
-A successful script exit is necessary, but it is not the only check. Confirm that the regenerated files still represent the intended dataset and model.
+A successful script exit is necessary, but it is not the only check. Confirm that the regenerated files still represent the intended dataset and model. Check only the stages you completed: a figure-only or source-count comparison route does not require a full model file.
 
 | Check | Expected result | Why it matters |
 |---|---|---|
@@ -1199,10 +1272,10 @@ A successful script exit is necessary, but it is not the only check. Confirm tha
 | Selected settings | `K = 6`, seed 2, 2,000 iterations per phase, and sparse optimization enabled | Confirms that the regenerated model matches the selected specification. |
 | Pattern structure | Six gene-weight and cell-activity columns with aligned pattern labels | Confirms that the compact exports describe the complete selected model. |
 | Diagnostics | Trace, snapshot, uncertainty, metrics, and available pump files are present for R | Confirms that the evidence needed to evaluate the R run was exported. |
-| Directionality | Global, cell-type, paired, and pseudobulk support tables are present | Confirms that expression direction can be interpreted separately from CoGAPS weights. |
-| Display files | Figures were rebuilt after their source tables | Confirms that the page displays the current evidence. |
+| Expression recalculation | Verified source totals and new donor-level, summary and normalization tables under `learner_outputs/recalculated_expression/`; the Stage 5 comparison check passes for unchanged inputs | Confirms that the new calculation agrees with the included comparisons without replacing them. |
+| Display files | The figure-only route creates 15 PNGs and seven source tables in its new output folder | Confirms that the included results can be redrawn; this command does not plot newly recalculated results or update the page. |
 
-The checks below summarize the selected-model folder. Choose the tab matching the result you rebuilt; the Python tab is only needed for the optional Python extension. These checks do not decide whether the biological interpretation is correct; they confirm that the expected evidence files are available and internally complete.
+The checks below apply when you regenerated model exports in Stage 4 or the Python extension. Skip them for a figure-only or source-count comparison route and use that route's Stage 5 checks instead. Choose the tab matching the model you used. These checks confirm file presence and the number of patterns, not biological correctness or complete agreement among files.
 
 ::: {.panel-tabset}
 
@@ -1219,14 +1292,12 @@ r_check <- data.frame(
     "pattern rows",
     "trace file",
     "uncertainty file",
-    "directionality file",
     "full R model"
   ),
   value = c(
     as.character(nrow(readr::read_csv(file.path(r_dir, "pattern_summary.csv"), show_col_types = FALSE))),
     file.exists(file.path(r_dir, "cogaps_K6_seed2_iter2000.trace.csv")),
     file.exists(file.path(r_dir, "cogaps_K6_seed2_iter2000.pattern_uncertainty_summary.csv")),
-    file.exists(file.path(r_dir, "pattern_gene_directionality_global.csv")),
     file.exists(file.path(r_dir, "cogaps_K6_seed2_iter2000.rds"))
   )
 )
@@ -1251,13 +1322,11 @@ py_check = pd.DataFrame(
         "check": [
             "pattern rows",
             "metrics file",
-            "directionality file",
             "full Python-compatible model",
         ],
         "value": [
             len(pd.read_csv(py_dir / "pattern_summary.csv")),
             (py_dir / "cogaps_K6_seed2_iter2000.metrics.json").exists(),
-            (py_dir / "pattern_gene_directionality_global.csv").exists(),
             (py_dir / "cogaps_K6_seed2_iter2000.h5ad").exists(),
         ],
     }
@@ -1300,17 +1369,16 @@ The result is written under `data/processed/selected_model_k6/python/`. If a ful
 FORCE_RERUN=1 bash scripts/reproduction/run_selected_model_python.sh
 ```
 
-The Python-compatible launcher uses `nSnapshots = 0` because its snapshot-conversion route does not provide the same reliable diagnostic export used by R. After model fitting completes, return to the **RStudio Terminal inside the container** to create the compact tables and directionality summaries:
+The Python-compatible launcher uses `nSnapshots = 0` because its snapshot-conversion route does not provide the same reliable diagnostic export used by R. After model fitting completes, return to the **RStudio Terminal inside the container** to create the compact tables:
 
 **RStudio Terminal inside the container**
 
 ```bash
 cd /home/rstudio/project
 /opt/cogaps-venv/bin/python scripts/export_lightweight_cogaps_derivatives.py
-/opt/cogaps-venv/bin/python scripts/pattern_directionality_analysis.py
 ```
 
-Check the Python-compatible folder with the Python tab in Stage 6. Compare biological evidence by cell activity, top genes, condition association, and cell-type structure rather than assuming that the same pattern number must be recovered in both implementations.
+Check the Python-compatible folder with the Python tab in Stage 6. For expression comparisons, follow [Rebuild Directionality Evidence](#rebuild-directionality-evidence), including source-count verification and the optional Python full-model export. Those comparisons are saved separately. Compare biological evidence by cell activity, top genes, condition association, and cell-type structure rather than assuming that the same pattern number must be recovered in both implementations.
 
 **Python extension checkpoint:** The full H5AD result, metrics JSON, six-row pattern summary, gene-weight and cell-activity files, and directionality tables are present. Pattern labels may differ from R, but the evidence used to match corresponding signals should be available.
 
@@ -1686,6 +1754,24 @@ scripts_to_show <- list(
     path = "scripts/reproduction/hpc_sweep/phase3_highk_fragmentation_analysis.py",
     language = "python",
     note = "Summarizes high-rank sweep behavior and fragmentation evidence."
+  ),
+  list(
+    title = "19. Verify source-wide count totals",
+    path = "scripts/directionality_normalization.py",
+    language = "python",
+    note = "Checks the source identity and its agreement with prepared raw counts and metadata, then records totals over all source genes."
+  ),
+  list(
+    title = "20. Compare expression normalization methods",
+    path = "scripts/directionality_sensitivity.py",
+    language = "python",
+    note = "Recalculates paired stimulation and pooled-other cell-identity comparisons with three normalizations; writes separate donor counts and sensitivity flags."
+  ),
+  list(
+    title = "21. Calculate TMM factors",
+    path = "scripts/calculate_tmm_factors.R",
+    language = "r",
+    note = "Called automatically by the normalization comparison to calculate edgeR TMM factors from source-gene pseudobulk counts. It does not perform a differential-expression test."
   )
 )
 
@@ -1699,16 +1785,18 @@ for (script in scripts_to_show) {
 The validated runtime image is:
 
 ```text
-othomas2/pycogaps-runtime-guide:0.3.1
+othomas2/pycogaps-runtime-guide:0.3.2
 ```
 
-Full reproduction assumes that the image provides the following software families:
+The published `linux/amd64` image has digest `sha256:8744703fcc00ad4e34b94179eaab8697049d6521295a3b3883eb10dffdd17a83`. It provides the following software families:
 
 ### R And Bioconductor
 
 R, Bioconductor, and `CoGAPS` are used for the primary selected-model fitting route and R diagnostic exports. The R CoGAPS build should report OpenMP support for the multithreaded selected-model run.
 
 Check OpenMP support inside Docker with:
+
+**RStudio Terminal inside the container**
 
 ```bash
 Rscript -e 'cat("R CoGAPS OpenMP support:", CoGAPS::compiledWithOpenMPSupport(), "\n")'
@@ -1719,6 +1807,8 @@ Rscript -e 'cat("R CoGAPS OpenMP support:", CoGAPS::compiledWithOpenMPSupport(),
 Python packages such as `anndata`, `scanpy`, `numpy`, `pandas`, and `scipy` are used for preprocessing, Python-compatible selected-model fitting, table generation, and figure building. The PyCoGAPS-compatible runtime supports the Python rerun path.
 
 Check the main Python runtime with:
+
+**RStudio Terminal inside the container**
 
 ```bash
 /opt/cogaps-venv/bin/python - <<'PY'
@@ -1734,6 +1824,8 @@ PY
 
 Quarto renders the case study. `ggplot2`, `matplotlib`, and related plotting tools regenerate figures. `nlme` and `statsmodels` support optional donor-aware mixed-model checks in the analysis section.
 
+For the optional normalization comparison, the image provides `edgeR` 4.0.16, `limma` 3.58.1, `locfit` 1.5-9.12 and `statmod` 1.5.2. No package installation is required in the RStudio session. The source-count check and TMM calculation have been tested without network access using the included prepared data and archived source file.
+
 ## Troubleshooting By Stage
 
 When a command fails, begin with the first error message rather than the final line of the log. The first error usually identifies the missing file, unavailable package, incorrect path, or model-setting problem that caused later messages.
@@ -1744,7 +1836,7 @@ Use the checkpoint at the end of each stage to decide where to begin. If Stage 1
 
 | What you see | What it usually means | What to check and do |
 |---|---|---|
-| Docker reports that the image cannot be found | The image has not been pulled, or its name or tag is misspelled. | In the Host Terminal, run `docker pull --platform linux/amd64 othomas2/pycogaps-runtime-guide:0.3.1`, then copy the image name directly into the launch command. |
+| Docker reports that the image cannot be found | The image has not been pulled, or its name or tag is misspelled. | In the Host Terminal, run `docker pull --platform linux/amd64 othomas2/pycogaps-runtime-guide:0.3.2`, then copy the image name directly into the launch command. |
 | Port 8787 is already in use | Another RStudio Server container or local process is using that port. | Stop the older container or map another local port, such as `-p 127.0.0.1:8788:8787`, and open `http://localhost:8788`. Keep `127.0.0.1` so the example login is only reachable from your own computer. |
 | RStudio Server opens but the project files are absent | The repository was mounted from the wrong local folder. | Stop the container, move to the repository root, and confirm that `index.qmd` is visible before rerunning Docker. |
 | Files can be read but regenerated outputs cannot be written | The repository or output mount is read-only. | Confirm that the repository mount ends in `:rw`. Keep only the downloaded reproduction archive read-only. |
@@ -1794,8 +1886,9 @@ Run the export and figure commands below in the **RStudio Terminal inside the co
 | The full R model exists but diagnostic CSV files do not | Model fitting completed, but the diagnostic export was not run or stopped. | Run `Rscript scripts/export_cogaps_diagnostics_r.R` and read the first export error. |
 | Gene-weight or cell-activity tables are absent | The compact-table export has not been run against the current model object. | Run `Rscript scripts/export_lightweight_cogaps_derivatives_r.R`. |
 | Directionality tables are absent | The expression-contrast stage has not been run for the selected outputs. | Run the R or Python directionality command from Stage 5. |
-| A figure still shows older values | Its source table was not refreshed, or the page is displaying a different copy of the image. | Rebuild the source table first, run `/opt/cogaps-venv/bin/python scripts/build_selected_k6_figures.py`, and check both `data/processed/figures/` and `img/`. |
-| Quarto reports a missing file | A path in the page does not match the regenerated filename or location. | Copy the path from the error, confirm it from inside Docker, and update either the output command or the page reference so they agree. |
+| You cannot find the figures you just redrew | You may be looking in the included-figure folder instead of your new output folder. | Follow [Regenerate The Displayed Figures](#regenerate-the-displayed-figures) and open the folder supplied to `--output-dir`; the command does not replace the page's images. |
+| The figure command reports that the output folder exists | The script is protecting an earlier set of outputs. | Choose a new folder name after `--output-dir`; you do not need to delete your earlier results. |
+| The figure command reports a checksum or input mismatch | Some included expression-comparison files are missing, altered, or from a different calculation. | Restore the matching `directionality_source_wide/` folder from the same project download. Do not bypass the check by using an older table. |
 
 Use file modification times as a quick check:
 
@@ -1806,6 +1899,17 @@ ls -lh --time-style=long-iso img
 ```
 
 A recent image built from an older table is still an older analysis. Check both the source table and the displayed figure.
+
+### Expression Recalculation Stops
+
+| What you see | What to check and do |
+| --- | --- |
+| `edgeR` is missing or its version check fails | Save your work and relaunch RStudio with image `0.3.2` from Packages and Setup. Pulling the image does not update an older running container. |
+| A normalization manifest is required | Complete **Verify The Source Counts** in Stage 5 and pass the new `normalization_manifest.json` path. Do not substitute HVG totals or transformed expression. |
+| A checksum, count or metadata comparison fails | Confirm that the archived source, prepared data and top-gene exports belong together. Keep intentionally changed inputs separate; do not bypass the checks. |
+| An output folder is not empty | Choose a new folder name and use its paths consistently in subsequent commands. Keep the earlier output for comparison. |
+| The TMM calculation fails | Read `tmm_run.log` in the new sensitivity output folder. Resolve the first error, then use a fresh output folder for the retry. |
+| Newly recalculated values do not appear in the figure-only PNGs | That command deliberately uses the included saved results. Inspect the recalculated CSVs separately; it does not update the lesson or plot alternative results automatically. |
 
 ### Cluster Commands Fail
 

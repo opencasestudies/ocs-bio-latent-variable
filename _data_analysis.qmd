@@ -23,6 +23,8 @@ Questions answered in this section
 
 The selected-model files are lightweight tables exported from the saved CoGAPS runs. They let the case study inspect model evidence without requiring every learner to load a full model object. In this first step, the code reads the tables that later chunks reuse.
 
+The expression-comparison tables include source-wide CPM estimates, donor counts and checks across normalization methods. They are included in `data/processed/selected_model_k6/directionality_source_wide/sensitivity/`; no additional download is needed. The code checks that each table has the required columns and that the positive, negative and zero donor counts add up to the number of donors included.
+
 In R, `readr::read_csv()` reads comma-separated tables and `readr::read_tsv()` reads tab-separated pattern matrices. The pipe operator `|>` passes the result of one step into the next step, which makes the code read from left to right. In Python, `pandas.read_csv()` plays the same role, and `Path` objects keep file paths explicit.
 
 ::: {.panel-tabset}
@@ -74,9 +76,32 @@ activity_by_replicate_r <- readr::read_csv(
   R_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV_R,
   show_col_types = FALSE
 )
-direction_global_r <- readr::read_csv(R_DIRECTION_GLOBAL_CSV_R, show_col_types = FALSE)
-direction_celltype_r <- readr::read_csv(R_DIRECTION_CELLTYPE_CSV_R, show_col_types = FALSE)
-direction_summary_r <- readr::read_csv(R_DIRECTION_SUMMARY_CSV_R, show_col_types = FALSE)
+direction_global_r <- readr::read_csv(R_SOURCE_DIRECTION_GLOBAL_CSV_R, show_col_types = FALSE)
+direction_celltype_r <- readr::read_csv(R_SOURCE_DIRECTION_CELLTYPE_CSV_R, show_col_types = FALSE)
+direction_identity_r <- readr::read_csv(R_SOURCE_DIRECTION_IDENTITY_CSV_R, show_col_types = FALSE)
+direction_coverage_r <- readr::read_csv(DIRECTIONALITY_DONOR_COVERAGE_CSV_R, show_col_types = FALSE)
+
+required_direction_fields_r <- c(
+  "mean_log2_contrast", "median_log2_contrast", "n_pairs",
+  "n_positive", "n_negative", "n_zero", "agreement_with_mean",
+  "mean_direction", "donor_support", "normalization_status"
+)
+for (report_r in list(direction_global_r, direction_celltype_r, direction_identity_r)) {
+  stopifnot(
+    all(required_direction_fields_r %in% names(report_r)),
+    all(report_r$normalization == "source_cpm"),
+    all(report_r$n_positive + report_r$n_negative + report_r$n_zero == report_r$n_pairs)
+  )
+}
+
+direction_summary_r <- direction_global_r |>
+  dplyr::group_by(pattern) |>
+  dplyr::summarise(
+    n_positive_mean = sum(mean_direction == "positive"),
+    n_negative_mean = sum(mean_direction == "negative"),
+    n_sensitive = sum(normalization_status == "normalization-sensitive mean sign"),
+    .groups = "drop"
+  )
 
 matrices_r <- load_lightweight_pattern_matrices_r(
   R_PATTERN_GENE_WEIGHTS_TSV_GZ_R,
@@ -134,9 +159,30 @@ pattern_correlations = pd.read_csv(PY_PATTERN_CORRELATIONS_CSV)
 pattern_top_genes = pd.read_csv(PY_PATTERN_TOP_GENES_CSV)
 activity_by_celltype = pd.read_csv(PY_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV)
 activity_by_replicate = pd.read_csv(PY_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV)
-direction_global = pd.read_csv(PY_DIRECTION_GLOBAL_CSV)
-direction_celltype = pd.read_csv(PY_DIRECTION_CELLTYPE_CSV)
-direction_summary = pd.read_csv(PY_DIRECTION_SUMMARY_CSV)
+direction_global = pd.read_csv(PY_SOURCE_DIRECTION_GLOBAL_CSV)
+direction_celltype = pd.read_csv(PY_SOURCE_DIRECTION_CELLTYPE_CSV)
+direction_identity = pd.read_csv(PY_SOURCE_DIRECTION_IDENTITY_CSV)
+direction_coverage = pd.read_csv(DIRECTIONALITY_DONOR_COVERAGE_CSV)
+
+required_direction_fields = {
+    "mean_log2_contrast", "median_log2_contrast", "n_pairs",
+    "n_positive", "n_negative", "n_zero", "agreement_with_mean",
+    "mean_direction", "donor_support", "normalization_status",
+}
+for report in (direction_global, direction_celltype, direction_identity):
+    assert required_direction_fields.issubset(report.columns)
+    assert report["normalization"].eq("source_cpm").all()
+    assert (report["n_positive"] + report["n_negative"] + report["n_zero"]).eq(report["n_pairs"]).all()
+
+direction_summary = (
+    direction_global.groupby("pattern", observed=True)
+    .agg(
+        n_positive_mean=("mean_direction", lambda values: values.eq("positive").sum()),
+        n_negative_mean=("mean_direction", lambda values: values.eq("negative").sum()),
+        n_sensitive=("normalization_status", lambda values: values.eq("normalization-sensitive mean sign").sum()),
+    )
+    .reset_index()
+)
 
 A_py, P_py = load_lightweight_pattern_matrices(
     PY_PATTERN_GENE_WEIGHTS_TSV_GZ,
@@ -554,20 +600,20 @@ Now that you know not to rely on pattern numbers alone, you can ask what kinds o
 - **stimulation association:** whether pattern activity tracks IFN-beta stimulation,
 - **dominant cell-type activity:** where the pattern is strongest on average,
 - **top genes:** which genes have the largest CoGAPS weights,
-- **direction among top genes:** whether those top genes tend to be higher or lower after stimulation.
+- **direction among top genes:** whether their expression is higher or lower after stimulation, on average across donors, and whether that direction changes across normalization methods.
 
 The code below uses simple, visible rules to assign cautious working interpretations. For example, a pattern with high stimulation correlation and interferon-stimulated genes is marked as IFN-associated. A pattern with `CD74` and `HLA` genes is marked as antigen-presentation-linked. A pattern with monocyte markers and highest mean activity in monocytes is treated as monocyte-linked. These labels are starting points for interpretation, not labels that CoGAPS knew in advance.
 
 As you read the code, focus on the data-wrangling pattern rather than trying to memorize every function name. Both tabs do the same four jobs:
 
 1. **Start from one row per CoGAPS pattern.** The source table already contains pattern-level summaries, such as stimulation correlation, mean activity in control and stimulated cells, the dominant cell type, and the top genes.
-2. **Add the directionality summary.** The code joins in the count of top genes that are higher or lower after IFN-beta stimulation, so the final table can keep CoGAPS weights and expression direction side by side.
+2. **Add the directionality summary.** The code counts genes with positive or negative mean contrasts and genes whose mean direction changes across normalization methods. These are counts of genes, not counts of agreeing donors or statistically significant results.
 3. **Create readable evidence columns.** The code calculates `stim - control`, keeps only the first few top genes for display, and turns several numeric columns into short phrases that are easier to scan.
 4. **Apply cautious interpretation rules.** The rules use the evidence already in the table. They do not rerun CoGAPS, and they do not replace biological judgment.
 
 In R, the pipe operator `|>` reads as "then." The code starts with `pattern_summary_r`, then uses `left_join()` to add direction counts, `mutate()` to create new columns, `case_when()` to assign the working interpretation, `arrange()` to put `Pattern1` through `Pattern6` in order, and `select()` to keep only the columns shown in the table. In Python, the same idea appears as a method chain: `merge()` adds the direction counts, `assign()` creates new columns, `apply()` runs the interpretation function once per row, `sort_values()` orders the patterns, and the final column selection keeps the output focused.
 
-::: {.panel-tabset}
+::: {.panel-tabset .directionality-tables}
 
 #### R
 
@@ -586,7 +632,7 @@ first_genes_r <- function(gene_text, n = 4L) {
 program_inventory_r <- pattern_summary_r |>
   dplyr::left_join(
     direction_summary_r |>
-      dplyr::select(pattern, n_up_in_stim, n_down_in_stim),
+      dplyr::select(pattern, n_positive_mean, n_negative_mean, n_sensitive),
     by = "pattern"
   ) |>
   dplyr::mutate(
@@ -618,8 +664,9 @@ program_inventory_r <- pattern_summary_r |>
       "; top genes: ", top_genes_top4
     ),
     direction_evidence = paste0(
-      n_up_in_stim, " up / ",
-      n_down_in_stim, " down among top 15 genes"
+      n_positive_mean, " positive / ",
+      n_negative_mean, " negative means; ",
+      n_sensitive, " with direction changes across normalization methods among top 15 genes"
     ),
     pattern_index = as.integer(sub("Pattern", "", pattern))
   ) |>
@@ -676,7 +723,7 @@ program_inventory = (
     pattern_summary
     .merge(
         direction_summary[
-            ["pattern", "n_up_in_stim", "n_down_in_stim"]
+            ["pattern", "n_positive_mean", "n_negative_mean", "n_sensitive"]
         ],
         on="pattern",
         how="left",
@@ -697,10 +744,12 @@ program_inventory["Identity / gene evidence"] = (
     + "; top genes: " + program_inventory["top_genes_top4"]
 )
 program_inventory["Direction check"] = (
-    program_inventory["n_up_in_stim"].astype(int).astype(str)
-    + " up / "
-    + program_inventory["n_down_in_stim"].astype(int).astype(str)
-    + " down among top 15 genes"
+    program_inventory["n_positive_mean"].astype(int).astype(str)
+    + " positive / "
+    + program_inventory["n_negative_mean"].astype(int).astype(str)
+    + " negative means; "
+    + program_inventory["n_sensitive"].astype(int).astype(str)
+    + " with direction changes across normalization methods among top 15 genes"
 )
 
 program_inventory_display = (
@@ -1293,17 +1342,122 @@ The antigen-presentation rows give a different kind of evidence. In the selected
 
 The main takeaway is not that one p-value settles the biology. Instead, the targeted gene-set check adds a second layer of evidence to the earlier activity summaries. It shows that the model contains both interferon-response gene structure and non-IFN immune structure, which is exactly what you need if the goal is to separate stimulation-associated activity from cell-type-linked biology.
 
+### How The Gene Contrasts Were Calculated
+
+CoGAPS weights tell you which genes help define a pattern, not whether their expression is higher in one group. To examine expression direction, we use donor-aware {{< glossary "Pseudobulk" display="pseudobulk" >}} comparisons. Pseudobulk means adding raw counts across a group of cells before comparing groups. The donor, rather than each cell, remains the independent biological unit.
+
+For the stimulation comparison, the saved analysis followed these steps:
+
+1. Identify the top 15 genes for each pattern from its CoGAPS gene weights.
+2. Sum each gene's raw counts from the prepared object's `counts` layer within each donor and condition, not the normalized, log-transformed values used for modeling. For a cell-type-specific comparison, first restrict the cells to that annotated type. Require at least 20 cells in each condition for that donor's comparison.
+3. Divide each gene's summed count by the total raw counts across all **15,706 genes in the supplied source object** for those same cells, then multiply by one million. These are source-wide {{< glossary "Counts per million (CPM)" display="counts per million (CPM)" >}}. The denominator is not restricted to the 3,000 modeled genes, and it is not a measurement of the entire transcriptome.
+4. Calculate `log2(stimulated CPM + 0.5) - log2(control CPM + 0.5)` for each eligible donor. The 0.5-CPM {{< glossary "Pseudocount" display="pseudocount" >}} prevents an undefined logarithm when CPM is zero.
+5. Summarize these within-donor comparisons with a mean, median, and counts of positive, negative and zero results. Each eligible donor has equal weight in the mean, even when donors contribute different numbers of cells.
+
+The cell-identity comparison asks a different question. Within each donor and condition, it compares dendritic cells with **all remaining PBMC types combined**. We add raw counts from those remaining cells before calculating CPM; we do not average their cell-type CPM values. The denominator rule and 0.5-CPM pseudocount are the same as above. Both comparison groups must contain at least 20 cells in both conditions. We average the control and stimulated log2 cell-type contrasts within each donor, then give each eligible donor equal weight in the final mean. A positive result means relatively higher expression in dendritic cells, not an increase after stimulation.
+
+**First ask whether donors agree.** Read the mean and median alongside the positive / negative / zero counts. These counts use the unrounded comparisons, with no minimum size required for a positive or negative result. **Agreement with mean** is the percentage of donors whose comparison has the same sign as the mean. It is undefined when the mean is exactly zero. If some donors have positive results and others have negative results, the table says **mixed donor directions**. A result from only one donor is labeled as having no across-donor replication, even when its agreement is 100%.
+
+**Then ask whether normalization changes the direction.** The check compares CPM based on the 3,000 highly variable genes, source-wide CPM, and CPM adjusted using {{< glossary "TMM normalization" display="TMM" >}} in edgeR. The same eligible donors and 0.5-CPM pseudocount are used for all three. [The original TMM paper](https://doi.org/10.1186/gb-2010-11-3-r25) explains how expression ratios across genes are used to adjust count totals. Here, TMM is a comparison method, not a gold standard, particularly when comparing different cell populations.
+
+Under **Normalization check**, **Direction unchanged** means the mean is positive under all three methods, negative under all three, or zero under all three. **Direction changes** means at least one method gives a different sign, including a difference between zero and a nonzero value. These labels compare methods, not donors, and do not say whether the size of the mean stays the same.
+
+:::{.disclaimer_box}
+::::{.disclaimer_box_header}
+What these contrasts do not establish
+::::
+::::{.inner_block}
+These are relative expression contrasts for selected pattern genes, not absolute changes in RNA molecules or a genome-wide differential-expression analysis. Donor agreement and agreement across normalization methods are not significance tests or confidence scores. Read small or normalization-sensitive shifts cautiously, and do not interpret a single donor pair as replicated evidence.
+::::
+:::
+
+To keep the displays readable, we show the expression estimates and donor checks in separate tables with the same gene order. The two functions below format copies of the data, leaving the saved values unchanged. In R, `transmute()` selects and formats columns, `paste()` combines the three donor counts, and `case_when()` labels the normalization result. In Python, `.copy()` protects the original table, `.round()` formats numeric columns, and `.map()` supplies readable labels. Rounding is only for display; it does not change a gene's direction or donor counts.
+
+::: {.panel-tabset}
+
+#### R
+
+```{r}
+#| label: analysis-direction-display-r
+format_contrast_estimates_r <- function(report) {
+  report |>
+    dplyr::transmute(
+      Rank = rank,
+      Gene = gene,
+      `CoGAPS weight` = round(cogaps_weight, 3),
+      `Mean log2 contrast` = round(mean_log2_contrast, 3),
+      `Median log2 contrast` = round(median_log2_contrast, 3),
+      `Donor pairs` = n_pairs
+    )
+}
+
+format_donor_support_r <- function(report) {
+  report |>
+    dplyr::transmute(
+      Gene = gene,
+      `Positive / negative / zero` = paste(n_positive, n_negative, n_zero, sep = " / "),
+      `Agreement with mean` = ifelse(
+        is.na(agreement_with_mean), "Not defined",
+        sprintf("%.1f%%", 100 * agreement_with_mean)
+      ),
+      `Donor description` = donor_support,
+      `Normalization check` = dplyr::case_when(
+        n_pairs == 0 ~ "Not estimable",
+        direction_stable ~ "Direction unchanged",
+        TRUE ~ "Direction changes"
+      )
+    )
+}
+```
+
+#### Python
+
+```{python}
+#| label: analysis-direction-display-python
+def format_contrast_estimates(report):
+    table = report[
+        ["rank", "gene", "cogaps_weight", "mean_log2_contrast", "median_log2_contrast", "n_pairs"]
+    ].copy()
+    columns_to_round = ["cogaps_weight", "mean_log2_contrast", "median_log2_contrast"]
+    table[columns_to_round] = table[columns_to_round].round(3)
+    return table.rename(columns={
+        "rank": "Rank", "gene": "Gene", "cogaps_weight": "CoGAPS weight",
+        "mean_log2_contrast": "Mean log2 contrast",
+        "median_log2_contrast": "Median log2 contrast", "n_pairs": "Donor pairs",
+    })
+
+def format_donor_support(report):
+    table = report[["gene", "donor_support"]].copy()
+    table["Positive / negative / zero"] = (
+        report["n_positive"].astype(str) + " / "
+        + report["n_negative"].astype(str) + " / " + report["n_zero"].astype(str)
+    )
+    table["Agreement with mean"] = report["agreement_with_mean"].map(
+        lambda value: "Not defined" if pd.isna(value) else f"{value:.1%}"
+    )
+    table["Normalization check"] = report["normalization_status"].map({
+        "same mean sign across methods": "Direction unchanged",
+        "normalization-sensitive mean sign": "Direction changes",
+        "not estimable": "Not estimable",
+    })
+    return table.rename(columns={"gene": "Gene", "donor_support": "Donor description"})[
+        ["Gene", "Positive / negative / zero", "Agreement with mean", "Donor description", "Normalization check"]
+    ]
+```
+
+:::
+
 ### Use An Identity-Linked Pattern As A Contrast
 
 It is tempting to focus only on the IFN-associated pattern, but that would miss an important lesson. A good latent-variable analysis should also ask what the other patterns capture. The targeted gene-set check above points to an antigen-presentation-linked pattern whose top genes include `CD74` and HLA class II genes. This pattern is useful as a contrast because it looks more like immune-cell identity or antigen-presentation structure than a broad stimulation response.
 
-The code below selects the pattern with the strongest antigen-presentation targeted enrichment and summarizes its top genes and direction. This gives you a second example of why CoGAPS gene weights and expression direction should be interpreted together.
+The code below selects the pattern with the strongest antigen-presentation targeted enrichment and reads two comparisons for its top genes: dendritic cells versus all remaining PBMC types combined, and stimulation versus control across all PBMCs. This gives you a second example of why CoGAPS gene weights, immune-cell identity and stimulation direction should be interpreted together.
 
-The selection step uses the targeted gene-set table you just created. It keeps only the rows for the antigen-presentation gene set, sorts those rows by enrichment p-value, and takes the top row. That top row gives the pattern whose highest-weight genes are most enriched for the targeted antigen-presentation markers. After that, the code goes back to the directionality table, keeps only genes from that selected pattern, sorts them by CoGAPS gene-weight rank, and prints the first 12 genes.
+The selection step uses the targeted gene-set table you just created. It keeps only the rows for the antigen-presentation gene set, sorts those rows by enrichment p-value, and takes the top row. That row identifies the pattern whose highest-weight genes are most enriched for these targeted markers. The code then keeps the first 12 genes by CoGAPS rank in each contrast and checks that both tables contain the same genes in the same order.
 
-In the R tab, `filter()` keeps the antigen-presentation rows, `arrange()` puts the smallest p-value first, `slice(1)` keeps the strongest row, and `pull(pattern)` extracts the pattern label as a single value. The next pipe uses that label to filter `direction_global_r`, then formats the log2 fold-change and pair-consistency columns for display. In the Python tab, the same idea is written with `pandas`: `.loc[...]` keeps antigen-presentation rows, `.sort_values(...)` orders them by p-value, `.iloc[0]` takes the first pattern label, and the second method chain filters `direction_global` to the selected pattern.
+In the R tab, `filter()` keeps the antigen-presentation rows, `arrange()` puts the smallest p-value first, `slice(1)` keeps the strongest row, and `pull(pattern)` extracts the pattern label as a single value. The next pipes filter the identity and stimulation reports separately; `slice_head(n = 12)` keeps the first 12 rows. In Python, `.loc[...]` selects rows, `.sort_values(...)` orders them, `.iloc[0]` takes the first pattern label, and `.head(12)` limits each display. The formatting functions above give both contrasts the same columns without combining their different meanings.
 
-::: {.panel-tabset}
+::: {.panel-tabset .directionality-tables}
 
 #### R
 
@@ -1317,34 +1471,36 @@ antigen_pattern_r <- targeted_gene_set_results_r |>
   dplyr::slice(1) |>
   dplyr::pull(pattern)
 
-identity_pattern_direction_r <- direction_global_r |>
+identity_pattern_direction_r <- direction_identity_r |>
+  dplyr::filter(pattern == antigen_pattern_r, cell_type == "Dendritic cells") |>
+  dplyr::arrange(rank) |>
+  dplyr::slice_head(n = 12)
+
+identity_pattern_stimulation_r <- direction_global_r |>
   dplyr::filter(pattern == antigen_pattern_r) |>
   dplyr::arrange(rank) |>
-  dplyr::mutate(
-    mean_log2fc_stim_vs_ctrl = round(mean_log2fc_stim_vs_ctrl, 3),
-    sign_consistency = round(sign_consistency, 2)
-  ) |>
-  dplyr::select(
-    rank,
-    gene,
-    cogaps_weight,
-    mean_log2fc_stim_vs_ctrl,
-    direction,
-    sign_consistency,
-    evidence_strength
-  )
+  dplyr::slice_head(n = 12)
+
+stopifnot(
+  nrow(identity_pattern_direction_r) == 12L,
+  identical(identity_pattern_direction_r$gene, identity_pattern_stimulation_r$gene)
+)
 
 knitr::kable(
-  head(identity_pattern_direction_r, 12),
-  col.names = c(
-    "Rank",
-    "Gene",
-    "CoGAPS weight",
-    "Mean log2FC: IFN-beta vs control",
-    "Direction",
-    "Pair consistency",
-    "Evidence strength"
-  )
+  format_contrast_estimates_r(identity_pattern_direction_r),
+  caption = "Dendritic cells versus pooled other PBMCs: expression contrasts"
+)
+knitr::kable(
+  format_donor_support_r(identity_pattern_direction_r),
+  caption = "Dendritic cells versus pooled other PBMCs: donor and normalization checks"
+)
+knitr::kable(
+  format_contrast_estimates_r(identity_pattern_stimulation_r),
+  caption = "The same genes, global IFN-beta versus control: expression contrasts"
+)
+knitr::kable(
+  format_donor_support_r(identity_pattern_stimulation_r),
+  caption = "The same genes, global IFN-beta versus control: donor and normalization checks"
 )
 ```
 
@@ -1368,46 +1524,40 @@ antigen_pattern_py = (
 )
 
 identity_pattern_direction = (
+    direction_identity.loc[
+        (direction_identity["pattern"] == antigen_pattern_py)
+        & direction_identity["cell_type"].eq("Dendritic cells")
+    ]
+    .sort_values("rank")
+    .head(12)
+    .copy()
+)
+identity_pattern_stimulation = (
     direction_global.loc[direction_global["pattern"] == antigen_pattern_py]
     .sort_values("rank")
     .head(12)
     .copy()
 )
-identity_pattern_direction["mean_log2fc_stim_vs_ctrl"] = identity_pattern_direction[
-    "mean_log2fc_stim_vs_ctrl"
-].round(3)
-identity_pattern_direction["sign_consistency"] = identity_pattern_direction[
-    "sign_consistency"
-].round(2)
+assert len(identity_pattern_direction) == 12
+assert identity_pattern_direction["gene"].tolist() == identity_pattern_stimulation["gene"].tolist()
 
-print(render_table(
-    identity_pattern_direction[
-        [
-            "rank",
-            "gene",
-            "cogaps_weight",
-            "mean_log2fc_stim_vs_ctrl",
-            "direction",
-            "sign_consistency",
-            "evidence_strength",
-        ]
-    ].rename(
-        columns={
-            "rank": "Rank",
-            "gene": "Gene",
-            "cogaps_weight": "CoGAPS weight",
-            "mean_log2fc_stim_vs_ctrl": "Mean log2FC: IFN-beta vs control",
-            "direction": "Direction",
-            "sign_consistency": "Pair consistency",
-            "evidence_strength": "Evidence strength",
-        }
-    )
-))
+print("Dendritic cells versus pooled other PBMCs: expression contrasts\n")
+print(render_table(format_contrast_estimates(identity_pattern_direction)))
+print("\n\nDendritic cells versus pooled other PBMCs: donor and normalization checks\n")
+print(render_table(format_donor_support(identity_pattern_direction)))
+print("\n\nThe same genes, global IFN-beta versus control: expression contrasts\n")
+print(render_table(format_contrast_estimates(identity_pattern_stimulation)))
+print("\n\nThe same genes, global IFN-beta versus control: donor and normalization checks\n")
+print(render_table(format_donor_support(identity_pattern_stimulation)))
 ```
 
 :::
 
-Here is how to read the table. **Rank** orders genes by their CoGAPS weight within the selected antigen-presentation-linked pattern. **Gene** names the feature being inspected. **CoGAPS weight** tells you how strongly that gene helps define the pattern. **Mean log2FC: IFN-beta vs control** is the paired expression contrast: positive values mean the gene is higher after stimulation, while negative values mean it is lower after stimulation. **Direction** turns that contrast into a readable label. **Pair consistency** summarizes how consistently the direction appears across donor pairs. **Evidence strength** is a compact label from the prepared directionality summary.
+Read each estimate table together with its donor-check table. **Rank** and **CoGAPS weight** locate the gene within this fitted pattern. The **mean** and **median** summarize the within-donor expression comparisons, while **Donor pairs** gives the number of eligible donors. The second table keeps donor agreement separate from the normalization check.
+
+For `CD74` and the HLA class II genes shown here, relative expression is higher in dendritic cells than in the remaining cells in all six eligible donors, with the same mean direction under all three methods. Their stimulation comparisons across all PBMCs tell a different story. For example, `CD74` has a mean log2 stimulation contrast of about +0.061 using source-wide CPM, with six positive and two negative donor contrasts. Its mean changes direction across normalization methods, so the result does not show a consistent stimulation increase or decrease.
+
+Other top genes also require individual checks. In the dendritic-versus-other comparison, `FTL` has a negative mean, but donors differ in direction. For `HSP90AB1`, donors differ in direction and the mean direction changes across normalization methods. A high gene weight does not guarantee higher expression in dendritic cells.
 
 The antigen-presentation-linked pattern has a different biological role from the IFN-associated pattern. Its top genes help mark antigen-presentation biology, especially MHC class II-related structure. That matters because PBMC data contain immune-cell identity structure before any stimulation comparison is made. A dendritic-cell-associated pattern can be biologically meaningful even if it is not the strongest IFN-beta response.
 
@@ -1431,41 +1581,24 @@ This question asks which genes make the IFN-associated pattern interpretable and
 
 Now return to the key point from the visualization section: CoGAPS weights and expression direction are different quantities. A high gene weight means the gene helps define the pattern. {{< glossary "Directionality" display="Directionality" >}} asks whether the gene is higher or lower after IFN-beta stimulation.
 
-The table below focuses on the top genes from the IFN-associated pattern. It shows their CoGAPS weight alongside a donor-aware {{< glossary "Pseudobulk" display="pseudobulk" >}} log2 fold-change. Pseudobulk means that the single-cell counts are first added up within a meaningful group, such as one donor's control cells or the same donor's stimulated cells, before conditions are compared. That keeps the paired donor design visible and avoids treating thousands of cells from the same donor as thousands of independent donors.
-
-The directionality summaries were generated before this section from the saved selected-model outputs and the count layer in the prepared PBMC dataset. The workflow did five things:
-
-1. extracted the top genes for each CoGAPS pattern from the gene-weight matrix,
-2. aggregated raw counts for those genes by donor and condition,
-3. converted each pseudobulk profile to counts per million, or CPM, so groups with different total counts are more comparable,
-4. computed `log2(stimulated CPM + 0.5) - log2(control CPM + 0.5)` for each donor pair, and
-5. summarized the mean direction, pair consistency, and adjusted Wilcoxon evidence for each pattern gene.
-
-The `+ 0.5` term is a small pseudocount. It prevents zeros from causing undefined logarithms. A positive mean log2 fold-change means the gene is higher after IFN-beta stimulation; a negative value means it is lower after stimulation.
+The tables below focus on the top 15 genes from the IFN-associated pattern. They use the [source-wide CPM and paired-donor calculation described above](#how-the-gene-contrasts-were-calculated). The estimate table places CoGAPS weights beside mean and median stimulation contrasts. The second table shows whether donors agree in direction and whether the mean sign changes across normalization methods.
 
 :::{.reproducibility_box}
 ::::{.reproducibility_box_header}
 Reproducibility note
 ::::
 ::::{.inner_block}
-The main analysis path reads saved directionality tables. To regenerate them in the validated environment, use the scripts listed in the [Full Reproduction Guide](#full-reproduction-guide):
-
-```bash
-Rscript scripts/pattern_directionality_analysis_r.R
-python scripts/pattern_directionality_analysis.py
-```
-
-These scripts write the R and Python directionality summaries under `data/processed/selected_model_k6/`. They perform a targeted directionality analysis for top CoGAPS pattern genes; they are not a genome-wide differential-expression workflow.
+These tables use the included expression-comparison files; no model fit or extra software installation is needed. To check which inputs were used, see the file records and count totals in `data/processed/selected_model_k6/directionality_source_wide/normalization/`.
 ::::
 :::
 
-The R and Python chunks below do the same display task. They do not recompute pseudobulk counts. Instead, each chunk starts from the saved global directionality table, keeps the run-specific IFN-associated pattern, orders genes by CoGAPS rank, rounds the numeric columns for reading, and prints the top 15 genes. This is a useful programming pattern: load a larger result table once, then filter and format the rows needed for the current question.
+The R and Python chunks below do the same display task. Each starts from the saved global report, keeps the run-specific IFN-associated pattern, orders genes by CoGAPS rank, and passes the top 15 genes to the formatting functions. This is a useful programming pattern: load a larger result table once, then filter and format the rows needed for the current question.
 
-::: {.panel-tabset}
+::: {.panel-tabset .directionality-tables}
 
 #### R
 
-In R, `dplyr::filter()` keeps only the IFN-associated pattern from the selected R run. `arrange(rank)` restores the CoGAPS gene-weight order, so the highest-weight gene appears first. The `mutate()` step rounds values for display, and `select()` keeps only the columns needed to answer the question.
+In R, `dplyr::filter()` keeps only the IFN-associated pattern from the selected R run. `arrange(rank)` restores the CoGAPS gene-weight order, so the highest-weight gene appears first, and `slice_head()` keeps the first 15 rows. The formatting functions use `transmute()` to select and format the display columns without changing the underlying report.
 
 ```{r}
 #| label: analysis-ifn-direction-r
@@ -1474,40 +1607,23 @@ In R, `dplyr::filter()` keeps only the IFN-associated pattern from the selected 
 ifn_direction_r <- direction_global_r |>
   dplyr::filter(pattern == ifn_pattern_r) |>
   dplyr::arrange(rank) |>
-  dplyr::mutate(
-    mean_log2fc_stim_vs_ctrl = round(mean_log2fc_stim_vs_ctrl, 3),
-    sign_consistency = round(sign_consistency, 2),
-    wilcoxon_fdr = signif(wilcoxon_fdr, 3)
-  ) |>
-  dplyr::select(
-    rank,
-    gene,
-    cogaps_weight,
-    mean_log2fc_stim_vs_ctrl,
-    direction,
-    sign_consistency,
-    evidence_strength,
-    wilcoxon_fdr
-  )
+  dplyr::slice_head(n = 15)
+
+stopifnot(nrow(ifn_direction_r) == 15L)
 
 knitr::kable(
-  head(ifn_direction_r, 15),
-  col.names = c(
-    "Rank",
-    "Gene",
-    "CoGAPS weight",
-    "Mean log2FC: IFN-beta vs control",
-    "Direction",
-    "Pair consistency",
-    "Evidence strength",
-    "FDR"
-  )
+  format_contrast_estimates_r(ifn_direction_r),
+  caption = "IFN-associated top genes, global IFN-beta versus control: expression contrasts"
+)
+knitr::kable(
+  format_donor_support_r(ifn_direction_r),
+  caption = "IFN-associated top genes: donor and normalization checks"
 )
 ```
 
 #### Python
 
-In Python, `.loc[...]` keeps only the IFN-associated pattern from the saved Python-compatible output. `.sort_values("rank")` orders genes by CoGAPS weight rank, `.head(15)` keeps the top genes, and `.copy()` makes a safe editable table for display formatting. The final `rename()` step gives the displayed columns clear, descriptive names.
+In Python, `.loc[...]` keeps only the IFN-associated pattern from the saved Python-compatible output. `.sort_values("rank")` orders genes by CoGAPS weight rank, `.head(15)` keeps the top genes, and `.copy()` makes an independent table. The formatting functions use `.round()` and `.rename()` to give the displayed values and columns a readable form.
 
 ```{python}
 #| label: analysis-ifn-direction-python
@@ -1518,46 +1634,20 @@ ifn_direction = (
     .head(15)
     .copy()
 )
-ifn_direction["mean_log2fc_stim_vs_ctrl"] = ifn_direction[
-    "mean_log2fc_stim_vs_ctrl"
-].round(3)
-ifn_direction["sign_consistency"] = ifn_direction["sign_consistency"].round(2)
-ifn_direction["wilcoxon_fdr"] = ifn_direction["wilcoxon_fdr"].map(lambda value: f"{value:.3g}")
-
-print(render_table(
-    ifn_direction[
-        [
-            "rank",
-            "gene",
-            "cogaps_weight",
-            "mean_log2fc_stim_vs_ctrl",
-            "direction",
-            "sign_consistency",
-            "evidence_strength",
-            "wilcoxon_fdr",
-        ]
-    ].rename(
-        columns={
-            "rank": "Rank",
-            "gene": "Gene",
-            "cogaps_weight": "CoGAPS weight",
-            "mean_log2fc_stim_vs_ctrl": "Mean log2FC: IFN-beta vs control",
-            "direction": "Direction",
-            "sign_consistency": "Pair consistency",
-            "evidence_strength": "Evidence strength",
-            "wilcoxon_fdr": "FDR",
-        }
-    )
-))
+assert len(ifn_direction) == 15
+print("IFN-associated top genes, global IFN-beta versus control: expression contrasts\n")
+print(render_table(format_contrast_estimates(ifn_direction)))
+print("\n\nIFN-associated top genes: donor and normalization checks\n")
+print(render_table(format_donor_support(ifn_direction)))
 ```
 
 :::
 
-Here is how to read the table. **Rank** orders genes by their CoGAPS weight within the IFN-associated pattern. **CoGAPS weight** tells you how strongly each gene helps define that pattern. **Mean log2FC: IFN-beta vs control** is the donor-aware expression contrast from the pseudobulk analysis. **Direction** translates the sign of that contrast into a readable label. **Pair consistency** tells you how often donor pairs agree in direction; a value of `1.00` means every usable donor pair moved in the same direction. **FDR** is the Benjamini-Hochberg-adjusted Wilcoxon result from this targeted paired summary.
+Compare the two tables. **CoGAPS weight** describes a gene's contribution to the pattern; **Mean log2 contrast** and **Median log2 contrast** summarize its relative expression change across donors. Use the second table to check how many donors agree with that direction and whether it changes across normalization methods.
 
-The main result is clear in both implementations: 14 of the top 15 IFN-associated pattern genes are higher after IFN-beta stimulation. Many of those genes, including `ISG15`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `OAS1`, and `BST2`, are familiar interferon-stimulated genes, so the direction of change supports the IFN-associated interpretation. The one exception among the top 15 is `FTH1`, which has a high pattern weight but is lower after stimulation in this targeted summary.
+For both saved models, 14 of the top 15 IFN-associated genes have higher relative expression after stimulation in all eight donors under all three normalization methods, when all PBMC types are combined. These include `ISG15`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `OAS1`, and `BST2`, supporting the IFN-associated interpretation. `FTH1` is the exception: its relative expression is lower in all eight donors under all three methods despite its high CoGAPS weight.
 
-That exception is important rather than problematic. It shows why the analysis keeps gene weight and expression direction separate. CoGAPS says that `FTH1` helps define the pattern; the pseudobulk contrast says that its expression moves opposite the main ISG group after stimulation. A careful interpretation therefore describes the IFN-associated pattern as dominated by up-shifted interferon-stimulated genes, while noting that not every high-weight gene is up-regulated.
+That exception shows why gene weight and expression direction are separate evidence. CoGAPS says that `FTH1` helps define the pattern; the pseudobulk contrast places its relative expression change opposite the main ISG group. This global result does not establish the same donor support within every cell type, which is the next question.
 
 ## Question 4: How Does The IFN-Associated Pattern Vary Across PBMC Identities?
 
@@ -1567,43 +1657,73 @@ This question asks whether the IFN-associated signal is broad across the PBMC mi
 
 The IFN-associated pattern is broad, but PBMCs are a mixture of immune-cell identities. A responsible analysis asks whether the same direction appears across those identities or whether the global result is driven by one large cell type.
 
-The next summary counts, within each annotated PBMC identity, how many of the IFN-associated pattern's top genes are higher in stimulation, lower in stimulation, or mixed/unclear. The code uses `group_by()` and `summarise()` in R, and `groupby()` with `size()` in Python. These methods are common data-analysis skills: they split a table into groups, compute a summary inside each group, and return a smaller table.
+Start by checking how many donor pairs contribute to each cell type. The table also counts genes for which donors differ in direction and genes whose mean direction changes across normalization methods. A gene can appear in both counts. The plot counts genes with positive, negative or zero **mean contrasts**, not donors or statistically significant results.
 
-::: {.panel-tabset}
+The code uses `group_by()` and `summarise()` in R, and `groupby()` with `agg()` or `size()` in Python. These methods split a table into groups, compute summaries within each group, and return a smaller table. `left_join()` in R and `merge()` in Python attach the eligible-donor counts using the cell-type label. The donor counts come from complete eligible pairs, not from the number of cells or genes.
+
+**Megakaryocytes have only one eligible donor pair.** Their contrasts are descriptive observations without across-donor replication. A matching mean sign under all three normalization methods does not change that limitation. Other cell types contribute five, six, or eight eligible pairs, as shown below.
+
+::: {.panel-tabset .directionality-tables}
 
 #### R
 
 ```{r}
+#| label: analysis-direction-coverage-r
+ifn_celltype_support_r <- direction_celltype_r |>
+  dplyr::filter(pattern == ifn_pattern_r) |>
+  dplyr::group_by(cell_type) |>
+  dplyr::summarise(
+    mixed_donor_genes = sum(donor_support == "mixed donor directions"),
+    sensitive_genes = sum(normalization_status == "normalization-sensitive mean sign"),
+    .groups = "drop"
+  ) |>
+  dplyr::left_join(
+    direction_coverage_r |>
+      dplyr::filter(scope == "stimulation_celltype") |>
+      dplyr::select(cell_type, n_pairs),
+    by = "cell_type"
+  ) |>
+  dplyr::select(cell_type, n_pairs, mixed_donor_genes, sensitive_genes)
+
+knitr::kable(
+  ifn_celltype_support_r,
+  col.names = c("PBMC identity", "Eligible donor pairs", "Genes with mixed donor directions", "Genes changing direction across methods")
+)
+```
+
+```{r}
 #| label: analysis-ifn-direction-celltype-r
+#| fig-alt: "Stacked bars count the top 15 genes of selected R Pattern4 by the sign of their mean stimulation contrast within each PBMC identity. Positive means predominate across the cell types. These are gene counts, not donor counts, significance levels or response strengths. The preceding table reports donor support and normalization sensitivity separately. Megakaryocytes have only one eligible donor pair, so their results lack across-donor replication."
 #| message: false
 #| warning: false
 #| fig-width: 8.2
 #| fig-height: 4.8
-#| fig-cap: "Direction summary for top IFN-associated pattern genes within annotated PBMC identities. Orange bars indicate top genes that are higher after IFN-beta stimulation; blue bars indicate top genes that are lower after stimulation."
+#| fig-cap: "Signs of source-wide mean stimulation contrasts for the top 15 IFN-associated pattern genes within each PBMC identity. The bars count genes, not donors or significant results; donor support and normalization sensitivity are reported in the table above. Megakaryocytes contribute one donor pair only."
 ifn_direction_by_celltype_r <- direction_celltype_r |>
   dplyr::filter(pattern == ifn_pattern_r) |>
-  dplyr::group_by(cell_type, direction) |>
+  dplyr::group_by(cell_type, mean_direction) |>
   dplyr::summarise(n_genes = dplyr::n(), .groups = "drop")
 
 ggplot(
   ifn_direction_by_celltype_r,
-  aes(x = cell_type, y = n_genes, fill = direction)
+  aes(x = cell_type, y = n_genes, fill = mean_direction)
 ) +
   geom_col(position = "stack", width = 0.75) +
   scale_fill_manual(
     values = c(
-      "up_in_stim" = "#E76F51",
-      "down_in_stim" = "#2F8FBD",
-      "mixed_or_unclear" = "#9CA3AF"
+      "positive" = "#E76F51",
+      "negative" = "#2F8FBD",
+      "zero" = "#9CA3AF",
+      "not estimable" = "#D1D5DB"
     ),
-    breaks = c("up_in_stim", "down_in_stim", "mixed_or_unclear"),
-    labels = c("higher in stimulation", "lower in stimulation", "mixed or unclear")
+    breaks = c("positive", "negative", "zero", "not estimable"),
+    labels = c("positive mean", "negative mean", "zero mean", "not estimable")
   ) +
   labs(
-    title = "IFN-associated top genes mostly rise across PBMC identities",
+    title = "Mean stimulation contrasts across PBMC identities",
     x = "Annotated PBMC identity",
     y = "Number of top pattern genes",
-    fill = "Expression direction"
+    fill = "Sign of mean"
   ) +
   theme_minimal(base_size = 13) +
   theme(
@@ -1615,19 +1735,48 @@ ggplot(
 #### Python
 
 ```{python}
+#| label: analysis-direction-coverage-python
+#| results: asis
+ifn_celltype_support = (
+    direction_celltype.loc[direction_celltype["pattern"] == ifn_pattern_py]
+    .groupby("cell_type", observed=True)
+    .agg(
+        mixed_donor_genes=("donor_support", lambda values: values.eq("mixed donor directions").sum()),
+        sensitive_genes=("normalization_status", lambda values: values.eq("normalization-sensitive mean sign").sum()),
+    )
+    .reset_index()
+    .merge(
+        direction_coverage.loc[
+            direction_coverage["scope"] == "stimulation_celltype", ["cell_type", "n_pairs"]
+        ],
+        on="cell_type", how="left", validate="one_to_one",
+    )
+)
+print(render_table(
+    ifn_celltype_support[["cell_type", "n_pairs", "mixed_donor_genes", "sensitive_genes"]]
+    .rename(columns={
+        "cell_type": "PBMC identity", "n_pairs": "Eligible donor pairs",
+        "mixed_donor_genes": "Genes with mixed donor directions",
+        "sensitive_genes": "Genes changing direction across methods",
+    })
+))
+```
+
+```{python}
 #| label: analysis-ifn-direction-celltype-python
+#| fig-alt: "Stacked bars count the top 15 genes of saved Python Pattern5 by the sign of their mean stimulation contrast within each PBMC identity. Positive means predominate across the cell types. These are gene counts, not donor counts, significance levels or response strengths. The preceding table reports donor support and normalization sensitivity separately. Megakaryocytes have only one eligible donor pair, so their results lack across-donor replication."
 ifn_direction_by_celltype = (
     direction_celltype.loc[direction_celltype["pattern"] == ifn_pattern_py]
-    .groupby(["cell_type", "direction"], observed=True)
+    .groupby(["cell_type", "mean_direction"], observed=True)
     .size()
     .reset_index(name="n_genes")
 )
 
-direction_order = ["up_in_stim", "down_in_stim", "mixed_or_unclear"]
+direction_order = ["positive", "negative", "zero", "not estimable"]
 plot_table = (
     ifn_direction_by_celltype.pivot_table(
         index="cell_type",
-        columns="direction",
+        columns="mean_direction",
         values="n_genes",
         fill_value=0,
     )
@@ -1635,9 +1784,10 @@ plot_table = (
 )
 
 colors = {
-    "up_in_stim": "#E76F51",
-    "down_in_stim": "#2F8FBD",
-    "mixed_or_unclear": "#9CA3AF",
+    "positive": "#E76F51",
+    "negative": "#2F8FBD",
+    "zero": "#9CA3AF",
+    "not estimable": "#D1D5DB",
 }
 
 ax = plot_table.plot(
@@ -1647,14 +1797,14 @@ ax = plot_table.plot(
     figsize=(9.2, 6.2),
     width=0.75,
 )
-ax.set_title("IFN-associated top genes mostly rise across PBMC identities")
+ax.set_title("Mean stimulation contrasts across PBMC identities")
 ax.set_xlabel("")
 ax.set_ylabel("Number of top pattern genes")
 ax.legend(
-    ["higher in stimulation", "lower in stimulation", "mixed or unclear"],
+    ["positive mean", "negative mean", "zero mean", "not estimable"],
     loc="upper center",
     bbox_to_anchor=(0.5, -0.28),
-    ncol=3,
+    ncol=2,
     frameon=False,
 )
 plt.xticks(rotation=35, ha="right")
@@ -1664,7 +1814,7 @@ show_plot(ax.figure, "analysis_ifn_direction_by_celltype.png")
 
 :::
 
-This cell-type-stratified view supports a broad IFN-beta response rather than a signal restricted to one annotated identity. It also leaves room for differences in response strength. Some PBMC identities show stronger activity or clearer direction than others, which is biologically plausible in a mixed immune-cell system.
+The mean comparisons show higher relative expression after stimulation for many of these genes across several PBMC cell types, consistent with a broad IFN-beta response. Each mean comparison keeps its direction across all three normalization methods in every listed cell type. Donors do not always agree, however: `FTH1` in NK cells has two positive and six negative donor contrasts. The number of eligible donors also differs by cell type. These gene counts do not show that the response is equally well supported across cell types or measure differences in response strength.
 
 ## Pull The Evidence Together
 
@@ -1675,13 +1825,13 @@ The four main research questions are now connected to specific evidence. The tab
 | **1. What latent transcriptional programs are present?** | R/Python pattern matching, candidate-program inventory, targeted gene-set checks, and identity-linked contrast. | The selected model contains a strong IFN-associated pattern plus additional immune-cell-linked structure, including antigen-presentation-linked biology. |
 | **2. Can CoGAPS distinguish broad stimulation-associated activity from cell-type-linked immune programs?** | Donor-paired IFN activity shift, donor-adjusted mixed-model check, canonical ISG-score agreement, IFN/antiviral enrichment, antigen-presentation enrichment, and identity-linked contrast. | Yes, the evidence supports a broad stimulation-associated signal while retaining non-IFN immune structure. |
 | **3. Which genes define the strongest IFN-associated pattern, and what is their direction in stimulation?** | IFN-associated gene weights paired with donor-aware pseudobulk directionality. | Top genes such as `ISG15`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `OAS1`, and `BST2` define the pattern and are mostly higher after IFN-beta stimulation. |
-| **4. How does the IFN-associated pattern vary across annotated PBMC cell types?** | Cell-type-stratified direction summaries for the IFN-associated pattern's top genes. | The IFN-associated direction is broadly visible across annotated PBMC identities, with room for differences in response strength across cell types. |
+| **4. How does the IFN-associated pattern vary across annotated PBMC cell types?** | Cell-type-stratified mean contrasts, eligible donor counts, donor directions and normalization flags. | Positive mean contrasts occur across several identities, but donor support varies. Megakaryocyte results have one eligible pair and are not replicated across donors. |
 
 Taken together, these checks support a coherent interpretation rather than a single-metric label. The full-run and sampling-only traces show changes at two different scales, while the snapshot plot shows high average top-gene overlap during sampling. The posterior summaries describe variability in cell activities and gene weights; they do not provide an overall accuracy score or certify convergence. The biological interpretation therefore rests on the combined gene, cell-type, and donor evidence, not on a claim that every pattern is equally stable or that `K = 6` is universally best.
 
 The first answer is that the model contains more than one kind of latent structure. The IFN-associated pattern is the clearest stimulation-linked signal: in the selected R run it is `Pattern4`, and in the Python saved output it is `Pattern5`. The number changes because CoGAPS pattern labels are run-specific, but the evidence points to the same biological signal: high activity after IFN-beta stimulation, high agreement with an interferon-stimulated gene score, and top genes such as `ISG15`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `OAS1`, and `BST2`. The model also retains immune-cell-linked patterns, including monocyte-linked structure, a dendritic / antigen-presentation-linked pattern, and a T-cell / lymphocyte-linked baseline pattern. That matters because the analysis is not simply rediscovering "stimulated versus control"; it is separating stimulation-associated activity from other structure already present in the PBMC mixture.
 
-The second answer is that the stimulation-associated signal is broad, but not identical in every cell type. The donor-paired analysis shows higher IFN-associated activity after stimulation in all eight matched donor pairs, and the mixed model reaches the same conclusion while accounting for donor baselines. The visualization section prepared the same idea visually: the UMAP activity maps showed that this pattern cuts across the cell-identity map rather than sitting in only one neighborhood. The cell-type-stratified summaries then showed that annotated PBMC identities can share the IFN-associated direction while still differing in response strength. This is the useful middle ground for a mixed immune-cell dataset: a shared perturbation response can be visible without erasing cell identity.
+The second answer is that the stimulation-associated signal is broad, but not identical in every cell type. The donor-paired analysis shows higher IFN-associated activity after stimulation in all eight matched donor pairs, and the mixed model reaches the same conclusion while accounting for donor baselines. The UMAP activity maps showed that this pattern cuts across the cell-identity map rather than sitting in only one neighborhood. The gene contrasts add positive mean stimulation shifts across several PBMC identities, with differing donor coverage and directional agreement. A shared perturbation response can be visible without erasing cell identity, but these descriptive gene counts do not establish differences in response strength between cell types.
 
 The third answer is that CoGAPS gene weights and expression direction have to be read together. The top genes for the IFN-associated pattern are strongly consistent with interferon biology, but the weights alone only say that those genes help define the pattern. The pseudobulk directionality summaries add the missing piece: among the top IFN-associated genes, most are higher after IFN-beta stimulation, while an exception such as `FTH1` shows why direction cannot be assumed from the CoGAPS weight. The identity-linked contrast reinforces the same lesson. A dendritic / antigen-presentation-linked pattern can be defined by genes such as `CD74` and HLA class II genes without behaving like the broad IFN-associated stimulation pattern.
 

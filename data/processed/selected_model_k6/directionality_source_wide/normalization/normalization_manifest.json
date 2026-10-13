@@ -1,0 +1,46 @@
+{
+  "schema_version": "source-wide-counts-v1",
+  "source": {
+    "filename": "kang_counts_25k.h5ad",
+    "size_bytes": 38356412,
+    "sha256": "e6a5adac64dcdeb36eaba27db49b63e0c64bb0ed4a64c6705971506b41c39830"
+  },
+  "prepared": {
+    "filename": "preprocessed_cells_hvg3000.h5ad",
+    "size_bytes": 55888818,
+    "sha256": "f26df25334f60d24a95f7e90927bc034b8ecf385731486f39b8183a8fea51e32"
+  },
+  "exporter": {
+    "filename": "directionality_normalization.py",
+    "size_bytes": 10835,
+    "sha256": "81e9d2cce363984e56876d96f14671330671155abcf415c7c6b063c99b61baed"
+  },
+  "archive_manifest": {
+    "filename": "reproduction_files.json",
+    "size_bytes": 3555,
+    "sha256": "18b54a83e005a34833add8af1da9f8be4261aa20b7734d09a856b21ed79720ad"
+  },
+  "archive_record_url": "https://zenodo.org/records/21208760",
+  "source_count_location": "X",
+  "prepared_count_location": "layers/counts",
+  "source_gene_count": 15706,
+  "modeled_gene_count": 3000,
+  "n_cells": 24673,
+  "retained_counts_match_source": true,
+  "normalization_universe": "All genes in the supplied source object; not the entire transcriptome",
+  "totals": {
+    "filename": "source_library_totals.csv",
+    "size_bytes": 1389245,
+    "sha256": "5ee7431c88c15d81bd7d8f0179bd0c9e23fd1667cf966eaa7bd4c6717bc10497"
+  },
+  "source_genes": {
+    "filename": "source_genes.csv",
+    "size_bytes": 115568,
+    "sha256": "f2d0b68333f314a284da023e33e55e0ddfecc11a4528c1796840f234e10b4302"
+  },
+  "modeled_genes": {
+    "filename": "modeled_genes.csv",
+    "size_bytes": 20873,
+    "sha256": "276721f8906c1cbe54eb403ae53c7f39fb0bfbfa700ac06d7de52b1b804e7f71"
+  }
+}

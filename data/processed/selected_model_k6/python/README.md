@@ -23,14 +23,15 @@ These files are the default Python path when the full `.h5ad` is absent:
 - `pattern_activity_by_celltype_condition.csv`: compact activity summaries by cell type and condition.
 - `pattern_activity_by_replicate_condition.csv`: donor-aware activity summaries.
 - `pattern_summary.csv`: compact per-pattern interpretation table.
-- `pattern_gene_directionality_global.csv`: targeted global directionality for top pattern genes.
-- `pattern_gene_directionality_by_celltype.csv`: targeted cell-type directionality for top pattern genes.
-- `pattern_direction_summary.csv`: one-row directionality summary per pattern.
-- `pattern_gene_directionality_pairs_global.csv`: donor-paired global log2FC values.
-- `pattern_gene_directionality_pairs_by_celltype.csv`: donor-paired cell-type log2FC values.
-- `pattern_gene_directionality_heatmap.png`: heatmap of global top-gene directionality.
-- `pseudobulk_counts_global.csv`: global pseudobulk counts used for directionality summaries.
-- `pseudobulk_counts_by_celltype.csv`: cell-type pseudobulk counts used for directionality summaries.
+
+Expression-direction comparisons are stored separately in
+[`../directionality_source_wide/`](../directionality_source_wide/README.md).
+The lesson uses its `sensitivity/python_gene_report_global.csv`,
+`python_gene_report_by_celltype.csv` and `python_gene_report_identity.csv` tables,
+which combine source-wide estimates, donor counts and normalization checks.
+These included files do not require the full model download. Superseded
+expression exports are no longer kept alongside the fitted-model summaries in
+this folder.
 
 ## Directionality Notes
 

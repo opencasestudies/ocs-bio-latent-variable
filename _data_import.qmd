@@ -48,7 +48,7 @@ manifest_group_summary_r <- tibble::tibble(
   what_it_means = c(
     "Files used in the main learner path.",
     "Large files for full local rebuilding or deeper inspection.",
-    "Files kept out of GitHub because they are too large or regenerated."
+    "Categories of files kept out of GitHub because they are too large or regenerated."
   ),
   learner_action = c(
     "Use these files while working through the case study.",
@@ -59,7 +59,7 @@ manifest_group_summary_r <- tibble::tibble(
 
 knitr::kable(
   manifest_group_summary_r,
-  col.names = c("File group", "Files", "What it means", "Learner action")
+  col.names = c("File group", "Listed entries", "What it means", "Learner action")
 )
 ```
 
@@ -79,7 +79,7 @@ manifest_group_summary = pd.DataFrame(
             "Optional external or local files",
             "Intentionally excluded from repository assets",
         ],
-        "Files": [
+        "Listed entries": [
             len(artifact_manifest["included_files"]),
             len(artifact_manifest["optional_external_or_local_files"]),
             len(artifact_manifest["explicitly_excluded_from_publication_assets"]),
@@ -87,7 +87,7 @@ manifest_group_summary = pd.DataFrame(
         "What it means": [
             "Files used in the main learner path.",
             "Large files for full local rebuilding or deeper inspection.",
-            "Files kept out of GitHub because they are too large or regenerated.",
+            "Categories of files kept out of GitHub because they are too large or regenerated.",
         ],
         "Learner action": [
             "Use these files while working through the case study.",
@@ -101,6 +101,8 @@ print(render_table(manifest_group_summary))
 ```
 
 :::
+
+The first two counts are individual file entries. The excluded count is the number of listed categories, not the number of individual files excluded.
 
 The main point is that you do not need to rerun the full CoGAPS sweep to work through the case study. The repository includes the prepared teaching data, model-selection summaries, and lightweight selected-model outputs. Optional large files are useful for auditing or rebuilding selected outputs, but they are not required for the main analysis path.
 
@@ -1003,8 +1005,8 @@ r_selected_files <- tibble::tibble(
     R_PATTERN_CELL_ACTIVITIES_TSV_GZ_R,
     R_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ_R,
     R_PATTERN_TOP_GENES_CSV_R,
-    R_DIRECTION_GLOBAL_CSV_R,
-    R_DIRECTION_CELLTYPE_CSV_R
+    R_SOURCE_DIRECTION_GLOBAL_CSV_R,
+    R_SOURCE_DIRECTION_CELLTYPE_CSV_R
   ),
   used_later_for = c(
     "runtime and model-setting checks",
@@ -1100,8 +1102,8 @@ python_selected_files = pd.DataFrame(
             PY_PATTERN_CELL_ACTIVITIES_TSV_GZ,
             PY_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ,
             PY_PATTERN_TOP_GENES_CSV,
-            PY_DIRECTION_GLOBAL_CSV,
-            PY_DIRECTION_CELLTYPE_CSV,
+            PY_SOURCE_DIRECTION_GLOBAL_CSV,
+            PY_SOURCE_DIRECTION_CELLTYPE_CSV,
         ],
         "Used later for": [
             "runtime and model-setting checks",
@@ -1204,7 +1206,7 @@ import_checkpoint_r <- tibble::tibble(
     exists("k_selection_decision_r"),
     file.exists(R_CHOSEN_METRICS_JSON_R),
     HAS_R_LIGHTWEIGHT_PATTERN_MATRICES_R,
-    file.exists(R_DIRECTION_GLOBAL_CSV_R) && file.exists(R_DIRECTION_CELLTYPE_CSV_R)
+    file.exists(R_SOURCE_DIRECTION_GLOBAL_CSV_R) && file.exists(R_SOURCE_DIRECTION_CELLTYPE_CSV_R)
   ),
   why_it_matters = c(
     "Needed to justify which model outputs are imported.",
@@ -1253,7 +1255,7 @@ import_checkpoint = pd.DataFrame(
             "k_selection_decision" in globals(),
             PY_CHOSEN_METRICS_JSON.exists(),
             HAS_PY_LIGHTWEIGHT_PATTERN_MATRICES,
-            PY_DIRECTION_GLOBAL_CSV.exists() and PY_DIRECTION_CELLTYPE_CSV.exists(),
+            PY_SOURCE_DIRECTION_GLOBAL_CSV.exists() and PY_SOURCE_DIRECTION_CELLTYPE_CSV.exists(),
         ],
         "Why it matters": [
             "Needed to justify which model outputs are imported.",

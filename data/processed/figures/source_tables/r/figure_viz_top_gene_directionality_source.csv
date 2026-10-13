@@ -1,16 +1,16 @@
-gene,pattern,rank,cogaps_weight,contrast_scope,mean_log2fc_stim_vs_ctrl,median_log2fc_stim_vs_ctrl,n_pairs,n_up_pairs,n_down_pairs,n_zero_pairs,sign_consistency,wilcoxon_pvalue,direction,evidence_strength,wilcoxon_fdr
-BST2,Pattern4,15,1.08426094055176,global,2.02879220287445,2.15909772795487,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-PLSCR1,Pattern4,14,1.17907178401947,global,2.67163634404404,2.57903710685419,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-OAS1,Pattern4,13,1.35603356361389,global,3.96238793116664,4.10488058061511,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-TNFSF10,Pattern4,12,1.40809190273285,global,5.04933592325015,4.97803618020624,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-IRF7,Pattern4,11,1.56163501739502,global,2.95852296779169,3.01082536267631,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-SAT1,Pattern4,10,1.56951463222504,global,1.3698097478045,1.372008837073,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-IFIT2,Pattern4,9,1.60991239547729,global,6.39050439591817,6.03098517854245,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-FTH1,Pattern4,8,2.98574447631836,global,-1.0809246736652,-1.05921027187755,8,0,8,0,1.0,0.0142661867014469,down_in_stim,strong,0.0167837490605258
-MX1,Pattern4,7,3.85335969924927,global,4.93797458482545,5.01754769699488,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-IFIT1,Pattern4,6,4.01197099685669,global,7.41602259590711,7.32742209880761,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-LY6E,Pattern4,5,4.53398990631104,global,4.18328625296589,4.07367569844011,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-IFIT3,Pattern4,4,4.92728328704834,global,6.39461435745302,5.99054631473433,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-IFI6,Pattern4,3,6.575852394104,global,4.68812154886454,4.53017740479273,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-ISG20,Pattern4,2,8.38416481018066,global,3.66850390134424,3.57427734682254,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
-ISG15,Pattern4,1,9.82040977478027,global,6.17321590430931,6.16798782377512,8,8,0,0,1.0,0.0142661867014469,up_in_stim,strong,0.0167837490605258
+gene,pattern,rank,cogaps_weight,contrast_scope,mean_log2fc_stim_vs_ctrl,median_log2fc_stim_vs_ctrl,n_agree_mean,mean_direction,direction,n_pairs,n_positive,n_negative,n_zero,agreement_with_mean,donor_support,normalization_status
+BST2,Pattern4,15,1.08426094055176,global,2.23882373405237,2.31772269451843,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+PLSCR1,Pattern4,14,1.17907178401947,global,2.88032298067439,2.82562154425501,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+OAS1,Pattern4,13,1.35603356361389,global,4.16602169995904,4.31280837197464,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+TNFSF10,Pattern4,12,1.40809190273285,global,5.25324260799612,5.19965637872572,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+IRF7,Pattern4,11,1.56163501739502,global,3.16693550404035,3.15479111678821,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+SAT1,Pattern4,10,1.56951463222504,global,1.58127098805254,1.5993103260049,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+IFIT2,Pattern4,9,1.60991239547729,global,6.57140008748008,6.17516601540601,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+FTH1,Pattern4,8,2.98574447631836,global,-0.869222361891428,-0.809069322609148,8,negative,down_in_stim,8,0,8,0,1.0,8 of 8 negative,same mean sign across methods
+MX1,Pattern4,7,3.85335969924927,global,5.138223129371,5.16677064703528,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+IFIT1,Pattern4,6,4.01197099685669,global,7.56612843558705,7.49786212364904,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+LY6E,Pattern4,5,4.53398990631104,global,4.39036754946753,4.28639736945971,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+IFIT3,Pattern4,4,4.92728328704834,global,6.586154728258,6.21341120045873,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+IFI6,Pattern4,3,6.575852394104,global,4.89312842401926,4.76013821353548,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+ISG20,Pattern4,2,8.38416481018066,global,3.87904113690715,3.74772968134311,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods
+ISG15,Pattern4,1,9.82040977478027,global,6.38278131613636,6.41582348954519,8,positive,up_in_stim,8,8,0,0,1.0,8 of 8 positive,same mean sign across methods

@@ -9,11 +9,12 @@
     "primary_implementation": "R/Bioconductor CoGAPS",
     "parallel_implementation": "Python/PyCoGAPS-compatible saved outputs",
     "primary_result_dir": "data/processed/selected_model_k6/r",
-    "python_result_dir": "data/processed/selected_model_k6/python"
+    "python_result_dir": "data/processed/selected_model_k6/python",
+    "directionality_result_dir": "data/processed/selected_model_k6/directionality_source_wide"
   },
   "publication_policy": {
     "github_contains": "Teaching subset, precomputed sweep summaries, lightweight K6 model exports, selected diagnostic summaries, and learner-facing selected K6 figures.",
-    "external_or_local_contains": "Optional full selected K6 model objects and dense full-reproduction inputs.",
+    "external_or_local_contains": "Optional larger source count object, full selected K6 model objects and dense full-reproduction input from the versioned Zenodo record.",
     "not_part_of_case_study_release": "Full HPC sweep output archive, large older K7 model objects, exploratory distributed-runtime outputs, and developer dashboard scratch artifacts."
   },
   "included_files": [
@@ -49,7 +50,7 @@
       "path": "data/processed/k_selection/k_selection_decision_manifest.json",
       "role": "Precomputed rank-sweep/model-selection summary",
       "size_bytes": 3023,
-      "sha256": "761998588dc0741b7795ebef14e956b9414f7214ef81b06ca7b43d23b849dff6",
+      "sha256": "5b9aa917172da758e40af3433fe3aeb4bda000bafe461f5d523975082098ad9c",
       "github_required": true
     },
     {
@@ -76,15 +77,15 @@
     {
       "path": "data/processed/selected_model_k6/r/README.md",
       "role": "Selected K6 R-primary lightweight model artifact",
-      "size_bytes": 2172,
-      "sha256": "266036ea10ab891d6ed849a13fa6c646e1936cd0d4ec3b7ea025c7e43649b4a3",
+      "size_bytes": 5145,
+      "sha256": "33bf05901a3babb54b0e655d0be3a28f3a3194dafe8487e039836207f6364cc1",
       "github_required": true
     },
     {
       "path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.diagnostics.json",
       "role": "Selected K6 R-primary lightweight model artifact",
-      "size_bytes": 1297,
-      "sha256": "5c1a3b905bbce057292fe47da04add5e6f59717b8e7ea2123bae3c88675355b9",
+      "size_bytes": 2608,
+      "sha256": "de3c93c4eb721caecbe5726282abcea8c5f432005fe26ccba6d6b49ef57768c9",
       "github_required": true
     },
     {
@@ -125,8 +126,8 @@
     {
       "path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.trace.csv",
       "role": "Selected K6 R-primary lightweight model artifact",
-      "size_bytes": 1841,
-      "sha256": "c90b951acaf8b2baa4a059952a72189530ed89fe0c4681355f709d08df5014f3",
+      "size_bytes": 4138,
+      "sha256": "e7c01bda25c47577ffa5124c493bd6762d17a26933ab24765b9d68c6b13410d6",
       "github_required": true
     },
     {
@@ -172,48 +173,6 @@
       "github_required": true
     },
     {
-      "path": "data/processed/selected_model_k6/r/pattern_direction_summary.csv",
-      "role": "Selected K6 R-primary lightweight model artifact",
-      "size_bytes": 794,
-      "sha256": "008010602c8de6422f3182b17085e7c7c669bf83109ed0e78b481c82daf3f9db",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/r/pattern_gene_directionality_by_celltype.csv",
-      "role": "Selected K6 R-primary lightweight model artifact",
-      "size_bytes": 115197,
-      "sha256": "d0b2ddd676ed8a677346fffe4f724d11904b1d2ce5b33a8fd1261643d3071530",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/r/pattern_gene_directionality_global.csv",
-      "role": "Selected K6 R-primary lightweight model artifact",
-      "size_bytes": 13669,
-      "sha256": "609d0bab37a63461cf136b2c7c2e51aa7703a28bf16a29fe8d164733edca9e74",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/r/pattern_gene_directionality_heatmap.png",
-      "role": "Selected K6 R-primary lightweight model artifact",
-      "size_bytes": 222779,
-      "sha256": "3693d4bcf9603d54d7884aa0ae920dda7f50add0bae42457c699f2dd7f624360",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/r/pattern_gene_directionality_pairs_by_celltype.csv",
-      "role": "Selected K6 R-primary lightweight model artifact",
-      "size_bytes": 317070,
-      "sha256": "d72c5e65da3450bc1d35260e7e0e0a6abbc46ec858680beb4b0ff2ca5f62d82c",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/r/pattern_gene_directionality_pairs_global.csv",
-      "role": "Selected K6 R-primary lightweight model artifact",
-      "size_bytes": 42451,
-      "sha256": "264a80cec53ea797103ab5169d9b3d53fe9b36ec7f1660c6df4f123e11bba91f",
-      "github_required": true
-    },
-    {
       "path": "data/processed/selected_model_k6/r/pattern_gene_weight_sd.tsv.gz",
       "role": "Selected K6 R-primary lightweight model artifact",
       "size_bytes": 163783,
@@ -242,31 +201,10 @@
       "github_required": true
     },
     {
-      "path": "data/processed/selected_model_k6/r/pattern_top_genes_directionality.csv",
-      "role": "Selected K6 R-primary lightweight model artifact",
-      "size_bytes": 3498,
-      "sha256": "a4a01091b7e30219b15ece71b14267c4639dbded2e492adcdfe62316e8cdd035",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/r/pseudobulk_counts_by_celltype.csv",
-      "role": "Selected K6 R-primary lightweight model artifact",
-      "size_bytes": 119942,
-      "sha256": "21dfcb0dc888d2f8bd5455c60f3bc73da73c54138c18b2b42c4a00a3fd522f14",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/r/pseudobulk_counts_global.csv",
-      "role": "Selected K6 R-primary lightweight model artifact",
-      "size_bytes": 21317,
-      "sha256": "6974e9b1b5206ab9b7b79d3df9255b92bcc98f2762f2cddabcb11c17395280bb",
-      "github_required": true
-    },
-    {
       "path": "data/processed/selected_model_k6/python/README.md",
       "role": "Selected K6 Python parallel-tab lightweight model artifact",
-      "size_bytes": 3654,
-      "sha256": "eeba5a1e385791609607f2bfdf817f06168adf504e622a370b4ece97f6c518d6",
+      "size_bytes": 3432,
+      "sha256": "d26e783a873069f7beb8fbc9f876e92ed314f285e9a986a4aa4145a3f9a165a1",
       "github_required": true
     },
     {
@@ -312,48 +250,6 @@
       "github_required": true
     },
     {
-      "path": "data/processed/selected_model_k6/python/pattern_direction_summary.csv",
-      "role": "Selected K6 Python parallel-tab lightweight model artifact",
-      "size_bytes": 770,
-      "sha256": "2d416af13ab538a822cef8e5dc27739bf8497821cdd796e1305af6bb06e5fa82",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/python/pattern_gene_directionality_by_celltype.csv",
-      "role": "Selected K6 Python parallel-tab lightweight model artifact",
-      "size_bytes": 114517,
-      "sha256": "db9958b9521d4173ae892e065c7817f333a23922afe399c1dfa258bc62b738d2",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/python/pattern_gene_directionality_global.csv",
-      "role": "Selected K6 Python parallel-tab lightweight model artifact",
-      "size_bytes": 13207,
-      "sha256": "d0899fe6abf1f32cc7c855b496862fb64d38da84f38163bdd95031cf9dbe1a1e",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/python/pattern_gene_directionality_heatmap.png",
-      "role": "Selected K6 Python parallel-tab lightweight model artifact",
-      "size_bytes": 262309,
-      "sha256": "60df71d3613f2368b0c4641ef9698025079a395e9157f8fcd178bedc0a7c086c",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/python/pattern_gene_directionality_pairs_by_celltype.csv",
-      "role": "Selected K6 Python parallel-tab lightweight model artifact",
-      "size_bytes": 320592,
-      "sha256": "f40ae3e7933bbe857c2fb0cb01d903ae4b1348d8666ef8b07fafd96c7326ef4e",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/python/pattern_gene_directionality_pairs_global.csv",
-      "role": "Selected K6 Python parallel-tab lightweight model artifact",
-      "size_bytes": 43987,
-      "sha256": "bd4ed3b3f4f1c279d1c50515cfe4af791697391856f5e08225998208bd18a25c",
-      "github_required": true
-    },
-    {
       "path": "data/processed/selected_model_k6/python/pattern_gene_weights.tsv.gz",
       "role": "Selected K6 Python parallel-tab lightweight model artifact",
       "size_bytes": 180314,
@@ -375,45 +271,416 @@
       "github_required": true
     },
     {
-      "path": "data/processed/selected_model_k6/python/pseudobulk_counts_by_celltype.csv",
-      "role": "Selected K6 Python parallel-tab lightweight model artifact",
-      "size_bytes": 150322,
-      "sha256": "fe7bb24a777832b42aa036e3858bd4b2b3d4702aa6c2ba7e2050ba49b669ad48",
-      "github_required": true
-    },
-    {
-      "path": "data/processed/selected_model_k6/python/pseudobulk_counts_global.csv",
-      "role": "Selected K6 Python parallel-tab lightweight model artifact",
-      "size_bytes": 25864,
-      "sha256": "ffb205cd7fc46b33e33b88001c9fd36caa40a0f5768d1c2ccffd25e00f28949b",
-      "github_required": true
-    },
-    {
       "path": "data/processed/figures/ifn_pattern_by_celltype_all.png",
       "role": "Learner-facing selected K6 rendered figure asset",
-      "size_bytes": 91775,
-      "sha256": "a78819019b34c331503ba76be3362c0b831a7855b0b9d8dabc226458b36ebb3f",
+      "size_bytes": 119200,
+      "sha256": "42e02a4aab59e7261af9d54407f8c16f4399b706d8c760f7815c8ab8d4ebddcd",
       "github_required": true
     },
     {
       "path": "data/processed/figures/ifn_pattern_by_celltype_split_condition.png",
       "role": "Learner-facing selected K6 rendered figure asset",
-      "size_bytes": 101639,
-      "sha256": "58af5bc74636b3705196d54510a534e76b056268c1fb4dd18c8c0d0b23ab2b61",
+      "size_bytes": 131633,
+      "sha256": "1a4c64a8a22f6ab6d1198e814e81f3d285dbcf2211daa3cf7a2ad2f8f6c782ff",
       "github_required": true
     },
     {
       "path": "data/processed/figures/mean_pattern_by_condition.png",
       "role": "Learner-facing selected K6 rendered figure asset",
-      "size_bytes": 55801,
-      "sha256": "04fc9ed5da2ac0e9aba843ce3d378fbb9b7ef569399d7d520834500fdd49354d",
+      "size_bytes": 71172,
+      "sha256": "72632f25054f76468e8459611d3d320989679d8d359eac6a772a0128cc86c40b",
       "github_required": true
     },
     {
-      "path": "data/processed/figures/pattern_gene_directionality_heatmap.png",
-      "role": "Learner-facing selected K6 rendered figure asset",
-      "size_bytes": 222779,
-      "sha256": "3693d4bcf9603d54d7884aa0ae920dda7f50add0bae42457c699f2dd7f624360",
+      "path": "img/figure_viz_top_gene_directionality.png",
+      "size_bytes": 221872,
+      "sha256": "d17a48f4a96ff1713233c3d18384a54c291821eb14b28e5e91093bdaca519323",
+      "role": "Corrected source-wide directionality figure, source table or provenance record",
+      "github_required": true
+    },
+    {
+      "path": "img/figure_viz_identity_pattern_directionality.png",
+      "size_bytes": 304224,
+      "sha256": "6b6ed58608291626aa355eae32aae842ec8e0279d2f99a2d1879e9ed3af13ff6",
+      "role": "Corrected source-wide directionality figure, source table or provenance record",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/figures/figure_viz_top_gene_directionality.png",
+      "size_bytes": 221872,
+      "sha256": "d17a48f4a96ff1713233c3d18384a54c291821eb14b28e5e91093bdaca519323",
+      "role": "Corrected source-wide directionality figure, source table or provenance record",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/figures/figure_viz_identity_pattern_directionality.png",
+      "size_bytes": 304224,
+      "sha256": "6b6ed58608291626aa355eae32aae842ec8e0279d2f99a2d1879e9ed3af13ff6",
+      "role": "Corrected source-wide directionality figure, source table or provenance record",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/figures/source_tables/r/figure_viz_top_gene_directionality_source.csv",
+      "size_bytes": 2553,
+      "sha256": "534d81df4266b8e8e14de3a991341f6d449fd2b7c3ea40436227668c8d436f1a",
+      "role": "Corrected source-wide directionality figure, source table or provenance record",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/figures/source_tables/r/figure_viz_identity_pattern_directionality_source.csv",
+      "size_bytes": 6540,
+      "sha256": "8bbbb0ea28e6d43e4f2f64cdf65dd351e7daa2508c2e39bbf36b2ccdf2a964b5",
+      "role": "Corrected source-wide directionality figure, source table or provenance record",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/figures/source_tables/python/figure_viz_top_gene_directionality_source.csv",
+      "size_bytes": 2614,
+      "sha256": "80877a96e37f6cd181804eff6bdcf9b2bbc801a8196b8f90de4915d9f5c7a1d1",
+      "role": "Corrected source-wide directionality figure, source table or provenance record",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/figures/source_tables/python/figure_viz_identity_pattern_directionality_source.csv",
+      "size_bytes": 6585,
+      "sha256": "c67756e7cff209b6e9ab26594891a7641910bb21d69eaa1d5a24d07cd92737f5",
+      "role": "Corrected source-wide directionality figure, source table or provenance record",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/figures/directionality_figure_manifest.json",
+      "size_bytes": 4668,
+      "sha256": "31a27ec9f376f9651e3e8555fc4f88535562ff5fca53b8a2a89193e28d4486c5",
+      "role": "Corrected source-wide directionality figure, source table or provenance record",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/bundle_manifest.json",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 31015,
+      "sha256": "27a376fb62d07c9f564e9e2e16a0194523804a19c710941b22c3c3559c352380",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/README.md",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 3585,
+      "sha256": "977a718a27a367850c3304b61f4054b71b9a1187b4de56fd1b69bb59de520c41",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/normalization/modeled_genes.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 20873,
+      "sha256": "276721f8906c1cbe54eb403ae53c7f39fb0bfbfa700ac06d7de52b1b804e7f71",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/normalization/normalization_manifest.json",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 1623,
+      "sha256": "6b47ded1764b3885a205749a371dd33bccc596daf8e03e3391878fa51c3e8c7c",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/normalization/source_genes.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 115568,
+      "sha256": "f2d0b68333f314a284da023e33e55e0ddfecc11a4528c1796840f234e10b4302",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/normalization/source_library_totals.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 1389245,
+      "sha256": "5ee7431c88c15d81bd7d8f0179bd0c9e23fd1667cf966eaa7bd4c6717bc10497",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/README.md",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 3192,
+      "sha256": "5d65d77919ecec7a7f1f5fbb66f2f6b60eb8ba9b859c7e4c960dd2f37cd3f312",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/directionality_method.json",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 5469,
+      "sha256": "0c1a25ed7a47f9db37a18b64e9a84fc895b908dbc3ede6ce4038967d97d419bd",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/pattern_direction_summary.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 785,
+      "sha256": "881032bd0f67aa1e8a2863ed7381553bb7a3bd925de2d9c69893e02dd472463f",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/pattern_gene_directionality_by_celltype.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 146971,
+      "sha256": "596729284cbafeadf48e0d773ee3b9cbbb059164c6e9bff13358dc406e808382",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/pattern_gene_directionality_global.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 16259,
+      "sha256": "be97b4246f0378d81728d1e730cbdc7ba7f8bf613928a11c1077bada9e1535aa",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/pattern_gene_directionality_heatmap.png",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 315729,
+      "sha256": "c5feb10612d6669ed20e0edf7bb9cbba9fbd01dfaeaed1da7b139c588dfb8089",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/pattern_gene_directionality_pairs_by_celltype.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 320646,
+      "sha256": "6ab9e5ee02f6ac4fc9140661cae9bdcefc94946accbfe20334178819b791be8d",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/pattern_gene_directionality_pairs_global.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 44083,
+      "sha256": "47b92a06a8c6c9fa8195ef45c2c2652fd4fcd5e540acc0d783f03c30885bcdca",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/pattern_top_genes.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 3260,
+      "sha256": "f013e20eae3eb47238c5306be712b7189deace2dc05df2090351c9b881daeebd",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/pseudobulk_counts_by_celltype.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 150656,
+      "sha256": "ff746905075eb40dffc75b6187608141e04e1e677ae4cff930d66f5265c773eb",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/pseudobulk_counts_global.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 25993,
+      "sha256": "7a95a18f67c666999c617c685a678cfbf896f607802113fbf7e1502de0463d3e",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/pseudobulk_eligibility_by_celltype.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 6986,
+      "sha256": "34d73810c5ff0954576e1bbaea05a2f3bb69c786a3722a346c7ea56d96b7323e",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/python/pseudobulk_eligibility_global.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 741,
+      "sha256": "ceed819dc121080fb7119404c06d155bb790040b2b814acd91797dbe4a7aaf57",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/r/directionality_method.json",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 4924,
+      "sha256": "81de0d2f1ea303cb8f59851a69f1dde05dcdd2f6f9a6ad05608dff5b5bbfea1d",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/r/pattern_direction_summary.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 813,
+      "sha256": "5d9b71fe3b3f7e8be9a5b49a04f033ecd73c8b011fdfb872a6910962bcb8f39e",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/r/pattern_gene_directionality_by_celltype.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 153089,
+      "sha256": "9cc1d7831c215fcede8f04a3ae2ad022301b8bbc762848ee4ce8a1a7f2fd7f77",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/r/pattern_gene_directionality_global.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 17045,
+      "sha256": "4c85444707537d2b1acee62e8ae29734e309d76d3ec07b7bf039bb0a81c4bd1e",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/r/pattern_gene_directionality_heatmap.png",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 222358,
+      "sha256": "254cc5a3b7a307df8b4133599322f5b551d1fb031f25eca4ea5203a0dae24d3f",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/r/pattern_gene_directionality_pairs_by_celltype.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 331423,
+      "sha256": "391c59ad78c291ea6c2aa9efd2081de63916abc086ee85cd22427e6d6081a9b2",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/r/pattern_gene_directionality_pairs_global.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 44846,
+      "sha256": "c329f20b44701255248de95f51ffec62b448b949f570d88e3332c927c6ebe06e",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/r/pattern_top_genes_directionality.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 3498,
+      "sha256": "a4a01091b7e30219b15ece71b14267c4639dbded2e492adcdfe62316e8cdd035",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/r/pseudobulk_counts_by_celltype.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 129424,
+      "sha256": "a962303c01a9f52034c5a09b7292631205a041abfcb0a1e054c492d94cb954a3",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/r/pseudobulk_counts_global.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 22842,
+      "sha256": "b663f078a0105053e43ac5ff5d1e965601d65a9c86bf465ebd86345921e6a75d",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/r/pseudobulk_eligibility_by_celltype.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 7992,
+      "sha256": "b6c5352993ec412d83b6c4ccf601af91b75e8da61050bd1ef9dff74f8513888d",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/r/pseudobulk_eligibility_global.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 849,
+      "sha256": "4d7509b7f46511211b77127681ea6eeda22ee6f6f1bb23e670ac7cda98be6b7d",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/contrast_summary.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 993598,
+      "sha256": "888fdecc8c2957a6ee1082b38dbedce3acf186bce846753200c8a7b880b8e5b1",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/donor_contrasts.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 1824694,
+      "sha256": "7e1bdf31b0e2ed6628bfcd33a6a1bf2e8ecf752d847fbdf560ccbd432d2a49b7",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/donor_eligibility.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 37787,
+      "sha256": "3841747399c974025ef030391c1259cef6f6f6c6a9a86a1a9e3509229a9e08c8",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/eligible_donors_by_scope.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 2968,
+      "sha256": "f2dc4c70e80db465158c33b892e4dbb4fa0bda2fdfbebe5fae414ce84570d889",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/identity_source_summary.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 154539,
+      "sha256": "087cbbb8baf49fa49ce18248af0e74e00b34e3a3aa2c3a15d685e2ecfa0569a9",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/normalization_comparison.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 151834,
+      "sha256": "ff378b09fb83ef51a3b68d561886c76af83a6b359c434c87dcf8cfa9ddb615d6",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/pattern_genes_python.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 3250,
+      "sha256": "f769ce50a4a2048c1e5d9d97ba6262553afa30024a765fac14429faa8b50c56d",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/pattern_genes_r.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 3130,
+      "sha256": "a8c2b8d33b056004d7165e5d16f29ba7953905c9a30c9db169cd07a5954c7d4e",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/python_gene_report_by_celltype.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 259772,
+      "sha256": "aed255d190a830109fd142e7869f006f526d3bb8090a2ce7a739fee1788f30d4",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/python_gene_report_global.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 33450,
+      "sha256": "c8d2dce194b28974f7137625a20186cae3efbc87d4adf4caa9c84fc21312d060",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/python_gene_report_identity.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 252854,
+      "sha256": "8aa189d0529b00d7bec1425a435298adc6c1f47455174ebbeaf5aee2570574f2",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/r_gene_report_by_celltype.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 258812,
+      "sha256": "10724d956fbd19bdb906479163a100e18d543f731639e46337791169499808cb",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/r_gene_report_global.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 33330,
+      "sha256": "818e1429de3819f46f4a8a6ba665f2ea44a7a84671f947034dfffe5d613e720a",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/r_gene_report_identity.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 251894,
+      "sha256": "facca2442437f55357a8f96f05a948744d1952d45654638580935a2a50e8fe01",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/sensitivity_method.json",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 7433,
+      "sha256": "bf2987bc0f99bc755b8ec47c07d7ff86ef788c2402fb525cd3ae5b2e6b9b5e2e",
+      "github_required": true
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/stimulation_source_summary.csv",
+      "role": "Source-wide expression comparison, donor reporting, normalization sensitivity or integrity record",
+      "size_bytes": 20620,
+      "sha256": "89e52e45d44b5d58cd0c9d3728c705992ff46a22d4325a18c5a43a27845802d8",
       "github_required": true
     }
   ],
@@ -421,47 +688,58 @@
     {
       "recommended_path": "data/source/kang_counts_25k.h5ad",
       "role": "Larger source PBMC IFN-beta single-cell count file used to recreate the prepared HVG single-cell dataset",
-      "required_for": "Optional full preprocessing reproduction",
+      "required_for": "Optional preprocessing, source-count verification and expression/TMM recalculation; not the saved-results learner path",
       "github_required": false,
-      "recommended_host": "Zenodo or equivalent external artifact host; local-only is sufficient for private full reproduction",
-      "present_locally": false,
-      "size_bytes": null
+      "size_bytes": 38356412,
+      "sha256": "e6a5adac64dcdeb36eaba27db49b63e0c64bb0ed4a64c6705971506b41c39830",
+      "upload_filename": "kang_counts_25k.h5ad",
+      "record_url": "https://zenodo.org/records/21208760",
+      "doi": "10.5281/zenodo.21208760"
     },
     {
       "recommended_path": "data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad",
       "role": "Dense genes x cells matrix for full local Python/PyCoGAPS reruns",
       "required_for": "Optional full reproduction input",
       "github_required": false,
-      "recommended_host": "Zenodo or equivalent external artifact host; local-only is sufficient for private full reproduction",
-      "present_locally": true,
-      "size_bytes": 624660894
+      "size_bytes": 624660894,
+      "sha256": "a351c7773e9e28572aea287b574e18583d1affb6f63b031cec05e2c38a9998fd",
+      "upload_filename": "cogaps_input_genesxcells_hvg3000_float64.h5ad",
+      "record_url": "https://zenodo.org/records/21208760",
+      "doi": "10.5281/zenodo.21208760"
     },
     {
       "recommended_path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds",
       "role": "Full selected R CoGAPS result object",
       "required_for": "Optional full local inspection and derivative regeneration",
       "github_required": false,
-      "recommended_host": "Zenodo or equivalent external artifact host; local-only is sufficient for private full reproduction",
-      "present_locally": true,
-      "size_bytes": 13093012
+      "size_bytes": 13093012,
+      "sha256": "1193b16a3ae60bf74aa8ba2fc498d304ae6f5217ddca9a44602ea39620173f0a",
+      "upload_filename": "cogaps_K6_seed2_iter2000.rds",
+      "record_url": "https://zenodo.org/records/21208760",
+      "doi": "10.5281/zenodo.21208760"
     },
     {
       "recommended_path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.checkpoint.out",
       "role": "R CoGAPS checkpoint from the selected heavy diagnostic run",
       "required_for": "Optional debugging/resume provenance",
       "github_required": false,
-      "recommended_host": "Zenodo or equivalent external artifact host; local-only is sufficient for private full reproduction",
-      "present_locally": true,
-      "size_bytes": 4040443
+      "size_bytes": 4040443,
+      "sha256": "1260413d6059104a0cabeeed7e164079db44fd6f00338ee8c54fc70bdfe31630",
+      "upload_filename": "cogaps_K6_seed2_iter2000.checkpoint.out",
+      "record_url": "https://zenodo.org/records/21208760",
+      "doi": "10.5281/zenodo.21208760"
     },
     {
       "recommended_path": "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad",
       "role": "Full selected Python/PyCoGAPS-compatible model object",
       "required_for": "Optional full local inspection and derivative regeneration",
       "github_required": false,
-      "recommended_host": "Zenodo or equivalent external artifact host; local-only is sufficient for private full reproduction",
-      "present_locally": true,
-      "size_bytes": 627158276
+      "size_bytes": 627158276,
+      "sha256": "c5c0ad25bce97568c328be90b5e9977ea3afa09733b3c9d4e790b4f34d61d23a",
+      "upload_filename": "cogaps_K6_seed2_iter2000_python.h5ad",
+      "record_url": "https://zenodo.org/records/21208760",
+      "doi": "10.5281/zenodo.21208760",
+      "placement_note": "Rename to cogaps_K6_seed2_iter2000.h5ad inside the project's python selected-model directory."
     }
   ],
   "explicitly_excluded_from_publication_assets": [
@@ -477,5 +755,12 @@
       "path_pattern": "data/diagnostics_model_comparison/",
       "reason": "Developer-facing runtime and implementation-comparison dashboard; useful provenance but not a formal learner-path asset."
     }
-  ]
+  ],
+  "updated_at": "2026-10-12T23:43:58.969111+00:00",
+  "inventory_scope": "Selected teaching inputs, model exports, expression comparisons and listed figure artifacts. This is not an inventory of every repository file or a scientific release approval.",
+  "external_archive_index": {
+    "path": "data/external/reproduction_files.json",
+    "size_bytes": 3555,
+    "sha256": "18b54a83e005a34833add8af1da9f8be4261aa20b7734d09a856b21ed79720ad"
+  }
 }

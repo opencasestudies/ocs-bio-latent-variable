@@ -28,6 +28,8 @@ CoGAPS: |
   A Bayesian nonnegative matrix factorization method used to learn overlapping gene-expression patterns and cell activities.
 Coefficient of variation: |
   A variability measure that divides the standard deviation by the mean, so uncertainty can be interpreted relative to the size of the value being estimated.
+Counts per million (CPM): |
+  The count for one gene divided by the total counts for the same sample or group of cells, multiplied by one million. The source-wide CPM used here totals all 15,706 genes in the supplied count object, not just the 3,000 modeled genes. CPM describes relative expression, not an absolute number of RNA molecules.
 Data stewardship: |
   Responsible management and use of data across its full life cycle, including respect for participants, privacy, provenance, access conditions, and future reuse.
 Dendritic cell: |
@@ -41,13 +43,19 @@ De-identification: |
 Diagnostic trace: |
   A saved record of model behavior over iterations, such as chi-square or atom-count values, used to check whether a run behaved as expected.
 Directionality: |
-  Whether expression is higher or lower in one condition compared with another.
+  Whether relative expression is higher or lower in a specified comparison. Here, the comparison is stimulation versus control or one cell type versus all remaining cell types combined; a CoGAPS gene weight alone does not give this direction.
+Donor pair: |
+  The control and stimulated samples from the same person, not samples from two different people. For a particular analysis, a pair is eligible only if both samples meet its cell-count requirements.
+Donor support: |
+  The observed agreement in expression direction among donors. Here, positive, negative and zero counts show how many donors have each result. Agreement with the mean is the percentage whose contrast has the same sign as the mean contrast; it is undefined when that mean is exactly zero. These descriptions are not confidence scores.
 Doublet: |
   A droplet or cell barcode that likely contains material from more than one cell.
 Equilibration: |
   The early phase of a CoGAPS run when the sampler moves away from its starting state before final model summaries are collected.
 Experimental unit: |
   The independent biological unit that receives a condition or contributes a comparison. In this case study, the donor rather than each individual cell is the main experimental unit.
+Expression contrast: |
+  A numerical comparison of expression for one gene between two groups. Here, it is the difference between log2(CPM + 0.5) values, calculated within a donor. A positive contrast means higher relative expression in the first group, a negative contrast means lower expression, and zero means equal values in this comparison.
 Flare: |
   A period when disease signs or symptoms become more active.
 Gene weight: |
@@ -108,6 +116,8 @@ Neutrophil extracellular trap: |
   A web-like structure released by neutrophils that can contain DNA and proteins; in SLE biology, these can contribute nucleic-acid material that stimulates interferon pathways.
 Non-negative matrix factorization: |
   A matrix-factorization approach that represents a non-negative data matrix using additive, non-negative patterns and activities.
+Normalization sensitivity: |
+  How a result depends on the method used to scale counts for comparison. Here, we check whether the mean expression contrast is positive, negative or zero under each of three methods. A direction that changes across methods is normalization-sensitive. An unchanged direction does not mean the size of the contrast is unchanged or that all donors agree.
 Paired design: |
   A design in which related samples are compared, such as control and stimulated aliquots from the same donor.
 Peripheral blood mononuclear cell: |
@@ -118,6 +128,8 @@ Plasmacytoid dendritic cell: |
   A dendritic-cell subtype known for producing large amounts of type I interferon after nucleic-acid sensing.
 Pseudobulk: |
   A summary that combines single-cell counts within a group, such as donor and condition, so expression differences can be compared at a grouped-sample level.
+Pseudocount: |
+  A small value added before a calculation that cannot accept zero. For the expression contrasts here, 0.5 is added to each CPM value before taking log2. This avoids an undefined logarithm; it does not represent an observed RNA count.
 Posterior uncertainty: |
   Variation in sampled model summaries that helps indicate how stable a pattern, activity, or gene weight is.
 Proxy measure: |
@@ -148,6 +160,8 @@ Systemic lupus erythematosus: |
   An autoimmune disease in which the immune system can attack the body's own tissues, causing inflammation that may affect several organ systems.
 T cell: |
   An adaptive immune cell type involved in coordinating or carrying out immune responses.
+TMM normalization: |
+  Trimmed mean of M-values, where M-values are log expression ratios between samples. TMM estimates an adjustment to count totals from many genes after excluding extreme ratios and expression levels. It aims to account for differences in which genes contribute to the counts in a sample. Here it is one sensitivity check, not a guarantee that a result is correct.
 Top-gene Jaccard: |
   A stability score based on how much two top-gene lists overlap; values closer to 1 mean the lists are more similar.
 Type I interferon: |

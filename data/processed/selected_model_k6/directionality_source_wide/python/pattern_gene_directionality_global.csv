@@ -1,0 +1,91 @@
+pattern,gene,rank,cogaps_weight,contrast_scope,n_pairs,n_positive,n_negative,n_zero,n_agree_mean,agreement_with_mean,mean_direction,donor_support,mean_log2fc_stim_vs_ctrl,median_log2fc_stim_vs_ctrl,direction,normalization_status
+Pattern1,FTH1,1,10.152085304260254,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.8692223618914279,-0.8090693226091483,down_in_stim,not assessed; run normalization sensitivity
+Pattern1,FTL,2,9.500815391540527,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.38162046685207196,-0.3390436400929513,down_in_stim,not assessed; run normalization sensitivity
+Pattern1,TIMP1,3,7.712009906768799,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.913256300580874,-0.9256862325268687,down_in_stim,not assessed; run normalization sensitivity
+Pattern1,S100A11,4,6.153379440307617,global,8,6,2,0,6,0.75,positive,mixed donor directions,0.06525357739468651,0.06529459800810677,up_in_stim,not assessed; run normalization sensitivity
+Pattern1,SH3BGRL3,5,6.133460998535156,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.7381603337408895,-0.6951578131253182,down_in_stim,not assessed; run normalization sensitivity
+Pattern1,S100A10,6,6.081233024597168,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.2528904482859422,-0.21723355327722071,down_in_stim,not assessed; run normalization sensitivity
+Pattern1,CD63,7,5.928230285644531,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.27100298767807596,-0.2626249444420914,down_in_stim,not assessed; run normalization sensitivity
+Pattern1,GAPDH,8,5.831065654754639,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.9550605322294328,-0.9692374236137926,down_in_stim,not assessed; run normalization sensitivity
+Pattern1,ACTB,9,5.680990695953369,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.9793668079265687,-0.968947435685088,down_in_stim,not assessed; run normalization sensitivity
+Pattern1,TYROBP,10,5.573038101196289,global,8,7,1,0,7,0.875,positive,mixed donor directions,0.22184461794097676,0.26567377657101776,up_in_stim,not assessed; run normalization sensitivity
+Pattern1,S100A6,11,5.461409091949463,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.7019651385973849,-0.7167358631899052,down_in_stim,not assessed; run normalization sensitivity
+Pattern1,FCER1G,12,5.3612589836120605,global,8,3,5,0,5,0.625,negative,mixed donor directions,-0.06857889956539753,-0.05583488654170932,down_in_stim,not assessed; run normalization sensitivity
+Pattern1,PFN1,13,5.28338623046875,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.9411207146042357,-0.9530249998543994,down_in_stim,not assessed; run normalization sensitivity
+Pattern1,C15orf48,14,5.269685745239258,global,8,8,0,0,8,1.0,positive,8 of 8 positive,0.22166851014353983,0.19383072326998363,up_in_stim,not assessed; run normalization sensitivity
+Pattern1,LGALS1,15,5.180225372314453,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.3008201059264126,-0.3016897205503293,down_in_stim,not assessed; run normalization sensitivity
+Pattern2,FTH1,1,12.976593971252441,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.8692223618914279,-0.8090693226091483,down_in_stim,not assessed; run normalization sensitivity
+Pattern2,FTL,2,5.554069519042969,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.38162046685207196,-0.3390436400929513,down_in_stim,not assessed; run normalization sensitivity
+Pattern2,ACTB,3,5.149622440338135,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.9793668079265687,-0.968947435685088,down_in_stim,not assessed; run normalization sensitivity
+Pattern2,PFN1,4,3.6003952026367188,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.9411207146042357,-0.9530249998543994,down_in_stim,not assessed; run normalization sensitivity
+Pattern2,SH3BGRL3,5,2.9782204627990723,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.7381603337408895,-0.6951578131253182,down_in_stim,not assessed; run normalization sensitivity
+Pattern2,VIM,6,1.9378620386123657,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.6910785770621681,-0.70620852715978,down_in_stim,not assessed; run normalization sensitivity
+Pattern2,ANXA1,7,1.7571991682052612,global,8,8,0,0,8,1.0,positive,8 of 8 positive,0.5110590974956519,0.4813109674244549,up_in_stim,not assessed; run normalization sensitivity
+Pattern2,GAPDH,8,1.4900200366973877,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.9550605322294328,-0.9692374236137926,down_in_stim,not assessed; run normalization sensitivity
+Pattern2,CCR7,9,1.3339897394180298,global,8,7,1,0,7,0.875,positive,mixed donor directions,0.5875589735744444,0.5949174915201771,up_in_stim,not assessed; run normalization sensitivity
+Pattern2,HSPA8,10,1.269834041595459,global,8,8,0,0,8,1.0,positive,8 of 8 positive,0.4598359973080548,0.41750259463529016,up_in_stim,not assessed; run normalization sensitivity
+Pattern2,EMP3,11,1.257824182510376,global,8,1,7,0,7,0.875,negative,mixed donor directions,-0.1058070713000161,-0.11295040553517843,down_in_stim,not assessed; run normalization sensitivity
+Pattern2,LTB,12,1.1858330965042114,global,8,1,7,0,7,0.875,negative,mixed donor directions,-0.23980680928660136,-0.25644332833203354,down_in_stim,not assessed; run normalization sensitivity
+Pattern2,RGCC,13,1.087324857711792,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-1.4734879836040926,-1.43445459850627,down_in_stim,not assessed; run normalization sensitivity
+Pattern2,ACTG1,14,0.8846946358680725,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.6927234266461044,-0.659394991392035,down_in_stim,not assessed; run normalization sensitivity
+Pattern2,CREM,15,0.8545056581497192,global,8,8,0,0,8,1.0,positive,8 of 8 positive,0.4464714786449633,0.45308971891170113,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,CXCL10,1,8.157148361206055,global,8,8,0,0,8,1.0,positive,8 of 8 positive,7.134663035368297,7.309180794263872,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,ISG15,2,7.785658359527588,global,8,8,0,0,8,1.0,positive,8 of 8 positive,6.382781316136361,6.415823489545192,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,APOBEC3A,3,7.3655242919921875,global,8,8,0,0,8,1.0,positive,8 of 8 positive,5.343325829961467,5.342544206973175,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,IFITM3,4,6.758245468139648,global,8,8,0,0,8,1.0,positive,8 of 8 positive,4.974280431998885,4.888680922534816,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,FTL,5,6.098469257354736,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.38162046685207196,-0.3390436400929513,down_in_stim,not assessed; run normalization sensitivity
+Pattern3,RSAD2,6,5.738306999206543,global,8,8,0,0,8,1.0,positive,8 of 8 positive,7.087869414301973,7.309605107896487,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,TNFSF10,7,5.339033603668213,global,8,8,0,0,8,1.0,positive,8 of 8 positive,5.253242607996117,5.1996563787257175,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,SAT1,8,4.981949329376221,global,8,8,0,0,8,1.0,positive,8 of 8 positive,1.5812709880525435,1.599310326004895,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,FTH1,9,4.963209629058838,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.8692223618914279,-0.8090693226091483,down_in_stim,not assessed; run normalization sensitivity
+Pattern3,SOD2,10,4.658294200897217,global,8,8,0,0,8,1.0,positive,8 of 8 positive,0.7177555774406097,0.8299166545103134,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,ISG20,11,4.655680179595947,global,8,8,0,0,8,1.0,positive,8 of 8 positive,3.879041136907154,3.747729681343107,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,TYMP,12,4.610434532165527,global,8,8,0,0,8,1.0,positive,8 of 8 positive,1.2227576867509578,1.199251550723031,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,IFIT3,13,4.535574913024902,global,8,8,0,0,8,1.0,positive,8 of 8 positive,6.586154728257996,6.213411200458733,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,LY6E,14,4.440127372741699,global,8,8,0,0,8,1.0,positive,8 of 8 positive,4.390367549467529,4.286397369459713,up_in_stim,not assessed; run normalization sensitivity
+Pattern3,C15orf48,15,4.43681526184082,global,8,8,0,0,8,1.0,positive,8 of 8 positive,0.22166851014353983,0.19383072326998363,up_in_stim,not assessed; run normalization sensitivity
+Pattern4,TIMP1,1,5.443826198577881,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.913256300580874,-0.9256862325268687,down_in_stim,not assessed; run normalization sensitivity
+Pattern4,FTH1,2,4.921694755554199,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.8692223618914279,-0.8090693226091483,down_in_stim,not assessed; run normalization sensitivity
+Pattern4,MS4A7,3,4.810563564300537,global,8,8,0,0,8,1.0,positive,8 of 8 positive,0.7945561276546479,0.8295797168595573,up_in_stim,not assessed; run normalization sensitivity
+Pattern4,FCGR3A,4,4.622005462646484,global,8,5,3,0,3,0.375,negative,mixed donor directions,-0.15906364463755085,0.0727749226606349,down_in_stim,not assessed; run normalization sensitivity
+Pattern4,SOD2,5,4.321434020996094,global,8,8,0,0,8,1.0,positive,8 of 8 positive,0.7177555774406097,0.8299166545103134,up_in_stim,not assessed; run normalization sensitivity
+Pattern4,S100A11,6,4.091746807098389,global,8,6,2,0,6,0.75,positive,mixed donor directions,0.06525357739468651,0.06529459800810677,up_in_stim,not assessed; run normalization sensitivity
+Pattern4,TYROBP,7,3.9278762340545654,global,8,7,1,0,7,0.875,positive,mixed donor directions,0.22184461794097676,0.26567377657101776,up_in_stim,not assessed; run normalization sensitivity
+Pattern4,FCER1G,8,3.808145523071289,global,8,3,5,0,5,0.625,negative,mixed donor directions,-0.06857889956539753,-0.05583488654170932,down_in_stim,not assessed; run normalization sensitivity
+Pattern4,FTL,9,3.5792596340179443,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.38162046685207196,-0.3390436400929513,down_in_stim,not assessed; run normalization sensitivity
+Pattern4,ACTB,10,3.5721967220306396,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.9793668079265687,-0.968947435685088,down_in_stim,not assessed; run normalization sensitivity
+Pattern4,SAT1,11,3.444181442260742,global,8,8,0,0,8,1.0,positive,8 of 8 positive,1.5812709880525435,1.599310326004895,up_in_stim,not assessed; run normalization sensitivity
+Pattern4,CXCL16,12,3.162369728088379,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.5325047529040283,-0.43600602664187216,down_in_stim,not assessed; run normalization sensitivity
+Pattern4,PSAP,13,3.0055530071258545,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.5184554190156572,-0.5347590416043362,down_in_stim,not assessed; run normalization sensitivity
+Pattern4,CTSS,14,2.854546070098877,global,8,8,0,0,8,1.0,positive,8 of 8 positive,0.909198703548196,0.93569610720734,up_in_stim,not assessed; run normalization sensitivity
+Pattern4,CST3,15,2.71581768989563,global,8,8,0,0,8,1.0,positive,8 of 8 positive,0.7574418357507937,0.7123536113765123,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,ISG15,1,9.808597564697266,global,8,8,0,0,8,1.0,positive,8 of 8 positive,6.382781316136361,6.415823489545192,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,ISG20,2,8.381224632263184,global,8,8,0,0,8,1.0,positive,8 of 8 positive,3.879041136907154,3.747729681343107,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,IFI6,3,6.584771633148193,global,8,8,0,0,8,1.0,positive,8 of 8 positive,4.893128424019256,4.76013821353548,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,IFIT3,4,4.9311394691467285,global,8,8,0,0,8,1.0,positive,8 of 8 positive,6.586154728257996,6.213411200458733,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,LY6E,5,4.535023212432861,global,8,8,0,0,8,1.0,positive,8 of 8 positive,4.390367549467529,4.286397369459713,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,IFIT1,6,4.0107550621032715,global,8,8,0,0,8,1.0,positive,8 of 8 positive,7.5661284355870535,7.497862123649039,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,MX1,7,3.8567159175872803,global,8,8,0,0,8,1.0,positive,8 of 8 positive,5.138223129370996,5.166770647035279,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,FTH1,8,2.999697685241699,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.8692223618914279,-0.8090693226091483,down_in_stim,not assessed; run normalization sensitivity
+Pattern5,IFIT2,9,1.600779414176941,global,8,8,0,0,8,1.0,positive,8 of 8 positive,6.571400087480079,6.175166015406006,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,SAT1,10,1.5642191171646118,global,8,8,0,0,8,1.0,positive,8 of 8 positive,1.5812709880525435,1.599310326004895,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,IRF7,11,1.5567588806152344,global,8,8,0,0,8,1.0,positive,8 of 8 positive,3.1669355040403513,3.154791116788212,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,TNFSF10,12,1.3978185653686523,global,8,8,0,0,8,1.0,positive,8 of 8 positive,5.253242607996117,5.1996563787257175,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,OAS1,13,1.3517608642578125,global,8,8,0,0,8,1.0,positive,8 of 8 positive,4.166021699959037,4.312808371974638,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,PLSCR1,14,1.1741489171981812,global,8,8,0,0,8,1.0,positive,8 of 8 positive,2.8803229806743893,2.8256215442550094,up_in_stim,not assessed; run normalization sensitivity
+Pattern5,BST2,15,1.0784711837768555,global,8,8,0,0,8,1.0,positive,8 of 8 positive,2.2388237340523682,2.317722694518429,up_in_stim,not assessed; run normalization sensitivity
+Pattern6,CD74,1,13.793898582458496,global,8,6,2,0,6,0.75,positive,mixed donor directions,0.06103166268765747,0.042083560767005146,up_in_stim,not assessed; run normalization sensitivity
+Pattern6,HLA-DRA,2,12.018577575683594,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.34445452468398163,-0.35676192437957344,down_in_stim,not assessed; run normalization sensitivity
+Pattern6,HLA-DRB1,3,10.16970443725586,global,8,2,6,0,6,0.75,negative,mixed donor directions,-0.08587974689462641,-0.08195935345654615,down_in_stim,not assessed; run normalization sensitivity
+Pattern6,HLA-DPA1,4,8.471000671386719,global,8,6,2,0,6,0.75,positive,mixed donor directions,0.15706748149941596,0.1613219198127398,up_in_stim,not assessed; run normalization sensitivity
+Pattern6,HLA-DPB1,5,8.204859733581543,global,8,2,6,0,6,0.75,negative,mixed donor directions,-0.07411745188609986,-0.09964296658900995,down_in_stim,not assessed; run normalization sensitivity
+Pattern6,FTL,6,5.5781474113464355,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.38162046685207196,-0.3390436400929513,down_in_stim,not assessed; run normalization sensitivity
+Pattern6,ACTB,7,4.715860843658447,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.9793668079265687,-0.968947435685088,down_in_stim,not assessed; run normalization sensitivity
+Pattern6,FTH1,8,3.585453987121582,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.8692223618914279,-0.8090693226091483,down_in_stim,not assessed; run normalization sensitivity
+Pattern6,PFN1,9,3.1363472938537598,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.9411207146042357,-0.9530249998543994,down_in_stim,not assessed; run normalization sensitivity
+Pattern6,HLA-DQB1,10,2.766254186630249,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.6378511329159426,-0.6108663070729285,down_in_stim,not assessed; run normalization sensitivity
+Pattern6,HLA-DQA1,11,2.259584426879883,global,8,1,7,0,7,0.875,negative,mixed donor directions,-0.5717288212614154,-0.5405686747792453,down_in_stim,not assessed; run normalization sensitivity
+Pattern6,HSP90AB1,12,1.9837803840637207,global,8,8,0,0,8,1.0,positive,8 of 8 positive,0.5215752115105701,0.526087233652131,up_in_stim,not assessed; run normalization sensitivity
+Pattern6,HSP90AA1,13,1.9631909132003784,global,8,8,0,0,8,1.0,positive,8 of 8 positive,0.9460406840605393,0.9400453007739822,up_in_stim,not assessed; run normalization sensitivity
+Pattern6,ACTG1,14,1.6350189447402954,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.6927234266461044,-0.659394991392035,down_in_stim,not assessed; run normalization sensitivity
+Pattern6,HLA-DMA,15,1.6193488836288452,global,8,0,8,0,8,1.0,negative,8 of 8 negative,-0.45666889529842003,-0.46174407013196017,down_in_stim,not assessed; run normalization sensitivity

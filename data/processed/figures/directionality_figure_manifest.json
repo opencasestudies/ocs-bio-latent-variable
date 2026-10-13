@@ -1,0 +1,99 @@
+{
+  "schema_version": "directionality-figures-v1",
+  "normalization": "source_cpm",
+  "pseudocount_CPM": 0.5,
+  "generator": {
+    "path": "scripts/build_selected_k6_figures.py",
+    "size_bytes": 41915,
+    "sha256": "8ba9ddea625f66182ef1351507766bfeb590e45fd35fb05c928012ee8de4fec3"
+  },
+  "functions": [
+    "save_top_gene_directionality",
+    "save_identity_pattern_directionality"
+  ],
+  "input_configuration": {
+    "RESULTS_DIR": "data/processed/selected_model_k6/directionality_source_wide/{language}",
+    "PATTERN_SUMMARY": "data/processed/selected_model_k6/{language}/pattern_summary.csv",
+    "SENSITIVITY_DIR": "data/processed/selected_model_k6/directionality_source_wide/sensitivity"
+  },
+  "validated_against": [
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/bundle_manifest.json",
+      "size_bytes": 31015,
+      "sha256": "27a376fb62d07c9f564e9e2e16a0194523804a19c710941b22c3c3559c352380"
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/r_gene_report_global.csv",
+      "size_bytes": 33330,
+      "sha256": "818e1429de3819f46f4a8a6ba665f2ea44a7a84671f947034dfffe5d613e720a"
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/r_gene_report_identity.csv",
+      "size_bytes": 251894,
+      "sha256": "facca2442437f55357a8f96f05a948744d1952d45654638580935a2a50e8fe01"
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/python_gene_report_global.csv",
+      "size_bytes": 33450,
+      "sha256": "c8d2dce194b28974f7137625a20186cae3efbc87d4adf4caa9c84fc21312d060"
+    },
+    {
+      "path": "data/processed/selected_model_k6/directionality_source_wide/sensitivity/python_gene_report_identity.csv",
+      "size_bytes": 252854,
+      "sha256": "8aa189d0529b00d7bec1425a435298adc6c1f47455174ebbeaf5aee2570574f2"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "img/figure_viz_top_gene_directionality.png",
+      "size_bytes": 221872,
+      "sha256": "d17a48f4a96ff1713233c3d18384a54c291821eb14b28e5e91093bdaca519323"
+    },
+    {
+      "path": "img/figure_viz_identity_pattern_directionality.png",
+      "size_bytes": 304224,
+      "sha256": "6b6ed58608291626aa355eae32aae842ec8e0279d2f99a2d1879e9ed3af13ff6"
+    },
+    {
+      "path": "data/processed/figures/figure_viz_top_gene_directionality.png",
+      "size_bytes": 221872,
+      "sha256": "d17a48f4a96ff1713233c3d18384a54c291821eb14b28e5e91093bdaca519323"
+    },
+    {
+      "path": "data/processed/figures/figure_viz_identity_pattern_directionality.png",
+      "size_bytes": 304224,
+      "sha256": "6b6ed58608291626aa355eae32aae842ec8e0279d2f99a2d1879e9ed3af13ff6"
+    },
+    {
+      "path": "data/processed/figures/source_tables/r/figure_viz_top_gene_directionality_source.csv",
+      "size_bytes": 2553,
+      "sha256": "534d81df4266b8e8e14de3a991341f6d449fd2b7c3ea40436227668c8d436f1a"
+    },
+    {
+      "path": "data/processed/figures/source_tables/r/figure_viz_identity_pattern_directionality_source.csv",
+      "size_bytes": 6540,
+      "sha256": "8bbbb0ea28e6d43e4f2f64cdf65dd351e7daa2508c2e39bbf36b2ccdf2a964b5"
+    },
+    {
+      "path": "data/processed/figures/source_tables/python/figure_viz_top_gene_directionality_source.csv",
+      "size_bytes": 2614,
+      "sha256": "80877a96e37f6cd181804eff6bdcf9b2bbc801a8196b8f90de4915d9f5c7a1d1"
+    },
+    {
+      "path": "data/processed/figures/source_tables/python/figure_viz_identity_pattern_directionality_source.csv",
+      "size_bytes": 6585,
+      "sha256": "c67756e7cff209b6e9ab26594891a7641910bb21d69eaa1d5a24d07cd92737f5"
+    }
+  ],
+  "reporting": "Bar colors describe mean signs; counts show positive/negative/zero donors; hatching flags a normalization-sensitive mean sign.",
+  "unchanged": "CoGAPS fits, gene weights, cell activities, UMAP coordinates and canonical contrast estimates.",
+  "reproduction_status": "The included-R figure-only command and full-reproduction instructions are synchronized with runtime 0.3.2 and verified locally; final release review remains separate.",
+  "generator_record_scope": "Original generation identity and input configuration are retained as historical provenance; current route verification is recorded separately.",
+  "validated_generator": {
+    "path": "scripts/build_selected_k6_figures.py",
+    "size_bytes": 44094,
+    "sha256": "9f0980b55e304ae16044f734a4ea441d11bbe30c58ad2b03d863f1e3815a1326"
+  },
+  "validated_command": "python scripts/build_selected_k6_figures.py --included-r-results --output-dir learner_outputs/rebuilt_r_figures",
+  "validated_runtime": "othomas2/pycogaps-runtime-guide:0.3.2"
+}

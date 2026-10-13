@@ -41,6 +41,14 @@ R_K6_RESULTS_DIR_R <- file.path(SELECTED_MODEL_DIR_R, "r")
 SELECTED_R_RESULTS_DIR_R <- R_K6_RESULTS_DIR_R
 SELECTED_PYTHON_RESULTS_DIR_R <- SELECTED_RESULTS_DIR_R
 
+# Source-wide expression reports used by the lesson.
+DIRECTIONALITY_BUNDLE_DIR_R <- file.path(SELECTED_MODEL_DIR_R, "directionality_source_wide")
+DIRECTIONALITY_REPORTS_DIR_R <- file.path(DIRECTIONALITY_BUNDLE_DIR_R, "sensitivity")
+DIRECTIONALITY_DONOR_COVERAGE_CSV_R <- file.path(DIRECTIONALITY_REPORTS_DIR_R, "eligible_donors_by_scope.csv")
+R_SOURCE_DIRECTION_GLOBAL_CSV_R <- file.path(DIRECTIONALITY_REPORTS_DIR_R, "r_gene_report_global.csv")
+R_SOURCE_DIRECTION_CELLTYPE_CSV_R <- file.path(DIRECTIONALITY_REPORTS_DIR_R, "r_gene_report_by_celltype.csv")
+R_SOURCE_DIRECTION_IDENTITY_CSV_R <- file.path(DIRECTIONALITY_REPORTS_DIR_R, "r_gene_report_identity.csv")
+
 CHOSEN_K_R <- 6L
 CHOSEN_SEED_R <- 2L
 CHOSEN_ITER_R <- 2000L
@@ -68,9 +76,6 @@ R_PATTERN_CORRELATIONS_CSV_R <- file.path(R_K6_RESULTS_DIR_R, "pattern_correlati
 R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV_R <- file.path(R_K6_RESULTS_DIR_R, "pattern_activity_by_celltype_condition.csv")
 R_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV_R <- file.path(R_K6_RESULTS_DIR_R, "pattern_activity_by_replicate_condition.csv")
 R_PATTERN_SUMMARY_CSV_R <- file.path(R_K6_RESULTS_DIR_R, "pattern_summary.csv")
-R_DIRECTION_GLOBAL_CSV_R <- file.path(R_K6_RESULTS_DIR_R, "pattern_gene_directionality_global.csv")
-R_DIRECTION_CELLTYPE_CSV_R <- file.path(R_K6_RESULTS_DIR_R, "pattern_gene_directionality_by_celltype.csv")
-R_DIRECTION_SUMMARY_CSV_R <- file.path(R_K6_RESULTS_DIR_R, "pattern_direction_summary.csv")
 
 PY_CHOSEN_RESULT_H5AD_R <- file.path(SELECTED_RESULTS_DIR_R, "cogaps_K6_seed2_iter2000.h5ad")
 PY_CHOSEN_METRICS_JSON_R <- file.path(SELECTED_RESULTS_DIR_R, "cogaps_K6_seed2_iter2000.metrics.json")
