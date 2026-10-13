@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """Build learner-facing figures and source tables for selected K6 CoGAPS outputs.
 
-The case-study narrative uses lightweight source tables and saved figure files.
-By default, this script creates the R-primary figures and R source tables. It
-can also be pointed at the saved Python-compatible output directory to create
-parallel Python source tables for the Python tabs.
+The command-line route redraws the included R results in a new output folder.
+It verifies the saved expression-comparison files, without reading full models
+or recalculating normalization. Plotting functions can also be imported for
+explicitly configured analysis workflows.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 import os
@@ -16,6 +17,9 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+from directionality_normalization import verify_file
+from reproduction.check_directionality_bundle import check_bundle
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,9 +45,7 @@ REPLICATE_CONDITION = RESULTS_DIR / "pattern_activity_by_replicate_condition.csv
 TOP_GENES = RESULTS_DIR / "pattern_top_genes.csv"
 DIRECTION_GLOBAL = RESULTS_DIR / "pattern_gene_directionality_global.csv"
 CELL_ACTIVITIES = RESULTS_DIR / "pattern_cell_activities_with_metadata.csv.gz"
-DIRECTIONALITY_HEATMAP = RESULTS_DIR / "pattern_gene_directionality_heatmap.png"
-PSEUDOBULK_GLOBAL = RESULTS_DIR / "pseudobulk_counts_global.csv"
-PSEUDOBULK_BY_CELLTYPE = RESULTS_DIR / "pseudobulk_counts_by_celltype.csv"
+SENSITIVITY_DIR = Path(os.environ.get("COGAPS_SENSITIVITY_DIR", RESULTS_DIR / "normalization_sensitivity"))
 
 CONTROL_COLOR = "#64748B"
 STIM_COLOR = "#E76F51"
@@ -655,7 +657,7 @@ def save_pattern_celltype_shift_heatmap() -> None:
 
 
 def save_top_gene_directionality(ifn_pattern: str) -> None:
-    direction = pd.read_csv(DIRECTION_GLOBAL)
+    _, direction = load_canonical_directionality()
     selected = direction.loc[
         direction["pattern"].eq(ifn_pattern) & direction["rank"].le(15)
     ].copy()
@@ -682,23 +684,23 @@ def save_top_gene_directionality(ifn_pattern: str) -> None:
 
     ax = axes[1]
     ax.axvline(0, color="#CBD5E1", linewidth=1.5)
-    ax.barh(y, selected["mean_log2fc_stim_vs_ctrl"], color=colors, edgecolor="white")
-    ax.set_xlabel("Mean log2 fold-change\nIFN-beta vs control")
+    draw_reported_contrast(ax, y, selected, "mean_log2fc_stim_vs_ctrl", colors)
+    ax.set_xlabel("Mean paired log2 contrast\nIFN-beta vs control")
     ax.set_title("Direction in stimulation")
     style_axis(ax, xgrid=True, ygrid=False)
     handles = [
-        plt.Line2D([0], [0], color=STIM_COLOR, lw=8, label="higher in stimulation"),
-        plt.Line2D([0], [0], color=BLUE, lw=8, label="lower in stimulation"),
+        plt.Line2D([0], [0], color=STIM_COLOR, lw=8, label="positive mean"),
+        plt.Line2D([0], [0], color=BLUE, lw=8, label="negative mean"),
     ]
-    ax.legend(handles=handles, frameon=False, loc="lower right")
+    fig.legend(handles=handles, frameon=False, loc="lower center", ncol=2, bbox_to_anchor=(0.5, -0.085))
 
     fig.suptitle("Top genes need both weight and direction", fontsize=21, fontweight="bold", y=1.03)
     fig.text(
         0.5,
-        -0.02,
-        "A high weight says a gene helps define the pattern; the expression contrast says whether it rises or falls after IFN-beta.",
+        -0.15,
+        "Source-wide CPM. Donor counts: positive / negative / zero.\nHatching: mean sign changes across normalizations. Counts and colors are descriptive, not confidence levels.",
         ha="center",
-        fontsize=12,
+        fontsize=10,
         color="#475569",
     )
     save_figure(fig, "figure_viz_top_gene_directionality.png")
@@ -725,87 +727,78 @@ def selected_identity_pattern(ifn_pattern: str) -> str:
     return str(candidates.iloc[0]["pattern"])
 
 
-def cpm_column_for_gene(gene: str, df: pd.DataFrame) -> str | None:
-    """Find the CPM column for a gene, handling R/Python name punctuation."""
-    gene = str(gene)
-    candidates = [
-        f"{gene}__cpm",
-        f"{gene.replace('.', '-')}__cpm",
-        f"{gene.replace('-', '.')}__cpm",
-    ]
-    for candidate in candidates:
-        if candidate in df.columns:
-            return candidate
-    return None
+def draw_reported_contrast(ax, y, selected, value, colors, prefix=""):
+    """Reserve right-hand space for actual donor counts; sensitivity is not color-only."""
+    bars = ax.barh(y, selected[value], color=colors, edgecolor="white")
+    for bar, row in zip(bars, selected.to_dict("records")):
+        if row[f"{prefix}normalization_status"] == "normalization-sensitive mean sign":
+            bar.set_hatch("///")
+            bar.set_edgecolor("#374151")
+            bar.set_linewidth(0.5)
+    lo, hi = ax.get_xlim()
+    ax.set_xlim(lo, hi + (hi - lo) * 0.55)
+    for position, row in zip(y, selected.to_dict("records")):
+        n = int(row[f"{prefix}n_pairs"])
+        label = "not estimable" if not n else " / ".join(str(int(row[f"{prefix}{key}"])) for key in ("n_positive", "n_negative", "n_zero"))
+        if n == 1:
+            label += " (1 pair)"
+        ax.text(0.98, position, label, transform=ax.get_yaxis_transform(), ha="right", va="center", fontsize=8)
 
 
-def expression_per_million(gene: str, df: pd.DataFrame) -> pd.Series:
-    """Return CPM-like expression for a gene, falling back to raw counts."""
-    cpm_col = cpm_column_for_gene(gene, df)
-    if cpm_col is not None and df[cpm_col].notna().any():
-        return pd.to_numeric(df[cpm_col], errors="coerce")
-
-    gene = str(gene)
-    raw_candidates = [
-        gene,
-        gene.replace(".", "-"),
-        gene.replace("-", "."),
-    ]
-    raw_col = next((candidate for candidate in raw_candidates if candidate in df.columns), None)
-    if raw_col is None:
-        return pd.Series(np.nan, index=df.index)
-
-    raw = pd.to_numeric(df[raw_col], errors="coerce")
-    if "library_size_total_counts" not in df.columns:
-        return raw
-    library_size = pd.to_numeric(df["library_size_total_counts"], errors="coerce")
-    return raw / library_size.replace(0, np.nan) * 1_000_000
-
-
-def mean_stim_log2fc_from_global_pseudobulk(gene: str, pseudobulk: pd.DataFrame) -> float:
-    pseudobulk = pseudobulk.copy()
-    pseudobulk["_expr_per_million"] = expression_per_million(gene, pseudobulk)
-
-    values = []
-    for _, group in pseudobulk.groupby("replicate", observed=True):
-        ctrl = group.loc[group["condition"].eq("ctrl"), "_expr_per_million"].dropna()
-        stim = group.loc[group["condition"].eq("stim"), "_expr_per_million"].dropna()
-        if ctrl.empty or stim.empty:
-            continue
-        values.append(np.log2((float(stim.iloc[0]) + 1) / (float(ctrl.iloc[0]) + 1)))
-    return float(np.nanmean(values)) if values else np.nan
-
-
-def mean_identity_log2fc_from_celltype_pseudobulk(
-    gene: str,
-    dominant_cell_type: str,
-    pseudobulk: pd.DataFrame,
-) -> float:
-    pseudobulk = pseudobulk.copy()
-    pseudobulk["_expr_per_million"] = expression_per_million(gene, pseudobulk)
-
-    values = []
-    for _, group in pseudobulk.groupby(["replicate", "condition"], observed=True):
-        dominant = group.loc[group["cell_type"].eq(dominant_cell_type), "_expr_per_million"].dropna()
-        others = group.loc[
-            ~group["cell_type"].eq(dominant_cell_type),
-            ["_expr_per_million", "n_cells"],
-        ].dropna()
-        if dominant.empty or others.empty:
-            continue
-        if "n_cells" in others.columns and others["n_cells"].sum() > 0:
-            other_mean = np.average(others["_expr_per_million"], weights=others["n_cells"])
-        else:
-            other_mean = others["_expr_per_million"].mean()
-        values.append(np.log2((float(dominant.iloc[0]) + 1) / (float(other_mean) + 1)))
-    return float(np.nanmean(values)) if values else np.nan
+def load_canonical_directionality() -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Require saved, provenance-matched contrasts; never infer expression from counts."""
+    path = SENSITIVITY_DIR / "sensitivity_method.json"
+    if not path.is_file():
+        raise ValueError("Verified sensitivity outputs are required; set COGAPS_SENSITIVITY_DIR. No legacy identity or raw-count fallback is permitted.")
+    manifest = json.loads(path.read_text())
+    if (manifest["schema_version"] != "directionality-sensitivity-v2"
+            or manifest.get("reporting_version") != "donor-support-v1" or manifest["pseudocount_CPM"] != 0.5):
+        raise ValueError("Unsupported contrast contract")
+    tables = []
+    for filename, scope in (("identity_source_summary.csv", "identity"),
+                            ("stimulation_source_summary.csv", "stimulation_global")):
+        record = next(row for row in manifest["outputs"] if row["filename"] == filename)
+        verify_file(SENSITIVITY_DIR / filename, record)
+        table = pd.read_csv(SENSITIVITY_DIR / filename)
+        required = {"n_pairs", "n_positive", "n_negative", "n_zero", "agreement_with_mean", "donor_support", "normalization_status"}
+        if not required.issubset(table.columns):
+            raise ValueError("Canonical contrasts lack donor support or sensitivity reporting")
+        counts = table[["n_pairs", "n_positive", "n_negative", "n_zero"]].to_numpy(float)
+        if not np.isfinite(counts).all() or (counts < 0).any() or (counts != np.floor(counts)).any():
+            raise ValueError("Invalid donor counts in canonical contrasts")
+        if (table.empty or table.duplicated(["cell_type", "gene"]).any()
+                or not table.normalization.eq("source_cpm").all() or not table.scope.eq(scope).all()
+                or not np.isfinite(table.loc[table.n_pairs.gt(0), "mean_log2_contrast"]).all()
+                or (table.n_pairs < 0).any() or not table.n_pairs.eq(table.n_donors).all()
+                or not table[["n_positive", "n_negative", "n_zero"]].sum(axis=1).eq(table.n_pairs).all()
+                or not table.normalization_status.isin(["same mean sign across methods", "normalization-sensitive mean sign", "not estimable"]).all()):
+            raise ValueError("Invalid or duplicate canonical contrasts")
+        tables.append(table)
+    direction_manifest = json.loads((DIRECTION_GLOBAL.parent / "directionality_method.json").read_text())
+    for key in ("source", "prepared"):
+        if direction_manifest["normalization"][key]["sha256"] != manifest["normalization"][key]["sha256"]:
+            raise ValueError("Directionality and identity inputs have different provenance")
+    record = next(row for row in direction_manifest["outputs"] if row["filename"] == DIRECTION_GLOBAL.name)
+    verify_file(DIRECTION_GLOBAL, record)
+    direction = pd.read_csv(DIRECTION_GLOBAL)
+    if set(direction.columns) & {"evidence_strength", "sign_consistency", "wilcoxon_pvalue", "wilcoxon_fdr"}:
+        raise ValueError("Legacy confidence/test columns cannot enter refreshed figures")
+    if direction.duplicated(["pattern", "gene"]).any():
+        raise ValueError("Duplicate pattern/gene direction rows")
+    joined = direction.merge(tables[1][["gene", "mean_log2_contrast"]], on="gene", how="left", validate="many_to_one")
+    if joined.gene.isin(tables[1].gene).eq(False).any() or not np.allclose(
+        joined.mean_log2fc_stim_vs_ctrl, joined.mean_log2_contrast, rtol=0, atol=1e-10, equal_nan=True,
+    ):
+        raise ValueError("Stimulation values disagree with canonical source-wide contrasts")
+    report_cols = ["n_pairs", "n_positive", "n_negative", "n_zero", "agreement_with_mean", "donor_support", "normalization_status"]
+    direction = direction.drop(columns=[c for c in report_cols if c in direction])
+    direction = direction.merge(tables[1][["gene", *report_cols]], on="gene", validate="many_to_one")
+    return tables[0], direction
 
 
 def save_identity_pattern_directionality(identity_pattern: str) -> None:
     summary = pd.read_csv(PATTERN_SUMMARY)
-    direction = pd.read_csv(DIRECTION_GLOBAL)
-    pseudobulk_global = pd.read_csv(PSEUDOBULK_GLOBAL)
-    pseudobulk_celltype = pd.read_csv(PSEUDOBULK_BY_CELLTYPE)
+    identity, direction = load_canonical_directionality()
 
     summary_row = summary.loc[summary["pattern"].eq(identity_pattern)].iloc[0]
     dominant_cell_type = str(summary_row["dominant_cell_type"])
@@ -824,14 +817,18 @@ def save_identity_pattern_directionality(identity_pattern: str) -> None:
     selected["working_label"] = label
     selected["interpretation_note"] = note
     selected["corr_with_stim"] = float(summary_row["corr_with_stim"])
-    selected["identity_log2fc_dominant_vs_other"] = [
-        mean_identity_log2fc_from_celltype_pseudobulk(gene, dominant_cell_type, pseudobulk_celltype)
-        for gene in selected["gene"]
-    ]
-    selected["stim_log2fc_stim_vs_ctrl"] = [
-        mean_stim_log2fc_from_global_pseudobulk(gene, pseudobulk_global)
-        for gene in selected["gene"]
-    ]
+    identity = identity.loc[identity.cell_type.eq(dominant_cell_type),
+                            ["gene", "mean_log2_contrast", "n_donors", "n_pairs", "n_positive", "n_negative", "n_zero",
+                             "agreement_with_mean", "donor_support", "normalization_status"]].rename(columns={
+        "mean_log2_contrast": "identity_log2fc_dominant_vs_other", "n_donors": "identity_donor_pairs",
+        **{key: f"identity_{key}" for key in ("n_pairs", "n_positive", "n_negative", "n_zero", "agreement_with_mean", "donor_support", "normalization_status")},
+    })
+    selected = selected.merge(identity, on="gene", how="left", validate="one_to_one")
+    if not np.isfinite(selected.identity_log2fc_dominant_vs_other).all():
+        raise ValueError("A plotted identity gene lacks a canonical contrast")
+    selected["stim_log2fc_stim_vs_ctrl"] = selected["mean_log2fc_stim_vs_ctrl"]
+    selected["normalization"] = "source_cpm"
+    selected["pseudocount_CPM"] = 0.5
     selected["identity_direction"] = np.where(
         selected["identity_log2fc_dominant_vs_other"].ge(0),
         f"higher in {dominant_cell_type}",
@@ -851,7 +848,7 @@ def save_identity_pattern_directionality(identity_pattern: str) -> None:
 
     fig, axes = plt.subplots(
         ncols=3,
-        figsize=(14, 6.7),
+        figsize=(16, 6.7),
         sharey=True,
         gridspec_kw={"width_ratios": [0.9, 1.2, 1.15], "wspace": 0.08},
     )
@@ -864,32 +861,22 @@ def save_identity_pattern_directionality(identity_pattern: str) -> None:
     style_axis(axes[0], xgrid=True, ygrid=False)
 
     axes[1].axvline(0, color="#CBD5E1", linewidth=1.5)
-    axes[1].barh(
-        y,
-        selected["identity_log2fc_dominant_vs_other"],
-        color=identity_colors,
-        edgecolor="white",
-    )
-    axes[1].set_xlabel(f"Mean log2 fold-change\n{dominant_cell_type} vs other PBMCs")
+    draw_reported_contrast(axes[1], y, selected, "identity_log2fc_dominant_vs_other", identity_colors, prefix="identity_")
+    axes[1].set_xlabel(f"Mean paired log2 contrast\n{dominant_cell_type} vs pooled other PBMCs")
     axes[1].set_title("Direction across\ncell identities")
     style_axis(axes[1], xgrid=True, ygrid=False)
 
     axes[2].axvline(0, color="#CBD5E1", linewidth=1.5)
-    axes[2].barh(
-        y,
-        selected["stim_log2fc_stim_vs_ctrl"],
-        color=condition_colors,
-        edgecolor="white",
-    )
-    axes[2].set_xlabel("Mean log2 fold-change\nIFN-beta vs control")
+    draw_reported_contrast(axes[2], y, selected, "stim_log2fc_stim_vs_ctrl", condition_colors)
+    axes[2].set_xlabel("Mean paired log2 contrast\nIFN-beta vs control")
     axes[2].set_title("Direction across\nconditions")
     style_axis(axes[2], xgrid=True, ygrid=False)
 
     handles = [
-        plt.Line2D([0], [0], color=TEAL, lw=8, label=f"higher in {dominant_cell_type}"),
-        plt.Line2D([0], [0], color="#7E68B1", lw=8, label="higher in other PBMCs"),
-        plt.Line2D([0], [0], color=STIM_COLOR, lw=8, label="higher in stimulation"),
-        plt.Line2D([0], [0], color=BLUE, lw=8, label="higher in control"),
+        plt.Line2D([0], [0], color=TEAL, lw=8, label="positive identity mean"),
+        plt.Line2D([0], [0], color="#7E68B1", lw=8, label="negative identity mean"),
+        plt.Line2D([0], [0], color=STIM_COLOR, lw=8, label="positive stimulation mean"),
+        plt.Line2D([0], [0], color=BLUE, lw=8, label="negative stimulation mean"),
     ]
     fig.legend(handles=handles, frameon=False, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.045))
 
@@ -897,7 +884,7 @@ def save_identity_pattern_directionality(identity_pattern: str) -> None:
     fig.text(
         0.5,
         -0.095,
-        f"{identity_pattern} is {label}; compare whether its top genes mark {dominant_cell_type}, stimulation, or both.",
+        f"{identity_pattern}: {label}. Source-wide CPM; donor counts: positive / negative / zero.\nHatching: mean sign changes across normalizations. Colors describe means, not donor agreement or confidence.",
         ha="center",
         fontsize=12,
         color="#475569",
@@ -1016,7 +1003,44 @@ def save_mean_pattern_by_condition(df: pd.DataFrame) -> None:
     save_figure(fig, "mean_pattern_by_condition.png", dpi=180)
 
 
+def configure_included_r_route(output_dir: Path) -> None:
+    """Select the included R inputs and protect all existing outputs."""
+    if output_dir.exists() or output_dir.is_symlink():
+        raise ValueError(f"Output folder already exists: {output_dir}. Choose a new folder name; existing files will not be replaced.")
+    output_dir = output_dir.resolve()
+    for name in ("data", "img", "docs", "scripts", "resources", "_extensions", ".git"):
+        if output_dir.is_relative_to((ROOT / name).resolve()):
+            raise ValueError("Keep regenerated figures outside the project's input and published-output folders; use learner_outputs/rebuilt_r_figures.")
+
+    results = ROOT / "data/processed/selected_model_k6/r"
+    bundle = ROOT / "data/processed/selected_model_k6/directionality_source_wide"
+    inputs = {
+        "METRICS_JSON": results / "cogaps_K6_seed2_iter2000.metrics.json",
+        "PATTERN_SUMMARY": results / "pattern_summary.csv",
+        "CELLTYPE_CONDITION": results / "pattern_activity_by_celltype_condition.csv",
+        "REPLICATE_CONDITION": results / "pattern_activity_by_replicate_condition.csv",
+        "CELL_ACTIVITIES": results / "pattern_cell_activities_with_metadata.csv.gz",
+    }
+    for path in inputs.values():
+        if not path.is_file() or not path.stat().st_size:
+            raise ValueError(f"Missing or empty included R input: {path}")
+    check_bundle(bundle)
+    # Model summaries and expression comparisons live in separate input folders.
+    globals().update(inputs)
+    globals().update(
+        RESULTS_DIR=results,
+        DIRECTION_GLOBAL=bundle / "r/pattern_gene_directionality_global.csv",
+        SENSITIVITY_DIR=bundle / "sensitivity",
+        IMG_DIR=output_dir,
+        SOURCE_TABLE_DIR=output_dir / "source_tables",
+        LEGACY_IMG_DIR=None,
+    )
+    load_canonical_directionality()
+    output_dir.mkdir(parents=True, exist_ok=False)
+
+
 def main() -> None:
+    load_canonical_directionality()
     IMG_DIR.mkdir(parents=True, exist_ok=True)
     SOURCE_TABLE_DIR.mkdir(parents=True, exist_ok=True)
     if LEGACY_IMG_DIR is not None:
@@ -1034,16 +1058,24 @@ def main() -> None:
     save_ifn_by_celltype_split(df, ifn_pattern)
     save_ifn_by_celltype_all(df, ifn_pattern)
     save_mean_pattern_by_condition(df)
-    if DIRECTIONALITY_HEATMAP.exists():
-        target = IMG_DIR / "pattern_gene_directionality_heatmap.png"
-        target.write_bytes(DIRECTIONALITY_HEATMAP.read_bytes())
-        if LEGACY_IMG_DIR is not None:
-            legacy_target = LEGACY_IMG_DIR / "pattern_gene_directionality_heatmap.png"
-            legacy_target.write_bytes(DIRECTIONALITY_HEATMAP.read_bytes())
     print(f"Selected K6 IFN-associated pattern: {ifn_pattern}")
     print(f"Wrote figures to {IMG_DIR}")
     print(f"Wrote source tables to {SOURCE_TABLE_DIR}")
 
 
+def cli() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--included-r-results", action="store_true", required=True,
+                        help="Redraw the included selected R results and verified expression comparisons.")
+    parser.add_argument("--output-dir", type=Path, required=True,
+                        help="New folder for 15 PNGs and a source_tables subfolder; must not already exist.")
+    args = parser.parse_args()
+    try:
+        configure_included_r_route(args.output_dir)
+        main()
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        parser.error(str(exc))
+
+
 if __name__ == "__main__":
-    main()
+    cli()

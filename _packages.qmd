@@ -89,16 +89,18 @@ From the checked project root, pull and launch the existing case-study image:
 **Host Terminal**
 
 ```bash
-docker pull --platform linux/amd64 othomas2/pycogaps-runtime-guide:0.3.1
+docker pull --platform linux/amd64 othomas2/pycogaps-runtime-guide:0.3.2
 
 docker run --platform linux/amd64 --rm -it \
   -p 127.0.0.1:8787:8787 \
   -e PASSWORD="Password12" \
   -v "$PWD":/home/rstudio/project:rw \
-  othomas2/pycogaps-runtime-guide:0.3.1
+  othomas2/pycogaps-runtime-guide:0.3.2
 ```
 
 This command starts RStudio Server inside the container and mounts your downloaded project at `/home/rstudio/project`. The mount is writable (`rw`), so small outputs you create in the project folder are saved back to your local project folder, whether you cloned it or extracted a ZIP.
+
+Image `0.3.2` also includes `edgeR` for the optional normalization comparison in the Full Reproduction Guide. You do not need to install it yourself. If you already have RStudio running in an older container, save your scripts and other work in the mounted project folder, stop that container in Docker Desktop, and launch the command above. Pulling a new image does not update a running container. Files in the mounted project are preserved; unsaved session objects are not. Use the updated project scripts as well as the image.
 
 The `127.0.0.1` port mapping makes RStudio available only from your own computer. Keep that address in the command when using the example password below.
 
@@ -111,7 +113,7 @@ The `--platform linux/amd64` option keeps the runtime consistent with the valida
 
 Use this path only if you want to regenerate selected-model files or inspect larger model objects. Keep the GitHub project and obtain any additional inputs from [Zenodo record 21208760](https://zenodo.org/records/21208760){target="_blank"}, DOI [10.5281/zenodo.21208760](https://doi.org/10.5281/zenodo.21208760){target="_blank"}. This fixed release contains the source and saved-model files used by this guide. The main learner path does not need these additional downloads.
 
-Follow [Download The Files For Your Route](#download-the-files-for-your-route) to choose files from the record's **Files** list. Download only the inputs your chosen stage needs: preprocessing needs the larger source file, while inspecting or exporting the saved R model needs its `.rds` file. Fitting a new R model from the included prepared data does not require an archive download or a pre-existing model.
+Follow [Download The Files For Your Route](#download-the-files-for-your-route) to choose files from the record's **Files** list. Download only the inputs your chosen stage needs: preprocessing and recalculating expression comparisons need the larger source file, while inspecting or exporting the saved R model needs its `.rds` file. The normalization comparison can use the included top-gene tables without a full model download. Fitting a new R model from the included prepared data does not require an archive download or a pre-existing model.
 
 The guide's file-placement table and `data/external/README.md` give the exact destinations, including the required filename change for the optional Python model. The record provides individual files, so keep their downloaded names in a separate reference folder and copy only needed inputs into a separate reproduction working project.
 

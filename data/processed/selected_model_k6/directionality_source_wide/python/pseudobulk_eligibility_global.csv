@@ -1,0 +1,17 @@
+replicate,condition,n_cells,passes_min_cells,paired_eligible,exclusion_reason
+patient_101,ctrl,858,True,True,included
+patient_101,stim,1166,True,True,included
+patient_107,ctrl,517,True,True,included
+patient_107,stim,525,True,True,included
+patient_1015,ctrl,2738,True,True,included
+patient_1015,stim,2352,True,True,included
+patient_1016,ctrl,1723,True,True,included
+patient_1016,stim,1635,True,True,included
+patient_1039,ctrl,461,True,True,included
+patient_1039,stim,641,True,True,included
+patient_1244,ctrl,1879,True,True,included
+patient_1244,stim,1464,True,True,included
+patient_1256,ctrl,2108,True,True,included
+patient_1256,stim,2026,True,True,included
+patient_1488,ctrl,2031,True,True,included
+patient_1488,stim,2549,True,True,included

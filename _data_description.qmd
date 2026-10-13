@@ -54,7 +54,7 @@ The table below is a map, not a workflow. Exact filenames and optional large-fil
 | Prepared single-cell dataset | Cells, genes, condition labels, donor labels, cell-type labels, and visualization coordinates for the PBMC IFN-beta teaching dataset. | This is the starting dataset for the main analysis, not the complete raw GEO archive. |
 | Model-resolution summaries | Precomputed summaries of candidate CoGAPS runs at different values of `K`, the number of patterns, used to compare model resolution. | These summaries support a rank decision; they do not give biological names to patterns by themselves. |
 | Saved CoGAPS outputs | Pattern activities, gene weights, top-gene summaries, and diagnostic summaries from the selected model loaded later. | Pattern labels are run-specific, and gene weights do not say whether expression is higher or lower after stimulation. |
-| Directionality summaries | Targeted stimulation-versus-control expression contrasts for genes used in pattern interpretation. | These summaries help determine direction of change for selected genes; they are not a genome-wide differential-expression analysis. |
+| Directionality summaries | Expression comparisons for selected pattern genes: stimulation versus control, or one cell type versus all remaining cell types combined. | Check which comparison a table describes; higher expression in one cell type does not necessarily mean an increase after stimulation. |
 | Optional reproduction files | Larger inputs and full model files used to rebuild or audit the workflow outside the main narrative. | These are useful for full reproduction, but they are not required to follow the main narrative. |
 
 ## What one row means
@@ -66,7 +66,7 @@ Rows do not mean the same thing in every file. A row might represent one cell, o
 | Cell metadata | One cell barcode and its labels. | Which condition, donor, and annotated PBMC cell type does this cell belong to? |
 | Cell activity tables | One cell, or one summarized cell group, with CoGAPS pattern activities. | Where is a learned pattern most active? |
 | Gene-weight and top-gene tables | One gene's contribution to one CoGAPS pattern. | Which genes help define a pattern? |
-| Directionality tables | One gene contrast between IFN-beta-stimulated and control cells. | Is the gene higher or lower after stimulation? |
+| Directionality tables | One gene's {{< glossary "Expression contrast" display="expression contrast" >}}, a numerical comparison between two groups. | Is relative expression higher or lower after stimulation, or in one cell type compared with the remaining cells? |
 | Diagnostic or model-summary tables | One saved trace point, candidate model, or run-level summary. | Did the model run behave reasonably, and how does it compare with alternatives? |
 
 ## Columns you will see often
@@ -84,7 +84,7 @@ You do not need to memorize every column name now, but this overview, can help y
 | pattern-activity columns | CoGAPS activity values for learned patterns. | Larger values mean a cell or group uses that pattern more strongly. |
 | `pattern` | A run-specific pattern label in long-format summaries. | Use it to compare patterns, but wait for evidence before assigning biological meaning. |
 | `gene` and `weight` | A gene symbol and its CoGAPS contribution to a pattern. | Use them to ask which genes help define a pattern. |
-| `log2FC` and `direction` | Directionality summaries comparing IFN-beta stimulation with control. | Use them to check whether selected genes are higher or lower after stimulation. |
+| Mean and median log2 contrasts, donor counts and normalization checks | Summaries of expression differences, how many donors share their direction, and whether that direction changes when counts are scaled differently. | Ask two separate questions: do donors agree, and does the choice of normalization method affect the result? |
 :::
 
 Later sections will introduce a few additional diagnostic columns only when they become useful. For now, the main habit is simple: check whether a table is about **cells**, **patterns**, **genes**, or **model behavior** before interpreting a number.

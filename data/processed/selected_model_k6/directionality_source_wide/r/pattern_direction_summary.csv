@@ -1,0 +1,7 @@
+"pattern","n_top_genes","n_up_in_stim","n_down_in_stim","n_zero_mean","n_mixed_donor_directions","n_single_donor","n_not_estimable","median_mean_log2fc","top_up_genes","top_down_genes"
+"Pattern1",15,7,8,0,4,0,0,-0.0685788995653975,"SAT1, CTSS, MS4A7, CST3, SOD2","ACTB, TIMP1, FTH1, CXCL16, PSAP"
+"Pattern2",15,3,12,0,3,0,0,-0.381620466852072,"TYROBP, C15orf48, S100A11","ACTB, GAPDH, PFN1, TIMP1, FTH1"
+"Pattern3",15,4,11,0,5,0,0,-0.381620466852072,"HSP90AA1, HSP90AB1, HLA-DPA1, CD74","ACTB, PFN1, FTH1, ACTG1, HLA-DQB1"
+"Pattern4",15,14,1,0,0,0,0,4.39036754946753,"IFIT1, IFIT3, IFIT2, ISG15, TNFSF10","FTH1"
+"Pattern5",15,13,2,0,0,0,0,4.39036754946753,"CXCL10, RSAD2, IFIT3, ISG15, APOBEC3A","FTH1, FTL"
+"Pattern6",15,4,11,0,3,0,0,-0.691078577062168,"CCR7, ANXA1, HSPA8, CREM","RGCC, ACTB, GAPDH, PFN1, FTH1"

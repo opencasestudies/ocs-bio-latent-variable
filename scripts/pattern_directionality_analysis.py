@@ -5,22 +5,25 @@ This script answers a reviewer-facing question that CoGAPS alone does not:
 the CoGAPS A matrix identifies genes that define each pattern, but expression
 direction needs to be estimated from the underlying count data.
 
-The selected Python `.h5ad` is a full-local input. The directionality tables and
-heatmap written to `data/processed/selected_model_k6/python/` are lightweight
-cooking-show artifacts used by the parallel Python tab when the full model object is absent.
+The selected Python `.h5ad` is an optional full-model input. The Full Reproduction
+Guide sets COGAPS_OUT_DIR to a fresh `learner_outputs/recalculated_expression/python/`
+folder for this script's tables and heatmap; existing outputs are protected.
+These exports use source-wide CPM but do not yet assess normalization sensitivity.
+The main learner path instead uses included, sensitivity-qualified reports from
+`data/processed/selected_model_k6/directionality_source_wide/sensitivity/` and does
+not require the full model object.
 
 The analysis uses replicate-aware pseudobulk summaries:
 
 - extract top genes from the chosen CoGAPS result
 - aggregate raw counts by replicate + condition, globally and within cell type
-- library-size normalize pseudobulk counts to CPM
+- library-size normalize to CPM with verified source-wide totals
 - compute paired log2(stim CPM + pseudocount) - log2(ctrl CPM + pseudocount)
 - summarize direction and consistency across donors
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 import os
 
@@ -28,8 +31,13 @@ import anndata as ad
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy import stats
 from scipy import sparse
+
+from directionality_normalization import (
+    fresh_output, group_eligibility, load_normalization, prepared_counts,
+    require_ids, write_method_manifest,
+)
+from directionality_reporting import stimulation_summary
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,19 +55,11 @@ CHOSEN_RESULT_H5AD = Path(
 )
 OUT_DIR = Path(os.environ.get("COGAPS_OUT_DIR", ROOT / "data/processed/selected_model_k6/python"))
 IFN_PATTERN = os.environ.get("COGAPS_IFN_PATTERN", "").strip()
+NORMALIZATION_MANIFEST = os.environ.get("COGAPS_NORMALIZATION_MANIFEST", "").strip()
 
 TOP_N_GENES = 15
 MIN_CELLS_PER_PSEUDOBULK = 20
 CPM_PSEUDOCOUNT = 0.5
-STRONG_ABS_LOG2FC = 0.5
-MODERATE_ABS_LOG2FC = 0.25
-HIGH_CONSISTENCY = 0.75
-
-
-@dataclass(frozen=True)
-class DirectionSummary:
-    direction: str
-    evidence_strength: str
 
 
 def pattern_columns(df: pd.DataFrame) -> list[str]:
@@ -69,63 +69,8 @@ def pattern_columns(df: pd.DataFrame) -> list[str]:
     )
 
 
-def classify_direction(mean_log2fc: float, sign_consistency: float, n_pairs: int) -> DirectionSummary:
-    if pd.isna(mean_log2fc) or n_pairs == 0:
-        return DirectionSummary("not_tested", "insufficient_pairs")
-
-    if mean_log2fc > 0:
-        direction = "up_in_stim"
-    elif mean_log2fc < 0:
-        direction = "down_in_stim"
-    else:
-        direction = "mixed_or_unclear"
-
-    abs_fc = abs(mean_log2fc)
-    if abs_fc >= STRONG_ABS_LOG2FC and sign_consistency >= HIGH_CONSISTENCY:
-        strength = "strong"
-    elif abs_fc >= MODERATE_ABS_LOG2FC and sign_consistency >= 0.625:
-        strength = "moderate"
-    elif abs_fc < 0.1 or sign_consistency < 0.625:
-        strength = "weak_or_mixed"
-    else:
-        strength = "suggestive"
-
-    if direction == "mixed_or_unclear":
-        strength = "weak_or_mixed"
-    return DirectionSummary(direction, strength)
-
-
-def benjamini_hochberg(pvalues: pd.Series) -> pd.Series:
-    """Benjamini-Hochberg adjusted p-values, preserving missing values."""
-    out = pd.Series(np.nan, index=pvalues.index, dtype=float)
-    valid = pvalues.dropna().astype(float)
-    if valid.empty:
-        return out
-
-    order = np.argsort(valid.to_numpy())
-    ordered_p = valid.to_numpy()[order]
-    n = len(ordered_p)
-    adjusted = ordered_p * n / np.arange(1, n + 1)
-    adjusted = np.minimum.accumulate(adjusted[::-1])[::-1]
-    adjusted = np.clip(adjusted, 0, 1)
-    valid_index = valid.index.to_numpy()[order]
-    out.loc[valid_index] = adjusted
-    return out
-
-
-def paired_wilcoxon_pvalue(values: np.ndarray) -> float:
-    if len(values) < 2 or np.allclose(values, 0):
-        return float("nan")
-    try:
-        return float(stats.wilcoxon(values, alternative="two-sided", zero_method="wilcox").pvalue)
-    except ValueError:
-        return float("nan")
-
-
 def get_counts_matrix(adata: ad.AnnData):
-    if "counts" in adata.layers:
-        return adata.layers["counts"]
-    return adata.X
+    return prepared_counts(adata)
 
 
 def subset_counts(X, rows: np.ndarray, cols: np.ndarray) -> np.ndarray:
@@ -135,9 +80,11 @@ def subset_counts(X, rows: np.ndarray, cols: np.ndarray) -> np.ndarray:
     return np.asarray(block).sum(axis=0)
 
 
-def group_library_size(X, rows: np.ndarray) -> float:
-    block = X[rows]
-    return float(block.sum())
+def group_library_size(source_totals, rows: np.ndarray) -> float:
+    values = np.asarray(source_totals, dtype=np.float64)[rows]
+    if not np.isfinite(values).all() or (values <= 0).any():
+        raise ValueError("Each source library total must be finite and positive")
+    return float(values.sum())
 
 
 def extract_top_pattern_genes(result: ad.AnnData, top_n: int) -> pd.DataFrame:
@@ -162,15 +109,23 @@ def make_pseudobulk(
     genes: list[str],
     group_cols: list[str],
     min_cells: int,
+    source_totals: pd.Series,
 ) -> pd.DataFrame:
     missing = sorted(set(genes) - set(adata.var_names.astype(str)))
     if missing:
         raise ValueError(f"Pattern genes missing from processed AnnData: {missing}")
 
     X = get_counts_matrix(adata)
+    cells = require_ids(adata.obs_names, "prepared cells")
+    ids = require_ids(source_totals.index, "source-total cells")
+    if set(ids) != set(cells):
+        raise ValueError("Source totals must cover exactly the prepared cells")
+    source_totals = source_totals.loc[cells]
     gene_indices = np.asarray([adata.var_names.get_loc(gene) for gene in genes])
     obs = adata.obs.copy()
     obs["_row_index"] = np.arange(adata.n_obs)
+    if obs[group_cols].isna().any().any():
+        raise ValueError("Missing pseudobulk grouping metadata")
 
     rows = []
     for group_values, group_df in obs.groupby(group_cols, observed=True):
@@ -182,7 +137,7 @@ def make_pseudobulk(
 
         cell_indices = group_df["_row_index"].to_numpy()
         gene_counts = subset_counts(X, cell_indices, gene_indices)
-        library_size = group_library_size(X, cell_indices)
+        library_size = group_library_size(source_totals, cell_indices)
 
         row = dict(zip(group_cols, group_values))
         row["n_cells"] = int(n_cells)
@@ -192,6 +147,8 @@ def make_pseudobulk(
             row[gene] = float(count)
         rows.append(row)
 
+    if not rows:
+        raise ValueError("No pseudobulk groups pass the minimum-cell rule")
     return pd.DataFrame(rows)
 
 
@@ -199,13 +156,12 @@ def add_cpm(pseudobulk: pd.DataFrame, genes: list[str]) -> pd.DataFrame:
     out = pseudobulk.copy()
     count_matrix = out[genes].to_numpy(dtype=float)
     library_sizes = out["library_size_total_counts"].to_numpy(dtype=float)
-    with np.errstate(divide="ignore", invalid="ignore"):
-        cpm = np.divide(
-            count_matrix,
-            library_sizes[:, None],
-            out=np.zeros_like(count_matrix, dtype=float),
-            where=library_sizes[:, None] > 0,
-        ) * 1_000_000
+    if not np.isfinite(library_sizes).all() or (library_sizes <= 0).any():
+        raise ValueError("CPM requires finite positive source-wide library totals")
+    if (not np.isfinite(count_matrix).all() or (count_matrix < 0).any()
+            or (count_matrix > library_sizes[:, None]).any()):
+        raise ValueError("Invalid pseudobulk counts")
+    cpm = count_matrix / library_sizes[:, None] * 1_000_000
     for i, gene in enumerate(genes):
         out[f"{gene}__cpm"] = cpm[:, i]
     return out
@@ -216,17 +172,22 @@ def paired_directionality(
     genes: list[str],
     pair_cols: list[str],
     context_cols: dict[str, str],
+    expected_strata: pd.DataFrame | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Return per-pair log2FC rows and one summary row per gene."""
     pair_rows = []
     summary_rows = []
 
     group_cols = [*pair_cols]
+    if pseudobulk_cpm[group_cols + ["condition"]].isna().any().any():
+        raise ValueError("Missing donor or condition metadata")
     grouped = pseudobulk_cpm.groupby(group_cols, observed=True, dropna=False)
     for pair_values, group in grouped:
         if not isinstance(pair_values, tuple):
             pair_values = (pair_values,)
         by_condition = group.set_index("condition", drop=False)
+        if by_condition.index.has_duplicates or not set(by_condition.index).issubset({"ctrl", "stim"}):
+            raise ValueError("Expected at most one ctrl and one stim pseudobulk per donor stratum")
         if "ctrl" not in by_condition.index or "stim" not in by_condition.index:
             continue
         pair_info = dict(zip(pair_cols, pair_values))
@@ -235,6 +196,8 @@ def paired_directionality(
         for gene in genes:
             ctrl_cpm = float(ctrl[f"{gene}__cpm"])
             stim_cpm = float(stim[f"{gene}__cpm"])
+            if not np.isfinite([ctrl_cpm, stim_cpm]).all() or min(ctrl_cpm, stim_cpm) < 0:
+                raise ValueError("Paired CPM values must be finite and nonnegative")
             log2fc = np.log2(stim_cpm + CPM_PSEUDOCOUNT) - np.log2(ctrl_cpm + CPM_PSEUDOCOUNT)
             pair_rows.append(
                 {
@@ -249,47 +212,23 @@ def paired_directionality(
                 }
             )
 
-    pair_df = pd.DataFrame(pair_rows)
-    if pair_df.empty:
-        return pair_df, pd.DataFrame()
-
+    pair_df = pd.DataFrame(pair_rows, columns=[*context_cols, *pair_cols, "gene", "ctrl_cpm", "stim_cpm",
+                                              "log2fc_stim_vs_ctrl", "ctrl_n_cells", "stim_n_cells"])
     summary_group_cols = ["gene", *[c for c in pair_cols if c != "replicate"]]
-    for group_values, gene_df in pair_df.groupby(summary_group_cols, observed=True, dropna=False):
-        if not isinstance(group_values, tuple):
-            group_values = (group_values,)
-        summary_group = dict(zip(summary_group_cols, group_values))
-        gene = summary_group["gene"]
-        log2fc_values = gene_df["log2fc_stim_vs_ctrl"].to_numpy(dtype=float)
-        mean_log2fc = float(np.mean(log2fc_values))
-        median_log2fc = float(np.median(log2fc_values))
-        n_pairs = int(len(log2fc_values))
-        n_up = int(np.sum(log2fc_values > 0))
-        n_down = int(np.sum(log2fc_values < 0))
-        n_zero = int(np.sum(log2fc_values == 0))
-        sign_consistency = max(n_up, n_down, n_zero) / n_pairs
-        direction = classify_direction(mean_log2fc, sign_consistency, n_pairs)
-        pvalue = paired_wilcoxon_pvalue(log2fc_values)
-        summary_rows.append(
-            {
-                **context_cols,
-                **summary_group,
-                "mean_log2fc_stim_vs_ctrl": mean_log2fc,
-                "median_log2fc_stim_vs_ctrl": median_log2fc,
-                "n_pairs": n_pairs,
-                "n_up_pairs": n_up,
-                "n_down_pairs": n_down,
-                "n_zero_pairs": n_zero,
-                "sign_consistency": float(sign_consistency),
-                "wilcoxon_pvalue": pvalue,
-                "direction": direction.direction,
-                "evidence_strength": direction.evidence_strength,
-            }
-        )
-
-    summary_df = pd.DataFrame(summary_rows)
-    if not summary_df.empty:
-        summary_df["wilcoxon_fdr"] = benjamini_hochberg(summary_df["wilcoxon_pvalue"])
-    return pair_df, summary_df
+    strata_cols = summary_group_cols[1:]
+    strata = (expected_strata if expected_strata is not None else pseudobulk_cpm[strata_cols]).drop_duplicates()
+    contexts = strata.to_dict("records") if strata_cols else [{}]
+    for context in contexts:
+        for gene in genes:
+            mask = pair_df.gene.eq(gene)
+            for key, value in context.items():
+                mask &= pair_df[key].eq(value)
+            group = pair_df.loc[mask]
+            if group.replicate.duplicated().any():
+                raise ValueError("Duplicate donor contrasts")
+            summary_rows.append({**context_cols, **context, "gene": gene,
+                                 **stimulation_summary(group.log2fc_stim_vs_ctrl.to_numpy(float))})
+    return pair_df, pd.DataFrame(summary_rows)
 
 
 def merge_pattern_annotations(summary: pd.DataFrame, top_genes: pd.DataFrame) -> pd.DataFrame:
@@ -322,7 +261,6 @@ def make_pattern_direction_summary(global_summary: pd.DataFrame) -> pd.DataFrame
     rows = []
     for pattern, df in global_summary.groupby("pattern", observed=True):
         direction_counts = df["direction"].value_counts().to_dict()
-        strength_counts = df["evidence_strength"].value_counts().to_dict()
         up_genes = (
             df.loc[df["direction"] == "up_in_stim"]
             .sort_values("mean_log2fc_stim_vs_ctrl", ascending=False)
@@ -339,11 +277,10 @@ def make_pattern_direction_summary(global_summary: pd.DataFrame) -> pd.DataFrame
                 "n_top_genes": int(len(df)),
                 "n_up_in_stim": int(direction_counts.get("up_in_stim", 0)),
                 "n_down_in_stim": int(direction_counts.get("down_in_stim", 0)),
-                "n_mixed_or_unclear": int(direction_counts.get("mixed_or_unclear", 0)),
-                "n_strong": int(strength_counts.get("strong", 0)),
-                "n_moderate": int(strength_counts.get("moderate", 0)),
-                "n_suggestive": int(strength_counts.get("suggestive", 0)),
-                "n_weak_or_mixed": int(strength_counts.get("weak_or_mixed", 0)),
+                "n_zero_mean": int(direction_counts.get("zero_mean", 0)),
+                "n_mixed_donor_directions": int(df.donor_support.eq("mixed donor directions").sum()),
+                "n_single_donor": int(df.n_pairs.eq(1).sum()),
+                "n_not_estimable": int(df.n_pairs.eq(0).sum()),
                 "median_mean_log2fc": float(df["mean_log2fc_stim_vs_ctrl"].median()),
                 "top_up_genes": ", ".join(up_genes),
                 "top_down_genes": ", ".join(down_genes),
@@ -383,8 +320,8 @@ def write_readme(
         "",
         "## Inputs",
         "",
-        f"- processed AnnData: `{PREPROCESSED_H5AD.relative_to(ROOT)}`",
-        f"- chosen CoGAPS result: `{CHOSEN_RESULT_H5AD.relative_to(ROOT)}`",
+        f"- processed AnnData: `{PREPROCESSED_H5AD.name}` (hash in `directionality_method.json`)",
+        f"- chosen CoGAPS result: `{CHOSEN_RESULT_H5AD.name}` (hash in `directionality_method.json`)",
         f"- top genes per pattern: `{TOP_N_GENES}`",
         f"- total unique genes tested: `{n_genes}`",
         "",
@@ -392,14 +329,15 @@ def write_readme(
         "",
         "- extracted top CoGAPS genes from the chosen model A matrix",
         "- aggregated raw counts from `.layers[\"counts\"]` into pseudobulk profiles",
+        "- divided each gene count by the sum of verified source-wide totals for the same cells, then multiplied by one million; the denominator includes all 15,706 genes in the supplied source, not only the 3,000 modeled genes",
         "- computed paired donor-level `log2(stim CPM + 0.5) - log2(ctrl CPM + 0.5)`",
-        "- added paired Wilcoxon signed-rank p-values and Benjamini-Hochberg FDR values as targeted descriptive support",
+        "- reported eligible donors, positive/negative/zero counts, mean/median, agreement with the mean sign, and descriptive donor-support labels; no confidence category or significance test",
         "- summarized direction globally across donors and within cell types where enough cells were available",
         "",
         "## Main Result",
         "",
         f"- `{ifn_pattern}` is treated as the IFN-associated pattern for this run.",
-        f"- `{ifn_pattern}`: {int(ifn_row.n_up_in_stim)} of {int(ifn_row.n_top_genes)} top genes are up in stimulation by the global paired pseudobulk summary.",
+        f"- `{ifn_pattern}`: {int(ifn_row.n_up_in_stim)} of {int(ifn_row.n_top_genes)} top genes have a positive mean stimulation contrast; consult the donor counts and sensitivity results before interpreting a direction.",
         (
             f"- `{secondary_row.pattern}` has the next largest up-in-stimulation count among top pattern genes: "
             f"{int(secondary_row.n_up_in_stim)} of {int(secondary_row.n_top_genes)}."
@@ -410,6 +348,7 @@ def write_readme(
         "",
         "## Caveats",
         "",
+        "- Candidate outputs only. These source-wide summaries do not by themselves assess normalization sensitivity; run the separate sensitivity/reporting step before lesson integration. No Wilcoxon/FDR or evidence-strength fields are carried forward.",
         "- This is a targeted directionality check for pattern genes, not a genome-wide differential-expression analysis.",
         "- The by-cell-type summaries are descriptive and depend on cell counts per donor/condition/cell-type stratum.",
         "- The current dataset is an IFN-beta stimulation PBMC dataset; any dengue interpretation should be framed as biological relevance to IFN/inflammatory programs, not direct dengue infection evidence.",
@@ -429,10 +368,19 @@ def write_readme(
 
 
 def main() -> None:
-    OUT_DIR.mkdir(exist_ok=True)
+    if not NORMALIZATION_MANIFEST:
+        raise ValueError("Set COGAPS_NORMALIZATION_MANIFEST to the manifest produced by scripts/directionality_normalization.py; no HVG-denominator fallback is permitted")
+    fresh_output(OUT_DIR)
 
     adata = ad.read_h5ad(PREPROCESSED_H5AD)
+    source_totals, normalization = load_normalization(NORMALIZATION_MANIFEST, PREPROCESSED_H5AD, adata)
     result = ad.read_h5ad(CHOSEN_RESULT_H5AD)
+    if (set(require_ids(result.obs_names, "model genes")) != set(adata.var_names)
+            or set(require_ids(result.var_names, "model cells")) != set(adata.obs_names)):
+        raise ValueError("Model identifiers differ from the prepared gene/cell sets")
+    weights = result.obs[pattern_columns(result.obs)].to_numpy(dtype=float)
+    if weights.shape[1] == 0 or not np.isfinite(weights).all() or (weights < 0).any():
+        raise ValueError("Model gene weights must be finite and nonnegative")
 
     top_genes = extract_top_pattern_genes(result, TOP_N_GENES)
     genes = sorted(top_genes["gene"].unique())
@@ -443,6 +391,7 @@ def main() -> None:
             genes=genes,
             group_cols=["replicate", "condition"],
             min_cells=MIN_CELLS_PER_PSEUDOBULK,
+            source_totals=source_totals,
         ),
         genes,
     )
@@ -460,6 +409,7 @@ def main() -> None:
             genes=genes,
             group_cols=["replicate", "condition", "cell_type"],
             min_cells=MIN_CELLS_PER_PSEUDOBULK,
+            source_totals=source_totals,
         ),
         genes,
     )
@@ -468,6 +418,7 @@ def main() -> None:
         genes,
         pair_cols=["replicate", "cell_type"],
         context_cols={"contrast_scope": "by_cell_type"},
+        expected_strata=adata.obs[["cell_type"]],
     )
     cell_summary = (
         top_genes.merge(cell_gene_summary, on="gene", how="left")
@@ -488,6 +439,13 @@ def main() -> None:
 
     make_pattern_heatmap(global_summary, OUT_DIR / "pattern_gene_directionality_heatmap.png")
     write_readme(OUT_DIR / "README.md", len(genes), global_summary, pattern_summary)
+    for suffix, cols in (("global", ["replicate", "condition"]),
+                         ("by_celltype", ["replicate", "condition", "cell_type"])):
+        group_eligibility(adata.obs, cols, MIN_CELLS_PER_PSEUDOBULK).to_csv(
+            OUT_DIR / f"pseudobulk_eligibility_{suffix}.csv", index=False,
+        )
+    write_method_manifest(OUT_DIR, normalization, CHOSEN_RESULT_H5AD, __file__,
+                          MIN_CELLS_PER_PSEUDOBULK, CPM_PSEUDOCOUNT)
 
     print(f"Wrote outputs to: {OUT_DIR}")
     print(pattern_summary.to_string(index=False))
@@ -507,11 +465,8 @@ def main() -> None:
             "rank",
             "gene",
             "mean_log2fc_stim_vs_ctrl",
-            "n_up_pairs",
-            "n_down_pairs",
-            "wilcoxon_fdr",
-            "direction",
-            "evidence_strength",
+            "n_pairs", "n_positive", "n_negative", "n_zero",
+            "agreement_with_mean", "donor_support", "normalization_status",
         ]].to_string(index=False)
     )
 

@@ -9,7 +9,7 @@ The previous sections prepared the data, checked the cell metadata, and loaded s
 1. how other patterns behave across cell types, and
 1. which top genes define a pattern and which direction question is appropriate for that pattern.
 
-Throughout this section, remember the distinction between {{< glossary "Cell activity" display="cell activity" >}}, {{< glossary "Gene weight" display="gene weight" >}}, and {{< glossary "Directionality" display="directionality" >}}. Cell activity tells you where a learned pattern is used. Gene weights tell you which genes help define that pattern. Directionality asks whether those genes are higher or lower in IFN-beta-stimulated cells compared with matched controls.
+Throughout this section, remember the distinction between {{< glossary "Cell activity" display="cell activity" >}}, {{< glossary "Gene weight" display="gene weight" >}}, and {{< glossary "Directionality" display="directionality" >}}. Cell activity tells you where a learned pattern is used. Gene weights tell you which genes help define that pattern. Directionality requires a separate expression comparison: stimulated versus matched control aliquots for the stimulation question, or one annotated cell type versus the pooled remaining cells for the identity question.
 
 ## Start From Small Visualization Tables
 
@@ -152,6 +152,8 @@ print(render_table(viz_source_inventory))
 The IFN-associated pattern label is read from each implementation's source table rather than typed by hand. The saved R result labels the IFN-associated pattern `Pattern4`; the saved Python-compatible result labels the corresponding signal `Pattern5`. The static figure files displayed in the narrative use the selected R model as the primary evidence source, but the R and Python code tabs below read their own implementation-specific source tables.
 
 Pattern numbers are therefore run-specific. The source tables also carry cautious working labels, such as "IFN-associated stimulation" or "monocyte-linked." Treat those labels as interpretation guides to check, not as names that were known before the analysis.
+
+The two gene-expression plots use the same comparisons as the later analysis tables. They use source-wide CPM, with count totals across all 15,706 genes in the supplied object. Alongside each mean comparison, you will check whether donors agree and whether the direction changes across normalization methods. The small tables needed for these plots are included; no source-data download or model fit is needed.
 
 ## Screen Patterns Before Naming Them
 
@@ -610,13 +612,21 @@ This view helps separate broad stimulation structure from more cell-type-linked 
 
 ## Connect Top Genes To Direction
 
-The last visualization combines two pieces of evidence that are easy to confuse. A high CoGAPS gene weight means a gene helps define a pattern. It does not say whether the gene is higher in stimulation. For that, you need a separate expression-direction summary.
+This visualization combines two pieces of evidence that are easy to confuse. A high CoGAPS gene weight means a gene helps define a pattern. It does not say whether the gene is higher in stimulation. For that, you need a separate expression-direction summary.
 
 The saved figure below shows the selected R run, where the IFN-associated pattern is `Pattern4`. The Python tab below uses the same check for the Python saved output, where the corresponding IFN-associated pattern is `Pattern5`.
 
-![Top-gene and directionality check for `Pattern4`, the IFN-associated pattern in the selected R run. The left panel ranks genes by CoGAPS weight, which tells you which genes most help define the pattern. The right panel checks whether those same genes are higher or lower in IFN-beta-stimulated cells compared with controls. Most top genes are canonical interferon-stimulated genes that are higher in stimulation, while FTH1 is a useful reminder that a high pattern weight does not automatically mean up-regulation.](img/figure_viz_top_gene_directionality.png){#fig-viz-top-gene-directionality fig-alt="Two-panel plot for Pattern4, the IFN-associated pattern in the selected R run. The first panel ranks top genes by CoGAPS weight. The second panel shows mean log2 fold-change for IFN-beta-stimulated versus control cells, with most top genes higher in stimulation and FTH1 lower in stimulation." width="88%" .lightbox}
+The expression panel starts with one {{< glossary "Expression contrast" display="expression contrast" >}} per donor: `log2(stimulated CPM + 0.5) - log2(control CPM + 0.5)`. The added 0.5 is a {{< glossary "Pseudocount" display="pseudocount" >}} that allows the logarithm to be calculated when CPM is zero. Positive values mean higher relative expression after stimulation; negative values mean lower expression. The bar shows the mean across eligible donors, with each donor contributing equally.
 
-The R code below uses `ifelse()` to choose a color from the direction column. The Python code uses `map()` for the same purpose. Both versions show the key idea: first rank genes by pattern weight, then check whether each gene rises or falls in the stimulation contrast.
+The numbers beside each bar count **positive / negative / zero** donor contrasts. Read them alongside the mean: a positive average can include donors whose expression is lower after stimulation. [How The Gene Contrasts Were Calculated](#how-the-gene-contrasts-were-calculated) gives the full method and cell-count requirements.
+
+![Gene weights and expression comparisons for `Pattern4`, the IFN-associated pattern in the selected R run. The right panel shows the mean stimulation contrast, with positive / negative / zero donor counts. Fourteen genes have higher relative expression after stimulation in all eight donors; FTH1 has lower expression in all eight. None of these mean contrasts changes direction across the three normalization methods, so no bars are hatched.](img/figure_viz_top_gene_directionality.png){#fig-viz-top-gene-directionality fig-alt="Two-panel selected R Pattern4 plot showing gene weights and mean stimulation contrasts. Fourteen genes have donor counts 8 / 0 / 0; FTH1 has 0 / 8 / 0. Each mean contrast keeps its direction across the three normalization methods." width="100%" .lightbox}
+
+To check {{< glossary "Normalization sensitivity" display="normalization sensitivity" >}}, we compare CPM based on the 3,000 modeled genes, source-wide CPM, and CPM adjusted using {{< glossary "TMM normalization" display="trimmed mean of M-values (TMM)" >}}. TMM uses expression ratios across many genes to adjust count totals, reducing the influence of extreme ratios and expression levels. This provides another way to check how scaling the counts affects the comparison.
+
+Hatching marks a mean contrast whose direction differs across these methods. The code below uses an asterisk beside the donor counts for the same purpose. These markers describe dependence on normalization, not agreement among donors or statistical significance. An unmarked bar can still change in size across methods.
+
+The R code uses `case_when()` to label the mean's sign, `paste()` to combine donor counts, and `geom_text()` to place them beside each bar. In Python, `np.select()` assigns sign labels, and a short loop adds the donor counts with `ax.text()`. Both versions reserve space for those labels and keep the unrounded mean contrasts for plotting. Colors distinguish positive, negative and zero means.
 
 ::: {.panel-tabset}
 
@@ -624,59 +634,92 @@ The R code below uses `ifelse()` to choose a color from the direction column. Th
 
 ```{r}
 #| label: plot-top-gene-directionality-r
+#| fig-alt: "Horizontal bars show mean stimulated-versus-control log2 contrasts using source-wide CPM for the top 15 genes of selected R Pattern4. Fourteen genes have positive contrasts in all eight donors; FTH1 has negative contrasts in all eight. Labels count positive / negative / zero donors. None of these means changes direction across normalization methods, so no labels have asterisks. Bar colors indicate mean direction, not confidence."
 #| message: false
 #| warning: false
-#| fig-width: 8
-#| fig-height: 5.6
+#| fig-width: 8.8
+#| fig-height: 6.2
 gene_direction_plot_r <- top_gene_direction_r |>
   dplyr::arrange(desc(rank)) |>
   dplyr::mutate(
     gene = factor(gene, levels = gene),
-    direction_color = ifelse(direction == "up_in_stim", "higher in stimulation", "lower in stimulation")
+    direction_color = dplyr::case_when(
+      mean_log2fc_stim_vs_ctrl > 0 ~ "positive mean",
+      mean_log2fc_stim_vs_ctrl < 0 ~ "negative mean",
+      TRUE ~ "zero mean"
+    ),
+    donor_counts = paste(n_positive, n_negative, n_zero, sep = " / "),
+    donor_counts = ifelse(
+      normalization_status == "normalization-sensitive mean sign",
+      paste0(donor_counts, " *"), donor_counts
+    )
   )
 
 ggplot(gene_direction_plot_r, aes(x = mean_log2fc_stim_vs_ctrl, y = gene, fill = direction_color)) +
   geom_vline(xintercept = 0, color = "grey80") +
   geom_col() +
+  geom_text(aes(x = Inf, label = donor_counts), hjust = 1.05, size = 3.4) +
+  scale_x_continuous(expand = expansion(mult = c(0.08, 0.45))) +
   scale_fill_manual(
-    values = c("higher in stimulation" = "#E76F51", "lower in stimulation" = "#2B8CBE"),
+    values = c("positive mean" = "#E76F51", "negative mean" = "#2B8CBE", "zero mean" = "grey60"),
     name = NULL
   ) +
   labs(
-    title = "Direction of top pattern genes",
-    x = "Mean log2 fold-change: IFN-beta vs control",
-    y = NULL
+    title = "Stimulation contrasts for top pattern genes",
+    subtitle = "Source-wide CPM; donor counts: positive / negative / zero",
+    x = "Mean paired log2 contrast: IFN-beta vs control",
+    y = NULL,
+    caption = "* Mean sign differs across normalization methods. Counts and colors are descriptive, not confidence levels."
   ) +
-  theme_minimal(base_size = 13)
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "bottom", plot.caption = element_text(size = 9))
 ```
 
 ### Python
 
 ```{python}
 #| label: plot-top-gene-directionality-python
-gene_direction_plot = top_gene_direction.sort_values("rank", ascending=False)
-direction_colors = gene_direction_plot["direction"].map(
-    {"up_in_stim": "#E76F51", "down_in_stim": "#2B8CBE"}
+#| fig-alt: "Horizontal bars show mean stimulated-versus-control log2 contrasts using source-wide CPM for the top 15 genes of saved Python Pattern5. Fourteen genes have positive contrasts in all eight donors; FTH1 has negative contrasts in all eight. Labels count positive / negative / zero donors. None of these means changes direction across normalization methods, so no labels have asterisks. Bar colors indicate mean direction, not confidence."
+gene_direction_plot = top_gene_direction.sort_values("rank", ascending=False).copy()
+gene_direction_plot["mean_sign"] = np.select(
+    [gene_direction_plot["mean_log2fc_stim_vs_ctrl"] > 0,
+     gene_direction_plot["mean_log2fc_stim_vs_ctrl"] < 0],
+    ["positive mean", "negative mean"], default="zero mean",
 )
+direction_palette = {"positive mean": "#E76F51", "negative mean": "#2B8CBE", "zero mean": "#999999"}
+direction_colors = gene_direction_plot["mean_sign"].map(direction_palette)
 
-fig, ax = plt.subplots(figsize=(8, 5.6))
+fig, ax = plt.subplots(figsize=(8.8, 6.2))
 ax.axvline(0, color="0.8")
 ax.barh(
     gene_direction_plot["gene"],
     gene_direction_plot["mean_log2fc_stim_vs_ctrl"],
     color=direction_colors,
 )
-ax.set_xlabel("Mean log2 fold-change: IFN-beta vs control")
+lo, hi = ax.get_xlim()
+ax.set_xlim(lo, hi + (hi - lo) * 0.45)
+for position, row in enumerate(gene_direction_plot.to_dict("records")):
+    counts = f"{row['n_positive']} / {row['n_negative']} / {row['n_zero']}"
+    if row["normalization_status"] == "normalization-sensitive mean sign":
+        counts += " *"
+    ax.text(0.98, position, counts, transform=ax.get_yaxis_transform(), ha="right", va="center")
+ax.set_xlabel("Mean paired log2 contrast: IFN-beta vs control")
 ax.set_ylabel("")
-ax.set_title("Direction of top pattern genes")
+ax.set_title("Stimulation contrasts for top pattern genes\nSource-wide CPM; donor counts: positive / negative / zero")
 ax.grid(axis="x", alpha=0.25)
-plt.tight_layout()
+fig.legend(
+    handles=[plt.Line2D([0], [0], color=color, lw=8, label=label)
+             for label, color in direction_palette.items()],
+    loc="lower center", bbox_to_anchor=(0.5, 0.04), ncol=3, frameon=False,
+)
+fig.text(0.5, 0.015, "* Mean sign differs across normalization methods; not a confidence label.", ha="center", fontsize=9)
+plt.tight_layout(rect=[0, 0.11, 1, 1])
 show_plot(fig, "visualization_ifn_top_gene_directionality.png")
 ```
 
 :::
 
-Most top genes for the implementation-specific IFN-associated pattern are higher in IFN-beta-stimulated cells. The top list includes canonical interferon-stimulated genes such as `ISG15`, `ISG20`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `IFIT2`, `IRF7`, `OAS1`, `PLSCR1`, and `BST2`. The main exception among the top genes is `FTH1`, which has a high pattern weight but is lower in stimulation in this targeted summary. That exception is useful: it reminds you not to translate "top pattern gene" into "up-regulated gene" without checking directionality.
+For both saved models, 14 of the top 15 IFN-associated genes have higher relative expression after stimulation in all eight donors under all three methods, when all PBMC types are combined. They include well-known interferon-stimulated genes such as `ISG15`, `ISG20`, `IFI6`, `IFIT3`, `IFIT1`, `MX1`, `IFIT2`, `IRF7`, `OAS1`, `PLSCR1`, and `BST2`. `FTH1` has a high pattern weight but lower relative expression in all eight donors under all three methods. This comparison does not measure absolute RNA changes. The exception reminds you not to translate "top pattern gene" into "up-regulated gene" without checking directionality.
 
 ## Compare Directionality For An Identity-Linked Pattern
 
@@ -684,11 +727,11 @@ The IFN-associated pattern is not the only pattern worth visualizing. Some patte
 
 The next figure uses a dendritic / antigen-presentation-linked pattern as a teaching contrast. In the selected R run, this is `Pattern3`. In the saved Python-compatible output, the corresponding dendritic / antigen-presentation-linked pattern is `Pattern6`. The exact number changes across implementations, but the interpretation question is the same: do the top genes mark a PBMC identity, a stimulation response, or both?
 
-To answer that, the figure uses two expression contrasts. The middle panel asks whether top genes are higher in the dominant annotated cell identity than in other PBMC identities. The right panel asks whether those same genes are higher after IFN-beta stimulation. That comparison keeps {{< glossary "Gene weight" display="gene weights" >}} separate from {{< glossary "Directionality" display="directionality" >}} and also keeps cell identity separate from condition.
+To answer that, the figure uses two expression comparisons. The middle panel compares dendritic cells with all remaining PBMC types combined. Counts are added within each donor and condition, and the control and stimulated comparisons are then averaged within each donor. Six donors meet the cell-count requirements. The right panel compares stimulated and control aliquots across all PBMC types, using eight donors. Both panels use source-wide CPM, a 0.5-CPM pseudocount and equal donor weights. They answer different questions and use different x-axis scales, so compare each bar with zero rather than comparing bar lengths between panels.
 
-![Directionality check for `Pattern3`, the dendritic / antigen-presentation-linked pattern in the selected R run. The left panel ranks top genes by CoGAPS weight. The middle panel compares expression in dendritic cells with other PBMC identities. The right panel compares IFN-beta stimulation with control. CD74 and HLA genes help define the pattern and are higher in dendritic cells, while most of those genes are not higher after IFN-beta stimulation.](img/figure_viz_identity_pattern_directionality.png){#fig-viz-identity-pattern-directionality fig-alt="Three-panel directionality check for Pattern3, the dendritic and antigen-presentation-linked pattern in the selected R run. The top genes include CD74 and HLA genes. These genes are higher in dendritic cells than in other PBMC identities, while most are lower in IFN-beta stimulation compared with control." width="96%" .lightbox}
+![Expression comparisons for selected R `Pattern3`. The panels show gene weights, dendritic cells versus all remaining PBMC types combined, and stimulation versus control across all PBMCs. Numbers give positive / negative / zero donor counts. CD74 and the displayed HLA genes have higher relative expression in dendritic cells in all six eligible donors. Several stimulation means are small or change direction across normalization methods; donors can also differ in direction. Hatching marks changes across normalization methods. Each expression panel has its own x-axis scale.](img/figure_viz_identity_pattern_directionality.png){#fig-viz-identity-pattern-directionality fig-alt="Three-panel selected R Pattern3 figure. CD74 and HLA cell-type comparisons have donor counts 6 / 0 / 0. CD74's stimulation mean is small and positive with 6 / 2 / 0 counts and hatching. FTL's cell-type mean is negative with donors differing in direction; HSP90AB1's cell-type mean changes direction across normalization methods. Expression panels have separate scales." width="100%" .lightbox}
 
-The code below builds the same type of figure from the implementation-specific source table. In R, `pivot_longer()` turns two contrast columns into one plotting column so `facet_wrap()` can place the contrasts side by side. In Python, `plt.subplots()` creates the two side-by-side axes and a short loop draws one bar chart per contrast. Both versions practice the same programming idea: reshape the data so that the contrast you want to compare becomes a plotting variable.
+The code below plots both contrasts from the implementation-specific source table. In R, `transmute()` gives the matching estimate, count and flag columns consistent names. `pivot_longer()` then gathers them into one row per gene and contrast; `.value` keeps the corresponding measurements together. `facet_wrap()` puts the contrasts side by side with separate x-axis scales. In Python, `plt.subplots()` creates two axes and a loop selects the estimate and matching donor-count columns for each panel. Both versions append an asterisk to the donor counts when the mean sign changes across normalization methods, corresponding to the hatching in the saved figure.
 
 ::: {.panel-tabset}
 
@@ -696,113 +739,141 @@ The code below builds the same type of figure from the implementation-specific s
 
 ```{r}
 #| label: plot-identity-pattern-directionality-r
+#| fig-alt: "Two panels compare top genes of selected R Pattern3: dendritic cells versus all remaining PBMCs combined, and stimulation versus control. Bars show mean log2 contrasts using source-wide CPM, with separate x-axis scales. Labels count positive / negative / zero donors: six for identity and eight for stimulation. CD74 and the displayed HLA genes have positive identity contrasts in all six donors; stimulation directions vary. Asterisks mark mean directions that change across normalization methods, not confidence."
 #| message: false
 #| warning: false
-#| fig-width: 9
-#| fig-height: 5.6
+#| fig-width: 11
+#| fig-height: 6.8
 identity_pattern_label_r <- unique(identity_gene_direction_r$pattern)
 dominant_identity_r <- unique(identity_gene_direction_r$dominant_cell_type)
 
 identity_direction_long_r <- identity_gene_direction_r |>
   dplyr::arrange(desc(rank)) |>
-  dplyr::mutate(gene = factor(gene, levels = gene)) |>
+  dplyr::transmute(
+    gene = factor(gene, levels = gene),
+    identity_mean = identity_log2fc_dominant_vs_other,
+    stimulation_mean = stim_log2fc_stim_vs_ctrl,
+    identity_positive = identity_n_positive,
+    stimulation_positive = n_positive,
+    identity_negative = identity_n_negative,
+    stimulation_negative = n_negative,
+    identity_zero = identity_n_zero,
+    stimulation_zero = n_zero,
+    identity_sensitive = identity_normalization_status == "normalization-sensitive mean sign",
+    stimulation_sensitive = normalization_status == "normalization-sensitive mean sign"
+  ) |>
   tidyr::pivot_longer(
-    cols = c(identity_log2fc_dominant_vs_other, stim_log2fc_stim_vs_ctrl),
-    names_to = "contrast",
-    values_to = "mean_log2fc"
+    cols = -gene,
+    names_to = c("contrast", ".value"),
+    names_pattern = "(identity|stimulation)_(.*)"
   ) |>
   dplyr::mutate(
-    contrast = dplyr::recode(
-      contrast,
-      identity_log2fc_dominant_vs_other = paste0(dominant_identity_r, " vs other PBMCs"),
-      stim_log2fc_stim_vs_ctrl = "IFN-beta vs control"
-    ),
     direction_label = dplyr::case_when(
-      contrast == paste0(dominant_identity_r, " vs other PBMCs") & mean_log2fc >= 0 ~ paste0("higher in ", dominant_identity_r),
-      contrast == paste0(dominant_identity_r, " vs other PBMCs") & mean_log2fc < 0 ~ "higher in other PBMCs",
-      contrast == "IFN-beta vs control" & mean_log2fc >= 0 ~ "higher in stimulation",
-      TRUE ~ "higher in control"
+      mean > 0 ~ paste(contrast, "positive mean"),
+      mean < 0 ~ paste(contrast, "negative mean"),
+      TRUE ~ "zero mean"
+    ),
+    donor_counts = paste(positive, negative, zero, sep = " / "),
+    donor_counts = ifelse(sensitive, paste0(donor_counts, " *"), donor_counts),
+    contrast = factor(
+      contrast, levels = c("identity", "stimulation"),
+      labels = c(paste0(dominant_identity_r, " vs pooled other PBMCs"), "IFN-beta vs control")
     )
   )
 
-identity_direction_colors_r <- c("#168477", "#7E68B1", "#E76F51", "#2B8CBE")
-names(identity_direction_colors_r) <- c(
-  paste0("higher in ", dominant_identity_r),
-  "higher in other PBMCs",
-  "higher in stimulation",
-  "higher in control"
+identity_direction_colors_r <- c(
+  "identity positive mean" = "#168477", "identity negative mean" = "#7E68B1",
+  "stimulation positive mean" = "#E76F51", "stimulation negative mean" = "#2B8CBE",
+  "zero mean" = "grey60"
 )
 
-ggplot(identity_direction_long_r, aes(x = mean_log2fc, y = gene, fill = direction_label)) +
+ggplot(identity_direction_long_r, aes(x = mean, y = gene, fill = direction_label)) +
   geom_vline(xintercept = 0, color = "grey80") +
   geom_col() +
+  geom_text(aes(x = Inf, label = donor_counts), hjust = 1.05, size = 3.2) +
+  scale_x_continuous(expand = expansion(mult = c(0.08, 0.6))) +
   facet_wrap(~ contrast, ncol = 2, scales = "free_x") +
   scale_fill_manual(
     values = identity_direction_colors_r,
     name = NULL
   ) +
   labs(
-    title = paste0(identity_pattern_label_r, ": direction checks for an identity-linked pattern"),
-    x = "Mean log2 fold-change",
-    y = NULL
+    title = paste0(identity_pattern_label_r, ": identity and stimulation contrasts"),
+    subtitle = "Source-wide CPM; donor counts: positive / negative / zero",
+    x = "Mean paired log2 contrast",
+    y = NULL,
+    caption = "* Mean sign differs across normalization methods. Separate x-axis scales; colors do not measure confidence."
   ) +
   theme_minimal(base_size = 13) +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom", plot.caption = element_text(size = 9))
 ```
 
 ### Python
 
 ```{python}
 #| label: plot-identity-pattern-directionality-python
+#| fig-alt: "Two panels compare top genes of saved Python Pattern6: dendritic cells versus all remaining PBMCs combined, and stimulation versus control. Bars show mean log2 contrasts using source-wide CPM, with separate x-axis scales. Labels count positive / negative / zero donors: six for identity and eight for stimulation. CD74 and the displayed HLA genes have positive identity contrasts in all six donors; stimulation directions vary. Asterisks mark mean directions that change across normalization methods, not confidence."
 identity_direction_plot = identity_gene_direction.sort_values("rank", ascending=False).copy()
 identity_pattern_label = identity_direction_plot["pattern"].iloc[0]
 dominant_identity = identity_direction_plot["dominant_cell_type"].iloc[0]
 
 plot_specs = [
     (
-        f"{dominant_identity} vs other PBMCs",
+        f"{dominant_identity} vs pooled other PBMCs",
         "identity_log2fc_dominant_vs_other",
+        "identity_",
         "#168477",
         "#7E68B1",
     ),
     (
         "IFN-beta vs control",
         "stim_log2fc_stim_vs_ctrl",
+        "",
         "#E76F51",
         "#2B8CBE",
     ),
 ]
 
-fig, axes = plt.subplots(ncols=2, figsize=(9, 5.6), sharey=True)
+fig, axes = plt.subplots(ncols=2, figsize=(11, 6.8), sharey=True)
 y_positions = np.arange(len(identity_direction_plot))
 
-for ax, (title, value_column, positive_color, negative_color) in zip(axes, plot_specs):
+for ax, (title, value_column, prefix, positive_color, negative_color) in zip(axes, plot_specs):
     values = identity_direction_plot[value_column]
-    colors = np.where(values >= 0, positive_color, negative_color)
+    colors = np.select([values > 0, values < 0], [positive_color, negative_color], default="#999999")
     ax.axvline(0, color="0.8")
     ax.barh(y_positions, values, color=colors)
+    lo, hi = ax.get_xlim()
+    ax.set_xlim(lo, hi + (hi - lo) * 0.6)
+    for position, row in enumerate(identity_direction_plot.to_dict("records")):
+        counts = " / ".join(str(row[prefix + key]) for key in ("n_positive", "n_negative", "n_zero"))
+        if row[prefix + "normalization_status"] == "normalization-sensitive mean sign":
+            counts += " *"
+        ax.text(0.98, position, counts, transform=ax.get_yaxis_transform(), ha="right", va="center", fontsize=9)
     ax.set_title(title)
-    ax.set_xlabel("Mean log2 fold-change")
+    ax.set_xlabel("Mean paired log2 contrast")
     ax.grid(axis="x", alpha=0.25)
 
 axes[0].set_yticks(y_positions)
 axes[0].set_yticklabels(identity_direction_plot["gene"])
 axes[0].set_ylabel("")
-fig.suptitle(f"{identity_pattern_label}: direction checks for an identity-linked pattern")
+fig.suptitle(f"{identity_pattern_label}: identity and stimulation contrasts\nSource-wide CPM; donor counts: positive / negative / zero")
 legend_handles = [
-    plt.Line2D([0], [0], color="#168477", lw=8, label=f"higher in {dominant_identity}"),
-    plt.Line2D([0], [0], color="#7E68B1", lw=8, label="higher in other PBMCs"),
-    plt.Line2D([0], [0], color="#E76F51", lw=8, label="higher in stimulation"),
-    plt.Line2D([0], [0], color="#2B8CBE", lw=8, label="higher in control"),
+    plt.Line2D([0], [0], color="#168477", lw=8, label="identity positive mean"),
+    plt.Line2D([0], [0], color="#7E68B1", lw=8, label="identity negative mean"),
+    plt.Line2D([0], [0], color="#E76F51", lw=8, label="stimulation positive mean"),
+    plt.Line2D([0], [0], color="#2B8CBE", lw=8, label="stimulation negative mean"),
 ]
-fig.legend(handles=legend_handles, loc="lower center", ncol=2, frameon=False)
-plt.tight_layout(rect=[0, 0.1, 1, 0.96])
+fig.legend(handles=legend_handles, loc="lower center", bbox_to_anchor=(0.5, 0.05), ncol=2, frameon=False)
+fig.text(0.5, 0.02, "* Mean sign differs across normalizations. Separate x-axis scales; not confidence levels.", ha="center", fontsize=9)
+plt.tight_layout(rect=[0, 0.16, 1, 0.93])
 show_plot(fig, "visualization_identity_pattern_directionality.png")
 ```
 
 :::
 
-The identity-linked direction check changes the interpretation. The top genes for this pattern are not mainly canonical IFN-response genes. They include `CD74` and several HLA genes, which are consistent with antigen presentation and dendritic-cell-linked structure. Those genes are higher in dendritic cells than in other PBMC identities, while most are not higher after IFN-beta stimulation in this summary. That is exactly why this second direction check matters: a meaningful CoGAPS pattern does not have to be a stimulation-response pattern.
+The two comparisons lead to different interpretations. `CD74` and the displayed HLA genes have higher relative expression in dendritic cells than in the remaining cells in all six eligible donors, with the same mean direction under all three normalization methods. Their stimulation comparisons across all PBMCs are less clear: several means are small or change direction across methods. For example, `CD74` has a mean log2 stimulation contrast of about +0.061 using source-wide CPM, with six positive and two negative donor contrasts. Because its mean changes direction across methods, we cannot describe it as consistently increased or decreased by stimulation.
+
+Other top genes show why a pattern-level label cannot describe every gene. For `FTL`, the dendritic-versus-other comparison has a negative mean, with two positive and four negative donor contrasts. For `HSP90AB1`, donors differ in direction and the mean changes direction across normalization methods. Together, the activity and gene evidence support a cautious dendritic / antigen-presentation-linked interpretation, not the claim that every high-weight gene is a dendritic marker or responds to stimulation in the same direction. The later analysis tables add medians and detailed donor descriptions to these plots.
 
 ## Visualization Checkpoint
 
@@ -812,8 +883,8 @@ By the end of this section, you should be able to read the selected-model visual
 - The paired donor plot checks whether the stimulation shift appears across matched donor aliquots.
 - The cell-type plot asks whether the same pattern is broad across PBMC identities.
 - The heatmap shows that other patterns have different condition and cell-type behavior.
-- The gene-direction plot connects top CoGAPS genes to whether those genes rise or fall after IFN-beta stimulation.
-- The identity-linked direction plot shows that some top genes mark an immune-cell identity rather than a stimulation response.
+- The gene-direction plot compares expression for top CoGAPS genes, showing donor agreement separately from changes across normalization methods.
+- The identity-linked direction plot distinguishes cell-type differences from stimulation effects. The clearer dendritic-cell differences do not imply that these genes also increase after stimulation.
 
 The next section moves from visual inspection to model interpretation. You will inspect the same CoGAPS outputs more directly, identify the IFN-associated pattern from the saved metrics and pattern tables, and connect activity, top genes, and directionality into a cautious biological interpretation.
 

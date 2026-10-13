@@ -41,6 +41,17 @@ R_K6_RESULTS_DIR = SELECTED_MODEL_DIR / "r"
 SELECTED_R_RESULTS_DIR = R_K6_RESULTS_DIR
 SELECTED_PYTHON_RESULTS_DIR = SELECTED_RESULTS_DIR
 
+# Source-wide expression reports used by the lesson.
+DIRECTIONALITY_BUNDLE_DIR = SELECTED_MODEL_DIR / "directionality_source_wide"
+DIRECTIONALITY_REPORTS_DIR = DIRECTIONALITY_BUNDLE_DIR / "sensitivity"
+DIRECTIONALITY_DONOR_COVERAGE_CSV = DIRECTIONALITY_REPORTS_DIR / "eligible_donors_by_scope.csv"
+R_SOURCE_DIRECTION_GLOBAL_CSV = DIRECTIONALITY_REPORTS_DIR / "r_gene_report_global.csv"
+R_SOURCE_DIRECTION_CELLTYPE_CSV = DIRECTIONALITY_REPORTS_DIR / "r_gene_report_by_celltype.csv"
+R_SOURCE_DIRECTION_IDENTITY_CSV = DIRECTIONALITY_REPORTS_DIR / "r_gene_report_identity.csv"
+PY_SOURCE_DIRECTION_GLOBAL_CSV = DIRECTIONALITY_REPORTS_DIR / "python_gene_report_global.csv"
+PY_SOURCE_DIRECTION_CELLTYPE_CSV = DIRECTIONALITY_REPORTS_DIR / "python_gene_report_by_celltype.csv"
+PY_SOURCE_DIRECTION_IDENTITY_CSV = DIRECTIONALITY_REPORTS_DIR / "python_gene_report_identity.csv"
+
 ARTIFACT_MANIFEST_JSON = DATA_DIR / "artifact_manifest.json"
 K_SELECTION_DECISION_JSON = MODEL_SELECTION_DIR / "k_selection_decision_manifest.json"
 PREPROCESSED_H5AD = INPUT_DIR / "preprocessed_cells_hvg3000.h5ad"
@@ -62,21 +73,6 @@ CANDIDATE_K7_ACTIVITY_MATCHES_CSV = MODEL_SELECTION_DIR / "candidate_best_k7_act
 PY_PER_RUN_METRICS_CSV = resolve_first_existing(
     PY_RESULTS_DIR / "per_run_metrics.csv",
     LEGACY_RESULTS_DIR / "per_run_metrics.csv",
-)
-PY_DIRECTION_GLOBAL_CSV = resolve_first_existing(
-    SELECTED_RESULTS_DIR / "pattern_gene_directionality_global.csv",
-    PY_RESULTS_DIR / "pattern_gene_directionality_global.csv",
-    LEGACY_RESULTS_DIR / "pattern_gene_directionality_global.csv",
-)
-PY_DIRECTION_CELLTYPE_CSV = resolve_first_existing(
-    SELECTED_RESULTS_DIR / "pattern_gene_directionality_by_celltype.csv",
-    PY_RESULTS_DIR / "pattern_gene_directionality_by_celltype.csv",
-    LEGACY_RESULTS_DIR / "pattern_gene_directionality_by_celltype.csv",
-)
-PY_DIRECTION_SUMMARY_CSV = resolve_first_existing(
-    SELECTED_RESULTS_DIR / "pattern_direction_summary.csv",
-    PY_RESULTS_DIR / "pattern_direction_summary.csv",
-    LEGACY_RESULTS_DIR / "pattern_direction_summary.csv",
 )
 PY_PATTERN_GENE_WEIGHTS_TSV_GZ = resolve_first_existing(
     SELECTED_RESULTS_DIR / "pattern_gene_weights.tsv.gz",
@@ -129,9 +125,6 @@ R_PATTERN_CORRELATIONS_CSV = R_K6_RESULTS_DIR / "pattern_correlations.csv"
 R_PATTERN_ACTIVITY_BY_CELLTYPE_CONDITION_CSV = R_K6_RESULTS_DIR / "pattern_activity_by_celltype_condition.csv"
 R_PATTERN_ACTIVITY_BY_REPLICATE_CONDITION_CSV = R_K6_RESULTS_DIR / "pattern_activity_by_replicate_condition.csv"
 R_PATTERN_SUMMARY_CSV = R_K6_RESULTS_DIR / "pattern_summary.csv"
-R_DIRECTION_GLOBAL_CSV = R_K6_RESULTS_DIR / "pattern_gene_directionality_global.csv"
-R_DIRECTION_CELLTYPE_CSV = R_K6_RESULTS_DIR / "pattern_gene_directionality_by_celltype.csv"
-R_DIRECTION_SUMMARY_CSV = R_K6_RESULTS_DIR / "pattern_direction_summary.csv"
 
 CHOSEN_K = 6
 CHOSEN_SEED = 2
@@ -180,9 +173,6 @@ CHOSEN_RESULT_H5AD = PY_CHOSEN_RESULT_H5AD
 CHOSEN_METRICS_JSON = PY_CHOSEN_METRICS_JSON
 SUMMARY_BY_K_CSV = PY_SUMMARY_BY_K_CSV
 PER_RUN_METRICS_CSV = PY_PER_RUN_METRICS_CSV
-DIRECTION_GLOBAL_CSV = PY_DIRECTION_GLOBAL_CSV
-DIRECTION_CELLTYPE_CSV = PY_DIRECTION_CELLTYPE_CSV
-DIRECTION_SUMMARY_CSV = PY_DIRECTION_SUMMARY_CSV
 PATTERN_GENE_WEIGHTS_TSV_GZ = PY_PATTERN_GENE_WEIGHTS_TSV_GZ
 PATTERN_CELL_ACTIVITIES_TSV_GZ = PY_PATTERN_CELL_ACTIVITIES_TSV_GZ
 PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ = PY_PATTERN_CELL_ACTIVITIES_WITH_METADATA_CSV_GZ

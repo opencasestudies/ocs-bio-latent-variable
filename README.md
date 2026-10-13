@@ -12,7 +12,7 @@ Known items to finalize:
 
 - repository landing page and public documentation polish for `https://github.com/opencasestudies/ocs-bio-latent-variable`
 - author list and citation text
-- package/environment instructions beyond the current OpenMP runtime image `othomas2/pycogaps-runtime-guide:0.3.1`
+- package/environment instructions beyond the current OpenMP runtime image `othomas2/pycogaps-runtime-guide:0.3.2`
 - final policy for distributing optional full model objects separately from lightweight GitHub artifacts
 - final decision about mentioning dengue in the motivation
 - optional enrichment analysis for the selected K6 IFN-associated pattern and secondary stimulation-associated pattern
@@ -62,11 +62,14 @@ When those larger files are absent, the case study falls back to smaller exporte
 - `data/processed/selected_model_k6/r/pattern_activity_by_celltype_condition.csv`
 - `data/processed/selected_model_k6/r/pattern_activity_by_replicate_condition.csv`
 - `data/processed/selected_model_k6/r/pattern_summary.csv`
-- `data/processed/selected_model_k6/r/pattern_gene_directionality_global.csv`
-- `data/processed/selected_model_k6/r/pattern_gene_directionality_by_celltype.csv`
-- `data/processed/selected_model_k6/r/pattern_direction_summary.csv`
-- additional R directionality support files such as `pattern_top_genes_directionality.csv`,
-  donor-pair directionality tables, pseudobulk count tables, and a small heatmap PNG
+
+Current expression comparisons are separate from those model summaries, under
+`data/processed/selected_model_k6/directionality_source_wide/`. Keep that whole
+folder, including `normalization/`, `r/`, `python/`, `sensitivity/` and its
+integrity manifests. The lesson uses its source-wide CPM comparisons and
+sensitivity-qualified donor reports. Superseded directionality exports have
+been removed from the model-summary folders; the fitted-model summaries are
+unchanged.
 
 The parallel Python implementation keeps the same full-or-lightweight pattern using `data/processed/selected_model_k6/python/`.
 Its full `.h5ad` result and dense genes x cells input are optional local artifacts, not GitHub-required files. When they are absent, the Python tabs load the smaller exported pattern matrices and summaries from `data/processed/selected_model_k6/python/`, just as the R tabs load the smaller R exports from `data/processed/selected_model_k6/r/`.
@@ -86,13 +89,13 @@ Its full `.h5ad` result and dense genes x cells input are optional local artifac
 | `data/processed/selected_model_k6/r/pattern_correlations.csv` | Selected R K6 pattern correlations with stimulation |
 | `data/processed/selected_model_k6/r/pattern_activity_by_celltype_condition.csv` | Selected R K6 pattern activity summaries by cell type and condition |
 | `data/processed/selected_model_k6/r/pattern_summary.csv` | Selected R K6 compact per-pattern summary for lightweight rendering |
-| `data/processed/selected_model_k6/r/pattern_gene_directionality_global.csv` | Selected R K6 pattern-gene directionality across donors |
+| `data/processed/selected_model_k6/directionality_source_wide/sensitivity/r_gene_report_global.csv` | Selected R K6 expression contrasts with donor counts and normalization checks |
 | `data/processed/selected_model_k6/python/pattern_gene_weights.tsv.gz` | Python K6 lightweight gene-weight matrix |
 | `data/processed/selected_model_k6/python/pattern_cell_activities.tsv.gz` | Python K6 lightweight cell-activity matrix |
 | `data/processed/selected_model_k6/python/pattern_top_genes.csv` | Python K6 top genes per pattern |
 | `data/processed/selected_model_k6/python/pattern_correlations.csv` | Python K6 pattern correlations with stimulation |
 | `data/processed/selected_model_k6/python/pattern_activity_by_celltype_condition.csv` | Python K6 pattern activity summaries by cell type and condition |
-| `data/processed/selected_model_k6/python/pattern_direction_summary.csv` | Python K6 pattern-gene directionality summary |
+| `data/processed/selected_model_k6/directionality_source_wide/sensitivity/python_gene_report_global.csv` | Python K6 expression contrasts with donor counts and normalization checks |
 
 ## Rendering
 
@@ -102,18 +105,36 @@ From this folder, try:
 quarto render
 ```
 
-This draft uses R-first / Python-second tabbed chunks. The intended local validation environment is the OpenMP-enabled Docker image `othomas2/pycogaps-runtime-guide:0.3.1`, which preinstalls:
+This draft uses R-first / Python-second tabbed chunks. The intended local validation environment is the OpenMP-enabled Docker image `othomas2/pycogaps-runtime-guide:0.3.2`, which preinstalls:
 
 - R/Bioconductor `CoGAPS`, `zellkonverter`, `SingleCellExperiment`, and the supporting R packages used by the primary R chunks
 - Python `PyCoGAPS`, `anndata`, `pandas`, `numpy`, `scipy`, `matplotlib`, and Jupyter for the Python chunks
 - `scanpy` and pinned `scikit-misc==0.3.1` for Seurat-v3 highly variable gene selection in source preprocessing
+- `edgeR` 4.0.16, `limma` 3.58.1, `locfit` 1.5-9.12 and `statmod` 1.5.2 for the optional TMM comparison
 
-The `0.3.1` runtime adds the missing preprocessing dependency to the tested
-`0.3.0` stack without upgrading the other packages. The repository's preparation
+The `0.3.2` runtime adds the TMM dependencies to the tested `0.3.1` stack,
+preserving its existing R and Python package versions and CoGAPS OpenMP support.
+Its published `linux/amd64` digest is
+`sha256:8744703fcc00ad4e34b94179eaab8697049d6521295a3b3883eb10dffdd17a83`.
+The repository's preparation
 script validates `ctrl`/`stim` labels and copies source `label` to `condition`
 only when the latter is absent. Use both the updated script and the updated
 image for source-data reproduction; a new image does not replace scripts in a
 mounted project.
+
+## Recalculating Expression Comparisons
+
+Follow Stage 5 in `_full_reproduction_guide.qmd` inside the `0.3.2` container.
+The source-count and TMM route needs the archived `kang_counts_25k.h5ad`, the
+included prepared data and the included top-gene exports. It does not require a
+full model download or new fit. The guide first verifies source-wide totals,
+then writes new comparisons and normalization checks to fresh folders under
+`learner_outputs/recalculated_expression/`. Separate optional commands extract
+genes from full saved models. Included results are not overwritten.
+
+The figure-only command redraws the included results, not arbitrary new
+recalculations. It writes its 15 PNGs and seven source tables to a separate
+folder and requires neither the larger source file nor full models.
 
 ## Scientific Caveats
 

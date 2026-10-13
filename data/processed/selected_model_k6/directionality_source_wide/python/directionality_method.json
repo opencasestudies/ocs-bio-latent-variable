@@ -1,0 +1,149 @@
+{
+  "normalization": {
+    "schema_version": "source-wide-counts-v1",
+    "source": {
+      "filename": "kang_counts_25k.h5ad",
+      "size_bytes": 38356412,
+      "sha256": "e6a5adac64dcdeb36eaba27db49b63e0c64bb0ed4a64c6705971506b41c39830"
+    },
+    "prepared": {
+      "filename": "preprocessed_cells_hvg3000.h5ad",
+      "size_bytes": 55888818,
+      "sha256": "f26df25334f60d24a95f7e90927bc034b8ecf385731486f39b8183a8fea51e32"
+    },
+    "exporter": {
+      "filename": "directionality_normalization.py",
+      "size_bytes": 10835,
+      "sha256": "81e9d2cce363984e56876d96f14671330671155abcf415c7c6b063c99b61baed"
+    },
+    "archive_manifest": {
+      "filename": "reproduction_files.json",
+      "size_bytes": 3555,
+      "sha256": "18b54a83e005a34833add8af1da9f8be4261aa20b7734d09a856b21ed79720ad"
+    },
+    "archive_record_url": "https://zenodo.org/records/21208760",
+    "source_count_location": "X",
+    "prepared_count_location": "layers/counts",
+    "source_gene_count": 15706,
+    "modeled_gene_count": 3000,
+    "n_cells": 24673,
+    "retained_counts_match_source": true,
+    "normalization_universe": "All genes in the supplied source object; not the entire transcriptome",
+    "totals": {
+      "filename": "source_library_totals.csv",
+      "size_bytes": 1389245,
+      "sha256": "5ee7431c88c15d81bd7d8f0179bd0c9e23fd1667cf966eaa7bd4c6717bc10497"
+    },
+    "source_genes": {
+      "filename": "source_genes.csv",
+      "size_bytes": 115568,
+      "sha256": "f2d0b68333f314a284da023e33e55e0ddfecc11a4528c1796840f234e10b4302"
+    },
+    "modeled_genes": {
+      "filename": "modeled_genes.csv",
+      "size_bytes": 20873,
+      "sha256": "276721f8906c1cbe54eb403ae53c7f39fb0bfbfa700ac06d7de52b1b804e7f71"
+    }
+  },
+  "model": {
+    "filename": "cogaps_K6_seed2_iter2000.h5ad",
+    "size_bytes": 627158276,
+    "sha256": "c5c0ad25bce97568c328be90b5e9977ea3afa09733b3c9d4e790b4f34d61d23a"
+  },
+  "script": {
+    "filename": "pattern_directionality_analysis.py",
+    "size_bytes": 21211,
+    "sha256": "7abdda7f7bbc507281f873abde4fa4003c406d779e385efd111745c764ec2967"
+  },
+  "normalization_helper": {
+    "filename": "directionality_normalization.py",
+    "size_bytes": 10981,
+    "sha256": "256170e0c80ce155c7a97f4099faecf02a176c65adc956420e2076ae27fdb24f"
+  },
+  "numerator": "Sum of prepared layers/counts for one gene in the exact grouped cells",
+  "denominator": "Sum of source-wide per-cell raw totals for those same cells",
+  "grouping_global": [
+    "replicate",
+    "condition"
+  ],
+  "grouping_cell_type": [
+    "replicate",
+    "condition",
+    "cell_type"
+  ],
+  "min_cells_per_pseudobulk": 20,
+  "pseudocount": 0.5,
+  "pseudocount_unit": "CPM",
+  "contrast": "log2(stim_CPM + 0.5) - log2(ctrl_CPM + 0.5)",
+  "donor_weighting": "Equal weight among eligible donor-paired contrasts",
+  "status": "Candidate outputs; not approved for replacing lesson results",
+  "reporting_version": "donor-support-v1",
+  "reporting_helper": {
+    "filename": "directionality_reporting.py",
+    "size_bytes": 1973,
+    "sha256": "bd89cbfada1fde2a46d1434995e1b8436ef1330798d090d9cbb62636c40bd613"
+  },
+  "caution": "Descriptive donor counts and mean-sign agreement only; no evidence-strength category or Wilcoxon/FDR. Source-only exports mark sensitivity not assessed until the sensitivity step.",
+  "outputs": [
+    {
+      "filename": "README.md",
+      "size_bytes": 3192,
+      "sha256": "5d65d77919ecec7a7f1f5fbb66f2f6b60eb8ba9b859c7e4c960dd2f37cd3f312"
+    },
+    {
+      "filename": "pattern_direction_summary.csv",
+      "size_bytes": 785,
+      "sha256": "881032bd0f67aa1e8a2863ed7381553bb7a3bd925de2d9c69893e02dd472463f"
+    },
+    {
+      "filename": "pattern_gene_directionality_by_celltype.csv",
+      "size_bytes": 146971,
+      "sha256": "596729284cbafeadf48e0d773ee3b9cbbb059164c6e9bff13358dc406e808382"
+    },
+    {
+      "filename": "pattern_gene_directionality_global.csv",
+      "size_bytes": 16259,
+      "sha256": "be97b4246f0378d81728d1e730cbdc7ba7f8bf613928a11c1077bada9e1535aa"
+    },
+    {
+      "filename": "pattern_gene_directionality_heatmap.png",
+      "size_bytes": 315729,
+      "sha256": "c5feb10612d6669ed20e0edf7bb9cbba9fbd01dfaeaed1da7b139c588dfb8089"
+    },
+    {
+      "filename": "pattern_gene_directionality_pairs_by_celltype.csv",
+      "size_bytes": 320646,
+      "sha256": "6ab9e5ee02f6ac4fc9140661cae9bdcefc94946accbfe20334178819b791be8d"
+    },
+    {
+      "filename": "pattern_gene_directionality_pairs_global.csv",
+      "size_bytes": 44083,
+      "sha256": "47b92a06a8c6c9fa8195ef45c2c2652fd4fcd5e540acc0d783f03c30885bcdca"
+    },
+    {
+      "filename": "pattern_top_genes.csv",
+      "size_bytes": 3260,
+      "sha256": "f013e20eae3eb47238c5306be712b7189deace2dc05df2090351c9b881daeebd"
+    },
+    {
+      "filename": "pseudobulk_counts_by_celltype.csv",
+      "size_bytes": 150656,
+      "sha256": "ff746905075eb40dffc75b6187608141e04e1e677ae4cff930d66f5265c773eb"
+    },
+    {
+      "filename": "pseudobulk_counts_global.csv",
+      "size_bytes": 25993,
+      "sha256": "7a95a18f67c666999c617c685a678cfbf896f607802113fbf7e1502de0463d3e"
+    },
+    {
+      "filename": "pseudobulk_eligibility_by_celltype.csv",
+      "size_bytes": 6986,
+      "sha256": "34d73810c5ff0954576e1bbaea05a2f3bb69c786a3722a346c7ea56d96b7323e"
+    },
+    {
+      "filename": "pseudobulk_eligibility_global.csv",
+      "size_bytes": 741,
+      "sha256": "ceed819dc121080fb7119404c06d155bb790040b2b814acd91797dbe4a7aaf57"
+    }
+  ]
+}

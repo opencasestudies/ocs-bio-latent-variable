@@ -294,3 +294,10 @@
 .frontmatter-tabs .nav-tabs li a.active {
   font-weight: bold;
 }
+
+/* Keep the paired-contrast tables within narrow language tabs. */
+.directionality-tables .cell-output-display,
+.directionality-tables .tab-pane {
+  max-width: 100%;
+  overflow-x: auto;
+}

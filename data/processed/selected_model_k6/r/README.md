@@ -21,9 +21,14 @@ Pattern labels are run-specific. In this selected local R run, the IFN-associate
 - `pattern_activity_by_celltype_condition.csv`: activity summaries by cell type and condition.
 - `pattern_activity_by_replicate_condition.csv`: donor-aware activity summaries.
 - `pattern_summary.csv`: compact per-pattern interpretation table.
-- `pattern_gene_directionality_global.csv`: targeted global directionality for top pattern genes.
-- `pattern_gene_directionality_by_celltype.csv`: targeted cell-type directionality for top pattern genes.
-- `pattern_direction_summary.csv`: one-row directionality summary per pattern.
+
+Expression-direction comparisons are stored separately in
+[`../directionality_source_wide/`](../directionality_source_wide/README.md).
+The lesson uses its `sensitivity/r_gene_report_global.csv`,
+`r_gene_report_by_celltype.csv` and `r_gene_report_identity.csv` tables, which
+combine source-wide estimates, donor counts and normalization checks. These
+included files do not require the full model download. Superseded expression
+exports are no longer kept alongside the fitted-model summaries in this folder.
 
 ## Optional Full-Local Files
 

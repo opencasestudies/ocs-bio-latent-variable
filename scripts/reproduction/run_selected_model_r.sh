@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-IMAGE="${COGAPS_RUNTIME_IMAGE:-othomas2/pycogaps-runtime-guide:0.3.1}"
+IMAGE="${COGAPS_RUNTIME_IMAGE:-othomas2/pycogaps-runtime-guide:0.3.2}"
 OUTDIR="data/processed/selected_model_k6/r"
 TAG="K6_seed2_iter2000"
 FULL_RESULT="${ROOT}/${OUTDIR}/cogaps_${TAG}.rds"

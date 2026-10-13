@@ -31,6 +31,7 @@ The complete GEO-to-H5AD workflow, exact earlier cell/gene filtering, donor-labe
 | --- | --- | --- |
 | Main learner path | Included prepared data and compact summaries | No archive files required |
 | Source preprocessing | `kang_counts_25k.h5ad` | Prepared data, preprocessing record, dense input |
+| Source-count and TMM comparison | `kang_counts_25k.h5ad`, included prepared data and top-gene exports | Verified source totals, donor contrasts, normalization factors and reports in new output folders; no model download or fitting |
 | R fitting | Prepared data, already included | Full R result and checkpoint |
 | R export/full-object inspection | Prepared data and full R result | Compact tables/diagnostics |
 | Optional Python fitting | Prepared data and dense input | Full Python result |
@@ -73,6 +74,8 @@ Missing/invalid required inputs and existing full-model output collisions cause 
 
 After successfully generating and validating an input yourself, name it explicitly, for example `--route fit-r --generated-input prepared`, or `--route export-r --generated-input prepared --generated-input r_model`. Readability and nonzero size are still required, but those declared outputs are not compared with the original model/data checksum. The source file cannot be exempted this way. This option is not a substitute for validating generated object content or a workaround for a corrupted archive download.
 
-Use Docker image `othomas2/pycogaps-runtime-guide:0.3.1` and the updated repository scripts. Source preprocessing and native R import have been tested in that runtime. A separate saved-R-result walkthrough also verified diagnostic/compact exports and figure generation without fitting a model. These checks do not certify a new full model fit, every optional Python/HPC route, or every platform. Successful downloads and local reproduction do not independently validate the inherited annotations or reconstruct their upstream history.
+Use Docker image `othomas2/pycogaps-runtime-guide:0.3.2` and the updated repository scripts. It preserves the `0.3.1` preprocessing/native-R environment and adds edgeR 4.0.16 and its dependencies. Source-wide totals, paired comparisons and TMM factors have been recalculated offline without fitting CoGAPS. Stage 5 of the Full Reproduction Guide gives the commands and fresh output paths; it does not replace the included expression files. Use `--route preprocess` to check the source file before that route, then run its dedicated count/metadata verification without rerunning preprocessing.
+
+A saved-R-result walkthrough previously verified diagnostic/compact exports and figure generation without fitting a model. These checks do not certify a new full model fit, every optional Python/HPC route, or every platform. Successful downloads and local reproduction do not independently validate the inherited annotations or reconstruct their upstream history.
 
 The full HPC sweep output archive, older large K7 model objects, and developer-facing runtime dashboards are not required for the learner path or the selected-model full reproduction guide.
