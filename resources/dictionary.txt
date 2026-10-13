@@ -193,3 +193,7 @@ summarization
 tibbles
 TSV
 walltime
+Docker's
+PowerShell
+WSL
+ZIP's
