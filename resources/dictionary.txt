@@ -197,3 +197,9 @@ Docker's
 PowerShell
 WSL
 ZIP's
+checksums
+DOI
+pre
+SHA
+subfolder
+zenodo

@@ -109,9 +109,11 @@ The `--platform linux/amd64` option keeps the runtime consistent with the valida
 <details>
 <summary><strong>Optional: inspect or rebuild full model outputs</strong></summary>
 
-Use this path only if you want to regenerate selected-model files or inspect larger model objects. The GitHub repository is still required, but the larger files are supplied separately through Zenodo, another artifact host, or private local storage. They should not be committed to ordinary GitHub history.
+Use this path only if you want to regenerate selected-model files or inspect larger model objects. The additional files are available from [Zenodo record 21208760](https://zenodo.org/records/21208760){target="_blank"}, DOI [10.5281/zenodo.21208760](https://doi.org/10.5281/zenodo.21208760){target="_blank"}. The main learner path uses the included data and saved summaries; it does not require these downloads.
 
-The optional files are documented in `data/external/README.md` and in the [Full Reproduction Guide](#full-reproduction-guide). Examples include the full R `.rds` model object, the full Python `.h5ad` result, and the dense genes-by-cells input needed for a full Python rerun.
+Download only the inputs for your chosen route. For example, rebuilding preprocessing needs the larger source file, while fitting R from the included prepared data does not need a pre-existing full model. The [download and file-placement instructions](#download-the-files-for-your-route) identify the files for each goal. Creating or mounting an archive folder does not download anything.
+
+Keep downloaded reference files separate from your writable reproduction project. Follow [Before You Begin](#before-you-begin) for the read-only archive mount, then use the [Stage 1 file check](#stage-1-confirm-the-environment-and-files) before running a stage. Exact filenames, destinations, and checksum details are also documented in `data/external/README.md`.
 
 Full local reproduction uses complete scripts rather than copying every chunk by hand. Follow the [Full Reproduction Guide](#full-reproduction-guide) to check the inputs for your chosen stage before running a script. Reading the main case study does not require any model reruns.
 
