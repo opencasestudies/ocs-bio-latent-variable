@@ -48,34 +48,43 @@ If you see "Cannot connect to the Docker daemon," check that Docker Desktop is o
 
 ### Download the project
 
-Choose **one** of the following routes. Both use the repository's `main` branch. A ZIP download provides the project files without requiring Git or downloading the Git history.
+Choose one method. Download the ZIP if you do not already use Git.
 
-**Option 1: Clone with Git**
+**Option 1: Download ZIP**
 
-Open the Host Terminal in the folder where you want to keep the case study, then run:
+1. [Download the case-study ZIP](https://github.com/opencasestudies/ocs-bio-latent-variable/archive/refs/heads/main.zip).
+2. Extract the ZIP, then open the extracted folder. Find the folder containing `index.qmd`, `scripts`, and `data`. This is the **project root**, the main folder for the case study.
 
-**Host Terminal**
+In the **Host Terminal**, use `cd` to change to that folder. The examples below assume you extracted the ZIP in your Downloads folder.
+
+For **macOS or Linux**:
 
 ```bash
-git clone --branch main https://github.com/opencasestudies/ocs-bio-latent-variable.git
-cd ocs-bio-latent-variable
+cd "$HOME/Downloads/ocs-bio-latent-variable-main"
 ```
 
-**Option 2: Download ZIP without Git**
-
-1. Open the [case-study repository](https://github.com/opencasestudies/ocs-bio-latent-variable){target="_blank"}, select the `main` branch, and choose **Code > Download ZIP**.
-2. Extract the ZIP and open the extracted folder. Find the folder containing `index.qmd`, `scripts/`, and `data/`; this is the project root. Use those contents to identify it, rather than relying on the extracted folder's name.
-3. In the Host Terminal, change to that project root. Replace the example path below with the full path to your extracted folder, keeping the quotes if the path contains spaces.
-
-**Host Terminal**
+For **Windows using WSL**, a typical path is:
 
 ```bash
-cd "/full/path/to/extracted/project"
+cd "/mnt/c/Users/YOUR_USERNAME/Downloads/ocs-bio-latent-variable-main"
+```
+
+Replace `YOUR_USERNAME` with your Windows user-folder name. WSL uses `/mnt/c` to access your Windows C: drive. [Windows/WSL path guidance](https://learn.microsoft.com/en-us/windows/wsl/filesystems)
+
+If you extracted the project somewhere else or renamed its folder, use that location instead. Keep the quotation marks so paths containing spaces work.
+
+**Option 2: Clone with Git**
+
+If you already use Git, open the **Host Terminal** in the folder where you want to keep the case study, then run:
+
+```bash
+git clone https://github.com/opencasestudies/ocs-bio-latent-variable.git
+cd ocs-bio-latent-variable
 ```
 
 ### Check the project root
 
-After either download route, check your location and confirm that all three entries are present:
+After either download method, check that your Terminal is working in the case-study folder. `pwd` shows your current location, and `ls` checks for the required file and folders.
 
 **Host Terminal**
 
@@ -84,7 +93,9 @@ pwd
 ls -d index.qmd scripts data
 ```
 
-Continue only when `index.qmd`, `scripts`, and `data` are all listed without a missing-file error. If an entry is missing, change to the project root and repeat the check. The Docker command below mounts your current folder, so starting from the ZIP's parent folder would give RStudio the wrong files.
+Continue when all three entries are listed without a missing-file error. If something is missing, use `cd` to move into the folder containing those entries and repeat the check.
+
+Run the Docker launch command below from this same folder, not from Downloads or another folder containing the ZIP. This makes the case-study files available in RStudio.
 
 ### Launch the case-study environment
 
