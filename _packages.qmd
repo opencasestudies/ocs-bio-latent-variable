@@ -28,77 +28,180 @@ The second figure shows how the main learner path differs from full local reprod
 
 ## Main learner setup
 
-Start here unless your goal is to rebuild large files. First clone the case-study repository and move into the repository root on your computer:
+Start here to run the main learner path. If you only want to read the rendered case study, you can skip software setup.
+
+### Check that Docker is ready
+
+Open Docker Desktop and wait for it to finish starting. Use your computer's Terminal, or the **Terminal** tab in RStudio if you already have it installed. Do not use the R **Console**. This check runs on your computer, before you open the lesson's browser-based RStudio environment.
+
+The commands below use Bash-style syntax: use Terminal on macOS or Linux, or a WSL terminal with [Docker Desktop integration enabled](https://docs.docker.com/desktop/features/wsl/){target="_blank"} on Windows, rather than PowerShell or Command Prompt.
+
+**Host Terminal (on your computer)**
+
+```bash
+docker info
+```
+
+Look for a `Server` section containing a server version and system information, without a connection error. A `Client` section alone does not confirm that Docker is ready.
+
+If you see "Cannot connect to the Docker daemon," check that Docker Desktop is open and has finished starting, then try again. If `docker` is not found, check your Docker installation. For further help, see the [Docker Desktop troubleshooting guide](https://docs.docker.com/desktop/troubleshoot-and-support/troubleshoot/){target="_blank"}.
+
+### Download the project
+
+Choose one method. Download the ZIP if you do not already use Git.
+
+**Option 1: Download ZIP**
+
+1. [Download the case-study ZIP](https://github.com/opencasestudies/ocs-bio-latent-variable/archive/refs/heads/main.zip).
+2. Extract the ZIP, then open the extracted folder. Find the folder containing `index.qmd`, `scripts`, and `data`. This is the **project root**, the main folder for the case study.
+
+In the **Host Terminal**, use `cd` to change to that folder. The examples below assume you extracted the ZIP in your Downloads folder.
+
+For **macOS or Linux**:
+
+```bash
+cd "$HOME/Downloads/ocs-bio-latent-variable-main"
+```
+
+For **Windows using WSL**, a typical path is:
+
+```bash
+cd "/mnt/c/Users/YOUR_USERNAME/Downloads/ocs-bio-latent-variable-main"
+```
+
+Replace `YOUR_USERNAME` with your Windows user-folder name. WSL uses `/mnt/c` to access your Windows C: drive. [Windows/WSL path guidance](https://learn.microsoft.com/en-us/windows/wsl/filesystems)
+
+If you extracted the project somewhere else or renamed its folder, use that location instead. Keep the quotation marks so paths containing spaces work.
+
+**Option 2: Clone with Git**
+
+If you already use Git, open the **Host Terminal** in the folder where you want to keep the case study, then run:
 
 ```bash
 git clone https://github.com/opencasestudies/ocs-bio-latent-variable.git
 cd ocs-bio-latent-variable
 ```
 
-Then pull and launch the Docker image:
+### Check the project root
+
+After either download method, check that your Terminal is working in the case-study folder. `pwd` shows your current location, and `ls` checks for the required file and folders.
+
+**Host Terminal**
 
 ```bash
-docker pull othomas2/pycogaps-runtime-guide:0.3.0
+pwd
+ls -d index.qmd scripts data
+```
+
+Continue when all three entries are listed without a missing-file error. If something is missing, use `cd` to move into the folder containing those entries and repeat the check.
+
+Run the Docker launch command below from this same folder, not from Downloads or another folder containing the ZIP. This makes the case-study files available in RStudio.
+
+### Launch the case-study environment
+
+Run the commands below from your case-study folder to download the software used in this lesson and start RStudio for use in your web browser.
+
+**Host Terminal**
+
+```bash
+docker pull --platform linux/amd64 othomas2/pycogaps-runtime-guide:0.3.0
 
 docker run --platform linux/amd64 --rm -it \
-  -p 8787:8787 \
+  -p 127.0.0.1:8787:8787 \
   -e PASSWORD="Password12" \
   -v "$PWD":/home/rstudio/project:rw \
   othomas2/pycogaps-runtime-guide:0.3.0
 ```
 
-This command starts RStudio Server inside the container and mounts the cloned repository at `/home/rstudio/project`. The mount is writable (`rw`), so small outputs you create in the project folder are saved back to your local clone.
+In RStudio, your downloaded case-study folder appears at `/home/rstudio/project`. These are the same files stored on your computer, not a separate copy. Files you create or edit in this folder through RStudio remain in your local case-study folder after you stop Docker.
 
-The `--platform linux/amd64` option keeps the runtime consistent with the validated case-study image. On Apple silicon Macs, Docker may use emulation for this image, so long model-fitting runs can be slower than they would be on native Linux hardware. The main learner path avoids that problem by using included CoGAPS evidence.
+The `127.0.0.1` port mapping makes RStudio available only from your own computer. Keep that address in the command when using the example password below.
+
+Keep `--platform linux/amd64` unchanged in both commands, including on Apple silicon Macs.
 
 ## Full local reproduction setup
 
-Use this path only if you want to regenerate selected-model files or inspect larger model objects. The GitHub repository is still required, but the larger files are supplied separately through Zenodo, another artifact host, or private local storage. They should not be committed to ordinary GitHub history.
+<details>
+<summary><strong>Optional: inspect or rebuild full model outputs</strong></summary>
 
-The optional files are documented in `data/external/README.md` and in the [Full Reproduction Guide](#full-reproduction-guide). Examples include the full R `.rds` model object, the full Python `.h5ad` result, and the dense genes-by-cells input needed for a full Python rerun.
+The main lesson uses the included data and saved results. You can skip this section and continue to [Open RStudio Server](#open-rstudio-server).
 
-Full local reproduction uses complete scripts rather than copying every chunk by hand. After Docker starts, open the RStudio Terminal and work from the mounted repository:
+To inspect full model objects or rerun parts of the analysis, follow the [Full Reproduction Guide](#full-reproduction-guide). Check the required files for your chosen stage before starting; some are separate downloads. The guide uses R for full reproduction and includes an optional Python route. You do not need both.
 
-```bash
-cd /home/rstudio/project
-ls scripts/reproduction
-```
+When following the guide:
 
-The selected-model rerun wrappers are:
+- Start model runs in the **Host Terminal**, from your case-study folder. Keep Docker Desktop running and the model's progress visible.
+- Run preprocessing and export commands in the **RStudio Terminal inside the container**, from `/home/rstudio/project`.
 
-```bash
-bash scripts/reproduction/run_selected_model_r.sh
-bash scripts/reproduction/run_selected_model_python.sh
-```
-
-The R wrapper is the primary reproduction route for the selected model. The Python wrapper is parallel and useful for implementation comparison, but it requires the optional dense CoGAPS input file. If a model-fitting script is launched, run it in a visible Terminal so progress messages remain watchable.
-
-The full rank sweep is intentionally not part of local reproduction. Learners analyze the included sweep summaries under `data/processed/k_selection/`.
+</details>
 
 ## Open RStudio Server
 
 After Docker starts, open [http://localhost:8787](http://localhost:8787){target="_blank"} and sign in with username `rstudio` and password `Password12`. Keep the online case-study page open in one browser tab and RStudio Server open in another.
 
-In RStudio Server, work from `/home/rstudio/project`. If you are unsure where you are, run `getwd()` in the R Console or `pwd` in the Terminal.
+In RStudio Server, work from `/home/rstudio/project`, the mounted project folder. Set the working directory in each session you use before running code with relative file paths.
+
+**RStudio Console**
+
+```r
+setwd("/home/rstudio/project")
+getwd()
+```
+
+**RStudio Terminal inside the container**
+
+Open the Terminal tab in RStudio, then run:
+
+```bash
+cd /home/rstudio/project
+pwd
+```
+
+Each check should report `/home/rstudio/project`. The RStudio Console and the RStudio Terminal inside the container have separate working directories: changing one does not change the other. Use `getwd()` to check R's location and `pwd` to check the Terminal's location.
 
 The schematic below labels the main panes you will use while working through the case study.
 
 ![A labeled RStudio Server window showing where to paste R code, run selected lines, use the Terminal for Python or full scripts, and find output files.](img/rstudio_server_labeled.svg){#fig-rstudio-server-labeled-cs4 width="100%"}
 
-| What you are running | Where to paste or run it | Where output appears |
-|---|---|---|
-| Short R chunks from an R tab | R Console, or an R script in the Source pane | Console output, Plots pane, and saved files in the Files pane |
-| Short Python chunks from a Python tab | Terminal pane using `/opt/cogaps-venv/bin/python`, or a small `.py` script | Terminal output and saved files in the Files pane |
-| Full reproduction scripts | Terminal pane from `/home/rstudio/project` | Terminal progress messages, logs, and regenerated output folders |
+Choose one language for the main lesson. In the browser-based RStudio, use the corresponding workflow below.
 
-For R chunks, a common workflow is to open `File > New File > R Script`, paste the code, highlight the lines you want to run, and click **Run**. You can also paste short chunks directly into the R Console. For Python chunks, use the Terminal pane so you are running Python inside the Docker environment:
+| Code | Where to run it | Where results appear |
+|---|---|---|
+| R | Add code to a saved R script in the **Source** pane. Select the lines and click **Run**. | **Console** and **Plots** pane |
+| Python | Enter code in a **Python session** started from the **RStudio Terminal inside the container**. | **Terminal**; saved output in the **Files** pane |
+
+Files you save in `/home/rstudio/project` are available through RStudio's **Files** pane.
+
+Choose the tab for your language and follow the instructions below.
+
+::: {.panel-tabset}
+
+### R
+
+**Keep your work in a saved script**
+
+Choose **File > New File > R Script** and save the new file as `case_study_work.R` in `/home/rstudio/project`. Add successive R chunks to this script as you work through the case study. Highlight the lines you want to run and click **Run**; they execute in the RStudio Console. Use the Console directly for brief checks such as `getwd()`, rather than keeping your only copy of the workflow in the Console history.
+
+Keep `setwd("/home/rstudio/project")` and the package and helper setup chunks near the top of your script. When you return to a new R session, reopen the script and rerun those setup chunks and any earlier chunks that create objects needed by the section you are resuming. Saving the script preserves your code, not the objects in an R session. Files saved in the mounted project folder remain in your local project when the container stops.
+
+### Python
+
+**Start a separate session**
+
+For Python chunks, start the existing Python workflow from the Terminal pane, not the RStudio Console.
+
+**RStudio Terminal inside the container**
 
 ```bash
 cd /home/rstudio/project
 /opt/cogaps-venv/bin/python
 ```
 
-You can paste short Python examples after the `>>>` prompt. For longer Python examples, save the code in a small `.py` file and run it from the Terminal.
+**Python session**
+
+Once the `>>>` prompt appears, paste Python code only; do not include the prompt itself. For longer Python examples, save the code in a `.py` file in `/home/rstudio/project` and run it with `/opt/cogaps-venv/bin/python` from the RStudio Terminal inside the container. Run `exit()` in the Python session to return to the Terminal before entering shell commands such as `cd`.
+
+:::
 
 ## Load packages
 
@@ -256,9 +359,12 @@ The case study uses the same few folders repeatedly. You do not need to memorize
 |---|---|
 | `data/processed/input/` | Prepared single-cell data used in the main lesson |
 | `data/processed/k_selection/` | Saved model-resolution summaries from the rank sweep |
-| selected-model output folder | Lightweight CoGAPS outputs used after model selection |
+| `data/processed/selected_model_k6/r/` | Included compact tables and matrices from the selected R CoGAPS model |
+| `data/processed/selected_model_k6/python/` | Included compact tables and matrices from the parallel Python model |
 | `img/` | Figures shown in the case study |
 | `scripts/` | Helper scripts and optional reproduction scripts |
+
+The selected-model folders include compact CSV tables and compressed matrix exports for the main learner path. The full R `.rds` object and full Python model `.h5ad` file are optional downloads, not files you should expect in a fresh clone or ZIP. The prepared `.h5ad` dataset under `data/processed/input/` is included; it is not the full Python model. See the optional [Full local reproduction setup](#full-local-reproduction-setup) for the separate large-file route.
 
 Run the helper setup once after loading packages. If you are working through the case study interactively, run the tab for your language before moving to the Data Import section. Later chunks depend on these helper paths.
 
