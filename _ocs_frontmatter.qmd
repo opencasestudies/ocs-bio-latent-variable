@@ -105,7 +105,7 @@ Include bioOCSdata package information once ready/applicable
 Prerequisites
 ::::
 ::::{.inner_block}
-You do not need previous experience with CoGAPS or this dataset. To run the code, you should be comfortable with basic R or Python: variables, function calls, data frames, and file paths. You only need one language. The case study introduces the biological and modeling concepts as you encounter them, and you can read the rendered analysis without installing software.
+You do not need previous experience with CoGAPS or this dataset. To run the code, you should be comfortable with basic R or Python: variables, function calls, data frames, and file paths. You only need one language. The case study introduces the biological and modeling concepts as you encounter them. You can read through the code output without installing any software.
 
 You can also complete the main analysis without installing R, Python, CoGAPS, or single-cell packages one at a time. A validated Docker image provides the software environment, and the GitHub repository provides the prepared PBMC data, model-selection summaries, and lightweight outputs from the selected CoGAPS models.
 
