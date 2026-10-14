@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "description": "Reference identities for seven archive data/model files, with dated anonymous-download verification; not end-to-end reproduction certification.",
+  "record_id": "21208760",
+  "record_url": "https://zenodo.org/records/21208760",
+  "doi": "10.5281/zenodo.21208760",
+  "public_access_verified": true,
+  "public_access_verification": {
+    "completed_at_utc": "2026-10-05T15:07:00.790869+00:00",
+    "method": "Complete anonymous HTTP GETs; byte size, MD5, and SHA-256 matched expected values for all ten record files.",
+    "verified_file_count": 10,
+    "verified_total_bytes": 1363237514,
+    "scope": "Public retrieval and file identity only; not upstream provenance, redistribution approval, or end-to-end reproduction certification."
+  },
+  "files": [
+    {
+      "target_path": "data/source/kang_counts_25k.h5ad",
+      "upload_filename": "kang_counts_25k.h5ad",
+      "role": "Source count-level PBMC IFN-beta H5AD used to rebuild the prepared teaching object.",
+      "size_bytes": 38356412,
+      "sha256": "e6a5adac64dcdeb36eaba27db49b63e0c64bb0ed4a64c6705971506b41c39830",
+      "id": "source"
+    },
+    {
+      "target_path": "data/processed/input/preprocessed_cells_hvg3000.h5ad",
+      "upload_filename": "preprocessed_cells_hvg3000.h5ad",
+      "role": "Prepared cell-by-gene teaching object with metadata and UMAP coordinates.",
+      "size_bytes": 55888818,
+      "sha256": "f26df25334f60d24a95f7e90927bc034b8ecf385731486f39b8183a8fea51e32",
+      "id": "prepared"
+    },
+    {
+      "target_path": "data/processed/input/preprocess_config_hvg3000.json",
+      "upload_filename": "preprocess_config_hvg3000.json",
+      "role": "Recorded preprocessing settings for the 3,000-HVG teaching object.",
+      "size_bytes": 174,
+      "sha256": "b26e56d5b06d178cddea3917c9703fc231d550b96aed7d07589b5ea54e36ef0c",
+      "id": "config"
+    },
+    {
+      "target_path": "data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad",
+      "upload_filename": "cogaps_input_genesxcells_hvg3000_float64.h5ad",
+      "role": "Dense genes-by-cells matrix for local PyCoGAPS reruns.",
+      "size_bytes": 624660894,
+      "sha256": "a351c7773e9e28572aea287b574e18583d1affb6f63b031cec05e2c38a9998fd",
+      "id": "dense"
+    },
+    {
+      "target_path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds",
+      "upload_filename": "cogaps_K6_seed2_iter2000.rds",
+      "role": "Full selected R CoGAPS K6 seed 2 model object.",
+      "size_bytes": 13093012,
+      "sha256": "1193b16a3ae60bf74aa8ba2fc498d304ae6f5217ddca9a44602ea39620173f0a",
+      "id": "r_model"
+    },
+    {
+      "target_path": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.checkpoint.out",
+      "upload_filename": "cogaps_K6_seed2_iter2000.checkpoint.out",
+      "role": "Checkpoint from the selected R heavy diagnostic model run.",
+      "size_bytes": 4040443,
+      "sha256": "1260413d6059104a0cabeeed7e164079db44fd6f00338ee8c54fc70bdfe31630",
+      "id": "checkpoint"
+    },
+    {
+      "target_path": "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad",
+      "upload_filename": "cogaps_K6_seed2_iter2000_python.h5ad",
+      "role": "Full selected Python/PyCoGAPS-compatible K6 seed 2 model object.",
+      "size_bytes": 627158276,
+      "sha256": "c5c0ad25bce97568c328be90b5e9977ea3afa09733b3c9d4e790b4f34d61d23a",
+      "placement_note": "Rename to cogaps_K6_seed2_iter2000.h5ad inside the project's python selected-model directory.",
+      "id": "python_model"
+    }
+  ]
+}
