@@ -99,7 +99,7 @@ Run the Docker launch command below from this same folder, not from Downloads or
 
 ### Launch the case-study environment
 
-From the checked project root, pull and launch the existing case-study image:
+Run the commands below from your case-study folder to download the software used in this lesson and start RStudio for use in your web browser.
 
 **Host Terminal**
 
@@ -113,7 +113,7 @@ docker run --platform linux/amd64 --rm -it \
   othomas2/pycogaps-runtime-guide:0.3.0
 ```
 
-This command starts RStudio Server inside the container and mounts your downloaded project at `/home/rstudio/project`. The mount is writable (`rw`), so small outputs you create in the project folder are saved back to your local project folder, whether you cloned it or extracted a ZIP.
+In RStudio, your downloaded case-study folder appears at `/home/rstudio/project`. These are the same files stored on your computer, not a separate copy. Files you create or edit in this folder through RStudio remain in your local case-study folder after you stop Docker.
 
 The `127.0.0.1` port mapping makes RStudio available only from your own computer. Keep that address in the command when using the example password below.
 
