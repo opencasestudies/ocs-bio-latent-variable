@@ -117,7 +117,7 @@ In RStudio, your downloaded case-study folder appears at `/home/rstudio/project`
 
 The `127.0.0.1` port mapping makes RStudio available only from your own computer. Keep that address in the command when using the example password below.
 
-The `--platform linux/amd64` option keeps the runtime consistent with the validated case-study image. On Apple silicon Macs, Docker may use emulation for this image, so long model-fitting runs can be slower than they would be on native Linux hardware. The main learner path avoids that problem by using included CoGAPS evidence.
+Keep `--platform linux/amd64` unchanged in both commands, including on Apple silicon Macs.
 
 ## Full local reproduction setup
 
