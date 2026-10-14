@@ -172,13 +172,21 @@ Choose one language for the main lesson. In the browser-based RStudio, use the c
 
 Files you save in `/home/rstudio/project` are available through RStudio's **Files** pane.
 
-**R: keep your work in a saved script**
+Choose the tab for your language and follow the instructions below.
+
+::: {.panel-tabset}
+
+### R
+
+**Keep your work in a saved script**
 
 Choose **File > New File > R Script** and save the new file as `case_study_work.R` in `/home/rstudio/project`. Add successive R chunks to this script as you work through the case study. Highlight the lines you want to run and click **Run**; they execute in the RStudio Console. Use the Console directly for brief checks such as `getwd()`, rather than keeping your only copy of the workflow in the Console history.
 
 Keep `setwd("/home/rstudio/project")` and the package and helper setup chunks near the top of your script. When you return to a new R session, reopen the script and rerun those setup chunks and any earlier chunks that create objects needed by the section you are resuming. Saving the script preserves your code, not the objects in an R session. Files saved in the mounted project folder remain in your local project when the container stops.
 
-**Python: start a separate session**
+### Python
+
+**Start a separate session**
 
 For Python chunks, start the existing Python workflow from the Terminal pane, not the RStudio Console.
 
@@ -192,6 +200,8 @@ cd /home/rstudio/project
 **Python session**
 
 Once the `>>>` prompt appears, paste Python code only; do not include the prompt itself. For longer Python examples, save the code in a `.py` file in `/home/rstudio/project` and run it with `/opt/cogaps-venv/bin/python` from the RStudio Terminal inside the container. Run `exit()` in the Python session to return to the Terminal before entering shell commands such as `cd`.
+
+:::
 
 ## Load packages
 
