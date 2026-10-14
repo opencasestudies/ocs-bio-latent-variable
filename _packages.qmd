@@ -124,41 +124,14 @@ Keep `--platform linux/amd64` unchanged in both commands, including on Apple sil
 <details>
 <summary><strong>Optional: inspect or rebuild full model outputs</strong></summary>
 
-Use this path only if you want to regenerate selected-model files or inspect larger model objects. The GitHub repository is still required, but the larger files are supplied separately through Zenodo, another artifact host, or private local storage. They should not be committed to ordinary GitHub history.
+The main lesson uses the included data and saved results. You can skip this section and continue to [Open RStudio Server](#open-rstudio-server).
 
-The optional files are documented in `data/external/README.md` and in the [Full Reproduction Guide](#full-reproduction-guide). Examples include the full R `.rds` model object, the full Python `.h5ad` result, and the dense genes-by-cells input needed for a full Python rerun.
+To inspect full model objects or rerun parts of the analysis, follow the [Full Reproduction Guide](#full-reproduction-guide). Check the required files for your chosen stage before starting; some are separate downloads. The guide uses R for full reproduction and includes an optional Python route. You do not need both.
 
-Full local reproduction uses complete scripts rather than copying every chunk by hand. Follow the [Full Reproduction Guide](#full-reproduction-guide) to check the inputs for your chosen stage before running a script. Reading the main case study does not require any model reruns.
+When following the guide:
 
-The selected-model launchers below start their own Docker containers. Run them in the **Host Terminal**, not the RStudio Terminal inside the container or the RStudio Console. Keep Docker Desktop running. If your first Host Terminal is occupied by the RStudio Server container, open a second Host Terminal window or tab.
-
-Change to the same local project root you mounted for RStudio, whether you cloned it or extracted a ZIP. Replace the example path with the path on your computer; `/home/rstudio/project` is the path inside the RStudio container, not the host path.
-
-**Host Terminal**
-
-```bash
-cd "/full/path/to/your/project"
-pwd
-ls -d index.qmd scripts data
-```
-
-The following commands fit models and write outputs; they are not setup checks. Choose the R route for primary reproduction. The parallel Python route is optional and requires the separate dense CoGAPS input file. You do not need to run both.
-
-**Host Terminal: R selected-model launcher**
-
-```bash
-bash scripts/reproduction/run_selected_model_r.sh
-```
-
-**Host Terminal: optional Python selected-model launcher**
-
-```bash
-bash scripts/reproduction/run_selected_model_python.sh
-```
-
-Keep any model-fitting run visible in the Host Terminal so you can watch its progress. After fitting, return to the **RStudio Terminal inside the container** for the guide's export commands and run `cd /home/rstudio/project` there first. These export commands use the R and Python packages installed in the container.
-
-The full rank sweep is intentionally not part of local reproduction. Learners analyze the included sweep summaries under `data/processed/k_selection/`.
+- Start model runs in the **Host Terminal**, from your case-study folder. Keep Docker Desktop running and the model's progress visible.
+- Run preprocessing and export commands in the **RStudio Terminal inside the container**, from `/home/rstudio/project`.
 
 </details>
 
