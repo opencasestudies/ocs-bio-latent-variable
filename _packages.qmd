@@ -32,15 +32,19 @@ Start here to run the main learner path. If you only want to read the rendered c
 
 ### Check that Docker is ready
 
-Open Docker Desktop and wait for its engine to start. Use the **Host Terminal**, meaning a terminal on your computer outside RStudio and the case-study container. The commands below use Bash-style syntax: use Terminal on macOS or Linux, or a WSL terminal with [Docker Desktop integration enabled](https://docs.docker.com/desktop/features/wsl/){target="_blank"} on Windows, rather than PowerShell or Command Prompt.
+Open Docker Desktop and wait for it to finish starting. Use your computer's Terminal, or the **Terminal** tab in RStudio if you already have it installed. Do not use the R **Console**. This check runs on your computer, before you open the lesson's browser-based RStudio environment.
 
-**Host Terminal**
+The commands below use Bash-style syntax: use Terminal on macOS or Linux, or a WSL terminal with [Docker Desktop integration enabled](https://docs.docker.com/desktop/features/wsl/){target="_blank"} on Windows, rather than PowerShell or Command Prompt.
+
+**Host Terminal (on your computer)**
 
 ```bash
 docker info
 ```
 
-Look for a `Server` section containing a server version and system information, without a connection error. A `Client` section alone does not confirm that the engine is reachable. If you see a message such as "Cannot connect to the Docker daemon", the terminal cannot reach the engine. Check that Docker Desktop is open and has finished starting, then try again. If the error persists, check Docker's connection settings; do not move the command into the RStudio Console. If `docker` is not found, check the Docker installation before continuing.
+Look for a `Server` section containing a server version and system information, without a connection error. A `Client` section alone does not confirm that Docker is ready.
+
+If you see "Cannot connect to the Docker daemon," check that Docker Desktop is open and has finished starting, then try again. If `docker` is not found, check your Docker installation. For further help, see the [Docker Desktop troubleshooting guide](https://docs.docker.com/desktop/troubleshoot-and-support/troubleshoot/){target="_blank"}.
 
 ### Download the project
 
