@@ -62,6 +62,7 @@ qmd
 repo
 Rmd
 RStudio
+RStudio's
 scCoGAPS
 SLURM
 stim

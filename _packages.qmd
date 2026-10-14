@@ -163,12 +163,14 @@ The schematic below labels the main panes you will use while working through the
 
 ![A labeled RStudio Server window showing where to paste R code, run selected lines, use the Terminal for Python or full scripts, and find output files.](img/rstudio_server_labeled.svg){#fig-rstudio-server-labeled-cs4 width="100%"}
 
-| What you are running | Where to paste or run it | Where output appears |
+Choose one language for the main lesson. In the browser-based RStudio, use the corresponding workflow below.
+
+| Code | Where to run it | Where results appear |
 |---|---|---|
-| Short R chunks from an R tab | A saved R script in the Source pane, run in the RStudio Console | Console output, Plots pane, and saved files in the Files pane |
-| Short Python chunks from a Python tab | Python session started from the RStudio Terminal inside the container, or a saved `.py` script run there | Terminal output and saved files in the Files pane |
-| Selected-model launchers (`run_selected_model_r.sh` or `run_selected_model_python.sh`) | Host Terminal at your local project root | Model progress messages and files in the selected-model output folder |
-| Reproduction export commands (`Rscript` or `/opt/cogaps-venv/bin/python`) | RStudio Terminal inside the container, from `/home/rstudio/project` | Export messages and regenerated tables or figures |
+| R | Add code to a saved R script in the **Source** pane. Select the lines and click **Run**. | **Console** and **Plots** pane |
+| Python | Enter code in a **Python session** started from the **RStudio Terminal inside the container**. | **Terminal**; saved output in the **Files** pane |
+
+Files you save in `/home/rstudio/project` are available through RStudio's **Files** pane.
 
 **R: keep your work in a saved script**
 
