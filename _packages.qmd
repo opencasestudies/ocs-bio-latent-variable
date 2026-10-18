@@ -32,9 +32,11 @@ Start here to run the main learner path. If you only want to read the rendered c
 
 ### Check that Docker is ready
 
-Open Docker Desktop and wait for it to finish starting. Use your computer's Terminal, or the **Terminal** tab in RStudio if you already have it installed. Do not use the R **Console**. This check runs on your computer, before you open the lesson's browser-based RStudio environment.
+Open Docker Desktop and wait for it to finish starting. Run the check below **on your computer**, before opening the lesson's browser-based RStudio.
 
-The commands below use Bash-style syntax: use Terminal on macOS or Linux, or a WSL terminal with [Docker Desktop integration enabled](https://docs.docker.com/desktop/features/wsl/){target="_blank"} on Windows, rather than PowerShell or Command Prompt.
+Use **Terminal** on macOS or Linux. On Windows, use a **WSL terminal** with [Docker Desktop integration enabled](https://docs.docker.com/desktop/features/wsl/){target="_blank"}. The setup commands below use Bash-style syntax, rather than PowerShell or Command Prompt.
+
+**Already have RStudio installed on your computer?** You can also run this check in its **Terminal** tab, not its **R Console**. You do not need to install RStudio separately for this lesson.
 
 **Host Terminal (on your computer)**
 
