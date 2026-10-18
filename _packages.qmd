@@ -53,7 +53,7 @@ Choose one method. Download the ZIP if you do not already use Git.
 **Option 1: Download ZIP**
 
 1. [Download the case-study ZIP](https://github.com/opencasestudies/ocs-bio-latent-variable/archive/refs/heads/main.zip).
-2. Extract the ZIP, then open the extracted folder. Find the folder containing `index.qmd`, `scripts`, and `data`. This is the **project root**, the main folder for the case study.
+2. Extract the ZIP, then open the extracted folder. The extracted folder should contain `index.qmd`, `scripts`, and `data`. This is the **project root**, the main folder for the case study.
 
 In the **Host Terminal**, use `cd` to change to that folder. The examples below assume you extracted the ZIP in your Downloads folder.
 
