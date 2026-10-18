@@ -163,20 +163,17 @@ The schematic below labels the main panes you will use while working through the
 
 ![A labeled RStudio Server window showing where to paste R code, run selected lines, use the Terminal for Python or full scripts, and find output files.](img/rstudio_server_labeled.svg){#fig-rstudio-server-labeled-cs4 width="100%"}
 
-Choose one language for the main lesson. In the browser-based RStudio, use the corresponding workflow below.
-
-| Code | Where to run it | Where results appear |
-|---|---|---|
-| R | Add code to a saved R script in the **Source** pane. Select the lines and click **Run**. | **Console** and **Plots** pane |
-| Python | Enter code in a **Python session** started from the **RStudio Terminal inside the container**. | **Terminal**; saved output in the **Files** pane |
-
 Files you save in `/home/rstudio/project` are available through RStudio's **Files** pane.
 
-Choose the tab for your language and follow the instructions below.
+Choose one language for the main lesson and follow its tab below.
 
 ::: {.panel-tabset}
 
 ### R
+
+| Where to run it | Where results appear |
+|---|---|
+| Add code to a saved R script in the **Source** pane. Select the lines and click **Run**. | **Console** and **Plots** pane |
 
 **Keep your work in a saved script**
 
@@ -185,6 +182,10 @@ Choose **File > New File > R Script** and save the new file as `case_study_work.
 Keep `setwd("/home/rstudio/project")` and the package and helper setup chunks near the top of your script. When you return to a new R session, reopen the script and rerun those setup chunks and any earlier chunks that create objects needed by the section you are resuming. Saving the script preserves your code, not the objects in an R session. Files saved in the mounted project folder remain in your local project when the container stops.
 
 ### Python
+
+| Where to run it | Where results appear |
+|---|---|
+| Enter code in a **Python session** started from the **RStudio Terminal inside the container**. | **Terminal**; saved output in the **Files** pane |
 
 **Start a separate session**
 
