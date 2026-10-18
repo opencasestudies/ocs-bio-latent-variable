@@ -113,7 +113,7 @@ docker run --platform linux/amd64 --rm -it \
   othomas2/pycogaps-runtime-guide:0.3.0
 ```
 
-In RStudio, your downloaded case-study folder appears at `/home/rstudio/project`. These are the same files stored on your computer, not a separate copy. Files you create or edit in this folder through RStudio remain in your local case-study folder after you stop Docker.
+The code above makes the files you just downloaded available in the container at `/home/rstudio/project`.
 
 The `127.0.0.1` port mapping makes RStudio available only from your own computer. Keep that address in the command when using the example password below.
 
