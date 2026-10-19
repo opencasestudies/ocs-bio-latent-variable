@@ -12,7 +12,7 @@ Known items to finalize:
 
 - repository landing page and public documentation polish for `https://github.com/opencasestudies/ocs-bio-latent-variable`
 - author list and citation text
-- package/environment instructions beyond the current OpenMP runtime image `othomas2/pycogaps-runtime-guide:0.3.0`
+- package/environment instructions beyond the current OpenMP runtime image `othomas2/pycogaps-runtime-guide:0.3.1`
 - final policy for distributing optional full model objects separately from lightweight GitHub artifacts
 - final decision about mentioning dengue in the motivation
 - optional enrichment analysis for the selected K6 IFN-associated pattern and secondary stimulation-associated pattern
@@ -102,7 +102,7 @@ From this folder, try:
 quarto render
 ```
 
-This draft uses R-first / Python-second tabbed chunks. The intended local validation environment is the OpenMP-enabled Docker image `othomas2/pycogaps-runtime-guide:0.3.0`, which preinstalls:
+This draft uses R-first / Python-second tabbed chunks. The intended local validation environment is the OpenMP-enabled Docker image `othomas2/pycogaps-runtime-guide:0.3.1`, which preinstalls:
 
 - R/Bioconductor `CoGAPS`, `zellkonverter`, `SingleCellExperiment`, and the supporting R packages used by the primary R chunks
 - Python `PyCoGAPS`, `anndata`, `pandas`, `numpy`, `scipy`, `matplotlib`, and Jupyter for the Python chunks

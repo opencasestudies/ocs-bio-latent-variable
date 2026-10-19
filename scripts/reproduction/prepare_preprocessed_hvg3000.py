@@ -63,6 +63,23 @@ def build_cogaps_input(preprocessed_cells: ad.AnnData) -> ad.AnnData:
     return cogaps_input
 
 
+def ensure_condition_column(adata: ad.AnnData) -> str:
+    """Retain canonical treatment metadata, or copy the source's label field."""
+    source = "condition" if "condition" in adata.obs else "label"
+    if source not in adata.obs:
+        raise ValueError("Missing obs['condition'] and source fallback obs['label'].")
+    condition = adata.obs[source]
+    if condition.isna().any():
+        raise ValueError(f"obs[{source!r}] contains missing treatment labels.")
+    if set(condition.astype(str)) != {"ctrl", "stim"}:
+        raise ValueError(
+            f"obs[{source!r}] must contain both 'ctrl' and 'stim', and no other labels."
+        )
+    if source == "label":
+        adata.obs["condition"] = condition.copy()
+    return source
+
+
 def main() -> None:
     args = parse_args()
 
@@ -74,6 +91,15 @@ def main() -> None:
             "Use the validated case-study image or install scanpy in your environment."
         ) from exc
 
+    if args.hvg_flavor == "seurat_v3":
+        try:
+            from skmisc.loess import loess
+        except ImportError as exc:
+            raise SystemExit(
+                "Seurat-v3 HVG selection requires scikit-misc. "
+                "Use case-study image othomas2/pycogaps-runtime-guide:0.3.1 or later."
+            ) from exc
+
     if not args.source_h5ad.exists():
         raise FileNotFoundError(
             f"Source H5AD not found: {args.source_h5ad}. "
@@ -81,6 +107,7 @@ def main() -> None:
         )
 
     adata = ad.read_h5ad(args.source_h5ad)
+    condition_source = ensure_condition_column(adata)
 
     if "counts" not in adata.layers:
         adata.layers["counts"] = adata.X.copy()
@@ -116,6 +143,7 @@ def main() -> None:
         "target_sum": args.target_sum,
         "hvg_flavor": args.hvg_flavor,
         "n_top_genes": args.n_top_genes,
+        "condition_source_column": condition_source,
         "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "prepared_h5ad": str(args.out_h5ad),
         "cogaps_input_h5ad": str(args.cogaps_input_h5ad),

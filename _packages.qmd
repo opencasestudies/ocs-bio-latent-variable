@@ -106,13 +106,13 @@ Run the commands below from your case-study folder to download the software used
 **Host Terminal**
 
 ```bash
-docker pull --platform linux/amd64 othomas2/pycogaps-runtime-guide:0.3.0
+docker pull --platform linux/amd64 othomas2/pycogaps-runtime-guide:0.3.1
 
 docker run --platform linux/amd64 --rm -it \
   -p 127.0.0.1:8787:8787 \
   -e PASSWORD="Password12" \
   -v "$PWD":/home/rstudio/project:rw \
-  othomas2/pycogaps-runtime-guide:0.3.0
+  othomas2/pycogaps-runtime-guide:0.3.1
 ```
 
 The code above makes the files you just downloaded available in the container at `/home/rstudio/project`.
