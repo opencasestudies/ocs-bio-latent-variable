@@ -35,7 +35,7 @@ Use this fixed release, DOI [10.5281/zenodo.21208760](https://doi.org/10.5281/ze
 
 ### 3. Place The Files
 
-Copy the required files into your reproduction working project using the placement table below. Paths are relative to the project folder containing `index.qmd`, `scripts`, and `data`.
+Copy the required files into your project using the placement table below. Paths are relative to the project folder containing `index.qmd`, `scripts`, and `data`.
 
 Keep the downloaded originals unchanged. Do not replace an existing working file without checking what it contains.
 
@@ -62,24 +62,29 @@ Only the Python model needs a filename change: remove `_python` from the working
 
 </details>
 
-#### Keep Reference Files Separate From Your Work
+:::{.disclaimer_box #keep-reference-files-separate-from-your-work}
+::::{.disclaimer_box_header}
+Reproduction can replace existing files
+::::
+::::{.inner_block}
+Rebuilding data, tables, or figures can replace files in your project folder. Back up anything you want to keep, or use a separate copy of the project. Downloading the project again restores the included lesson files, but not your own edits or newly generated results.
 
-Keep these three local folders distinct:
+Model-fitting scripts stop if a full model already exists, unless you explicitly allow its replacement.
+::::
+:::
 
-- **Main learner project:** your original GitHub clone or extracted ZIP containing the pages, scripts, included data, and saved results.
-- **Reproduction archive:** a separate folder containing the obtained source and saved-model files. Keep this reference copy unchanged and mount it read-only.
-- **Reproduction working project:** a separate clone or ZIP extraction in which scripts can write regenerated files to their usual project-relative locations. Creating an unused `reproduction_work/` subfolder does not redirect those scripts.
+Keep the original Zenodo downloads in a separate reference folder. The Docker command below makes that folder read-only while allowing the scripts to write results into your project.
 
 Before starting a long run, confirm that you have enough local storage for the downloaded archive and regenerated model files. Runtime depends on the computer, Docker architecture, diagnostic settings, and thread support. The selected-model section therefore shows what progress should look like instead of promising one universal runtime.
 
-Obtain a separate working project using either download route in [Main learner setup](#main-learner-setup). In the **Host Terminal**, change to that working project's root and confirm it contains `index.qmd`, `scripts/`, and `data/`.
+To use a separate project copy, follow either download route in [Main learner setup](#main-learner-setup). In the **Host Terminal**, change to the project folder you will use for reproduction and confirm it contains `index.qmd`, `scripts/`, and `data/`.
 
 For a task requiring downloads, replace the example archive path below with your populated reference folder. Do not point Docker to an empty directory or to your browser's general Downloads folder containing unrelated files.
 
 **Host Terminal**
 
 ```bash
-# Check that you are in the separate reproduction working project.
+# Check that you are in the project used for reproduction.
 pwd
 ls -d index.qmd scripts data
 
@@ -97,7 +102,7 @@ docker run --platform linux/amd64 --rm -it \
 
 Inside Docker, the working project appears at `/home/rstudio/project`, and the reference archive appears at `/home/rstudio/project/data/external/reproduction_archive`. The archive mount is read-only; the working project's output folders are writable. A missing archive directory causes this bind mount to fail instead of silently creating one. An existing but empty directory still needs the Stage 1 check.
 
-If you are fitting R from the included prepared data without downloading an archive, use the main setup launch command with your separate working project. No archive mount or pre-existing full R result is required for that route.
+If you are fitting R from the included prepared data without downloading an archive, use the main setup launch command with the project you will use for reproduction. No archive mount or pre-existing full R result is required for that route.
 
 After launching Docker, you can copy the source file from the mounted reference folder into the working project with this example. Use it only if your next task needs the source file.
 
