@@ -126,14 +126,9 @@ Keep `--platform linux/amd64` unchanged in both commands, including on Apple sil
 <details>
 <summary><strong>Optional: inspect or rebuild full model outputs</strong></summary>
 
-The main lesson uses the included data and saved results. You can skip this section and continue to [Open RStudio Server](#open-rstudio-server).
+To inspect full model objects or rerun parts of the analysis, see the [Full Reproduction Guide](#full-reproduction-guide).
 
-To inspect full model objects or rerun parts of the analysis, follow the [Full Reproduction Guide](#full-reproduction-guide). Check the required files for your chosen stage before starting; some are separate downloads. The guide uses R for full reproduction and includes an optional Python route. You do not need both.
-
-When following the guide:
-
-- Start model runs in the **Host Terminal**, from your case-study folder. Keep Docker Desktop running and the model's progress visible.
-- Run preprocessing and export commands in the **RStudio Terminal inside the container**, from `/home/rstudio/project`.
+For the main lesson, continue to [Open RStudio Server](#open-rstudio-server).
 
 </details>
 

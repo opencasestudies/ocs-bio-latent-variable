@@ -1,32 +1,11 @@
 # **Full Reproduction Guide**
 ***
 
-The main analysis uses included data and saved CoGAPS results so that you can concentrate on interpretation. This guide follows the same analysis in the other direction: it starts with the source data, rebuilds the prepared PBMC dataset, fits the selected R model, and recreates the smaller tables and figures used earlier.
+The main learner path uses included data and saved results. This optional guide explains how to rebuild those files.
 
-You do not need to complete every step. Choose the goal that matches what you want to check, and stop when you have produced the files you need.
+You can start from source counts, fit a model using the included prepared data, or recreate tables from a saved model. Complete only the stages you need. To read the explanations or redraw figures from the included tables, no additional downloads are required.
 
-:::{.disclaimer_box}
-::::{.disclaimer_box_header}
-How to use this guide
-::::
-::::{.inner_block}
-- **Understand where the included results came from:** read the roadmap and the explanations in each stage. You do not need the large files or a model rerun.
-- **Rebuild tables or figures:** begin with the included selected-model outputs, then run the export, directionality, or figure-building stage you want to check.
-- **Complete the full local R reproduction:** obtain the larger source files, rebuild preprocessing, fit the selected `K = 6` R model, and recreate its diagnostics and interpretation files.
-
-The high-performance-computing rank sweep is an optional extension. It is explained near the end so that you can study its design without making cluster work part of the local reproduction route.
-::::
-:::
-
-## Choose What You Want To Rebuild
-
-The three routes share the same scripts and output folders, but they begin at different points.
-
-| Your goal | Begin with | Stop when |
-|---|---|---|
-| Understand the evidence chain | The [Reproduction Roadmap](#reproduction-roadmap) | You can explain how source data become the tables and figures used in the analysis. |
-| Rebuild selected outputs | The full selected R model or the included compact tables | The diagnostic tables, directionality summaries, or figures you need have been recreated. |
-| Complete the full local R reproduction | The larger PBMC source file and the validated Docker image | The prepared dataset, selected R model, diagnostics, compact analysis tables, directionality summaries, and figures have all been checked. |
+The [Reproduction Roadmap](#reproduction-roadmap) shows how the stages connect. The high-performance-computing rank sweep is an optional extension near the end of the guide.
 
 The selected local model uses `K = 6`, `seed = 2`, 2,000 iterations per phase, and sparse optimization. R/Bioconductor CoGAPS is the primary implementation. A separate optional section shows how the Python-compatible output was produced, but it is not a required second route through the guide.
 
@@ -34,56 +13,176 @@ The selected local model uses `K = 6`, `seed = 2`, 2,000 iterations per phase, a
 
 Full reproduction uses the validated Docker image introduced in [Packages and Setup](#packages-and-setup). The image provides R, Python, CoGAPS, PyCoGAPS, Quarto, and the packages used by the scripts. It does not contain the project data.
 
-Keep these three local folders distinct:
+### 1. Choose What To Rebuild {#choose-what-you-want-to-rebuild}
 
-- **Case-study repository:** the GitHub clone containing the pages, scripts, included data, and output folders.
-- **Reproduction archive:** the downloaded Zenodo or local folder containing larger source files and full saved model objects. It is mounted read-only so the downloaded files remain unchanged.
-- **Writable work folder:** a local folder for regenerated files, logs, and trial outputs.
+Use the table below to identify the additional file and file-check option for your next task. These are starting points within the same workflow. For full R reproduction, begin with preprocessing, then continue through fitting and exporting.
+
+| Your next task | Additional download | File-check option |
+| --- | --- | --- |
+| Rebuild preprocessing, Stage 2 | `kang_counts_25k.h5ad` | `preprocess` |
+| Fit an R model, Stage 3 | None; use the included prepared data | `fit-r` |
+| Recreate R tables from the saved model, Stage 4 | `cogaps_K6_seed2_iter2000.rds` | `export-r` |
+| Fit a Python model, optional extension | `cogaps_input_genesxcells_hvg3000_float64.h5ad`, unless generated in Stage 2 | `fit-python` |
+| Inspect the saved Python model, optional extension | `cogaps_K6_seed2_iter2000_python.h5ad` | `inspect-python` |
+
+A model-fitting step creates its full model file. You do not need to download that model first.
+
+### 2. Download The Required Files {#download-the-files-for-your-route}
+
+Open the [Zenodo release](https://zenodo.org/records/21208760){target="_blank"} and download only the files listed for your next task. The release provides individual files, not a ZIP. Keep the downloaded originals together in your reference folder.
+
+Use this fixed release, DOI [10.5281/zenodo.21208760](https://doi.org/10.5281/zenodo.21208760){target="_blank"}, so that the file check can compare downloads with the recorded sizes and checksums. Creating a folder does not download any files.
+
+### 3. Place The Files
+
+Copy the required files into your project using the placement table below. Paths are relative to the project folder containing `index.qmd`, `scripts`, and `data`.
+
+Keep the downloaded originals unchanged. Do not replace an existing working file without checking what it contains.
+
+<details>
+<summary><strong>Open the file-placement table</strong></summary>
+
+Copy only files required for your next stage, not outputs that stage will generate.
+
+<table id="reproduction-file-placement" class="table table-sm" style="width:100%; table-layout:fixed; overflow-wrap:anywhere; font-size:0.88rem; line-height:1.35;">
+<colgroup><col style="width:40%;"><col style="width:60%;"></colgroup>
+<thead><tr><th scope="col">Downloaded filename</th><th scope="col">Working-project destination</th></tr></thead>
+<tbody>
+<tr><td><code>kang_counts_25k.h5ad</code></td><td><code>data/source/kang_counts_25k.h5ad</code></td></tr>
+<tr><td><code>preprocessed_cells_hvg3000.h5ad</code></td><td><code>data/processed/input/preprocessed_cells_hvg3000.h5ad</code></td></tr>
+<tr><td><code>preprocess_config_hvg3000.json</code></td><td><code>data/processed/input/preprocess_config_hvg3000.json</code></td></tr>
+<tr><td><code>cogaps_input_genesxcells_hvg3000_float64.h5ad</code></td><td><code>data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad</code></td></tr>
+<tr><td><code>cogaps_K6_seed2_iter2000.rds</code></td><td><code>data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds</code></td></tr>
+<tr><td><code>cogaps_K6_seed2_iter2000.checkpoint.out</code></td><td><code>data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.checkpoint.out</code></td></tr>
+<tr><td><code>cogaps_K6_seed2_iter2000_python.h5ad</code></td><td><code>data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad</code></td></tr>
+</tbody>
+</table>
+
+Only the Python model needs a filename change: remove `_python` from the working copy's filename. Keep the downloaded reference copy unchanged. Do not overwrite an existing working file; if it fails verification, investigate it or use a clean working project before proceeding. A non-overwriting copy example follows the Docker setup below.
+
+</details>
+
+:::{.disclaimer_box #keep-reference-files-separate-from-your-work}
+::::{.disclaimer_box_header}
+Reproduction can replace existing files
+::::
+::::{.inner_block}
+Rebuilding data, tables, or figures can replace files in your project folder. Back up anything you want to keep, or use a separate copy of the project. Downloading the project again restores the included lesson files, but not your own edits or newly generated results.
+
+Model-fitting scripts stop if a full model already exists, unless you explicitly allow its replacement.
+::::
+:::
+
+Keep the original Zenodo downloads in a separate reference folder. The Docker command below makes that folder read-only while allowing the scripts to write results into your project.
 
 Before starting a long run, confirm that you have enough local storage for the downloaded archive and regenerated model files. Runtime depends on the computer, Docker architecture, diagnostic settings, and thread support. The selected-model section therefore shows what progress should look like instead of promising one universal runtime.
 
-Use the commands below from your computer's Terminal. If you already cloned the repository, skip the `git clone` command and move into your existing repository folder.
+To use a separate project copy, follow either download route in [Main learner setup](#main-learner-setup). In the **Host Terminal**, change to the project folder you will use for reproduction and confirm it contains `index.qmd`, `scripts/`, and `data/`.
+
+For a task requiring downloads, replace the example archive path below with your populated reference folder. Do not point Docker to an empty directory or to your browser's general Downloads folder containing unrelated files.
+
+**Host Terminal**
 
 ```bash
-# Get the case-study repository if you have not already cloned it.
-git clone https://github.com/opencasestudies/ocs-bio-latent-variable.git
-cd ocs-bio-latent-variable
+# Check that you are in the project used for reproduction.
+pwd
+ls -d index.qmd scripts data
 
-# Point to the downloaded Zenodo or local reproduction archive.
-mkdir -p "$HOME/cs4_reproduction_archive"
-export CS4_REPRODUCTION_ARCHIVE="$HOME/cs4_reproduction_archive"
-
-# Create a writable folder for regenerated outputs.
-mkdir -p "$PWD/reproduction_work"
+# Point to files you have already obtained, not a folder to be created.
+export CS4_REPRODUCTION_ARCHIVE="/full/path/to/your/reproduction_archive"
 
 # Launch the validated case-study image.
 docker run --platform linux/amd64 --rm -it \
-  -p 8787:8787 \
+  -p 127.0.0.1:8787:8787 \
   -e PASSWORD="Password12" \
   -v "$PWD":/home/rstudio/project:rw \
-  -v "$CS4_REPRODUCTION_ARCHIVE":/home/rstudio/project/data/external/reproduction_archive:ro \
+  --mount "type=bind,source=$CS4_REPRODUCTION_ARCHIVE,target=/home/rstudio/project/data/external/reproduction_archive,readonly" \
   othomas2/pycogaps-runtime-guide:0.3.0
 ```
 
-Inside Docker, the repository appears at `/home/rstudio/project`, and the reproduction archive appears at `/home/rstudio/project/data/external/reproduction_archive`. Write regenerated files to the repository's expected output folders or to `reproduction_work/` while testing.
+Inside Docker, the working project appears at `/home/rstudio/project`, and the reference archive appears at `/home/rstudio/project/data/external/reproduction_archive`. The archive mount is read-only; the working project's output folders are writable. A missing archive directory causes this bind mount to fail instead of silently creating one. An existing but empty directory still needs the Stage 1 check.
 
-After the container starts, inspect the downloaded archive before copying or linking anything:
+If you are fitting R from the included prepared data without downloading an archive, use the main setup launch command with the project you will use for reproduction. No archive mount or pre-existing full R result is required for that route.
+
+After launching Docker, you can copy the source file from the mounted reference folder into the working project with this example. Use it only if your next task needs the source file.
+
+**RStudio Terminal inside the container**
 
 ```bash
 cd /home/rstudio/project
-find data/external/reproduction_archive -maxdepth 5 -type f | sort
+mkdir -p data/source
+cp -n data/external/reproduction_archive/kang_counts_25k.h5ad \
+  data/source/kang_counts_25k.h5ad
 ```
 
-The scripts use the paths shown in the file inventory below. If the archive preserves those project-relative folders, copy the files you need into the matching writable locations or pass the archive path through the relevant command-line option. For example, the preprocessing script accepts `--source-h5ad`, so it can read the source H5AD directly from the mounted archive without changing the downloaded copy.
+Here `-n` prevents overwriting an existing file. If the destination already exists but fails verification, investigate it or use a clean working copy; this command will not repair it. For other files, use the placement table above. Check the required files next, before starting a long computation.
 
-Keep model fitting visible in Terminal. The progress messages show whether CoGAPS has loaded the data, entered equilibration, moved into sampling, and completed the requested iterations. They also report atom counts, chi-square values, and elapsed time that can help diagnose a stalled or unexpectedly slow run.
+Keep model fitting visible in the Host Terminal. The progress messages show whether CoGAPS has loaded the data, entered equilibration, moved into sampling, and completed the requested iterations. They also report atom counts, chi-square values, and elapsed time that can help diagnose a stalled or unexpectedly slow run.
 
-### Complete File Inventory
+### 4. Check The Required Files {#stage-1-confirm-the-environment-and-files}
+
+In the **RStudio Terminal inside the container**, run the command below. Replace `preprocess` with the file-check option from the table in [Choose What To Rebuild](#choose-what-you-want-to-rebuild).
+
+```bash
+cd /home/rstudio/project
+/opt/cogaps-venv/bin/python scripts/reproduction/check_reproduction_inputs.py \
+  --route preprocess
+```
+
+Continue when the script reports **"Ready: the required files passed the checks."** Otherwise, address the listed problems and run the check again. Review any replacement warnings before continuing.
+
+This command checks files; it does not run the analysis or change anything. If you regenerated an input in an earlier stage, follow **Checking an input you regenerated in an earlier stage** below.
+
+<details>
+<summary><strong>Optional: check the main learner files</strong></summary>
+
+To check the included starting files instead, replace `preprocess` with `learner-r` or `learner-python` in the same command. These options check the prepared data, preprocessing record, and chosen language's pattern summary. They do not check every lesson file or run the analysis.
+
+</details>
+
+<details>
+<summary><strong>Understanding the detailed file-check report</strong></summary>
+
+Add `--json` to the same command for the full report. Required inputs must be readable and nonempty; original archive inputs must also match their recorded sizes and SHA-256 checksums. If an input is missing from the project but a verified reference copy is available, the report identifies where to copy it. The checker does not copy files.
+
+| Detailed status (`--json`) | What to do |
+| --- | --- |
+| `ready` | The required file is readable and nonempty. Original archive inputs also match their recorded byte size and SHA-256 digest. |
+| `missing required input` | Obtain and place this input before continuing. A verified archive copy, when available, is reported with its destination. |
+| `invalid required input` | Stop and investigate an empty, unreadable, wrong-sized, or checksum-mismatched file. Do not treat it as an original archive input. |
+| `not needed for this route` | No download is required for this stage. |
+| `output to be generated` | This stage produces the file. Do not download it as a prerequisite. Existing full-model outputs stop fitting checks because the launchers refuse to overwrite them. |
+| `archive directory empty` | No files were found in the mounted archive folder. Creating or mounting the folder did not download anything. This prevents a route only when its required inputs are unavailable. |
+
+</details>
+
+<details>
+<summary><strong>Checking an input you regenerated in an earlier stage</strong></summary>
+
+Newly generated data and models need not have the original archive's checksum. After completing and checking the preceding stage, declare each regenerated input explicitly. For example, after rebuilding the prepared data in Stage 2:
+
+**RStudio Terminal inside the container**
+
+```bash
+cd /home/rstudio/project
+/opt/cogaps-venv/bin/python scripts/reproduction/check_reproduction_inputs.py \
+  --route fit-r --generated-input prepared
+```
+
+After both preprocessing and fitting a new R model, check Stage 4 with `--route export-r --generated-input prepared --generated-input r_model`. The command still requires readable, nonempty files, but labels them as regenerated instead of claiming they match the original archive. This flag is not a workaround for a corrupted download, cannot exempt the source count file, and does not replace the dimension, metadata, and model checks later in the guide.
+
+</details>
+
+**Stage 1 checkpoint:** The required files have passed the checks for your next task. This confirms file prerequisites, not software availability, scientific correctness, or successful completion of later stages.
+
+#### Complete File Inventory
 
 You only need files associated with the stage you intend to run. Open the inventory below when you need to locate a particular input or understand where an output belongs.
 
 <details>
 <summary><strong>Open the complete file inventory</strong></summary>
+
+The record also preserves copies of the included prepared data and preprocessing record, an R checkpoint, and release documentation. You do not need to download all of these files for every task. Keep the release documentation separate from the working project's `README.md` and manifests; do not replace those project files with archive copies. The checkpoint is optional run provenance; resuming from it is not a validated route in this guide.
 
 <table class="table table-sm" style="width: 100%; table-layout: fixed; font-size: 0.88rem; line-height: 1.35;">
 <colgroup>
@@ -174,78 +273,13 @@ The included files are enough to read the case study, rerun its summaries, and i
 
 </details>
 
-## Stage 1: Confirm The Environment And Files
-
-Begin by checking which files are already present. These commands do not change the data or fit a model. They report whether each expected file can be found and, when it is present, show its size. This lets you distinguish a missing input from a problem inside a later script.
-
-Choose either tab. Both checks look for the same files and should report the same availability results.
-
-::: {.panel-tabset}
-
-### R
-
-```bash
-Rscript - <<'RS'
-checks <- c(
-  "prepared PBMC data" = "data/processed/input/preprocessed_cells_hvg3000.h5ad",
-  "preprocessing record" = "data/processed/input/preprocess_config_hvg3000.json",
-  "R lightweight pattern summary" = "data/processed/selected_model_k6/r/pattern_summary.csv",
-  "Python lightweight pattern summary" = "data/processed/selected_model_k6/python/pattern_summary.csv",
-  "mounted reproduction archive" = "data/external/reproduction_archive",
-  "source count file" = "data/source/kang_counts_25k.h5ad",
-  "dense Python CoGAPS input" = "data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad",
-  "full R selected model" = "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds",
-  "full Python selected model" = "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad"
-)
-
-for (label in names(checks)) {
-  path <- checks[[label]]
-  exists <- file.exists(path)
-  size <- if (exists) sprintf("%.1f MB", file.info(path)$size / 1e6) else ""
-  cat(sprintf("%-34s %-8s %10s  %s\n", label, if (exists) "present" else "missing", size, path))
-}
-RS
-```
-
-### Python
-
-```bash
-/opt/cogaps-venv/bin/python - <<'PY'
-from pathlib import Path
-
-checks = {
-    "prepared PBMC data": "data/processed/input/preprocessed_cells_hvg3000.h5ad",
-    "preprocessing record": "data/processed/input/preprocess_config_hvg3000.json",
-    "R lightweight pattern summary": "data/processed/selected_model_k6/r/pattern_summary.csv",
-    "Python lightweight pattern summary": "data/processed/selected_model_k6/python/pattern_summary.csv",
-    "mounted reproduction archive": "data/external/reproduction_archive",
-    "source count file": "data/source/kang_counts_25k.h5ad",
-    "dense Python CoGAPS input": "data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad",
-    "full R selected model": "data/processed/selected_model_k6/r/cogaps_K6_seed2_iter2000.rds",
-    "full Python selected model": "data/processed/selected_model_k6/python/cogaps_K6_seed2_iter2000.h5ad",
-}
-
-for label, path in checks.items():
-    p = Path(path)
-    status = "present" if p.exists() else "missing"
-    size = f"{p.stat().st_size / 1_000_000:.1f} MB" if p.exists() else ""
-    print(f"{label:34s} {status:8s} {size:>10s}  {path}")
-PY
-```
-
-:::
-
-Interpret `missing` in relation to your goal. A missing included file can prevent the corresponding analysis or page from running. A missing larger file only prevents the reproduction stage that uses it. For example, you can rebuild figures without the source-count file, but you cannot rebuild preprocessing without it.
-
-**Stage 1 checkpoint:** The repository is visible inside Docker, and every input required for the stage you intend to run is reported as `present`. It is acceptable for unused optional files to be reported as `missing`.
-
 ## Reproduction Roadmap
 
 The local reproduction route has six stages. Each stage answers one practical question and produces files that can be checked before you continue.
 
 | Stage | Question | Main result | A reasonable stopping point |
 |---|---|---|---|
-| 1. Confirm the setup | Can the container see the repository and the files needed for your chosen goal? | A successful environment and file check. | Stop here if you only wanted to verify that reproduction is possible. |
+| 1. Confirm the setup | Can the container see the repository and the files needed for your chosen goal? | Verified file prerequisites for the chosen route. | Stop here if you only wanted to check input availability; this does not verify the later computations. |
 | 2. Prepare the PBMC data | Can the source counts be transformed into the same cells-by-genes dataset used in the analysis? | Prepared PBMC data, an optional genes-by-cells input, and a preprocessing record. | Stop here if you are checking preprocessing only. |
 | 3. Fit the selected R model | Can the selected CoGAPS settings be rerun to completion? | Full R CoGAPS object, run metrics, checkpoint, and visible progress log. | Stop here if you only need the full fitted model. |
 | 4. Create diagnostic and analysis tables | Can the full model be converted into the compact evidence inspected earlier? | Trace, uncertainty, gene-weight, cell-activity, top-gene, and activity-summary files. | Stop here if you need refreshed model evidence but not new figures. |
