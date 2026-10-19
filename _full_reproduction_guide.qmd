@@ -240,7 +240,9 @@ cd /home/rstudio/project
 
 Replace `preprocess` with the route you need. To fit R from the included prepared data, use `--route fit-r`: a full Python model and a pre-existing R model are not prerequisites.
 
-| Reported status | What to do |
+The summary lists files that need your attention and says whether the required files passed the checks. Add `--json` to the same command for the detailed statuses below.
+
+| Detailed status (`--json`) | What to do |
 | --- | --- |
 | `ready` | The required file is readable and nonempty. Original archive inputs also match their recorded byte size and SHA-256 digest. |
 | `missing required input` | Obtain and place this input before continuing. A verified archive copy, when available, is reported with its destination. |

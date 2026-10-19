@@ -17,6 +17,15 @@ ROUTES = {
     "inspect-python": ({"prepared", "python_model"}, set()),
 }
 GENERATED_INPUTS = {"prepared", "config", "dense", "r_model", "python_model"}
+ROUTE_LABELS = {
+    "learner-r": "Check the main learner files (R)",
+    "learner-python": "Check the main learner files (Python)",
+    "preprocess": "Rebuild preprocessing",
+    "fit-r": "Fit the R model",
+    "export-r": "Regenerate R exports",
+    "fit-python": "Fit the Python model",
+    "inspect-python": "Inspect the saved Python model",
+}
 
 
 def read_specs(project):
@@ -113,6 +122,63 @@ def check_route(project, archive, route, generated=(), specs=None):
     }
 
 
+def format_summary(report, project):
+    """Summarize the existing report without rechecking or changing any files."""
+    def display_path(value):
+        path = Path(value)
+        try:
+            return str(path.relative_to(project))
+        except ValueError:
+            return str(path)
+
+    missing = [row for row in report["files"] if row["status"] == "missing required input"]
+    invalid = [row for row in report["files"] if row["status"] == "invalid required input"]
+    blocked_outputs = [row for row in report["files"]
+                       if row["status"] == "output to be generated" and row["blocking"]]
+    # The unchanged JSON report records existing outputs in its detail message.
+    replacements = [row for row in report["files"]
+                    if row["status"] == "output to be generated" and not row["blocking"]
+                    and row["detail"].startswith("Already exists.")]
+    lines = [f"Stage: {ROUTE_LABELS[report['route']]}"]
+    if missing or invalid or blocked_outputs or replacements:
+        lines.append("Paths below are relative to your project folder unless shown as absolute paths.")
+
+    for heading, rows in (
+        ("Missing required input:" if len(missing) == 1 else "Missing required inputs:", missing),
+        ("Invalid required inputs:", invalid),
+        ("Existing model files block fitting:", blocked_outputs),
+        ("Files this stage will replace:", replacements),
+    ):
+        if not rows:
+            continue
+        lines.extend(["", heading])
+        for row in rows:
+            lines.append(f"  {display_path(row['path'])}")
+            if row["status"] == "invalid required input":
+                reason = row["detail"].split("; verified archive copy available at ", 1)[0]
+                lines.append(f"    {reason}")
+            if "archive_check" in row:
+                archive_check = row["archive_check"]
+                if "SHA-256 matches archived reference" in archive_check:
+                    lines.append(f"    Verified download: {display_path(row['archive_path'])}")
+                    lines.append("    Copy it to the project path above, then rerun this check.")
+                elif archive_check != "file is missing":
+                    lines.append(f"    Download check failed: {display_path(row['archive_path'])}")
+                    lines.append(f"    {archive_check}")
+        if rows is blocked_outputs:
+            lines.append("  The model launcher refuses to overwrite these files. Use a separate working project.")
+
+    if report["ready"]:
+        conclusion = "Ready: the required files passed the checks."
+    elif missing and not invalid and not blocked_outputs:
+        noun = "input" if len(missing) == 1 else "inputs"
+        conclusion = f"Not ready. Add the missing {noun} and run this check again."
+    else:
+        conclusion = "Not ready. Resolve the issues above and run this check again."
+    lines.extend(["", conclusion, "This check has not changed any files."])
+    return "\n".join(lines)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--route", choices=ROUTES, required=True)
@@ -120,7 +186,7 @@ def main(argv=None):
     parser.add_argument("--archive", type=Path, help="Flat archive folder; defaults to the mounted project archive.")
     parser.add_argument("--generated-input", action="append", default=[], choices=sorted(GENERATED_INPUTS),
                         help="Explicitly identify an input you regenerated and checked in a preceding stage; may be repeated.")
-    parser.add_argument("--json", action="store_true", help="Print a machine-readable report instead of the readable inventory.")
+    parser.add_argument("--json", action="store_true", help="Print the full machine-readable report instead of the brief summary.")
     args = parser.parse_args(argv)
     project = args.project_root.resolve()
     if not (project / "index.qmd").is_file() or not all((project / name).is_dir() for name in ("scripts", "data")):
@@ -133,13 +199,7 @@ def main(argv=None):
     if args.json:
         print(json.dumps(result, indent=2))
     else:
-        print(f"Route: {result['route']}\nArchive: {result['archive']['status']}\n{result['archive']['detail']}\n")
-        for row in result["files"]:
-            print(f"{row['file']}: {row['status']}\n  {row['path']}\n  {row['detail']}")
-            if "archive_check" in row:
-                print(f"  Archive copy: {row['archive_check']}")
-        print("\nFile prerequisites ready." if result["ready"] else "\nSTOP: resolve the blocking entries before this stage.")
-        print(result["scope"])
+        print(format_summary(result, project))
     return 0 if result["ready"] else 1
 
 

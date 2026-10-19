@@ -1,12 +1,16 @@
 """Focused, dependency-free tests for the route-aware inventory."""
 
 import hashlib
+import io
+import json
+from contextlib import redirect_stdout
+from copy import deepcopy
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
 
-from check_reproduction_inputs import check_route, inspect_file
+from check_reproduction_inputs import ROUTES, check_route, format_summary, inspect_file, main
 
 
 class InventoryTests(unittest.TestCase):
@@ -145,6 +149,117 @@ class InventoryTests(unittest.TestCase):
         self.assertFalse(report["ready"])
         self.assertIn("refuses to overwrite", self.row(report, "r_model")["detail"])
         self.assertEqual(before, path.read_bytes())
+
+    def test_summary_groups_missing_input_and_existing_outputs(self):
+        self.put("prepared")
+        self.put("config")
+        text = format_summary(self.check("preprocess"), self.root)
+        self.assertEqual(text, "\n".join([
+            "Stage: Rebuild preprocessing",
+            "Paths below are relative to your project folder unless shown as absolute paths.",
+            "", "Missing required input:", "  data/source",
+            "", "Files this stage will replace:", "  data/prepared", "  data/config",
+            "", "Not ready. Add the missing input and run this check again.",
+            "This check has not changed any files.",
+        ]))
+        self.assertNotIn("data/dense", text)
+        self.assertNotIn("python_model", text)
+
+    def test_ready_summary_hides_unneeded_files_and_new_outputs(self):
+        self.put("prepared")
+        text = format_summary(self.check("fit-r"), self.root)
+        self.assertEqual(text, "Stage: Fit the R model\n\n"
+                         "Ready: the required files passed the checks.\n"
+                         "This check has not changed any files.")
+
+    def test_invalid_file_reasons_remain_visible(self):
+        for content, reason in ((b"", "file is empty"),
+                                (b"short", "byte size mismatch"),
+                                (b"x" * self.specs["source"]["size_bytes"], "SHA-256 mismatch")):
+            with self.subTest(reason=reason):
+                self.put("source", content=content)
+                text = format_summary(self.check("preprocess"), self.root)
+                self.assertIn("Invalid required inputs:\n  data/source", text)
+                self.assertIn(reason, text)
+                self.assertIn("Not ready.", text)
+
+    def test_unreadable_input_reason_remains_visible(self):
+        self.put("source")
+        with patch.object(Path, "open", side_effect=PermissionError("denied")):
+            report = self.check("preprocess")
+        self.assertIn("cannot read file: denied", format_summary(report, self.root))
+
+    def test_verified_archive_copy_has_concise_placement_guidance(self):
+        archived = self.put("source", archive=True)
+        text = format_summary(self.check("preprocess"), self.root)
+        self.assertIn(f"Verified download: {archived}", text)
+        self.assertIn("Copy it to the project path above", text)
+        self.assertIn("Not ready.", text)
+
+    def test_invalid_archive_copy_is_still_reported(self):
+        self.put("source", archive=True, content=b"bad")
+        text = format_summary(self.check("preprocess"), self.root)
+        self.assertIn("Download check failed:", text)
+        self.assertIn("byte size mismatch", text)
+        self.assertNotIn("Verified download:", text)
+
+    def test_summary_preserves_model_collision_for_both_languages(self):
+        for key in ("prepared", "dense", "r_model", "python_model"):
+            self.put(key)
+        for route, model in (("fit-r", "r_model"), ("fit-python", "python_model")):
+            with self.subTest(route=route):
+                text = format_summary(self.check(route), self.root)
+                self.assertIn(f"Existing model files block fitting:\n  data/{model}", text)
+                self.assertIn("refuses to overwrite", text)
+                self.assertNotIn("Files this stage will replace:", text)
+                self.assertIn("Not ready.", text)
+
+    def test_replacement_warning_does_not_change_ready_result(self):
+        for key in ("source", "prepared", "config"):
+            self.put(key)
+        report = self.check("preprocess")
+        text = format_summary(report, self.root)
+        self.assertTrue(report["ready"])
+        self.assertIn("Files this stage will replace:", text)
+        self.assertIn("Ready: the required files passed the checks.", text)
+
+    def test_formatting_is_read_only_and_does_not_recheck_files(self):
+        self.put("prepared")
+        report = self.check("preprocess")
+        before = deepcopy(report)
+        with patch.object(Path, "exists", side_effect=AssertionError("unexpected recheck")), \
+             patch.object(Path, "open", side_effect=AssertionError("unexpected file access")):
+            format_summary(report, self.root)
+        self.assertEqual(report, before)
+
+    def test_cli_json_and_exit_codes_match_reports_for_all_routes(self):
+        self.root = self.root.resolve()
+        self.archive = self.archive.resolve()
+        self.root.mkdir(exist_ok=True)
+        (self.root / "index.qmd").touch()
+        (self.root / "scripts").mkdir()
+        (self.root / "data").mkdir()
+        for populated in (False, True):
+            if populated:
+                for key in self.specs:
+                    self.put(key)
+            for route in ROUTES:
+                with self.subTest(populated=populated, route=route):
+                    report = self.check(route)
+                    before = {str(p): p.read_bytes() for p in self.root.rglob("*") if p.is_file()}
+                    args = ["--route", route, "--project-root", str(self.root), "--archive", str(self.archive)]
+                    with patch("check_reproduction_inputs.read_specs", return_value=self.specs):
+                        for as_json in (False, True):
+                            output = io.StringIO()
+                            with redirect_stdout(output):
+                                code = main(args + (["--json"] if as_json else []))
+                            self.assertEqual(code, 0 if report["ready"] else 1)
+                            if as_json:
+                                self.assertEqual(json.loads(output.getvalue()), report)
+                            else:
+                                self.assertEqual(output.getvalue(), format_summary(report, self.root) + "\n")
+                    after = {str(p): p.read_bytes() for p in self.root.rglob("*") if p.is_file()}
+                    self.assertEqual(after, before)
 
 
 if __name__ == "__main__":
