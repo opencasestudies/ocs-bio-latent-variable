@@ -593,7 +593,7 @@ The complete R output map is available below for reference. You do not need to m
 
 ### Run The Model Where You Can See Its Progress
 
-Run the launcher from your normal computer Terminal or from the Docker/RStudio Terminal while you can watch the output:
+Run this command in the **Host Terminal** on your computer, from your case-study folder, not in the RStudio Terminal inside the container.
 
 ```bash
 bash scripts/reproduction/run_selected_model_r.sh
@@ -997,7 +997,7 @@ The Python-compatible fit requires the dense genes-by-cells input:
 data/processed/input/cogaps_input_genesxcells_hvg3000_float64.h5ad
 ```
 
-Run the launcher in a visible Terminal:
+Run this command in the **Host Terminal** on your computer, from your case-study folder, not in the RStudio Terminal inside the container.
 
 ```bash
 bash scripts/reproduction/run_selected_model_python.sh
