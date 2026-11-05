@@ -105,19 +105,20 @@ Include bioOCSdata package information once ready/applicable
 Prerequisites
 ::::
 ::::{.inner_block}
-You do not need to be an expert in immunology, single-cell analysis, or latent-variable models before you begin. If you can follow a file path, read a small table, and run a short command, you have enough background to start. New biological and modeling concepts are introduced before you use them.
+In the main analysis, you will run and interpret supplied code rather than write code from scratch. The Continued Learning exercises offer opportunities to adapt the code and try your own analyses.
+
+You can also read the explanations and code output without installing software.
 
 You can also complete the main analysis without installing R, Python, CoGAPS, or single-cell packages one at a time. A validated Docker image provides the software environment, and the GitHub repository provides the prepared PBMC data, model-selection summaries, and lightweight outputs from the selected CoGAPS models.
 
-Before you begin, you should have:
+To run the code, you should have:
 
-- **Docker installed and running.** Install Docker Desktop using the official instructions for [Mac](https://docs.docker.com/desktop/setup/install/mac-install/){target="_blank"}, [Windows](https://docs.docker.com/desktop/setup/install/windows-install/){target="_blank"}, or [Linux](https://docs.docker.com/desktop/setup/install/linux-install/){target="_blank"}. Docker provides the R and Python environment used throughout the case study.
-- **Git installed, or another way to download a GitHub repository.** The setup instructions use `git clone` to place the case-study pages, scripts, figures, and included data in one project folder.
+- **Docker installed.** Install Docker Desktop using the official instructions for [Mac](https://docs.docker.com/desktop/setup/install/mac-install/){target="_blank"}, [Windows](https://docs.docker.com/desktop/setup/install/windows-install/){target="_blank"}, or [Linux](https://docs.docker.com/desktop/setup/install/linux/){target="_blank"}. You will confirm your Docker installation during [setup](#check-that-docker-is-ready).
 - **A stable internet connection for the initial setup.** You will download the repository and a Docker image of approximately 4.3 GB. After those files are available locally, most of the main analysis can be completed without repeated large downloads.
 - **A web browser and a Terminal or command prompt.** You will use the browser to read the case study and open RStudio Server. The Terminal is used to start Docker and, when needed, run Python or reproduction scripts. The Packages and Setup section walks through these steps.
-- **Basic familiarity with either R or Python.** You do not need to use both languages. It helps to recognize variables, function calls, data frames, and common operations for selecting, filtering, grouping, and summarizing rows. The code explanations identify the language-specific functions as they appear.
-- **Basic table and file-path skills.** You should be comfortable reading rows and columns and following a path from a project folder to a data file. The case study introduces CSV, JSON, H5AD, long-format, wide-format, and single-cell data structures when they first become relevant.
-- **Introductory biology knowledge.** It is helpful to know that genes can have different expression levels across cells and that blood contains several immune-cell populations. No previous lupus, interferon, single-cell RNA-seq, Bayesian modeling, or CoGAPS experience is required; the Motivation and Context sections provide that foundation.
+- **Basic familiarity with R or Python; choose one.** You should recognize variables, function calls, data frames, and basic operations for selecting, filtering, grouping, and summarizing rows. The code explanations introduce the functions used.
+- **Basic table and file-path skills.** You should be comfortable reading rows and columns and following a path from a project folder to a data file. The lesson introduces the file formats and data structures as you encounter them.
+- **Introductory biology knowledge.** It helps to know that gene expression can differ across cells and that blood contains several immune-cell populations. No previous experience with lupus, interferon signaling, single-cell RNA-seq, Bayesian modeling, CoGAPS, or this dataset is required. The Motivation and Context sections introduce these topics.
 
 **Computer, storage, and time expectations**
 

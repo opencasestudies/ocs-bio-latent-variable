@@ -62,6 +62,7 @@ qmd
 repo
 Rmd
 RStudio
+RStudio's
 scCoGAPS
 SLURM
 stim
@@ -193,3 +194,7 @@ summarization
 tibbles
 TSV
 walltime
+Docker's
+PowerShell
+WSL
+ZIP's
