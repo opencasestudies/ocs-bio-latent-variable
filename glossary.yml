@@ -14,6 +14,8 @@ B cell: |
   An adaptive immune cell type that can contribute to antibody responses.
 Biological compression: |
   A situation where a lower-resolution model captures a strong broad signal but merges other biologically useful structure into too few patterns.
+Cancer immunotherapy: |
+  Treatment that helps the immune system recognize or act against cancer. Different approaches can affect different immune-cell types and states.
 Cell activity: |
   A CoGAPS value describing how strongly a cell uses a learned pattern.
 Cell metadata: |
@@ -42,6 +44,8 @@ Diagnostic trace: |
   A saved record of model behavior over iterations, such as chi-square or atom-count values, used to check whether a run behaved as expected.
 Directionality: |
   Whether expression is higher or lower in one condition compared with another.
+Donor: |
+  A person who provides a biological sample. Here, each donor provided blood immune cells that were divided into untreated and IFN-beta-stimulated samples outside the body.
 Doublet: |
   A droplet or cell barcode that likely contains material from more than one cell.
 Equilibration: |
@@ -50,6 +54,10 @@ Experimental unit: |
   The independent biological unit that receives a condition or contributes a comparison. In this case study, the donor rather than each individual cell is the main experimental unit.
 Flare: |
   A period when disease signs or symptoms become more active.
+Gene expression: |
+  The use of a gene's information to make RNA and, for protein-coding genes, protein. RNA sequencing measures RNA abundance as an indicator of expression, not protein abundance directly.
+Gene expression profile: |
+  The measured expression levels of many genes in a cell or sample, considered together.
 Gene weight: |
   A CoGAPS value describing how strongly a gene contributes to a learned pattern.
 Generalizability: |
@@ -74,6 +82,8 @@ IFN-associated pattern: |
   A learned CoGAPS pattern whose cell activities and top genes are consistent with an interferon response; the numbered pattern label can differ by run.
 Immune complex: |
   A structure formed when antibodies bind to molecules they recognize; in lupus, immune complexes can include self-derived material and can stimulate immune signaling.
+Immune signaling: |
+  Communication through molecules and receptors that changes how immune cells or other cells respond. Interferons are one group of immune-signaling proteins.
 Immune-cell identity: |
   The immune-cell type or lineage a cell most resembles, such as a T cell, B cell, monocyte, natural killer cell, or dendritic cell.
 Interferon: |
@@ -86,6 +96,8 @@ JAK-STAT signaling: |
   A signaling pathway that carries cytokine-receptor signals to transcription factors that can change gene expression.
 Latent pattern: |
   An inferred gene-expression signal learned from the data rather than directly recorded as metadata.
+Latent variable: |
+  A feature inferred from observed data rather than measured directly. CoGAPS patterns are inferred features that can reflect biological or technical influences.
 Library-size normalization: |
   A preprocessing step that scales each cell's expression values to a common total so cells with different sequencing depths can be compared more fairly.
 Log transformation: |
@@ -104,6 +116,8 @@ Monocyte: |
   A circulating innate immune cell that can contribute to inflammation and antigen presentation.
 Natural killer cell: |
   An immune cell type involved in cytotoxic responses against infected or abnormal cells.
+Neural development: |
+  The processes through which cells acquire identities and functions in the nervous system. The cited example studies developing neural cell fates in human stem-cell cultures.
 Neutrophil extracellular trap: |
   A web-like structure released by neutrophils that can contain DNA and proteins; in lupus biology, these can contribute nucleic-acid material that stimulates interferon pathways.
 Non-negative matrix factorization: |
