@@ -645,50 +645,32 @@ Include bioOCSdata package information once ready/applicable
 </div>
 </div>
 </section>
-<section id="motivation" class="level1 page-columns page-full">
+<section id="motivation" class="level1">
 <h1><strong>Motivation</strong></h1>
 <hr>
-<p><button class="glossary"><span class="def">An autoimmune disease in which the immune system can attack the body’s own tissues, causing inflammation that may affect several organ systems.</span>Systemic lupus erythematosus</button>, often shortened to lupus or SLE, is an <button class="glossary"><span class="def">A disease in which immune responses are directed against the body’s own cells or molecules.</span>autoimmune disease</button> in which immune activity can be directed against the body’s own tissues. Lupus can look very different from one person to another. Some people experience fatigue, fever, painful or swollen joints, mouth sores, hair loss, or a rash that worsens with sun exposure; others may develop inflammation involving the kidneys, blood cells, brain, or the lining around the heart and lungs <span class="citation" data-cites="niams_lupus_overview">(<a href="#ref-niams_lupus_overview" role="doc-biblioref">National Institute of Arthritis and Musculoskeletal and Skin Diseases 2024</a>)</span>. Symptoms can also come and go in flares, which makes lupus challenging to study from a single clinical measurement.</p>
-<p>Lupus also matters as a public-health problem. In the United States, more than 200,000 people are estimated to have SLE, and the burden is not distributed evenly: SLE is much more common among women and affects several racial and ethnic groups more often than others <span class="citation" data-cites="cdc_lupus_data_research">(<a href="#ref-cdc_lupus_data_research" role="doc-biblioref">Centers for Disease Control and Prevention 2024</a>)</span>. Those clinical and epidemiological patterns are not the main outcome of this case study, but they explain why lupus is a meaningful setting for learning how immune signals appear in molecular data. Because lupus is a systemic immune disease, blood immune cells can carry information about immune activation even when the affected tissue is elsewhere in the body.</p>
-<p>Before looking at the dataset, it helps to know the main immune-cell players. <button class="glossary"><span class="def">A blood immune-cell category that includes lymphocytes and monocytes; often abbreviated PBMC.</span>Peripheral blood mononuclear cells</button>, or PBMCs, are blood immune cells that include several broad populations. T cells help coordinate or carry out adaptive immune responses. B cells can contribute to antibody responses. Natural killer cells participate in cytotoxic responses against infected or abnormal cells. Monocytes are circulating innate immune cells that can contribute to inflammation and antigen presentation, and dendritic cells help connect early immune sensing to later adaptive responses.</p>
-<p>One recurring molecular theme in lupus is the interferon response. <button class="glossary"><span class="def">A cytokine signal that helps cells coordinate antiviral and immune responses.</span>Interferons</button> are cytokine signals that help immune cells coordinate antiviral and danger-response programs. <button class="glossary"><span class="def">A subset of interferon cytokines, including IFN-alpha and IFN-beta, that signals through the type I interferon receptor.</span>Type I interferons</button> include IFN-alpha and <button class="glossary"><span class="def">A type I interferon used as the stimulation signal in this case-study dataset.</span>IFN-beta</button>. When cells respond to interferon signaling, many <button class="glossary"><span class="def">A gene whose expression can change when a cell responds to interferon signaling.</span>interferon-stimulated genes</button> can change expression, leaving a recognizable molecular signature. In lupus research, that signature is important because interferon signaling can be connected to immune complexes, dendritic cells, T cells, B cells, natural killer cells, macrophages, neutrophil-associated signals, and inflammatory feedback loops <span class="citation" data-cites="chyuan2019interferons">(<a href="#ref-chyuan2019interferons" role="doc-biblioref">Chyuan, Tzeng, and Chen 2019</a>)</span>.</p>
-<p>The figure below is not a result from the case-study dataset. It is a biological orientation map for why interferon signaling is worth paying attention to in lupus. In the diagram, self nucleic acids and <button class="glossary"><span class="def">A structure formed when antibodies bind to molecules they recognize; in lupus, immune complexes can include self-derived material and can stimulate immune signaling.</span>immune complexes</button> can stimulate plasmacytoid dendritic cells, an immune-cell type that can produce large amounts of type I interferon. <button class="glossary"><span class="def">A web-like structure released by neutrophils that can contain DNA and proteins; in lupus biology, these can contribute nucleic-acid material that stimulates interferon pathways.</span>Neutrophil extracellular traps</button> can add nucleic-acid material that further stimulates interferon pathways. Interferons can then influence myeloid dendritic cells, T cells, B cells, natural killer cells, and macrophages. You do not need to memorize every arrow. The main takeaway is that interferon biology can cut across several immune-cell populations, so an analysis should keep both shared interferon activity and cell identity visible.</p>
-<div id="fig-sle-ifn-pathogenesis" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Diagram of type I and type III interferon roles in systemic lupus erythematosus, including immune complexes, plasmacytoid dendritic cells, myeloid dendritic cells, T cells, B cells, NK cells, macrophages, neutrophil extracellular traps, and inflammatory feedback.">
+<p>Lupus is an <button class="glossary"><span class="def">A disease in which immune responses are directed against the body’s own cells or molecules.</span>autoimmune disease</button> in which the body mounts an immune response against its own tissues <span class="citation" data-cites="niams_lupus_overview">(<a href="#ref-niams_lupus_overview" role="doc-biblioref">National Institute of Arthritis and Musculoskeletal and Skin Diseases n.d.</a>)</span>. The <span class="citation" data-cites="lfa2025lupusFacts">Lupus Foundation of America (<a href="#ref-lfa2025lupusFacts" role="doc-biblioref">2025</a>)</span> estimates that 1.5 million Americans live with some form of the disease. While lupus can affect anyone, some populations are more affected than others. In this case study, we will focus on <button class="glossary"><span class="def">An autoimmune disease in which the immune system can attack the body’s own tissues, causing inflammation that may affect several organ systems.</span>systemic lupus erythematosus</button> (SLE), the most common type, accounting for approximately 70% of lupus cases <span class="citation" data-cites="lfa2025lupusFacts">(<a href="#ref-lfa2025lupusFacts" role="doc-biblioref">Lupus Foundation of America 2025</a>)</span>. SLE can be challenging to study because the affected tissues and experienced symptoms can vary strikingly between individuals and over time <span class="citation" data-cites="niams_lupus_overview">(<a href="#ref-niams_lupus_overview" role="doc-biblioref">National Institute of Arthritis and Musculoskeletal and Skin Diseases n.d.</a>)</span>. The <button class="glossary"><span class="def">The measured expression levels of many genes in a cell or sample, considered together.</span>gene expression profiles</button> of blood immune cells provide an accessible window into some aspects of the immune activity associated with SLE <span class="citation" data-cites="catalina2019interferonSLE">(<a href="#ref-catalina2019interferonSLE" role="doc-biblioref">Catalina et al. 2019</a>)</span>. However, each cell’s profile can reflect several overlapping influences, including its identity, its responses to <button class="glossary"><span class="def">Communication through molecules and receptors that changes how immune cells or other cells respond. Interferons are one group of immune-signaling proteins.</span>immune signaling</button>, and differences between individuals <span class="citation" data-cites="kang2018multiplexed">(<a href="#ref-kang2018multiplexed" role="doc-biblioref">Kang et al. 2018</a>)</span>.</p>
+<div id="fig-motivation-lupus" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Four-panel comic about lupus. An immune response targets the body's own tissues. Symptoms include fatigue, skin rash, joint pain and possible organ involvement, and can vary over time. A panel attributes the estimate of 1.5 million Americans with some form of lupus to the Lupus Foundation of America. The final panel shows how changing symptoms, illness and care costs can disrupt daily life." title="">
 <figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-sle-ifn-pathogenesis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/ifn_sle_pathogenesis_chyuan_2019_figure3.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;1: Type I and type III interferon biology in systemic lupus erythematosus. The diagram summarizes how self nucleic acids, immune complexes, neutrophil extracellular traps, interferons, and several immune-cell populations can participate in lupus-associated inflammatory feedback. Figure reproduced from Chyuan, Tzeng, and Chen (2019), Cells 8(9):963, licensed under CC BY 4.0. No content changes were made; the image is displayed at reduced size for teaching."><img src="img/ifn_sle_pathogenesis_chyuan_2019_figure3.png" class="img-fluid figure-img" alt="Diagram of type I and type III interferon roles in systemic lupus erythematosus, including immune complexes, plasmacytoid dendritic cells, myeloid dendritic cells, T cells, B cells, NK cells, macrophages, neutrophil extracellular traps, and inflammatory feedback." width="850"></a>
+<div aria-describedby="fig-motivation-lupus-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="img/motivation_lupus_comic.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title=""><img src="img/motivation_lupus_comic.png" class="img-fluid figure-img" alt="Four-panel comic about lupus. An immune response targets the body's own tissues. Symptoms include fatigue, skin rash, joint pain and possible organ involvement, and can vary over time. A panel attributes the estimate of 1.5 million Americans with some form of lupus to the Lupus Foundation of America. The final panel shows how changing symptoms, illness and care costs can disrupt daily life." width="900"></a>
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sle-ifn-pathogenesis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Type I and type III interferon biology in systemic lupus erythematosus. The diagram summarizes how self nucleic acids, immune complexes, neutrophil extracellular traps, interferons, and several immune-cell populations can participate in lupus-associated inflammatory feedback. Figure reproduced from Chyuan, Tzeng, and Chen (2019), Cells 8(9):963, licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. No content changes were made; the image is displayed at reduced size for teaching.
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-motivation-lupus-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Lupus can affect several tissues, with symptoms that vary between people and over time. The 1.5-million estimate covers all forms of lupus, not only SLE <span class="citation" data-cites="niams_lupus_overview lfa2025lupusFacts">(<a href="#ref-niams_lupus_overview" role="doc-biblioref">National Institute of Arthritis and Musculoskeletal and Skin Diseases n.d.</a>; <a href="#ref-lfa2025lupusFacts" role="doc-biblioref">Lupus Foundation of America 2025</a>)</span>. Illustrations adapted from NIH BioArt (Ryan Kissinger), Health Icons, and Avataaars (Pablo Stanley; Fang-Pen Lin). See Acknowledgments for artwork credits.
 </figcaption>
 </figure>
 </div>
-
-<div class="no-row-height column-margin column-container"><div class="margin-aside">
-<p><strong>Draft note:</strong> Redraw and replace this lupus/interferon orientation figure before publication.</p>
-</div></div><p>This case study uses a public single-cell RNA-seq perturbation study by Kang and colleagues to turn that biological motivation into a concrete data-analysis problem <span class="citation" data-cites="kang2018multiplexed">(<a href="#ref-kang2018multiplexed" role="doc-biblioref">Kang et al. 2018</a>)</span>. Kang et al.&nbsp;studied PBMCs from eight lupus donors. For each donor, the researchers split the cell sample into matched portions, called <button class="glossary"><span class="def">One portion of a sample split from the same original material.</span>aliquots</button>. One aliquot was left untreated as a control, and the other was exposed to IFN-beta for six hours before profiling.</p>
-<p>That setup is a <button class="glossary"><span class="def">A design in which related samples are compared, such as control and stimulated aliquots from the same donor.</span>paired</button> <button class="glossary"><span class="def">An experiment that deliberately changes a condition so the response can be measured.</span>perturbation experiment</button>. “Perturbation” means that the experiment deliberately changes one condition so the response can be measured. “Paired” means that control and stimulated cells come from the same donors, rather than from unrelated people. This matters because donor-to-donor differences can be large in immune data. By comparing matched control and IFN-beta-stimulated aliquots, the source study gives us a clearer way to ask how cells respond to an interferon signal while keeping donor background and cell identity in view.</p>
-<p>The data were generated with <button class="glossary"><span class="def">A sequencing approach that measures gene expression separately for many individual cells.</span>droplet single-cell RNA-seq</button>. In plain language, this technology measures RNA molecules from many individual cells, so each cell receives its own gene-expression profile. The output is a large table of genes by cells, plus metadata such as condition, donor, and annotated immune-cell identity. This is different from a bulk RNA-seq experiment, where measurements are averaged across many cells before the analyst sees them. Single-cell data let you ask whether different immune-cell populations share a response, but they also create a harder interpretation problem.</p>
-<p>The problem is that each cell carries more than one kind of information. A stimulated monocyte should still look like a monocyte. At the same time, that monocyte may share an interferon-response signal with stimulated T cells, B cells, natural killer cells, or dendritic cells. A cell can therefore contain a relatively stable identity signal, a stimulation-associated signal, donor-specific variation, and technical noise all at once. Clustering can help label groups of similar cells, but clustering alone does not automatically separate a shared response from the cell identities that response crosses.</p>
-<p>This is where <button class="glossary"><span class="def">An inferred gene-expression signal learned from the data rather than directly recorded as metadata.</span>latent patterns</button> become useful. A latent pattern is an inferred signal: it is learned from the gene-expression data rather than recorded directly as a metadata label. A helpful way to think about this is that a latent-variable model does not have to ask every cell to belong to exactly one group. Instead, it can represent each cell as a mixture of patterns, so a cell can be both “monocyte-like” and “interferon-response-like” to different degrees.</p>
-<p>Later in the case study, you will use <button class="glossary"><span class="def">A Bayesian nonnegative matrix factorization method used to learn overlapping gene-expression patterns and cell activities.</span>CoGAPS</button> to learn these latent transcriptional patterns from the PBMC dataset <span class="citation" data-cites="fertig2010cogaps">(<a href="#ref-fertig2010cogaps" role="doc-biblioref">Fertig et al. 2010</a>)</span>. CoGAPS gives each pattern two linked views. The <button class="glossary"><span class="def">A CoGAPS value describing how strongly a gene contributes to a learned pattern.</span>gene weights</button> tell you which genes contribute strongly to a pattern. The <button class="glossary"><span class="def">A CoGAPS value describing how strongly a cell uses a learned pattern.</span>cell activities</button> tell you which cells use that pattern strongly. Those two views let you ask whether one pattern is broadly associated with IFN-beta stimulation while other patterns capture immune-cell identity or other structure.</p>
-<p>One more interpretation step is important. CoGAPS pattern weights identify genes that are associated with a pattern, but they do not by themselves say whether those genes are higher or lower after stimulation. For that, you will also examine <button class="glossary"><span class="def">Whether expression is higher or lower in one condition compared with another.</span>directionality</button>: whether expression is higher or lower in IFN-beta-stimulated cells compared with matched controls. This distinction matters because a pattern can highlight important genes, while a condition comparison tells you which way those genes move.</p>
-<p>The opening roadmap at the top of the case study previews the evidence path you will follow. First, you will start from the paired IFN-beta perturbation design. Next, you will inspect how PBMC identities are arranged in the teaching data object. Then you will learn latent patterns, compare their activity between control and stimulated cells, and connect the genes that define a pattern to expression direction. The roadmap is a map of the analysis, not a demand that you accept a pattern label or model choice before seeing the evidence.</p>
-<p>The puzzle for the rest of the case study is therefore not simply whether IFN-beta changes gene expression. It is whether you can recover an interpretable interferon-associated signal inside a mixed immune-cell population while still respecting the fact that a monocyte, a T cell, and a B cell begin from different biological identities.</p>
-<div class="definition_box">
-<div class="definition_box_header">
-<p>Key terms</p>
+<p>Latent-variable analysis offers one way to investigate this complexity. A <button class="glossary"><span class="def">A feature inferred from observed data rather than measured directly. CoGAPS patterns are inferred features that can reflect biological or technical influences.</span>latent variable</button> is a feature that we do not measure directly but infer from observed data <span class="citation" data-cites="johnson2023cogapsWorkflow">(<a href="#ref-johnson2023cogapsWorkflow" role="doc-biblioref">Johnson et al. 2023</a>)</span>. In this case study, we will use <button class="glossary"><span class="def">A Bayesian nonnegative matrix factorization method used to learn overlapping gene-expression patterns and cell activities.</span>CoGAPS</button> to investigate how blood immune cells respond to <button class="glossary"><span class="def">A type I interferon used as the stimulation signal in this case-study dataset.</span>interferon-beta</button> (IFN-beta), an immune system signaling protein <span class="citation" data-cites="catalina2019interferonSLE">(<a href="#ref-catalina2019interferonSLE" role="doc-biblioref">Catalina et al. 2019</a>)</span>. We will compare <button class="glossary"><span class="def">The use of a gene’s information to make RNA and, for protein-coding genes, protein. RNA sequencing measures RNA abundance as an indicator of expression, not protein abundance directly.</span>gene expression</button> in IFN-beta-stimulated and untreated cells from the same <button class="glossary"><span class="def">A person who provides a biological sample. Here, each donor provided blood immune cells that were divided into untreated and IFN-beta-stimulated samples outside the body.</span>donors</button> <span class="citation" data-cites="kang2018multiplexed">(<a href="#ref-kang2018multiplexed" role="doc-biblioref">Kang et al. 2018</a>)</span>. We will look for responses shared across cell types and patterns associated with differences in <button class="glossary"><span class="def">The immune-cell type or lineage a cell most resembles, such as a T cell, B cell, monocyte, natural killer cell, or dendritic cell.</span>cell identity</button>.</p>
+<div id="fig-motivation-immune-cell-patterns" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Four-panel comic showing untreated and IFN-beta-stimulated samples from the same donors, with T cells, B cells and monocytes. Overlapping colored layers represent cell identity and stimulation effects on gene expression. CoGAPS infers patterns from an expression matrix. A researcher then examines contributing genes and compares cell activities to ask whether a response is shared. All grids, colors and patterns are schematic." title="">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-motivation-immune-cell-patterns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="img/motivation_immune_cell_patterns_comic.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title=""><img src="img/motivation_immune_cell_patterns_comic.png" class="img-fluid figure-img" alt="Four-panel comic showing untreated and IFN-beta-stimulated samples from the same donors, with T cells, B cells and monocytes. Overlapping colored layers represent cell identity and stimulation effects on gene expression. CoGAPS infers patterns from an expression matrix. A researcher then examines contributing genes and compares cell activities to ask whether a response is shared. All grids, colors and patterns are schematic." width="900"></a>
 </div>
-<div class="inner_block">
-<ul>
-<li><strong>PBMCs:</strong> Peripheral blood mononuclear cells, a mixed sample of blood immune cells.</li>
-<li><strong>IFN-beta stimulation:</strong> The controlled perturbation used to create an interferon-response signal.</li>
-<li><strong>Latent pattern:</strong> An inferred gene-expression signal learned from the data.</li>
-<li><strong>Cell activity:</strong> A score showing where a learned pattern is strongest across cells.</li>
-<li><strong>Gene weights and directionality:</strong> Pattern weights rank genes; directionality tells whether those genes rise or fall after stimulation.</li>
-</ul>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-motivation-immune-cell-patterns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Gene-expression profiles can reflect overlapping influences, including cell identity and response to stimulation. CoGAPS infers patterns that researchers evaluate using contributing genes and cell activities <span class="citation" data-cites="kang2018multiplexed johnson2023cogapsWorkflow">(<a href="#ref-kang2018multiplexed" role="doc-biblioref">Kang et al. 2018</a>; <a href="#ref-johnson2023cogapsWorkflow" role="doc-biblioref">Johnson et al. 2023</a>)</span>. The conditions contain different cells from the same donors; the diagrams are conceptual, not fitted results. Researcher illustration adapted from Avataaars (Pablo Stanley; Fang-Pen Lin). See Acknowledgments for artwork credits.
+</figcaption>
+</figure>
 </div>
-</div>
+<p>Similar questions arise in other areas of research, where cells can share a biological response while retaining their distinct identities. CoGAPS has been used to investigate cell types and developmental processes in the mouse retina <span class="citation" data-cites="steinobrien2019transferLearning">(<a href="#ref-steinobrien2019transferLearning" role="doc-biblioref">Stein-O’Brien et al. 2019</a>)</span>, to examine <button class="glossary"><span class="def">The processes through which cells acquire identities and functions in the nervous system. The cited example studies developing neural cell fates in human stem-cell cultures.</span>neural development</button> <span class="citation" data-cites="kim2024neuralFates">(<a href="#ref-kim2024neuralFates" role="doc-biblioref">Kim et al. 2024</a>)</span>, and to examine immune-cell states associated with <button class="glossary"><span class="def">Treatment that helps the immune system recognize or act against cancer. Different approaches can affect different immune-cell types and states.</span>cancer immunotherapy</button> <span class="citation" data-cites="davismarcisak2021nkActivation">(<a href="#ref-davismarcisak2021nkActivation" role="doc-biblioref">Davis-Marcisak et al. 2021</a>)</span>. You can apply this approach in your own research to identify genes associated with each pattern and compare pattern activity across cell types and experimental conditions <span class="citation" data-cites="johnson2023cogapsWorkflow">(<a href="#ref-johnson2023cogapsWorkflow" role="doc-biblioref">Johnson et al. 2023</a>)</span>.</p>
 <hr>
 </section>
 <section id="main-questions" class="level1 page-columns page-full">
@@ -908,7 +890,7 @@ Objectives map: where each skill is used
 <p>By the end of this section, you should be ready to enter Data Import with a map in mind. You will know what biological signals the literature suggests you might see, what the source study already established, and why later sections focus on pattern activity, gene weights, directionality, rank choice, and diagnostics.</p>
 <section id="what-is-systemic-lupus-erythematosus" class="level2">
 <h2 class="anchored" data-anchor-id="what-is-systemic-lupus-erythematosus">What is systemic lupus erythematosus?</h2>
-<p><button class="glossary"><span class="def">An autoimmune disease in which the immune system can attack the body’s own tissues, causing inflammation that may affect several organ systems.</span>Systemic lupus erythematosus</button>, or SLE, is a systemic <button class="glossary"><span class="def">A disease in which immune responses are directed against the body’s own cells or molecules.</span>autoimmune disease</button>. In an autoimmune disease, the immune system can respond to the body’s own cells or molecules. In SLE, that immune activity can affect several organ systems, and symptoms may include fatigue, fever, joint pain or swelling, skin rashes, mouth sores, blood abnormalities, kidney involvement, neurologic symptoms, or inflammation around the heart or lungs <span class="citation" data-cites="niams_lupus_overview">(<a href="#ref-niams_lupus_overview" role="doc-biblioref">National Institute of Arthritis and Musculoskeletal and Skin Diseases 2024</a>)</span>.</p>
+<p><button class="glossary"><span class="def">An autoimmune disease in which the immune system can attack the body’s own tissues, causing inflammation that may affect several organ systems.</span>Systemic lupus erythematosus</button>, or SLE, is a systemic <button class="glossary"><span class="def">A disease in which immune responses are directed against the body’s own cells or molecules.</span>autoimmune disease</button>. In an autoimmune disease, the immune system can respond to the body’s own cells or molecules. In SLE, that immune activity can affect several organ systems, and symptoms may include fatigue, fever, joint pain or swelling, skin rashes, mouth sores, blood abnormalities, kidney involvement, neurologic symptoms, or inflammation around the heart or lungs <span class="citation" data-cites="niams_lupus_overview">(<a href="#ref-niams_lupus_overview" role="doc-biblioref">National Institute of Arthritis and Musculoskeletal and Skin Diseases n.d.</a>)</span>.</p>
 <p>The word <strong>systemic</strong> matters. SLE is not limited to one tissue or one immune-cell type. A person with SLE can have immune signals in blood that relate to inflammation elsewhere in the body. That is one reason blood immune-cell data are useful for teaching this case study: PBMCs are accessible, contain multiple immune-cell populations, and can carry molecular evidence of immune activation.</p>
 <p>SLE is also heterogeneous. Two people with the same diagnosis may have different symptoms, affected tissues, autoantibodies, treatment histories, and immune-cell composition. That heterogeneity is part of what makes lupus difficult to study. It also explains why this case study will avoid overclaiming. We are not trying to diagnose SLE, predict disease activity, or prove a clinical mechanism. We are using a lupus PBMC perturbation dataset to learn how an interpretable interferon-associated signal can be separated from immune-cell identity in single-cell RNA-seq data.</p>
 </section>
@@ -1456,10 +1438,10 @@ Show answer
 <div id="fig-packages-setup-resources-cs4" class="lightbox quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-packages-setup-resources-cs4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/packages_setup_resources_cs4.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;2: Setup resources for the case study. Docker supplies the R and Python software environment, GitHub supplies the main learner files and lightweight CoGAPS evidence, optional Zenodo or local files support full local reproduction, and HPC sweep provenance is treated as a separate audit path."><img src="img/packages_setup_resources_cs4.png" class="img-fluid figure-img" style="width:100.0%"></a>
+<a href="img/packages_setup_resources_cs4.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;3: Setup resources for the case study. Docker supplies the R and Python software environment, GitHub supplies the main learner files and lightweight CoGAPS evidence, optional Zenodo or local files support full local reproduction, and HPC sweep provenance is treated as a separate audit path."><img src="img/packages_setup_resources_cs4.png" class="img-fluid figure-img" style="width:100.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-packages-setup-resources-cs4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Setup resources for the case study. Docker supplies the R and Python software environment, GitHub supplies the main learner files and lightweight CoGAPS evidence, optional Zenodo or local files support full local reproduction, and HPC sweep provenance is treated as a separate audit path.
+Figure&nbsp;3: Setup resources for the case study. Docker supplies the R and Python software environment, GitHub supplies the main learner files and lightweight CoGAPS evidence, optional Zenodo or local files support full local reproduction, and HPC sweep provenance is treated as a separate audit path.
 </figcaption>
 </figure>
 </div>
@@ -1467,10 +1449,10 @@ Figure&nbsp;2: Setup resources for the case study. Docker supplies the R and Pyt
 <div id="fig-packages-setup-workflow-cs4" class="lightbox quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-packages-setup-workflow-cs4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/packages_setup_workflow_map_cs4.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;3: Workflow map for the case study setup. The left column shows the main learner path: open prepared PBMC data, inspect model-resolution evidence, load selected CoGAPS outputs, check diagnostics, summarize activity, and interpret genes and direction. The upper-right column shows optional full local reproduction steps. The lower-right box shows the separate HPC sweep provenance path."><img src="img/packages_setup_workflow_map_cs4.png" class="img-fluid figure-img" style="width:100.0%"></a>
+<a href="img/packages_setup_workflow_map_cs4.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;4: Workflow map for the case study setup. The left column shows the main learner path: open prepared PBMC data, inspect model-resolution evidence, load selected CoGAPS outputs, check diagnostics, summarize activity, and interpret genes and direction. The upper-right column shows optional full local reproduction steps. The lower-right box shows the separate HPC sweep provenance path."><img src="img/packages_setup_workflow_map_cs4.png" class="img-fluid figure-img" style="width:100.0%"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-packages-setup-workflow-cs4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Workflow map for the case study setup. The left column shows the main learner path: open prepared PBMC data, inspect model-resolution evidence, load selected CoGAPS outputs, check diagnostics, summarize activity, and interpret genes and direction. The upper-right column shows optional full local reproduction steps. The lower-right box shows the separate HPC sweep provenance path.
+Figure&nbsp;4: Workflow map for the case study setup. The left column shows the main learner path: open prepared PBMC data, inspect model-resolution evidence, load selected CoGAPS outputs, check diagnostics, summarize activity, and interpret genes and direction. The upper-right column shows optional full local reproduction steps. The lower-right box shows the separate HPC sweep provenance path.
 </figcaption>
 </figure>
 </div>
@@ -1567,7 +1549,7 @@ Figure&nbsp;3: Workflow map for the case study setup. The left column shows the 
 <img src="img/rstudio_server_labeled.svg" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rstudio-server-labeled-cs4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: A labeled RStudio Server window showing where to paste R code, run selected lines, use the Terminal for Python or full scripts, and find output files.
+Figure&nbsp;5: A labeled RStudio Server window showing where to paste R code, run selected lines, use the Terminal for Python or full scripts, and find output files.
 </figcaption>
 </figure>
 </div>
@@ -9075,10 +9057,10 @@ checking whether identity-pattern genes mark a cell identity or condition
 <div id="fig-viz-pattern-condition-overview" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Two-panel plot of selected R K6 CoGAPS patterns. The first panel shows correlation between each pattern's cell activity and IFN-beta stimulation. The second panel shows mean control and IFN-beta-stimulated activity for each pattern. Pattern4 is highlighted as the IFN-associated pattern in this selected R run.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-viz-pattern-condition-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/figure_viz_pattern_condition_overview.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;5: Pattern-level screen for the selected R model. The left panel compares each pattern’s cell activity with the IFN-beta stimulation label, and the right panel compares mean activity in control and stimulated cells. Pattern 4 has the strongest positive stimulation association in this run, while other patterns show weaker positive, near-zero, or negative shifts. Use this plot as a guide for which pattern to inspect next, not as a complete biological interpretation by itself."><img src="img/figure_viz_pattern_condition_overview.png" class="img-fluid figure-img" style="width:100.0%" alt="Two-panel plot of selected R K6 CoGAPS patterns. The first panel shows correlation between each pattern's cell activity and IFN-beta stimulation. The second panel shows mean control and IFN-beta-stimulated activity for each pattern. Pattern4 is highlighted as the IFN-associated pattern in this selected R run."></a>
+<a href="img/figure_viz_pattern_condition_overview.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;6: Pattern-level screen for the selected R model. The left panel compares each pattern’s cell activity with the IFN-beta stimulation label, and the right panel compares mean activity in control and stimulated cells. Pattern 4 has the strongest positive stimulation association in this run, while other patterns show weaker positive, near-zero, or negative shifts. Use this plot as a guide for which pattern to inspect next, not as a complete biological interpretation by itself."><img src="img/figure_viz_pattern_condition_overview.png" class="img-fluid figure-img" style="width:100.0%" alt="Two-panel plot of selected R K6 CoGAPS patterns. The first panel shows correlation between each pattern's cell activity and IFN-beta stimulation. The second panel shows mean control and IFN-beta-stimulated activity for each pattern. Pattern4 is highlighted as the IFN-associated pattern in this selected R run."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-viz-pattern-condition-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: Pattern-level screen for the selected R model. The left panel compares each pattern’s cell activity with the IFN-beta stimulation label, and the right panel compares mean activity in control and stimulated cells. Pattern 4 has the strongest positive stimulation association in this run, while other patterns show weaker positive, near-zero, or negative shifts. Use this plot as a guide for which pattern to inspect next, not as a complete biological interpretation by itself.
+Figure&nbsp;6: Pattern-level screen for the selected R model. The left panel compares each pattern’s cell activity with the IFN-beta stimulation label, and the right panel compares mean activity in control and stimulated cells. Pattern 4 has the strongest positive stimulation association in this run, while other patterns show weaker positive, near-zero, or negative shifts. Use this plot as a guide for which pattern to inspect next, not as a complete biological interpretation by itself.
 </figcaption>
 </figure>
 </div>
@@ -9167,10 +9149,10 @@ Figure&nbsp;5: Pattern-level screen for the selected R model. The left panel com
 <div id="fig-viz-umap-pattern1" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Paired UMAP comparison for Pattern 1, labeled as an FCGR3A positive monocyte-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 1 activity.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-viz-umap-pattern1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/figure_viz_umap_pattern1_identity_activity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;6: Pattern 1 is interpreted cautiously as an FCGR3A+ monocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 1 activity. Activity is strongest in the FCGR3A+ monocyte neighborhood, stimulation association is weak, and high-weight genes include TIMP1, FTH1, MS4A7, FCGR3A, and SOD2."><img src="img/figure_viz_umap_pattern1_identity_activity.png" class="img-fluid figure-img" style="width:100.0%" alt="Paired UMAP comparison for Pattern 1, labeled as an FCGR3A positive monocyte-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 1 activity."></a>
+<a href="img/figure_viz_umap_pattern1_identity_activity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;7: Pattern 1 is interpreted cautiously as an FCGR3A+ monocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 1 activity. Activity is strongest in the FCGR3A+ monocyte neighborhood, stimulation association is weak, and high-weight genes include TIMP1, FTH1, MS4A7, FCGR3A, and SOD2."><img src="img/figure_viz_umap_pattern1_identity_activity.png" class="img-fluid figure-img" style="width:100.0%" alt="Paired UMAP comparison for Pattern 1, labeled as an FCGR3A positive monocyte-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 1 activity."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-viz-umap-pattern1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: Pattern 1 is interpreted cautiously as an FCGR3A+ monocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 1 activity. Activity is strongest in the FCGR3A+ monocyte neighborhood, stimulation association is weak, and high-weight genes include TIMP1, FTH1, MS4A7, FCGR3A, and SOD2.
+Figure&nbsp;7: Pattern 1 is interpreted cautiously as an FCGR3A+ monocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 1 activity. Activity is strongest in the FCGR3A+ monocyte neighborhood, stimulation association is weak, and high-weight genes include TIMP1, FTH1, MS4A7, FCGR3A, and SOD2.
 </figcaption>
 </figure>
 </div>
@@ -9179,10 +9161,10 @@ Figure&nbsp;6: Pattern 1 is interpreted cautiously as an FCGR3A+ monocyte-linked
 <div id="fig-viz-umap-pattern2" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Paired UMAP comparison for Pattern 2, labeled as a CD14 positive monocyte-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 2 activity.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-viz-umap-pattern2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/figure_viz_umap_pattern2_identity_activity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;7: Pattern 2 is interpreted cautiously as a CD14+ monocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 2 activity. Activity is strongest in CD14+ monocytes, is lower after IFN-beta stimulation, and high-weight genes include FTH1, FTL, TIMP1, S100A11, and SH3BGRL3."><img src="img/figure_viz_umap_pattern2_identity_activity.png" class="img-fluid figure-img" style="width:100.0%" alt="Paired UMAP comparison for Pattern 2, labeled as a CD14 positive monocyte-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 2 activity."></a>
+<a href="img/figure_viz_umap_pattern2_identity_activity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;8: Pattern 2 is interpreted cautiously as a CD14+ monocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 2 activity. Activity is strongest in CD14+ monocytes, is lower after IFN-beta stimulation, and high-weight genes include FTH1, FTL, TIMP1, S100A11, and SH3BGRL3."><img src="img/figure_viz_umap_pattern2_identity_activity.png" class="img-fluid figure-img" style="width:100.0%" alt="Paired UMAP comparison for Pattern 2, labeled as a CD14 positive monocyte-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 2 activity."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-viz-umap-pattern2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7: Pattern 2 is interpreted cautiously as a CD14+ monocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 2 activity. Activity is strongest in CD14+ monocytes, is lower after IFN-beta stimulation, and high-weight genes include FTH1, FTL, TIMP1, S100A11, and SH3BGRL3.
+Figure&nbsp;8: Pattern 2 is interpreted cautiously as a CD14+ monocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 2 activity. Activity is strongest in CD14+ monocytes, is lower after IFN-beta stimulation, and high-weight genes include FTH1, FTL, TIMP1, S100A11, and SH3BGRL3.
 </figcaption>
 </figure>
 </div>
@@ -9191,10 +9173,10 @@ Figure&nbsp;7: Pattern 2 is interpreted cautiously as a CD14+ monocyte-linked pa
 <div id="fig-viz-umap-pattern3" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Paired UMAP comparison for Pattern 3, labeled as a dendritic and antigen-presentation-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 3 activity.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-viz-umap-pattern3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/figure_viz_umap_pattern3_identity_activity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;8: Pattern 3 is interpreted cautiously as a dendritic and antigen-presentation-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 3 activity. High-weight HLA genes and dendritic-cell activity point to antigen-presentation structure; top genes include CD74, HLA-DRA, HLA-DRB1, HLA-DPA1, and HLA-DPB1."><img src="img/figure_viz_umap_pattern3_identity_activity.png" class="img-fluid figure-img" style="width:100.0%" alt="Paired UMAP comparison for Pattern 3, labeled as a dendritic and antigen-presentation-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 3 activity."></a>
+<a href="img/figure_viz_umap_pattern3_identity_activity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;9: Pattern 3 is interpreted cautiously as a dendritic and antigen-presentation-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 3 activity. High-weight HLA genes and dendritic-cell activity point to antigen-presentation structure; top genes include CD74, HLA-DRA, HLA-DRB1, HLA-DPA1, and HLA-DPB1."><img src="img/figure_viz_umap_pattern3_identity_activity.png" class="img-fluid figure-img" style="width:100.0%" alt="Paired UMAP comparison for Pattern 3, labeled as a dendritic and antigen-presentation-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 3 activity."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-viz-umap-pattern3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8: Pattern 3 is interpreted cautiously as a dendritic and antigen-presentation-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 3 activity. High-weight HLA genes and dendritic-cell activity point to antigen-presentation structure; top genes include CD74, HLA-DRA, HLA-DRB1, HLA-DPA1, and HLA-DPB1.
+Figure&nbsp;9: Pattern 3 is interpreted cautiously as a dendritic and antigen-presentation-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 3 activity. High-weight HLA genes and dendritic-cell activity point to antigen-presentation structure; top genes include CD74, HLA-DRA, HLA-DRB1, HLA-DPA1, and HLA-DPB1.
 </figcaption>
 </figure>
 </div>
@@ -9203,10 +9185,10 @@ Figure&nbsp;8: Pattern 3 is interpreted cautiously as a dendritic and antigen-pr
 <div id="fig-viz-umap-pattern4" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Paired UMAP comparison for Pattern 4, labeled as the IFN-associated stimulation pattern in the selected R run. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 4 activity.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-viz-umap-pattern4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/figure_viz_umap_pattern4_identity_activity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;9: Pattern 4 is the IFN-associated stimulation pattern in the selected R run. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 4 activity. Canonical interferon-stimulated genes and strong positive stimulation correlation mark the main IFN response; top genes include ISG15, ISG20, IFI6, IFIT3, and LY6E."><img src="img/figure_viz_umap_pattern4_identity_activity.png" class="img-fluid figure-img" style="width:100.0%" alt="Paired UMAP comparison for Pattern 4, labeled as the IFN-associated stimulation pattern in the selected R run. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 4 activity."></a>
+<a href="img/figure_viz_umap_pattern4_identity_activity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="Figure&nbsp;10: Pattern 4 is the IFN-associated stimulation pattern in the selected R run. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 4 activity. Canonical interferon-stimulated genes and strong positive stimulation correlation mark the main IFN response; top genes include ISG15, ISG20, IFI6, IFIT3, and LY6E."><img src="img/figure_viz_umap_pattern4_identity_activity.png" class="img-fluid figure-img" style="width:100.0%" alt="Paired UMAP comparison for Pattern 4, labeled as the IFN-associated stimulation pattern in the selected R run. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 4 activity."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-viz-umap-pattern4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9: Pattern 4 is the IFN-associated stimulation pattern in the selected R run. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 4 activity. Canonical interferon-stimulated genes and strong positive stimulation correlation mark the main IFN response; top genes include ISG15, ISG20, IFI6, IFIT3, and LY6E.
+Figure&nbsp;10: Pattern 4 is the IFN-associated stimulation pattern in the selected R run. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 4 activity. Canonical interferon-stimulated genes and strong positive stimulation correlation mark the main IFN response; top genes include ISG15, ISG20, IFI6, IFIT3, and LY6E.
 </figcaption>
 </figure>
 </div>
@@ -9215,10 +9197,10 @@ Figure&nbsp;9: Pattern 4 is the IFN-associated stimulation pattern in the select
 <div id="fig-viz-umap-pattern5" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Paired UMAP comparison for Pattern 5, labeled as a candidate secondary IFN and myeloid-response pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 5 activity.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-viz-umap-pattern5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/figure_viz_umap_pattern5_identity_activity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="Figure&nbsp;10: Pattern 5 is interpreted cautiously as a candidate secondary IFN and myeloid-response pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 5 activity. Positive stimulation association and CXCL10/APOBEC3A genes suggest a second myeloid response signal; top genes include CXCL10, ISG15, APOBEC3A, IFITM3, and FTL."><img src="img/figure_viz_umap_pattern5_identity_activity.png" class="img-fluid figure-img" style="width:100.0%" alt="Paired UMAP comparison for Pattern 5, labeled as a candidate secondary IFN and myeloid-response pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 5 activity."></a>
+<a href="img/figure_viz_umap_pattern5_identity_activity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="Figure&nbsp;11: Pattern 5 is interpreted cautiously as a candidate secondary IFN and myeloid-response pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 5 activity. Positive stimulation association and CXCL10/APOBEC3A genes suggest a second myeloid response signal; top genes include CXCL10, ISG15, APOBEC3A, IFITM3, and FTL."><img src="img/figure_viz_umap_pattern5_identity_activity.png" class="img-fluid figure-img" style="width:100.0%" alt="Paired UMAP comparison for Pattern 5, labeled as a candidate secondary IFN and myeloid-response pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 5 activity."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-viz-umap-pattern5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10: Pattern 5 is interpreted cautiously as a candidate secondary IFN and myeloid-response pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 5 activity. Positive stimulation association and CXCL10/APOBEC3A genes suggest a second myeloid response signal; top genes include CXCL10, ISG15, APOBEC3A, IFITM3, and FTL.
+Figure&nbsp;11: Pattern 5 is interpreted cautiously as a candidate secondary IFN and myeloid-response pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 5 activity. Positive stimulation association and CXCL10/APOBEC3A genes suggest a second myeloid response signal; top genes include CXCL10, ISG15, APOBEC3A, IFITM3, and FTL.
 </figcaption>
 </figure>
 </div>
@@ -9227,10 +9209,10 @@ Figure&nbsp;10: Pattern 5 is interpreted cautiously as a candidate secondary IFN
 <div id="fig-viz-umap-pattern6" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Paired UMAP comparison for Pattern 6, labeled as a T-cell and baseline lymphocyte-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 6 activity.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-viz-umap-pattern6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/figure_viz_umap_pattern6_identity_activity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="Figure&nbsp;11: Pattern 6 is interpreted cautiously as a T-cell and baseline lymphocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 6 activity. Activity is strongest in T-cell neighborhoods, is lower after stimulation, and high-weight genes include FTH1, FTL, ACTB, PFN1, and SH3BGRL3."><img src="img/figure_viz_umap_pattern6_identity_activity.png" class="img-fluid figure-img" style="width:100.0%" alt="Paired UMAP comparison for Pattern 6, labeled as a T-cell and baseline lymphocyte-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 6 activity."></a>
+<a href="img/figure_viz_umap_pattern6_identity_activity.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Figure&nbsp;12: Pattern 6 is interpreted cautiously as a T-cell and baseline lymphocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 6 activity. Activity is strongest in T-cell neighborhoods, is lower after stimulation, and high-weight genes include FTH1, FTL, ACTB, PFN1, and SH3BGRL3."><img src="img/figure_viz_umap_pattern6_identity_activity.png" class="img-fluid figure-img" style="width:100.0%" alt="Paired UMAP comparison for Pattern 6, labeled as a T-cell and baseline lymphocyte-linked pattern. The left panel shows annotated PBMC identity neighborhoods. The right panel recolors the same cells by Pattern 6 activity."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-viz-umap-pattern6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;11: Pattern 6 is interpreted cautiously as a T-cell and baseline lymphocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 6 activity. Activity is strongest in T-cell neighborhoods, is lower after stimulation, and high-weight genes include FTH1, FTL, ACTB, PFN1, and SH3BGRL3.
+Figure&nbsp;12: Pattern 6 is interpreted cautiously as a T-cell and baseline lymphocyte-linked pattern. The paired UMAP uses the same cells and coordinates in both panels: the left panel shows annotated PBMC identity neighborhoods, and the right panel recolors those cells by Pattern 6 activity. Activity is strongest in T-cell neighborhoods, is lower after stimulation, and high-weight genes include FTH1, FTL, ACTB, PFN1, and SH3BGRL3.
 </figcaption>
 </figure>
 </div>
@@ -9375,7 +9357,7 @@ Figure&nbsp;11: Pattern 6 is interpreted cautiously as a T-cell and baseline lym
 <span id="cb86-55"><a href="#cb86-55" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="ss">f"</span><span class="sc">{</span>pattern_to_map<span class="sc">}</span><span class="ss"> activity on the PBMC UMAP"</span>)</span>
 <span id="cb86-56"><a href="#cb86-56" aria-hidden="true" tabindex="-1"></a>fig.colorbar(scatter, ax<span class="op">=</span>axes[<span class="dv">1</span>], label<span class="op">=</span><span class="st">"Pattern activity"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;matplotlib.colorbar.Colorbar object at 0x77b435c1b940&gt;</code></pre>
+<pre><code>&lt;matplotlib.colorbar.Colorbar object at 0x7d4f0625e860&gt;</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb88"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -9399,10 +9381,10 @@ Figure&nbsp;11: Pattern 6 is interpreted cautiously as a T-cell and baseline lym
 <div id="fig-viz-ifn-replicate-pairs" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Horizontal donor-level difference plot showing the mean IFN-associated pattern activity shift for each matched donor pair. Each row is one donor, and the x-axis shows IFN-beta mean activity minus matched control mean activity.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-viz-ifn-replicate-pairs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/figure_viz_ifn_replicate_pairs.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Figure&nbsp;12: Paired donor check for the IFN-associated pattern. Each row compares one donor’s stimulated aliquot with that same donor’s control aliquot, using mean stimulated activity minus mean control activity. All eight donor pairs are positive, which supports the interpretation that the stimulation-associated increase is not driven by only one donor. This is a visual donor-aware check, not a substitute for a formal donor-level statistical model."><img src="img/figure_viz_ifn_replicate_pairs.png" class="img-fluid figure-img" style="width:82.0%" alt="Horizontal donor-level difference plot showing the mean IFN-associated pattern activity shift for each matched donor pair. Each row is one donor, and the x-axis shows IFN-beta mean activity minus matched control mean activity."></a>
+<a href="img/figure_viz_ifn_replicate_pairs.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" title="Figure&nbsp;13: Paired donor check for the IFN-associated pattern. Each row compares one donor’s stimulated aliquot with that same donor’s control aliquot, using mean stimulated activity minus mean control activity. All eight donor pairs are positive, which supports the interpretation that the stimulation-associated increase is not driven by only one donor. This is a visual donor-aware check, not a substitute for a formal donor-level statistical model."><img src="img/figure_viz_ifn_replicate_pairs.png" class="img-fluid figure-img" style="width:82.0%" alt="Horizontal donor-level difference plot showing the mean IFN-associated pattern activity shift for each matched donor pair. Each row is one donor, and the x-axis shows IFN-beta mean activity minus matched control mean activity."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-viz-ifn-replicate-pairs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;12: Paired donor check for the IFN-associated pattern. Each row compares one donor’s stimulated aliquot with that same donor’s control aliquot, using mean stimulated activity minus mean control activity. All eight donor pairs are positive, which supports the interpretation that the stimulation-associated increase is not driven by only one donor. This is a visual donor-aware check, not a substitute for a formal donor-level statistical model.
+Figure&nbsp;13: Paired donor check for the IFN-associated pattern. Each row compares one donor’s stimulated aliquot with that same donor’s control aliquot, using mean stimulated activity minus mean control activity. All eight donor pairs are positive, which supports the interpretation that the stimulation-associated increase is not driven by only one donor. This is a visual donor-aware check, not a substitute for a formal donor-level statistical model.
 </figcaption>
 </figure>
 </div>
@@ -9477,10 +9459,10 @@ Figure&nbsp;12: Paired donor check for the IFN-associated pattern. Each row comp
 <div id="fig-viz-ifn-celltype-condition" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Dumbbell plot showing mean IFN-associated pattern activity for each annotated PBMC identity in control and IFN-beta-stimulated cells. Most cell types show higher mean activity in stimulation, with different activity levels across cell types.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-viz-ifn-celltype-condition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/figure_viz_ifn_celltype_condition.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" title="Figure&nbsp;13: Mean IFN-associated activity by annotated PBMC identity and condition. Each line connects the control mean to the IFN-beta-stimulated mean for one immune-cell type. The upward shift appears across most annotated PBMC identities, which supports a broad stimulation-associated signal, but the stimulated means are not identical across cell types. This combination is common in single-cell data: a shared response can still have different strength in different immune-cell populations."><img src="img/figure_viz_ifn_celltype_condition.png" class="img-fluid figure-img" style="width:86.0%" alt="Dumbbell plot showing mean IFN-associated pattern activity for each annotated PBMC identity in control and IFN-beta-stimulated cells. Most cell types show higher mean activity in stimulation, with different activity levels across cell types."></a>
+<a href="img/figure_viz_ifn_celltype_condition.png" class="lightbox" data-gallery="quarto-lightbox-gallery-14" title="Figure&nbsp;14: Mean IFN-associated activity by annotated PBMC identity and condition. Each line connects the control mean to the IFN-beta-stimulated mean for one immune-cell type. The upward shift appears across most annotated PBMC identities, which supports a broad stimulation-associated signal, but the stimulated means are not identical across cell types. This combination is common in single-cell data: a shared response can still have different strength in different immune-cell populations."><img src="img/figure_viz_ifn_celltype_condition.png" class="img-fluid figure-img" style="width:86.0%" alt="Dumbbell plot showing mean IFN-associated pattern activity for each annotated PBMC identity in control and IFN-beta-stimulated cells. Most cell types show higher mean activity in stimulation, with different activity levels across cell types."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-viz-ifn-celltype-condition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;13: Mean IFN-associated activity by annotated PBMC identity and condition. Each line connects the control mean to the IFN-beta-stimulated mean for one immune-cell type. The upward shift appears across most annotated PBMC identities, which supports a broad stimulation-associated signal, but the stimulated means are not identical across cell types. This combination is common in single-cell data: a shared response can still have different strength in different immune-cell populations.
+Figure&nbsp;14: Mean IFN-associated activity by annotated PBMC identity and condition. Each line connects the control mean to the IFN-beta-stimulated mean for one immune-cell type. The upward shift appears across most annotated PBMC identities, which supports a broad stimulation-associated signal, but the stimulated means are not identical across cell types. This combination is common in single-cell data: a shared response can still have different strength in different immune-cell populations.
 </figcaption>
 </figure>
 </div>
@@ -9550,10 +9532,10 @@ Figure&nbsp;13: Mean IFN-associated activity by annotated PBMC identity and cond
 <div id="fig-viz-pattern-celltype-shift" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Heatmap of mean activity differences between IFN-beta-stimulated and control cells for each CoGAPS pattern and annotated PBMC identity. Each tile shows stimulated mean activity minus control mean activity; positive red values indicate higher activity in stimulated cells and negative blue values indicate higher activity in controls.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-viz-pattern-celltype-shift-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/figure_viz_pattern_celltype_shift_heatmap.png" class="lightbox" data-gallery="quarto-lightbox-gallery-14" title="Figure&nbsp;14: Condition shifts for every selected-model pattern across annotated PBMC identities. Each tile is computed as mean activity in IFN-beta-stimulated cells minus mean activity in control cells for one pattern and one cell type. Red positive values mean the pattern is stronger after stimulation. Blue negative values mean the pattern is stronger in control cells. The IFN-associated pattern shows positive shifts across several cell types, while other patterns show more cell-type-linked or negative behavior, reinforcing that the model is separating multiple overlapping sources of variation."><img src="img/figure_viz_pattern_celltype_shift_heatmap.png" class="img-fluid figure-img" style="width:100.0%" alt="Heatmap of mean activity differences between IFN-beta-stimulated and control cells for each CoGAPS pattern and annotated PBMC identity. Each tile shows stimulated mean activity minus control mean activity; positive red values indicate higher activity in stimulated cells and negative blue values indicate higher activity in controls."></a>
+<a href="img/figure_viz_pattern_celltype_shift_heatmap.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" title="Figure&nbsp;15: Condition shifts for every selected-model pattern across annotated PBMC identities. Each tile is computed as mean activity in IFN-beta-stimulated cells minus mean activity in control cells for one pattern and one cell type. Red positive values mean the pattern is stronger after stimulation. Blue negative values mean the pattern is stronger in control cells. The IFN-associated pattern shows positive shifts across several cell types, while other patterns show more cell-type-linked or negative behavior, reinforcing that the model is separating multiple overlapping sources of variation."><img src="img/figure_viz_pattern_celltype_shift_heatmap.png" class="img-fluid figure-img" style="width:100.0%" alt="Heatmap of mean activity differences between IFN-beta-stimulated and control cells for each CoGAPS pattern and annotated PBMC identity. Each tile shows stimulated mean activity minus control mean activity; positive red values indicate higher activity in stimulated cells and negative blue values indicate higher activity in controls."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-viz-pattern-celltype-shift-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;14: Condition shifts for every selected-model pattern across annotated PBMC identities. Each tile is computed as mean activity in IFN-beta-stimulated cells minus mean activity in control cells for one pattern and one cell type. Red positive values mean the pattern is stronger after stimulation. Blue negative values mean the pattern is stronger in control cells. The IFN-associated pattern shows positive shifts across several cell types, while other patterns show more cell-type-linked or negative behavior, reinforcing that the model is separating multiple overlapping sources of variation.
+Figure&nbsp;15: Condition shifts for every selected-model pattern across annotated PBMC identities. Each tile is computed as mean activity in IFN-beta-stimulated cells minus mean activity in control cells for one pattern and one cell type. Red positive values mean the pattern is stronger after stimulation. Blue negative values mean the pattern is stronger in control cells. The IFN-associated pattern shows positive shifts across several cell types, while other patterns show more cell-type-linked or negative behavior, reinforcing that the model is separating multiple overlapping sources of variation.
 </figcaption>
 </figure>
 </div>
@@ -9618,7 +9600,7 @@ Figure&nbsp;14: Condition shifts for every selected-model pattern across annotat
 <span id="cb94-22"><a href="#cb94-22" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"CoGAPS pattern"</span>)</span>
 <span id="cb94-23"><a href="#cb94-23" aria-hidden="true" tabindex="-1"></a>fig.colorbar(im, ax<span class="op">=</span>ax, label<span class="op">=</span><span class="st">"stim - control"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;matplotlib.colorbar.Colorbar object at 0x77b435977fd0&gt;</code></pre>
+<pre><code>&lt;matplotlib.colorbar.Colorbar object at 0x7d4f0610f580&gt;</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb96"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -9642,10 +9624,10 @@ Figure&nbsp;14: Condition shifts for every selected-model pattern across annotat
 <div id="fig-viz-top-gene-directionality" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Two-panel plot for Pattern4, the IFN-associated pattern in the selected R run. The first panel ranks top genes by CoGAPS weight. The second panel shows mean log2 fold-change for IFN-beta-stimulated versus control cells, with most top genes higher in stimulation and FTH1 lower in stimulation.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-viz-top-gene-directionality-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/figure_viz_top_gene_directionality.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" title="Figure&nbsp;15: Top-gene and directionality check for Pattern4, the IFN-associated pattern in the selected R run. The left panel ranks genes by CoGAPS weight, which tells you which genes most help define the pattern. The right panel checks whether those same genes are higher or lower in IFN-beta-stimulated cells compared with controls. Most top genes are canonical interferon-stimulated genes that are higher in stimulation, while FTH1 is a useful reminder that a high pattern weight does not automatically mean up-regulation."><img src="img/figure_viz_top_gene_directionality.png" class="img-fluid figure-img" style="width:88.0%" alt="Two-panel plot for Pattern4, the IFN-associated pattern in the selected R run. The first panel ranks top genes by CoGAPS weight. The second panel shows mean log2 fold-change for IFN-beta-stimulated versus control cells, with most top genes higher in stimulation and FTH1 lower in stimulation."></a>
+<a href="img/figure_viz_top_gene_directionality.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" title="Figure&nbsp;16: Top-gene and directionality check for Pattern4, the IFN-associated pattern in the selected R run. The left panel ranks genes by CoGAPS weight, which tells you which genes most help define the pattern. The right panel checks whether those same genes are higher or lower in IFN-beta-stimulated cells compared with controls. Most top genes are canonical interferon-stimulated genes that are higher in stimulation, while FTH1 is a useful reminder that a high pattern weight does not automatically mean up-regulation."><img src="img/figure_viz_top_gene_directionality.png" class="img-fluid figure-img" style="width:88.0%" alt="Two-panel plot for Pattern4, the IFN-associated pattern in the selected R run. The first panel ranks top genes by CoGAPS weight. The second panel shows mean log2 fold-change for IFN-beta-stimulated versus control cells, with most top genes higher in stimulation and FTH1 lower in stimulation."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-viz-top-gene-directionality-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15: Top-gene and directionality check for <code>Pattern4</code>, the IFN-associated pattern in the selected R run. The left panel ranks genes by CoGAPS weight, which tells you which genes most help define the pattern. The right panel checks whether those same genes are higher or lower in IFN-beta-stimulated cells compared with controls. Most top genes are canonical interferon-stimulated genes that are higher in stimulation, while FTH1 is a useful reminder that a high pattern weight does not automatically mean up-regulation.
+Figure&nbsp;16: Top-gene and directionality check for <code>Pattern4</code>, the IFN-associated pattern in the selected R run. The left panel ranks genes by CoGAPS weight, which tells you which genes most help define the pattern. The right panel checks whether those same genes are higher or lower in IFN-beta-stimulated cells compared with controls. Most top genes are canonical interferon-stimulated genes that are higher in stimulation, while FTH1 is a useful reminder that a high pattern weight does not automatically mean up-regulation.
 </figcaption>
 </figure>
 </div>
@@ -9725,10 +9707,10 @@ Figure&nbsp;15: Top-gene and directionality check for <code>Pattern4</code>, the
 <div id="fig-viz-identity-pattern-directionality" class="lightbox quarto-float quarto-figure quarto-figure-center anchored" alt="Three-panel directionality check for Pattern3, the dendritic and antigen-presentation-linked pattern in the selected R run. The top genes include CD74 and HLA genes. These genes are higher in dendritic cells than in other PBMC identities, while most are lower in IFN-beta stimulation compared with control.">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-viz-identity-pattern-directionality-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="img/figure_viz_identity_pattern_directionality.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" title="Figure&nbsp;16: Directionality check for Pattern3, the dendritic / antigen-presentation-linked pattern in the selected R run. The left panel ranks top genes by CoGAPS weight. The middle panel compares expression in dendritic cells with other PBMC identities. The right panel compares IFN-beta stimulation with control. CD74 and HLA genes help define the pattern and are higher in dendritic cells, while most of those genes are not higher after IFN-beta stimulation."><img src="img/figure_viz_identity_pattern_directionality.png" class="img-fluid figure-img" style="width:96.0%" alt="Three-panel directionality check for Pattern3, the dendritic and antigen-presentation-linked pattern in the selected R run. The top genes include CD74 and HLA genes. These genes are higher in dendritic cells than in other PBMC identities, while most are lower in IFN-beta stimulation compared with control."></a>
+<a href="img/figure_viz_identity_pattern_directionality.png" class="lightbox" data-gallery="quarto-lightbox-gallery-17" title="Figure&nbsp;17: Directionality check for Pattern3, the dendritic / antigen-presentation-linked pattern in the selected R run. The left panel ranks top genes by CoGAPS weight. The middle panel compares expression in dendritic cells with other PBMC identities. The right panel compares IFN-beta stimulation with control. CD74 and HLA genes help define the pattern and are higher in dendritic cells, while most of those genes are not higher after IFN-beta stimulation."><img src="img/figure_viz_identity_pattern_directionality.png" class="img-fluid figure-img" style="width:96.0%" alt="Three-panel directionality check for Pattern3, the dendritic and antigen-presentation-linked pattern in the selected R run. The top genes include CD74 and HLA genes. These genes are higher in dendritic cells than in other PBMC identities, while most are lower in IFN-beta stimulation compared with control."></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-viz-identity-pattern-directionality-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16: Directionality check for <code>Pattern3</code>, the dendritic / antigen-presentation-linked pattern in the selected R run. The left panel ranks top genes by CoGAPS weight. The middle panel compares expression in dendritic cells with other PBMC identities. The right panel compares IFN-beta stimulation with control. CD74 and HLA genes help define the pattern and are higher in dendritic cells, while most of those genes are not higher after IFN-beta stimulation.
+Figure&nbsp;17: Directionality check for <code>Pattern3</code>, the dendritic / antigen-presentation-linked pattern in the selected R run. The left panel ranks top genes by CoGAPS weight. The middle panel compares expression in dendritic cells with other PBMC identities. The right panel compares IFN-beta stimulation with control. CD74 and HLA genes help define the pattern and are higher in dendritic cells, while most of those genes are not higher after IFN-beta stimulation.
 </figcaption>
 </figure>
 </div>
@@ -13551,7 +13533,7 @@ strong
 <span id="cb130-6"><a href="#cb130-6" aria-hidden="true" tabindex="-1"></a>    frameon<span class="op">=</span><span class="va">False</span>,</span>
 <span id="cb130-7"><a href="#cb130-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;matplotlib.legend.Legend object at 0x77b4341b2c50&gt;</code></pre>
+<pre><code>&lt;matplotlib.legend.Legend object at 0x7d4f04973e20&gt;</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb132"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb132-1"><a href="#cb132-1" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">35</span>, ha<span class="op">=</span><span class="st">"right"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -13636,7 +13618,7 @@ strong
 <section id="summary-plot" class="level2">
 <h2 class="anchored" data-anchor-id="summary-plot"><strong>Summary Plot</strong></h2>
 <hr>
-<p><a href="img/ifn_pattern_by_celltype_split_condition.png" class="lightbox" data-gallery="quarto-lightbox-gallery-17"><img src="img/ifn_pattern_by_celltype_split_condition.png" class="img-fluid" alt="Boxplots of selected R K6 IFN-associated CoGAPS pattern activity across PBMC cell types, split by control and IFN-beta stimulated conditions." width="800"></a></p>
+<p><a href="img/ifn_pattern_by_celltype_split_condition.png" class="lightbox" data-gallery="quarto-lightbox-gallery-18"><img src="img/ifn_pattern_by_celltype_split_condition.png" class="img-fluid" alt="Boxplots of selected R K6 IFN-associated CoGAPS pattern activity across PBMC cell types, split by control and IFN-beta stimulated conditions." width="800"></a></p>
 </section>
 <section id="main-questions-revisited" class="level2">
 <h2 class="anchored" data-anchor-id="main-questions-revisited"><strong>Main Questions Revisited</strong></h2>
@@ -21984,60 +21966,68 @@ ITERS=2000</code></pre>
 <td>A situation where a lower-resolution model captures a strong broad signal but merges other biologically useful structure into too few patterns.</td>
 </tr>
 <tr class="even">
+<td>Cancer immunotherapy</td>
+<td>Treatment that helps the immune system recognize or act against cancer. Different approaches can affect different immune-cell types and states.</td>
+</tr>
+<tr class="odd">
 <td>Cell activity</td>
 <td>A CoGAPS value describing how strongly a cell uses a learned pattern.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Cell barcode</td>
 <td>A cell- or droplet-level identifier assigned during single-cell sequencing and processing. It is used as a lookup key to keep one profiled cell linked to its expression values, metadata, and later model outputs.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Cell metadata</td>
 <td>Information recorded about each cell, such as donor, condition, or cell-type label.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Cell-type-linked pattern</td>
 <td>A learned pattern whose activity mainly follows annotated immune-cell groups rather than the stimulation condition.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Chi-square</td>
 <td>A model-fit diagnostic that summarizes reconstruction error. Lower values generally indicate better reconstruction, but values can fluctuate during CoGAPS sampling.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Coefficient of variation</td>
 <td>A variability measure that divides the standard deviation by the mean, so uncertainty can be interpreted relative to the size of the value being estimated.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>CoGAPS</td>
 <td>A Bayesian nonnegative matrix factorization method used to learn overlapping gene-expression patterns and cell activities.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Data stewardship</td>
 <td>Responsible management and use of data across its full life cycle, including respect for participants, privacy, provenance, access conditions, and future reuse.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>De-identification</td>
 <td>Removal or masking of direct identifiers to reduce the chance that data can be linked to a person. De-identification lowers risk but may not remove it completely.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Decision manifest</td>
 <td>A small record that stores selected model settings and the evidence files used to support that decision.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Demultiplexing</td>
 <td>A computational step that separates pooled single-cell data back into donor- or sample-level assignments.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Dendritic cell</td>
 <td>An antigen-presenting immune cell that helps connect innate sensing to adaptive immune responses.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Diagnostic trace</td>
 <td>A saved record of model behavior over iterations, such as chi-square or atom-count values, used to check whether a run behaved as expected.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Directionality</td>
 <td>Whether expression is higher or lower in one condition compared with another.</td>
+</tr>
+<tr class="odd">
+<td>Donor</td>
+<td>A person who provides a biological sample. Here, each donor provided blood immune cells that were divided into untreated and IFN-beta-stimulated samples outside the body.</td>
 </tr>
 <tr class="even">
 <td>Doublet</td>
@@ -22056,8 +22046,16 @@ ITERS=2000</code></pre>
 <td>A period when disease signs or symptoms become more active.</td>
 </tr>
 <tr class="even">
+<td>Gene expression</td>
+<td>The use of a gene's information to make RNA and, for protein-coding genes, protein. RNA sequencing measures RNA abundance as an indicator of expression, not protein abundance directly.</td>
+</tr>
+<tr class="odd">
 <td>Gene Expression Omnibus</td>
 <td>A public NCBI repository for functional genomics data, often abbreviated GEO.</td>
+</tr>
+<tr class="even">
+<td>Gene expression profile</td>
+<td>The measured expression levels of many genes in a cell or sample, considered together.</td>
 </tr>
 <tr class="odd">
 <td>Gene weight</td>
@@ -22104,28 +22102,36 @@ ITERS=2000</code></pre>
 <td>A structure formed when antibodies bind to molecules they recognize; in lupus, immune complexes can include self-derived material and can stimulate immune signaling.</td>
 </tr>
 <tr class="even">
+<td>Immune signaling</td>
+<td>Communication through molecules and receptors that changes how immune cells or other cells respond. Interferons are one group of immune-signaling proteins.</td>
+</tr>
+<tr class="odd">
 <td>Immune-cell identity</td>
 <td>The immune-cell type or lineage a cell most resembles, such as a T cell, B cell, monocyte, natural killer cell, or dendritic cell.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Interferon</td>
 <td>A cytokine signal that helps cells coordinate antiviral and immune responses.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Interferon gene signature</td>
 <td>A recognizable group of interferon-responsive genes whose expression pattern suggests interferon pathway activity.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Interferon-stimulated gene</td>
 <td>A gene whose expression can change when a cell responds to interferon signaling.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>JAK-STAT signaling</td>
 <td>A signaling pathway that carries cytokine-receptor signals to transcription factors that can change gene expression.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Latent pattern</td>
 <td>An inferred gene-expression signal learned from the data rather than directly recorded as metadata.</td>
+</tr>
+<tr class="odd">
+<td>Latent variable</td>
+<td>A feature inferred from observed data rather than measured directly. CoGAPS patterns are inferred features that can reflect biological or technical influences.</td>
 </tr>
 <tr class="even">
 <td>Library-size normalization</td>
@@ -22164,106 +22170,110 @@ ITERS=2000</code></pre>
 <td>An immune cell type involved in cytotoxic responses against infected or abnormal cells.</td>
 </tr>
 <tr class="odd">
+<td>Neural development</td>
+<td>The processes through which cells acquire identities and functions in the nervous system. The cited example studies developing neural cell fates in human stem-cell cultures.</td>
+</tr>
+<tr class="even">
 <td>Neutrophil extracellular trap</td>
 <td>A web-like structure released by neutrophils that can contain DNA and proteins; in lupus biology, these can contribute nucleic-acid material that stimulates interferon pathways.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Non-negative matrix factorization</td>
 <td>A matrix-factorization approach that represents a non-negative data matrix using additive, non-negative patterns and activities.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Paired design</td>
 <td>A design in which related samples are compared, such as control and stimulated aliquots from the same donor.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Peripheral blood mononuclear cell</td>
 <td>A blood immune-cell category that includes lymphocytes and monocytes; often abbreviated PBMC.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Perturbation experiment</td>
 <td>An experiment that deliberately changes a condition so the response can be measured.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Plasmacytoid dendritic cell</td>
 <td>A dendritic-cell subtype known for producing large amounts of type I interferon after nucleic-acid sensing.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Posterior uncertainty</td>
 <td>Variation in sampled model summaries that helps indicate how stable a pattern, activity, or gene weight is.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Proxy measure</td>
 <td>An observed quantity used as a stand-in for a concept that is difficult to measure directly. A proxy can mislead when it does not represent that concept equally across people or settings.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Pseudobulk</td>
 <td>A summary that combines single-cell counts within a group, such as donor and condition, so expression differences can be compared at a grouped-sample level.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Quality control</td>
 <td>Checks and filters used to remove measurements that are too unreliable for the intended analysis.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Rank sweep</td>
 <td>A planned set of model runs that compares several values of K, usually across multiple seeds or iteration counts, before selecting one model resolution.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Sampling phase</td>
 <td>The phase of a CoGAPS run used to summarize the final pattern matrices after equilibration.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Secondary data</td>
 <td>Data collected by another person or research team for an earlier purpose and reused to answer a new question.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Selected-model outputs</td>
 <td>Saved files from the CoGAPS model used for the main case-study analysis, such as metrics, pattern activities, gene weights, and top-gene tables.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Sign test</td>
 <td>A simple paired test that counts how often the direction of change is the same across matched pairs.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Single-cell RNA-seq</td>
 <td>A sequencing approach that measures gene expression separately for many individual cells.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>SingleCellExperiment</td>
 <td>A Bioconductor data structure for annotated single-cell data, commonly used in R workflows.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Sparse optimization</td>
 <td>A CoGAPS implementation option that uses a sparse data representation to improve runtime on sparse single-cell RNA-seq matrices.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Spearman correlation</td>
 <td>A rank-based correlation that compares whether two measurements order observations similarly.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Stimulation-associated activity</td>
 <td>Pattern activity that differs between stimulated cells and control cells.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Systemic lupus erythematosus</td>
 <td>An autoimmune disease in which the immune system can attack the body's own tissues, causing inflammation that may affect several organ systems.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>T cell</td>
 <td>An adaptive immune cell type involved in coordinating or carrying out immune responses.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Top-gene Jaccard</td>
 <td>A stability score based on how much two top-gene lists overlap; values closer to 1 mean the lists are more similar.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Type I interferon</td>
 <td>A subset of interferon cytokines, including IFN-alpha and IFN-beta, that signals through the type I interferon receptor.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>UMAP</td>
 <td>A two-dimensional view that places cells with similar expression profiles near one another so broad structure can be inspected visually.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Wide format</td>
 <td>A table layout where related measurements are spread across multiple columns, such as one column per CoGAPS pattern.</td>
 </tr>
@@ -22280,17 +22290,23 @@ Blum, Janice S., Pamela A. Wearsch, and Peter Cresswell. 2013. <span>“Pathways
 <div id="ref-catalina2019interferonSLE" class="csl-entry" role="listitem">
 Catalina, Michelle D., Prathyusha Bachali, Nicholas S. Geraci, Amrie C. Grammer, and Peter E. Lipsky. 2019. <span>“Gene Expression Analysis Delineates the Potential Roles of Multiple Interferons in Systemic Lupus Erythematosus.”</span> <em>Communications Biology</em> 2: 140. <a href="https://doi.org/10.1038/s42003-019-0382-x">https://doi.org/10.1038/s42003-019-0382-x</a>.
 </div>
-<div id="ref-cdc_lupus_data_research" class="csl-entry" role="listitem">
-Centers for Disease Control and Prevention. 2024. <span>“Lupus Data and Research.”</span> <a href="https://www.cdc.gov/lupus/data-research/index.html">https://www.cdc.gov/lupus/data-research/index.html</a>.
-</div>
 <div id="ref-chyuan2019interferons" class="csl-entry" role="listitem">
 Chyuan, I-Tsu, Hong-Tai Tzeng, and Ji-Yih Chen. 2019. <span>“Signaling Pathways of <span>Type I</span> and <span>Type III</span> Interferons and Targeted Therapies in Systemic Lupus Erythematosus.”</span> <em>Cells</em> 8 (9): 963. <a href="https://doi.org/10.3390/cells8090963">https://doi.org/10.3390/cells8090963</a>.
+</div>
+<div id="ref-davismarcisak2021nkActivation" class="csl-entry" role="listitem">
+Davis-Marcisak, Emily F., Allison A. Fitzgerald, Michael D. Kessler, Ludmila Danilova, Elizabeth M. Jaffee, Neeha Zaidi, Louis M. Weiner, and Elana J. Fertig. 2021. <span>“Transfer Learning Between Preclinical Models and Human Tumors Identifies a Conserved <span>NK</span> Cell Activation Signature in Anti-<span>CTLA</span>-4 Responsive Tumors.”</span> <em>Genome Medicine</em> 13: 129. <a href="https://doi.org/10.1186/s13073-021-00944-5">https://doi.org/10.1186/s13073-021-00944-5</a>.
 </div>
 <div id="ref-fertig2010cogaps" class="csl-entry" role="listitem">
 Fertig, Elana J., Jie Ding, Alexander V. Favorov, Giovanni Parmigiani, and Michael F. Ochs. 2010. <span>“<span>CoGAPS</span>: An <span>R/C++</span> Package to Identify Patterns and Biological Process Activity in Transcriptomic Data.”</span> <em>Bioinformatics</em> 26 (21): 2792–93. <a href="https://doi.org/10.1093/bioinformatics/btq503">https://doi.org/10.1093/bioinformatics/btq503</a>.
 </div>
+<div id="ref-johnson2023cogapsWorkflow" class="csl-entry" role="listitem">
+Johnson, Jeanette A. I., Ashley P. Tsang, Jacob T. Mitchell, David L. Zhou, Julia Bowden, Emily Davis-Marcisak, Thomas Sherman, et al. 2023. <span>“Inferring Cellular and Molecular Processes in Single-Cell Data with Non-Negative Matrix Factorization Using <span>Python</span>, <span>R</span> and <span>GenePattern Notebook</span> Implementations of <span>CoGAPS</span>.”</span> <em>Nature Protocols</em> 18 (12): 3690–3731. <a href="https://doi.org/10.1038/s41596-023-00892-x">https://doi.org/10.1038/s41596-023-00892-x</a>.
+</div>
 <div id="ref-kang2018multiplexed" class="csl-entry" role="listitem">
 Kang, Hyun Min, Meena Subramaniam, Sasha Targ, Michelle Nguyen, Lenka Maliskova, Elizabeth McCarthy, Eunice Wan, et al. 2018. <span>“Multiplexed Droplet Single-Cell <span>RNA</span>-Sequencing Using Natural Genetic Variation.”</span> <em>Nature Biotechnology</em> 36 (1): 89–94. <a href="https://doi.org/10.1038/nbt.4042">https://doi.org/10.1038/nbt.4042</a>.
+</div>
+<div id="ref-kim2024neuralFates" class="csl-entry" role="listitem">
+Kim, Suel-Kee, Seungmae Seo, Genevieve Stein-O’Brien, Amritha Jaishankar, Kazuya Ogawa, Nicola Micali, Victor Luria, et al. 2024. <span>“Individual Variation in the Emergence of Anterior-to-Posterior Neural Fates from Human Pluripotent Stem Cells.”</span> <em>Stem Cell Reports</em> 19 (9): 1336–50. <a href="https://doi.org/10.1016/j.stemcr.2024.07.004">https://doi.org/10.1016/j.stemcr.2024.07.004</a>.
 </div>
 <div id="ref-kiselev2019singleCellClustering" class="csl-entry" role="listitem">
 Kiselev, Vladimir Yu, Tallulah S. Andrews, and Martin Hemberg. 2019. <span>“Challenges in Unsupervised Clustering of Single-Cell <span>RNA</span>-Seq Data.”</span> <em>Nature Reviews Genetics</em> 20: 273–82. <a href="https://doi.org/10.1038/s41576-018-0088-9">https://doi.org/10.1038/s41576-018-0088-9</a>.
@@ -22301,8 +22317,11 @@ Kotliar, Dylan, Adrian Veres, M. Aurel Nagy, Shervin Tabrizi, Eran Hodis, Dougla
 <div id="ref-liberzon2015hallmark" class="csl-entry" role="listitem">
 Liberzon, Arthur, Chet Birger, Helga Thorvaldsdottir, Mahmoud Ghandi, Jill P. Mesirov, and Pablo Tamayo. 2015. <span>“The Molecular Signatures Database Hallmark Gene Set Collection.”</span> <em>Cell Systems</em> 1 (6): 417–25. <a href="https://doi.org/10.1016/j.cels.2015.12.004">https://doi.org/10.1016/j.cels.2015.12.004</a>.
 </div>
+<div id="ref-lfa2025lupusFacts" class="csl-entry" role="listitem">
+Lupus Foundation of America. 2025. <span>“Lupus Facts and Statistics.”</span> <a href="https://www.lupus.org/resources/lupus-facts-and-statistics">https://www.lupus.org/resources/lupus-facts-and-statistics</a>.
+</div>
 <div id="ref-niams_lupus_overview" class="csl-entry" role="listitem">
-National Institute of Arthritis and Musculoskeletal and Skin Diseases. 2024. <span>“Lupus: Symptoms, Causes, and Risk Factors.”</span> <a href="https://www.niams.nih.gov/health-topics/lupus">https://www.niams.nih.gov/health-topics/lupus</a>.
+National Institute of Arthritis and Musculoskeletal and Skin Diseases. n.d. <span>“Systemic Lupus Erythematosus (Lupus).”</span> Accessed November 3, 2026. <a href="https://www.niams.nih.gov/health-topics/lupus">https://www.niams.nih.gov/health-topics/lupus</a>.
 </div>
 <div id="ref-nihLacksFamilyAgreement" class="csl-entry" role="listitem">
 National Institutes of Health. n.d. <span>“The <span>NIH</span>–Lacks Family Agreement.”</span> Accessed July 10, 2026. <a href="https://grants.nih.gov/policy-and-compliance/policy-topics/sharing-policies/dms/privacy/nih-lacks-family-agreement">https://grants.nih.gov/policy-and-compliance/policy-topics/sharing-policies/dms/privacy/nih-lacks-family-agreement</a>.
@@ -22361,7 +22380,7 @@ Ziegler-Heitbrock, Loems, Petronela Ancuta, Suzanne Crowe, Marc Dalod, Veronika 
  collate  en_US.UTF-8
  ctype    en_US.UTF-8
  tz       Etc/UTC
- date     2026-11-05
+ date     2026-11-06
  pandoc   3.1.1 @ /usr/local/bin/ (via rmarkdown)
 
 ─ Packages ───────────────────────────────────────────────────────────────────
@@ -22560,7 +22579,7 @@ Python
 Platform
 </td>
 <td>
-Linux-7.0.0-1017-azure-x86_64-with-glibc2.35
+Linux-7.0.0-1019-azure-x86_64-with-glibc2.35
 </td>
 </tr>
 <tr>
@@ -22624,6 +22643,7 @@ Matplotlib
 <p>We also acknowledge the CoGAPS, PyCoGAPS, Bioconductor, SingleCellExperiment, AnnData, Quarto, and Open Case Studies communities whose software, documentation, and templates support this case study.</p>
 <p>We would also like to acknowledge the National Institute of General Medical Sciences for funding this work (1R25GM160622).</p>
 <p>Icons are from <a href="https://www.iconpacks.net/" target="_blank">IconPacks</a>.</p>
+<p>The Motivation comics use adapted artwork from <a href="https://getavataaars.com/" target="_blank">Avataaars</a> (Pablo Stanley; generator by Fang-Pen Lin), <a href="https://bioart.niaid.nih.gov/" target="_blank">NIH BioArt</a> (Ryan Kissinger, NIAID Visual &amp; Medical Arts, courtesy of NIAID; public domain), and <a href="https://healthicons.org/licenses" target="_blank">Health Icons</a> (Health Icons contributors, Resolve to Save Lives; CC0). AI was used for visual inspiration. The <a href="resources/AVATAAARS_LICENSE.txt" target="_blank">Avataaars copyright and license notice</a> is included.</p>
 
 
 </section>
@@ -23071,7 +23091,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>
   </div>
 </footer>
-<script>var lightboxQuarto = GLightbox({"openEffect":"zoom","descPosition":"bottom","selector":".lightbox","loop":false,"closeEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"openEffect":"zoom","selector":".lightbox","closeEffect":"zoom","descPosition":"bottom","loop":false});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {
