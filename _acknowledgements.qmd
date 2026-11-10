@@ -14,4 +14,3 @@ See the [Avataaars SVG library MIT license](https://github.com/fangpenlin/avataa
 [NIH BioArt reuse guidance](https://bioart.niaid.nih.gov/faqs){target="_blank"}, and
 [Health Icons CC0 icon license](https://healthicons.org/licenses){target="_blank"}.
 AI was used for visual inspiration.
-The [Avataaars copyright and license notice](resources/AVATAAARS_LICENSE.txt){target="_blank"} is included.
