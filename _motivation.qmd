@@ -17,9 +17,7 @@ In this case study, we will focus on {{< glossary "Systemic lupus erythematosus"
 #| out-width: "900px"
 #| out-extra: '.lightbox title=""'
 ottrpal::include_slide(
-  "https://docs.google.com/presentation/d/1ddjMmQf0Mupk_GlIYuNStCA4YiuFIuK-_suS1W2T104/edit#slide=id.p1",
-  output_dir = "img/ottr",
-  overwrite = FALSE
+  "https://docs.google.com/presentation/d/1ddjMmQf0Mupk_GlIYuNStCA4YiuFIuK-_suS1W2T104/edit#slide=id.p1"
 )
 ```
 
@@ -33,9 +31,7 @@ Latent variable analysis offers one way to investigate this complexity. A {{< gl
 #| out-width: "900px"
 #| out-extra: '.lightbox title=""'
 ottrpal::include_slide(
-  "https://docs.google.com/presentation/d/1ddjMmQf0Mupk_GlIYuNStCA4YiuFIuK-_suS1W2T104/edit#slide=id.p2",
-  output_dir = "img/ottr",
-  overwrite = FALSE
+  "https://docs.google.com/presentation/d/1ddjMmQf0Mupk_GlIYuNStCA4YiuFIuK-_suS1W2T104/edit#slide=id.p2"
 )
 ```
 
