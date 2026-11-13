@@ -60,6 +60,4 @@ Our main questions
 </tbody>
 </table>
 
-The questions are ordered intentionally. First you inspect the latent patterns that CoGAPS learns. Then you separate shared stimulation structure from cell-type-linked structure. Only after that do you attach biological meaning through top genes, directionality, and cell-type summaries.
-
 ***
