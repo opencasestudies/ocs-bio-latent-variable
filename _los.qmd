@@ -1,11 +1,11 @@
 # **Learning Objectives**
 ***
 
-By the end of this case study, you will be able to use a {{< glossary "Peripheral blood mononuclear cell" display="PBMC" >}} {{< glossary "IFN-beta" display="IFN-beta" >}} stimulation dataset to interpret {{< glossary "Latent pattern" display="latent transcriptional patterns" >}} learned by {{< glossary "CoGAPS" display="CoGAPS" >}}. You will inspect the data, follow evidence for the model resolution used later in the analysis, connect {{< glossary "Gene weight" display="gene weights" >}} and {{< glossary "Cell activity" display="cell activities" >}} to biological interpretation, and evaluate whether one learned pattern is consistent with a broad interferon-associated response.
+How can you tell whether different types of immune cells respond to {{< glossary "IFN-beta" >}} in similar ways? To answer the [four main questions](#main-questions), you'll start with the experiment: researchers divided each donor's sample into two portions, exposed one to IFN-beta, and left the other untreated. After a short introduction to the biology, you'll open the prepared data and use the cell labels to see which donor, condition, and cell type each cell belongs to.
 
-The main learner path uses included data summaries and saved CoGAPS results so you can focus on interpretation rather than waiting for a long model run. The Full Reproduction Guide at the end of the case study shows how the larger files and selected-model outputs can be regenerated in the validated Docker image.
+Next, you'll explore {{< glossary "Latent pattern" display="gene expression patterns" >}} that {{< glossary "CoGAPS" >}} has already found. For example, you'll use a plot to ask whether a pattern is stronger in stimulated cells than in untreated cells, and whether that difference appears in more than one cell type. You'll then look at the genes that contribute most to the pattern. Together, those observations will help you explain why you think a pattern reflects a response to IFN-beta, and what the evidence does *not* tell you.
 
-The objectives are organized into data analysis and programming skills, latent-variable and CoGAPS modeling skills, and biological interpretation skills. Together, they prepare you to answer the four main questions introduced above.
+The objectives below break that work into skills you'll practice along the way. You'll use saved results throughout the main lesson; the [Full Reproduction Guide](#full-reproduction-guide) is optional.
 
 {{< include _data_science_los.qmd >}}
 
@@ -15,18 +15,22 @@ The objectives are organized into data analysis and programming skills, latent-v
 
 ::: {.callout-note collapse="true" title="Objectives map: where each skill is used"}
 
-| Learning goal | What this helps you do | Where it appears |
+The rows follow the twelve objectives above in the same order: data analysis and programming, latent-variable and CoGAPS modeling, then biological interpretation. Each row points to an existing step where you can practice that skill.
+
+| Objective | What you will check | Where it appears |
 | --- | --- | --- |
-| Understand the biological setting | Explain why lupus PBMCs exposed to IFN-beta are useful for studying interferon-response structure. | [Motivation](#motivation); [Context](#context); [What are the data?](#what-are-the-data) |
-| Trace the main learner path | Use included files and saved CoGAPS results while knowing where optional full reproduction belongs. | [Packages and Setup](#packages-and-setup); [Data Import](#data-import); [Full Reproduction Guide](#full-reproduction-guide) |
-| Inspect data and metadata | Check cells, genes, conditions, donors, and annotated cell types before interpreting patterns. | [Data Import](#data-import); [Data Exploration](#data-exploration) |
-| Prepare CoGAPS-ready data | Understand genes-by-cells orientation and the difference between the R and Python data representations. | [Data Wrangling](#data-wrangling); [Full Reproduction Guide](#full-reproduction-guide) |
-| Evaluate model resolution | Explain how the case study uses rank-selection evidence to choose the model resolution inspected later, without treating that choice as universal. | [Data Import](#data-import); [Data Analysis](#data-analysis); [Limitations](#limitations) |
-| Interpret latent patterns | Connect gene weights and cell activities to pattern summaries without treating numbered pattern labels as portable across runs. | [Data Analysis](#data-analysis); [Summary](#summary) |
-| Connect patterns to IFN biology | Use stimulation association, top genes, and interferon-stimulated genes to support the IFN-associated interpretation. | [Data Visualization](#data-visualization); [Data Analysis](#data-analysis); [Summary](#summary) |
-| Check expression direction | Compare gene weights with higher-or-lower expression after stimulation so pattern membership is not confused with regulation. | [Data Visualization](#data-visualization); [Data Analysis](#data-analysis) |
-| Compare activity across cell types | Ask whether the IFN-associated pattern is broad, cell-type-linked, or mixed across annotated PBMC cell types. | [Data Visualization](#data-visualization); [Data Analysis](#data-analysis) |
-| State limits clearly | Separate descriptive latent-pattern evidence from formal disease mechanism, pathway validation, or treatment claims. | [Limitations](#limitations); [Summary](#summary); [Continued Learning](#continued-learning) |
+| Load and check the teaching dataset | Check the prepared dataset's dimensions and its condition, donor and cell-type metadata. | [Prepared-data check](#check-the-prepared-single-cell-data); [Cell metadata](#inspect-the-cell-metadata) |
+| Explain input orientation and inspect prepared data | Identify the gene and cell dimensions in R and Python, and explain the genes-by-cells input expected by CoGAPS. | [Prepared-data check](#check-the-prepared-single-cell-data); [Input orientation](#the-saved-files-must-be-cogaps-ready) |
+| Join outputs with metadata | Check cell identifiers and counts after joining activities to metadata, and connect gene weights with top-gene and directionality summaries. | [Join activities to metadata](#join-pattern-activities-to-cell-metadata); [Gene-weight summaries](#reshape-gene-weights-without-confusing-direction); [Directionality inputs](#prepare-directionality-inputs-for-later) |
+| Create and read activity plots | Use the code and figures to compare pattern activity between conditions and across annotated PBMC cell types. | [Pattern screening](#screen-patterns-before-naming-them); [Activity by cell type](#compare-activity-across-pbmc-identities) |
+| Describe cells as mixtures of patterns | Explain how one cell can use several patterns rather than receive a single pattern label. | [From cell clusters to latent patterns](#from-cell-clusters-to-latent-patterns); [CoGAPS output structure](#preview-the-cogaps-output-structure) |
+| Explain the model-resolution choice | Use the saved comparisons to explain the K6 choice, including the structure combined at K4, without claiming that K6 is universally best. | [Candidate-model comparison](#compare-k4-k5-and-k6-candidate-models); [Biological compression](#check-for-biological-compression) |
+| Identify an IFN-associated pattern | Combine stimulation association, cell activities and top-gene evidence to justify a pattern's interpretation; keep its number specific to that run. | [Pattern screening](#screen-patterns-before-naming-them); [Evidence behind working labels](#check-the-evidence-behind-the-working-labels) |
+| Interpret gene weights with expression direction | Explain why a high gene weight does not establish increased expression, using the paired gene contrasts to determine direction. | [Top genes and direction](#connect-top-genes-to-direction); [IFN-associated gene direction](#inspect-direction-within-the-ifn-associated-pattern) |
+| Explain the paired IFN-beta experiment | Identify the eight donors and matched control and stimulated PBMC aliquots, and explain why the pairing matters. | [Source-study design](#summary-of-the-kang-et-al.-study); [Paired-design check](#check-the-paired-perturbation-design) |
+| Recognize interferon-stimulated genes | Identify familiar ISGs, such as ISG15, IFIT1 and MX1, in the top-gene evidence supporting the IFN-associated interpretation. | [Interferon gene examples](#interferon-genes-learners-should-recognize); [IFN-associated gene direction](#inspect-direction-within-the-ifn-associated-pattern) |
+| Distinguish shared responses from cell-type-linked structure | Compare the broad IFN-associated activity with patterns whose activities are more concentrated in particular cell types. | [Shared and cell-type-linked structure](#look-for-shared-and-cell-type-linked-structure); [Identity-linked contrast](#use-an-identity-linked-pattern-as-a-contrast) |
+| State what the evidence can support | Distinguish conclusions about this PBMC stimulation experiment from claims about clinical SLE, disease mechanisms or universal CoGAPS settings. | [Limitations](#limitations); [Summary](#summary) |
 
 :::
 
