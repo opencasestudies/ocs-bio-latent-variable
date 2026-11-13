@@ -19,7 +19,7 @@ The rows follow the twelve objectives above in the same order: data analysis and
 
 | Objective | What you will check | Where it appears |
 | --- | --- | --- |
-| Load and check the teaching dataset | Check the prepared dataset's dimensions and its condition, donor and cell-type metadata. | [Prepared-data check](#check-the-prepared-single-cell-data); [Cell metadata](#inspect-the-cell-metadata) |
+| Load and check the teaching dataset | Check how many genes and cells are in the prepared dataset, then inspect the condition, donor, and cell-type labels. | [Prepared-data check](#check-the-prepared-single-cell-data); [Cell metadata](#inspect-the-cell-metadata) |
 | Explain input orientation and inspect prepared data | Identify the gene and cell dimensions in R and Python, and explain the genes-by-cells input expected by CoGAPS. | [Prepared-data check](#check-the-prepared-single-cell-data); [Input orientation](#the-saved-files-must-be-cogaps-ready) |
 | Join outputs with metadata | Check cell identifiers and counts after joining activities to metadata, and connect gene weights with top-gene and directionality summaries. | [Join activities to metadata](#join-pattern-activities-to-cell-metadata); [Gene-weight summaries](#reshape-gene-weights-without-confusing-direction); [Directionality inputs](#prepare-directionality-inputs-for-later) |
 | Create and read activity plots | Use the code and figures to compare pattern activity between conditions and across annotated PBMC cell types. | [Pattern screening](#screen-patterns-before-naming-them); [Activity by cell type](#compare-activity-across-pbmc-identities) |
