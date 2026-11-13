@@ -3,4 +3,4 @@
 1. Explain why a paired IFN-beta perturbation experiment in PBMCs is useful for studying interferon-response programs.
 1. Recognize canonical interferon-stimulated genes that support the IFN-associated interpretation.
 1. Distinguish broad stimulation-associated activity from cell-type-linked immune structure in a mixed PBMC population.
-1. State what the case-study evidence can and cannot support about lupus, IFN-beta response, cell types, and CoGAPS pattern interpretation.
+1. State what the case-study evidence can and cannot support about SLE, IFN-beta response, cell types, and CoGAPS pattern interpretation.
