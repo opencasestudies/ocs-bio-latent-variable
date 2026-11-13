@@ -8,3 +8,9 @@ We also acknowledge the CoGAPS, PyCoGAPS, Bioconductor, SingleCellExperiment, An
 We would also like to acknowledge the National Institute of General Medical Sciences for funding this work (1R25GM160622).
 
 Icons are from [IconPacks](https://www.iconpacks.net/){target="_blank"}.
+
+The Motivation comics use adapted artwork from Avataaars (Pablo Stanley; generator by Fang-Pen Lin), NIH BioArt (Ryan Kissinger, NIAID Visual & Medical Arts, courtesy of NIAID; public-domain images), and Health Icons (Health Icons contributors, Resolve to Save Lives).
+See the [Avataaars SVG library MIT license](https://github.com/fangpenlin/avataaars/blob/master/LICENSE){target="_blank"},
+[NIH BioArt reuse guidance](https://bioart.niaid.nih.gov/faqs){target="_blank"}, and
+[Health Icons CC0 icon license](https://healthicons.org/licenses){target="_blank"}.
+AI was used for visual inspiration.
