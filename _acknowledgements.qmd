@@ -14,3 +14,5 @@ See the [Avataaars SVG library MIT license](https://github.com/fangpenlin/avataa
 [NIH BioArt reuse guidance](https://bioart.niaid.nih.gov/faqs){target="_blank"}, and
 [Health Icons CC0 icon license](https://healthicons.org/licenses){target="_blank"}.
 AI was used for visual inspiration.
+
+The interferon signaling diagram in Context is an original illustration inspired by the stimulated-cell model in Figure 8 of @platanitis2019interferon.

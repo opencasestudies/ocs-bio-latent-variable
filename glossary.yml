@@ -140,6 +140,8 @@ Quality control: |
   Checks and filters used to remove measurements that are too unreliable for the intended analysis.
 Rank sweep: |
   A planned set of model runs that compares several values of K, usually across multiple seeds or iteration counts, before selecting one model resolution.
+RNA (ribonucleic acid): |
+  A molecule that cells make from DNA when they use the information in a gene. Measuring how much RNA comes from a gene gives researchers a clue about that gene's activity.
 Selected-model outputs: |
   Saved files from the CoGAPS model used for the main case-study analysis, such as metrics, pattern activities, gene weights, and top-gene tables.
 Sign test: |
@@ -148,6 +150,8 @@ SingleCellExperiment: |
   A Bioconductor data structure for annotated single-cell data, commonly used in R workflows.
 Single-cell RNA-seq: |
   A sequencing approach that measures gene expression separately for many individual cells.
+Single-cell transcriptomics: |
+  The study of which genes are expressed, and at what levels, in individual cells. It lets researchers compare gene expression across cells rather than seeing only an average for a whole sample.
 Sampling phase: |
   The phase of a CoGAPS run used to summarize the final pattern matrices after equilibration.
 Secondary data: |
