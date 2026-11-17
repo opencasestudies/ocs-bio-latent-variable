@@ -43,7 +43,7 @@ De-identification: |
 Diagnostic trace: |
   A saved record of model behavior over iterations, such as chi-square or atom-count values, used to check whether a run behaved as expected.
 Directionality: |
-  Whether expression is higher or lower in one condition compared with another.
+  Whether relative expression is higher or lower in a specified comparison. Here, the comparison is stimulation versus control or one cell type versus all remaining cell types combined; a CoGAPS gene weight alone does not give this direction.
 Donor: |
   A person who provides a biological sample. Here, each donor provided blood immune cells that were divided into untreated and IFN-beta-stimulated samples outside the body.
 Doublet: |
