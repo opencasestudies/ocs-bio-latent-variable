@@ -1,10 +1,6 @@
 # **Main Questions**
 ***
 
-The researchers studied {{< glossary "Peripheral blood mononuclear cell" display="peripheral blood mononuclear cells" >}} (PBMCs), a mixture of blood immune cells that includes T cells, B cells, and monocytes. For each donor, the researchers exposed one portion of the sample to IFN-beta and left another untreated as a control. Comparing the two portions from the same donor is called a {{< glossary "Paired design" display="paired design" >}}.
-
-CoGAPS looks for {{< glossary "Latent pattern" display="gene expression patterns" >}}: groups of genes whose expression tends to vary together across cells. Is a pattern strong in T cells whether or not they were stimulated? Or is it stronger after stimulation in several cell types? Both can be true. To explore these possibilities, you'll use the *{{< glossary "Cell activity" display="activity" >}}* that CoGAPS estimates for each pattern in each cell: a measure of how strongly that pattern appears in the cell.
-
 :::{.main_question}
 ::::{.main_question_header}
 Our main questions
@@ -59,7 +55,5 @@ Our main questions
 </tr>
 </tbody>
 </table>
-
-The questions are ordered intentionally. First you inspect the latent patterns that CoGAPS learns. Then you separate shared stimulation structure from cell-type-linked structure. Only after that do you attach biological meaning through top genes, directionality, and cell-type summaries.
 
 ***

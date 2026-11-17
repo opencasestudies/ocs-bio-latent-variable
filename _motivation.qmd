@@ -37,4 +37,30 @@ ottrpal::include_slide(
 
 Similar questions arise in other areas of research, where cells can share a biological response while retaining their distinct identities. CoGAPS has been used to investigate cell types and developmental processes in the mouse retina [@steinobrien2019transferLearning], to examine {{< glossary "Neural development" display="neural development" >}} [@kim2024neuralFates], and to examine immune-cell states associated with {{< glossary "Cancer immunotherapy" display="cancer immunotherapy" >}} [@davismarcisak2021nkActivation]. You can apply this approach in your own research to identify genes associated with each pattern and compare pattern activity across cell types and experimental conditions [@johnson2023cogapsWorkflow].
 
+This case study uses data from Kang and colleagues [-@kang2018multiplexed], who studied how blood immune cells from eight people with SLE respond to IFN-beta. These {{< glossary "Peripheral blood mononuclear cell" display="peripheral blood mononuclear cells" >}} (PBMCs) include T cells, B cells, and monocytes. For each donor, the researchers exposed one portion of the cells to IFN-beta and left another untreated as a control, then measured RNA in individual cells six hours later. Comparing the two conditions helps us investigate whether different immune-cell types share a response to IFN-beta.
+
+```{r}
+#| label: fig-motivation-study-design
+#| echo: false
+#| fig-cap: "Kang and colleagues [-@kang2018multiplexed] divided blood immune-cell samples from eight donors with SLE between untreated control and IFN-beta conditions. After six hours, they measured RNA in individual cells. The conditions contain different cells from the same donors. The illustration summarizes the study design; portraits and cells are schematic."
+#| fig-alt: "Eight schematic donor portraits lead to a blood immune-cell sample. A branching arrow divides each donor sample into an untreated control culture and an IFN-beta culture. Both branches show six hours, then individual cells containing schematic RNA strands. Each donor contributes to both conditions, which contain different cells."
+#| out-width: "900px"
+#| out-extra: '.lightbox title=""'
+ottrpal::include_slide(
+  "https://docs.google.com/presentation/d/1tMAtDBFiU4xgW0WsbQNrOoIcy_CK99F_TGyEyUu29jU/edit#slide=id.p1"
+)
+```
+
+:::{.definition_box}
+::::{.definition_box_header}
+Motivating articles
+::::
+::::{.inner_block}
+
+- **Source data: Kang et al. [-@kang2018multiplexed].** This study measured gene expression in individual blood immune cells from eight donors with SLE, comparing IFN-beta-stimulated samples with untreated samples from the same donors. We use these data to investigate shared and cell-type-associated responses.
+- **Analysis method: Johnson et al. [-@johnson2023cogapsWorkflow].** This paper describes workflows for using CoGAPS to identify and interpret patterns in gene-expression data. It supports our analysis approach; CoGAPS was not used in the original Kang study.
+
+::::
+:::
+
 ***

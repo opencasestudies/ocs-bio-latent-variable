@@ -1,11 +1,9 @@
 # **Learning Objectives**
 ***
 
-How can you tell whether different types of immune cells respond to {{< glossary "IFN-beta" >}} in similar ways? To answer the [four main questions](#main-questions), you'll start with the experiment: researchers divided each donor's sample into two portions, exposed one to IFN-beta, and left the other untreated. After a short introduction to the biology, you'll open the prepared data and use the cell labels to see which donor, condition, and cell type each cell belongs to.
+To address the [four main questions](#main-questions), you'll learn to inspect the prepared data, create plots, and interpret saved {{< glossary "CoGAPS" >}} results. These steps will help you compare immune-cell responses to {{< glossary "IFN-beta" >}} and explain what the evidence supports.
 
-Next, you'll explore {{< glossary "Latent pattern" display="gene expression patterns" >}} that {{< glossary "CoGAPS" >}} has already found. For example, you'll use a plot to ask whether a pattern is stronger in stimulated cells than in untreated cells, and whether that difference appears in more than one cell type. You'll then look at the genes that contribute most to the pattern. Together, those observations will help you explain why you think a pattern reflects a response to IFN-beta, and what the evidence does *not* tell you.
-
-The objectives below break that work into skills you'll practice along the way. You'll use saved results throughout the main lesson; the [Full Reproduction Guide](#full-reproduction-guide) is optional.
+The objectives below describe the skills you'll practice. The [Full Reproduction Guide](#full-reproduction-guide) is optional.
 
 {{< include _data_science_los.qmd >}}
 
