@@ -33,49 +33,33 @@ A shared response need not look the same in every cell type. For example, in the
 
 ## PBMCs as a mixed immune-cell system
 
-{{< glossary "Peripheral blood mononuclear cell" display="Peripheral blood mononuclear cells" >}}, or PBMCs, are blood immune cells with round nuclei. They include lymphocytes, such as T cells, B cells, and natural killer cells, as well as monocytes and some dendritic cells. PBMCs do not include every immune cell in blood; for example, mature neutrophils are usually not part of the PBMC fraction. Still, PBMCs are widely used because they are accessible and contain many immune populations relevant to systemic immune activity.
+{{< glossary "Peripheral blood mononuclear cell" display="Peripheral blood mononuclear cells" >}}, or PBMCs, are a mixture of blood immune cells, including T cells, B cells, {{< glossary "Natural killer cell" display="natural killer cells" >}}, {{< glossary "Monocyte" display="monocytes" >}} and some {{< glossary "Dendritic cell" display="dendritic cells" >}}. They represent several, but not all, of the immune-cell types found in blood.
 
-For this case study, PBMCs are useful for the same reason they are challenging. A PBMC sample is not one cell type. It is a mixture. A stimulated monocyte can still have monocyte-like expression. A stimulated B cell can still have B-cell-like expression. A stimulated natural killer cell can still have cytotoxic-cell features. At the same time, all of those cells may share some response to IFN-beta.
+These cell types have different roles and characteristic {{< glossary "Gene expression profile" display="gene-expression profiles" >}}. A monocyte, for example, can respond to IFN-beta while retaining expression features that distinguish it from a T cell. Both cell types may increase expression of some of the same interferon-stimulated genes, but their responses need not be equally strong. {{< glossary "Immune-cell identity" display="Cell identity" >}} and response to stimulation can therefore contribute to the same cell's expression profile [@kang2018multiplexed; @kotliar2019identityActivity].
 
-This creates a layered interpretation problem. Each cell can carry:
+Single-cell measurements let you examine these differences separately. You can compare control and stimulated cells of the same type, then ask whether other cell types show similar changes. This matters because an average across all cells can change simply because a sample contains different proportions of cell types, even without expression changes within those types [@kang2018multiplexed].
 
-1. an immune-cell identity signal,
-1. a stimulation-associated signal,
-1. donor-specific variation,
-1. technical variation, and
-1. noise from sparse single-cell measurement.
-
-No single metadata label captures all of these layers. A cell-type label tells you what a cell most resembles, but not everything that cell is doing. A condition label tells you whether a cell came from control or stimulated culture, but not which genes drove its response. A latent-variable approach is useful because it can represent cells as mixtures of several signals rather than forcing each cell into one explanatory box.
+Not every difference reflects stimulation. Cells can also differ between {{< glossary "Donor" display="donors" >}}, and the measurements capture only part of the RNA present in each cell. Later, you will use the recorded cell type, donor and condition alongside the expression data to help interpret the patterns you find.
 
 ## Summary of the Kang et al. study
 
-The source study for this case study is Kang et al. 2018, which introduced demuxlet and used multiplexed droplet single-cell RNA-seq to study PBMC responses to IFN-beta [@kang2018multiplexed]. The original paper's main methodological contribution was demuxlet: a computational approach that uses natural genetic variation to assign each droplet to a donor and detect droplets that likely contain cells from more than one person.
+In the experiment used here, Kang and colleagues studied PBMCs from eight donors with SLE. Each donor's sample was divided into two portions, or {{< glossary "Aliquot" display="aliquots" >}}: one exposed to IFN-beta and one left untreated. RNA was measured in individual cells after six hours [@kang2018multiplexed].
 
-The IFN-beta part of that study used PBMCs from eight donors with SLE. For each donor, the researchers split PBMCs into two matched portions, or {{< glossary "Aliquot" display="aliquots" >}}. One aliquot was left untreated as a control. The other was stimulated with recombinant IFN-beta for six hours. After stimulation, cells were pooled by condition and profiled using droplet single-cell RNA-seq [@kang2018multiplexed].
+This is a {{< glossary "Perturbation experiment" display="perturbation experiment" >}} because researchers deliberately changed the cells' environment to study their response. It also uses a {{< glossary "Paired design" display="paired design" >}}: each donor contributes samples to both conditions. Comparing conditions within donors helps account for differences between people. The pairing is between samples from the same donor, not the same cells measured before and after stimulation.
 
-That design has two features that matter for the rest of the case study.
+After incubation, cells were combined into two pools, one per condition, and captured in tiny droplets for RNA sequencing. The researchers developed **demuxlet** to use genetic differences between donors to assign cells back to their source, a process called {{< glossary "Demultiplexing" display="demultiplexing" >}}. It also helped identify droplets containing cells from two different donors, a type of {{< glossary "Doublet" display="doublet" >}}, so those mixed observations could be excluded [@kang2018multiplexed].
 
-First, it is a {{< glossary "Perturbation experiment" display="perturbation experiment" >}}. The experiment deliberately changes one condition, IFN-beta exposure, so that the transcriptional response can be measured. This gives the analysis a clear contrast: control versus IFN-beta stimulated cells.
-
-Second, it is a {{< glossary "Paired design" display="paired design" >}}. Control and stimulated cells come from the same donors. That matters because immune profiles can differ substantially across people. A paired design lets the source study compare stimulation responses while keeping donor background more visible.
-
-Kang et al. also used {{< glossary "Demultiplexing" display="demultiplexing" >}} and {{< glossary "Doublet" display="doublet" >}} detection. In droplet single-cell RNA-seq, a droplet ideally contains RNA from one cell. A doublet occurs when material from two cells is captured together and treated as one observation. Demuxlet helped assign cells back to donors and remove likely doublets, improving confidence that later summaries reflected singlet cells rather than mixed droplets [@kang2018multiplexed].
-
-The exact files and teaching data objects used in this case study are described in the next section, [**What are the data?**](#what-are-the-data) Here, the important source-study point is conceptual: the dataset was designed to compare matched control and IFN-beta-stimulated PBMCs from donors with SLE while retaining single-cell and cell-type information.
+Next, we will look at what the original study found. The files used in our analysis are described later in [**What are the data?**](#what-are-the-data).
 
 ## Source-study findings to carry forward
 
-Kang et al. did not use CoGAPS. The original paper used the dataset to demonstrate multiplexed droplet single-cell RNA-seq, demuxlet, cell-type-specific response analysis, and genetic analyses. This case study reuses the source dataset for a different teaching goal: learning how CoGAPS can recover and interpret latent transcriptional patterns.
+Kang and colleagues reported three findings that are especially useful for interpreting this experiment [@kang2018multiplexed]:
 
-Several source-study findings should guide your expectations before you see the CoGAPS results:
+- **Responses were partly shared and partly cell-type-specific.** Thousands of genes differed in {{< glossary "Gene expression" display="expression" >}} between stimulated and untreated cells in at least one cell type. Some changes occurred across several cell types; others were limited to particular types.
+- **Cell types remained recognizable.** The researchers could still identify the major immune-cell groups in both conditions, despite the changes in gene expression.
+- **Donors differed too.** Some expression differences between {{< glossary "Donor" display="donors" >}} were related to the proportions of cell types in their samples. Other differences remained when the researchers compared cells of the same type.
 
-- IFN-beta stimulation produced broad transcriptional changes across PBMCs.
-- The source study identified thousands of genes with differential expression in at least one cell type after IFN-beta stimulation [@kang2018multiplexed].
-- The IFN-beta response included antiviral, chemokine, and SLE-related pathway signals.
-- IFN-beta stimulation did not erase cell identity. The original analysis still recovered major immune-cell groups after stimulation.
-- Cell-type composition and donor-to-donor variation both mattered, which is why the case study keeps cell type and donor metadata visible.
-
-These findings are expectations, not answers. They tell you what kinds of signals would be biologically plausible. Later sections ask whether the CoGAPS patterns support those expectations in the teaching data.
+These are findings from the original study, which did not use CoGAPS. Here, you will examine whether CoGAPS reveals similar features in the prepared data. The next subsection introduces genes that can help you recognize an interferon response.
 
 ## Interferon genes learners should recognize
 
