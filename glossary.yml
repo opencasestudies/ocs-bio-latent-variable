@@ -26,6 +26,8 @@ Cell-type-linked pattern: |
   A learned pattern whose activity mainly follows annotated immune-cell groups rather than the stimulation condition.
 Chi-square: |
   A model-fit diagnostic that summarizes reconstruction error. Lower values generally indicate better reconstruction, but values can fluctuate during CoGAPS sampling.
+Clustering: |
+  Grouping observations, such as cells, according to similarities in their measured features.
 CoGAPS: |
   A Bayesian nonnegative matrix factorization method used to learn overlapping gene-expression patterns and cell activities.
 Coefficient of variation: |
@@ -104,6 +106,8 @@ Log transformation: |
   A transformation that compresses large expression values and makes expression differences easier to summarize after normalization.
 Long format: |
   A table layout where each row stores one measurement for one observational unit, such as one cell-pattern activity value.
+Matrix: |
+  A rectangular arrangement of numbers in rows and columns.
 Matrix orientation: |
   The meaning assigned to matrix rows and columns. For CoGAPS input in this case study, rows should represent genes and columns should represent cells.
 Metadata join: |
@@ -133,7 +137,7 @@ Plasmacytoid dendritic cell: |
 Pseudobulk: |
   A summary that combines single-cell counts within a group, such as donor and condition, so expression differences can be compared at a grouped-sample level.
 Posterior uncertainty: |
-  Variation in sampled model summaries that helps indicate how stable a pattern, activity, or gene weight is.
+  Uncertainty in estimated quantities after accounting for the observed data and the model's assumptions. In CoGAPS, it can be summarized by the spread of sampled gene weights and cell activities.
 Proxy measure: |
   An observed quantity used as a stand-in for a concept that is difficult to measure directly. A proxy can mislead when it does not represent that concept equally across people or settings.
 Quality control: |
@@ -160,6 +164,8 @@ Sparse optimization: |
   A CoGAPS implementation option that uses a sparse data representation to improve runtime on sparse single-cell RNA-seq matrices.
 Spearman correlation: |
   A rank-based correlation that compares whether two measurements order observations similarly.
+Standard deviation: |
+  A measure of how spread out values are around their mean. Here, posterior standard deviations summarize the spread of sampled gene weights or cell activities.
 Stimulation-associated activity: |
   Pattern activity that differs between stimulated cells and control cells.
 Systemic lupus erythematosus: |

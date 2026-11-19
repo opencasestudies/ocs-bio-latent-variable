@@ -15,4 +15,6 @@ See the [Avataaars SVG library MIT license](https://github.com/fangpenlin/avataa
 [Health Icons CC0 icon license](https://healthicons.org/licenses){target="_blank"}.
 AI was used for visual inspiration.
 
+The pattern-evidence comic in Context reuses the Avataaars researcher artwork credited above and uses original schematic diagrams, with AI assistance for visual inspiration and slide construction.
+
 The interferon signaling diagram in Context is an original illustration inspired by the stimulated-cell model in Figure 8 of @platanitis2019interferon.

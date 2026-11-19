@@ -61,93 +61,91 @@ Kang and colleagues reported three findings that are especially useful for inter
 
 These are findings from the original study, which did not use CoGAPS. Here, you will examine whether CoGAPS reveals similar features in the prepared data. The next subsection introduces genes that can help you recognize an interferon response.
 
-## Interferon genes learners should recognize
+## Recognizing interferon-response genes {#interferon-genes-learners-should-recognize}
 
-You do not need to memorize a long list of interferon genes. You do need enough vocabulary to recognize why a later top-gene list might support an interferon-associated interpretation.
+Later tables will contain gene symbols such as `ISG15`, `IFIT1` and `MX1`. These symbols are short names for genes. Recognizing a few will help you connect the results to the interferon response described above.
 
-Several gene families often appear in interferon-response analyses:
+{{< glossary "Interferon-stimulated gene" display="Interferon-stimulated genes" >}} can have different roles. Some encode proteins that help defend against viruses, while others help regulate the response or communicate with other cells. Examples you will encounter include:
 
-- **ISG genes**, such as `ISG15` and `ISG20`, are named as interferon-stimulated genes and often appear in interferon-response signatures.
-- **IFIT and IFITM genes**, such as `IFIT1`, `IFIT2`, `IFIT3`, and `IFITM` family members, are commonly associated with antiviral interferon responses.
-- **IFI genes**, such as `IFI6`, are part of a broad set of interferon-inducible genes.
-- **MX and OAS genes**, such as `MX1`, `OAS1`, and `OASL`, are classic antiviral-response genes that often appear downstream of interferon signaling.
-- **IRF and STAT-related genes**, such as `IRF7` and `STAT1`, connect to transcriptional regulation and interferon pathway signaling.
-- **Nucleic-acid sensing genes**, such as `DDX58` and `IFIH1`, relate to sensing viral or self nucleic acids and can connect upstream danger sensing to interferon responses.
-- **Chemokine and immune-regulatory genes**, such as `CXCL10`, `TNFSF10`, and `SOCS1`, can reflect downstream immune communication or regulation.
+- **`IFIT1`: antiviral defense.** Its protein can interfere with the production of viral proteins [@habjan2013ifit1].
+- **`OAS1`: antiviral defense through RNA breakdown.** Its protein can activate a process that breaks down RNA [@wickenhagen2021oas1].
+- **`IRF7`: regulation.** Its protein helps control the expression of interferon genes [@honda2005irf7].
+- **`CXCL10`: communication.** Its protein helps attract immune cells [@taub1993cxcl10].
 
-These gene names are anchors for interpretation, not shortcuts. A top-gene list that includes several canonical interferon-related genes is consistent with an interferon-associated pattern. But you still need to ask where the pattern is active, whether it tracks stimulation, and whether the genes are higher or lower in stimulated cells.
+These descriptions come from studies of the genes and their proteins. Here, we measure RNA, so we cannot directly determine whether each protein is carrying out its known function.
 
-This last point is important. CoGAPS gene weights identify genes that help define a pattern. They do not, by themselves, tell you whether a gene is upregulated or downregulated. Later, you will pair pattern weights with condition-based directionality checks.
+When several genes associated with interferon responses appear together in a pattern, they give you a reason to investigate that interpretation. You will also check whether the pattern is more prominent in stimulated cells and whether those genes have higher or lower expression than in untreated cells. A large CoGAPS {{< glossary "Gene weight" display="gene weight" >}} alone does not tell you the {{< glossary "Directionality" display="direction of that change" >}}.
 
 ## From cell clusters to latent patterns
 
-Clustering is often one of the first useful tools in single-cell RNA-seq analysis. A clustering workflow groups cells with similar expression profiles, and those groups can help analysts assign cell-type labels. Reviews of single-cell clustering emphasize that clustering is central to identifying putative cell types, but also that interpretation is challenging because single-cell data are high-dimensional, sparse, and sensitive to preprocessing choices [@kiselev2019singleCellClustering].
+One way to explore single-cell data is to group cells with similar {{< glossary "Gene expression profile" display="gene-expression profiles" >}}. This is called {{< glossary "Clustering" display="clustering" >}}. Researchers examine the genes expressed in each group to help interpret it; a cluster is not automatically a cell type [@kiselev2019singleCellClustering].
 
-For this case study, clustering is helpful but not sufficient. Clustering asks which cells are similar overall. The research questions ask something more layered: which transcriptional signals are present, which signals are shared across immune-cell types, and which signals are most associated with IFN-beta stimulation.
+A cluster label does not describe every response within a cell. For example, a stimulated monocyte may retain expression features associated with monocytes while increasing expression of interferon-stimulated genes. A stimulated T cell may show some of those same changes. The cells need not belong to the same cluster for part of their response to be shared [@kotliar2019identityActivity].
 
-Kotliar and colleagues describe this as a distinction between cell-type identity programs and cellular activity programs [@kotliar2019identityActivity]. An identity program reflects what a cell is, such as a T cell, B cell, monocyte, or dendritic cell. An activity program reflects what a cell is doing, such as responding to stimulation, cycling, producing cytokines, or activating an antiviral pathway.
+CoGAPS offers another way to describe these data. It looks for gene-expression patterns and estimates how strongly each pattern is represented in each cell. These are called {{< glossary "Latent pattern" display="latent patterns" >}} because the model infers them from the expression measurements rather than receiving them as recorded labels. A cell can have contributions from several patterns [@steinobrien2019transferLearning].
 
-The difficult part is that a single cell can express both kinds of programs. A monocyte can have monocyte identity genes and interferon-response genes. A T cell can have T-cell markers and stimulation-response genes. A B cell can retain B-cell identity while also responding to IFN-beta. That is why a one-cell, one-cluster view can be too restrictive for this case study.
+Two linked outputs help you examine each pattern: {{< glossary "Gene weight" display="gene weights" >}}, which describe how strongly genes contribute to it, and {{< glossary "Cell activity" display="cell activities" >}}, which describe how strongly it is represented in each cell. Here, activity is a model estimate, not a direct measurement of a protein's activity.
 
-CoGAPS looks for gene expression patterns: groups of genes whose expression tends to vary together across cells. These {{< glossary "Latent pattern" display="latent patterns" >}} are inferred from the expression data, rather than supplied as cell labels. For each pattern, the model estimates a {{< glossary "Cell activity" display="cell activity" >}}, which describes how strongly that pattern is represented in each cell.
+The prepared dataset already includes cell-type labels. You will compare these labels with the pattern activities to ask whether a pattern is more prominent in a particular cell type, in stimulated cells across several types, or both. The contributing genes will help you interpret that pattern. Differences between donors or in how samples were measured can also influence the results, so a learned pattern is not automatically a distinct biological process.
 
-You can compare these activities to ask whether a pattern is strong in T cells in both conditions, or stronger after stimulation across several cell types. Both can be true. A pattern can also reflect donor differences or technical effects, so you will need evidence to decide what it represents.
+::: {.callout-note collapse="true" title="Optional: UMAP, PCA and CoGAPS"}
 
 UMAP, principal component analysis (PCA), and CoGAPS offer different ways to explore expression data. Here, we use UMAP as a two-dimensional display of the cells, which we can color by cell type, condition, or pattern activity. PCA produces gene loadings and cell scores along perpendicular directions that explain variation in the data; those loadings and scores can be positive or negative. CoGAPS instead represents expression using nonnegative, additive gene weights and cell activities. This lets us investigate overlapping candidate programs, such as cell identity and an interferon response within the same cell. Neither PCA nor CoGAPS automatically assigns biological meaning to its components.
+
+:::
 
 :::{.think_question}
 ::::{.think_question_header}
 Stop and think
 ::::
 ::::{.inner_block}
-Why might a stimulated monocyte be hard to interpret with only one label?
+If a pattern is more prominent in stimulated monocytes and stimulated T cells, what might it represent, and what would you check next?
 
 <details><summary>Answer</summary>
-A stimulated monocyte carries at least two interpretable signals: it still has monocyte-like expression, and it may also activate interferon-response genes. A single label can name the cell identity, but it does not describe every transcriptional program active in that cell.
+It might reflect a response shared across those cell types. Examine its contributing genes and compare its activity in stimulated and untreated cells within each type before interpreting it as an interferon response.
 </details>
 ::::
 :::
 
+The next subsection explains how gene weights and cell activities work together to represent the expression data.
+
 ## NMF: the mathematical shape of the problem
 
-Single-cell RNA-seq data can be organized as a matrix. In this case study, the modeling input is a genes-by-cells matrix. Each row represents a gene, each column represents a cell, and each entry is a non-negative expression value.
+How do gene weights and cell activities combine to describe expression? Start with a {{< glossary "Matrix" display="matrix" >}}, a rectangular arrangement of numbers. In the modeling input used here, each row represents a gene and each column represents a cell. An entry therefore describes one gene's expression in one cell.
 
-Here, an expression value is a nonnegative, library-size-normalized and log-transformed RNA measurement for one gene in one cell. It is not the original molecule count. The prepared dataset keeps the original counts for the retained genes in a separate `counts` layer for later expression-direction comparisons.
+These entries are prepared expression values, not original RNA counts. The counts have been {{< glossary "Library-size normalization" display="scaled" >}} to account for differences in the total counts measured per cell, then {{< glossary "Log transformation" display="log-transformed" >}} to compress large values. The original counts are retained separately for later comparisons.
 
-{{< glossary "Non-negative matrix factorization" display="Non-negative matrix factorization" >}}, or NMF, asks whether a large non-negative matrix can be approximated as the product of two smaller non-negative matrices. At the intuition level:
+{{< glossary "Non-negative matrix factorization" display="Non-negative matrix factorization" >}}, or NMF, represents this input using two linked matrices: {{< glossary "Gene weight" display="gene weights" >}} and {{< glossary "Cell activity" display="cell activities" >}}. For a chosen number of patterns, written as $K$, the model estimates values in these matrices whose product approximates the input. In the notation used here, this is written as $D \approx AP$ [@steinobrien2019transferLearning].
 
-```text
-observed expression matrix ~= gene weights x cell activities
-```
+| Matrix | Rows | Columns | Meaning |
+|---|---|---|---|
+| $D$ | Genes | Cells | Prepared expression values supplied to the model |
+| $A$ | Genes | Patterns | Each gene's weight in each pattern |
+| $P$ | Patterns | Cells | Each pattern's activity in each cell |
 
-In a compact mathematical form:
+The pattern columns of $A$ correspond to the pattern rows of $P$. Both contain the same $K$ patterns. In the saved activity tables you will inspect later, cells appear in rows and patterns in columns instead; the arrangement is reversed.
 
-$$
-D \approx A P
-$$
+To estimate the expression value for one gene in one cell, multiply that gene's weight in each pattern by the pattern's activity in the cell. Then add those contributions.
 
-Here:
+**Illustrative example:** suppose there are two patterns. For one gene, the weights are 2 and 1; in one cell, the corresponding activities are 0.5 and 0.2. The estimated expression value is $(2 \times 0.5) + (1 \times 0.2) = 1.2$.
 
-| Object | What it represents | How to read it |
-|---|---|---|
-| `D` | the observed expression matrix | genes by cells |
-| `A` | the gene-by-pattern matrix | which genes contribute to each pattern |
-| `P` | the pattern-by-cell matrix | which cells use each pattern strongly |
-| `K` | the number of patterns requested | the model resolution |
+**Non-negative** means that the weights and activities are zero or positive, so their contributions add rather than subtract. This does not mean that expression must increase after stimulation: expression can still be lower in one condition than another. The restriction concerns how the model represents each cell [@lee1999nmf].
 
-For one gene and one cell, the model approximates expression by adding up contributions from all `K` patterns:
+::: {.callout-note collapse="true" title="Optional: reading the equation for one gene and cell"}
 
 $$
 D_{g,c} \approx \sum_{k=1}^{K} A_{g,k} P_{k,c}
 $$
 
-In plain language, a cell's expression profile is represented as a mixture of learned patterns. The non-negative constraint matters because patterns add together rather than cancel each other out. That additive structure fits the PBMC problem: a cell can be monocyte-like and interferon-response-like at the same time.
+Here, $g$ identifies a gene, $c$ identifies a cell, and $k$ identifies a pattern. $A_{g,k}P_{k,c}$ is that pattern's contribution to the estimated expression value. The summation symbol means to add these contributions across all $K$ patterns.
 
-NMF is not magic. It does not know biology by itself. It produces matrices that must be interpreted using genes, cell metadata, experimental design, diagnostics, and prior biological knowledge.
+:::
 
-## How CoGAPS extends vanilla NMF
+The symbol $\approx$ means "approximately equal." The combined patterns summarize the input rather than reproduce every value exactly. Their biological meaning still needs to be investigated. The next subsection introduces CoGAPS, the particular NMF approach used in this case study.
 
-{{< glossary "CoGAPS" display="CoGAPS" >}} is the NMF-family method used in this case study. The name stands for Coordinated Gene Activity in Pattern Sets. CoGAPS was introduced as an R/C++ package for identifying patterns and biological process activity in transcriptomic data [@fertig2010cogaps]. Later single-cell CoGAPS work extended this latent-pattern framework to sparse single-cell RNA-seq data [@steinobrien2019transferLearning]. A later workflow paper describes CoGAPS analysis in R, Python, and GenePattern Notebook [@johnson2023cogapsWorkflow]. The official [CoGAPS User Guide](https://fertiglab.github.io/CoGAPSGuide/){target="_blank"} introduces the method and software workflows for R and Python users.
+## How CoGAPS estimates patterns and uncertainty {#how-cogaps-extends-vanilla-nmf}
+
+{{< glossary "CoGAPS" display="CoGAPS" >}}, short for Coordinated Gene Activity in Pattern Sets, is the method we use to estimate gene weights and cell activities. It follows the non-negative matrix representation introduced above and also estimates uncertainty in those values. The method was introduced by Fertig and colleagues and subsequently developed for single-cell data [@fertig2010cogaps; @steinobrien2019transferLearning].
 
 :::: {.columns}
 ::: {.column width="22%"}
@@ -161,67 +159,78 @@ NMF is not magic. It does not know biology by itself. It produces matrices that 
 
 *Image credit: CoGAPS logo and schematic from the [Fertig Lab CoGAPS User Guide](https://fertiglab.github.io/CoGAPSGuide/){target="_blank"}.*
 
-The schematic above shows the same basic matrix idea introduced in the NMF section: a large gene-expression matrix is represented by a smaller set of learned patterns. CoGAPS keeps that additive, non-negative structure, but fits the model using a Bayesian, sampling-based approach. Instead of treating one numerical factorization as the whole answer, CoGAPS samples plausible factorizations and summarizes them. This gives the method a natural connection to diagnostics, uncertainty, and stability checks.
+How does CoGAPS estimate the weights and activities? It uses a {{< glossary "Bayesian model" display="Bayesian model" >}}, which combines information from the expression data with assumptions about the values being estimated. During fitting, it repeatedly samples possible values for the gene weights and cell activities according to this model. Here, "sampling" refers to exploring model values, not collecting more cells or donors [@fertig2010cogaps].
 
-You do not need to understand every sampling detail to use the case study. The learner-facing interpretation rests on four ideas:
+CoGAPS summarizes these sampled values in two useful ways. The **means** provide estimates of the gene weights and cell activities. Their {{< glossary "Standard deviation" display="standard deviations" >}} describe how spread out the sampled values are around those means. These are summaries of uncertainty in the model estimates, not measurements of how much gene expression varies between cells [@johnson2023cogapsWorkflow].
 
-1. **Patterns are overlapping.** A cell can use more than one pattern.
-1. **Pattern numbers are run-specific.** A biological signal should be identified by evidence, not by assuming one pattern label is universal.
-1. **Gene weights are not directionality.** A high-weight gene helps define a pattern, but a separate condition comparison is needed to determine whether the gene is higher or lower after stimulation.
-1. **Diagnostics matter.** A biologically tempting pattern still needs evidence that the model ran sensibly and that the interpretation is stable enough to use.
+{{< glossary "Posterior uncertainty" display="Uncertainty estimates" >}} do not replace checks of the model run. Later, you will inspect saved diagnostic plots to examine how the estimates changed during fitting. You will also compare results from separate runs to see whether important features recur. Separate runs can produce different pattern orders and sometimes different patterns, so a pattern number is not a fixed biological name [@johnson2023cogapsWorkflow].
 
-The case study uses the R/Bioconductor CoGAPS workflow as the primary implementation. Python/PyCoGAPS-compatible outputs are provided as a secondary implementation path in later tabbed examples. That implementation detail matters for reproducibility, but the interpretation frame is the same: connect pattern activity, gene weights, source-study design, and biological expectations.
+These checks help you judge the model's behavior. Interpreting its patterns still requires examining the contributing genes and comparing cell activities with the recorded cell types and stimulation conditions.
 
-A gene weight describes the gene's contribution to a pattern in the saved model. Ranking these weights helps identify genes that define the pattern, but a high weight does not mean that the gene is specific to that pattern or increases after stimulation. The raw weight is not an expression measurement, a probability, or a fold change, and its size is not an absolute measure of biological importance across patterns or fitted runs.
+The main interpretation in this case study uses the saved R CoGAPS model. Parallel Python examples are provided in the language tabs. The [CoGAPS User Guide](https://fertiglab.github.io/CoGAPSGuide/){target="_blank"} provides further information about both workflows.
 
-PatternMarkers uses a gene's weights across the fitted patterns to identify associations with particular patterns [@steinobrien2017patternMarkers]. It addresses a different question from ranking genes within one pattern or comparing expression between conditions. The main analysis uses gene-weight-ranked lists.
+::: {.callout-note collapse="true" title="Optional: Gene weights and pattern-specific markers"}
+
+Ranking gene weights identifies the largest weights within one pattern. A gene can have a large weight in several patterns, so this ranking does not establish that it is specific to one pattern. **PatternMarkers** instead compares a gene's relative weights across patterns. Neither comparison determines whether expression increases or decreases after stimulation. The main analysis uses gene-weight-ranked lists [@steinobrien2017patternMarkers].
+
+:::
+
+Before fitting the model, we must choose how many patterns it can learn. This number, $K$, affects how broadly or finely the model describes the data. The next subsection explains that choice.
 
 ## What choosing `K` means
 
-The rank, written as `K`, is the number of latent patterns CoGAPS is asked to learn. Choosing `K` is a model-resolution decision.
+**$K$ sets the number of patterns CoGAPS will estimate.** This setting is also called the model's rank or {{< glossary "Model resolution" display="model resolution" >}}. In the two-pattern example above, $K = 2$: each gene has two weights, and each cell has two activities. $K$ does not specify how many cell types are present or how many biological processes truly occur.
 
-If `K` is too small, distinct biological signals can be compressed together. For example, one pattern might blend an interferon response with cell-type identity. If `K` is too large, a signal can fragment across several patterns, making the model harder to interpret and less stable. Neither extreme is automatically better.
+With fewer patterns, the model has fewer ways to describe differences in gene expression. For example, a small model might capture a broad interferon response while combining expression features associated with different immune-cell types in its other patterns. Those cell-type differences could then be harder to examine separately.
 
-This is why the case study does not treat `K` as a purely technical setting. The useful value of `K` depends on the analysis goal. Here, the goal is not only to find a strong interferon-response signal. The goal is to find a model that also preserves enough non-interferon structure to respect the mixed PBMC system.
+Allowing more patterns may help distinguish those features. However, additional patterns can also describe similar features without providing a more useful explanation. A larger $K$ is therefore not automatically better. Each choice requires a new model fit; increasing $K$ does not simply preserve the existing patterns and add another one [@johnson2023cogapsWorkflow].
 
-The value of `K` used for the main analysis is introduced in [Data Import](#compare-k4-k5-and-k6-candidate-models) after you inspect model-selection evidence. Context gives you the idea; the next sections provide the evidence.
+For this case study, a useful choice should help us examine both the response to IFN-beta and differences among immune-cell types. We therefore compare results from several values of $K$ rather than choosing from the number alone.
+
+The next subsection explains how that comparison works. In [Data Import](#compare-k4-k5-and-k6-candidate-models), you will inspect the saved comparisons and the evidence supporting the model used for the main analysis.
 
 ## Why run a rank sweep?
 
-A rank sweep means fitting or evaluating CoGAPS models across several candidate values of `K`. The purpose is to ask how model interpretation changes as the requested number of patterns changes.
+A {{< glossary "Rank sweep" display="rank sweep" >}} compares models fitted with different values of $K$. For example, comparing $K = 4$, $K = 5$ and $K = 6$ means examining separate CoGAPS fits with four, five and six patterns.
 
-For self-guided learners, the important point is that the sweep is precomputed. You will not need to rerun the full sweep during the main learner path. Instead, you will inspect saved summaries that compare candidate ranks using evidence such as:
+Some settings are also fitted more than once using different **random seeds**, numbers that control the random choices made during fitting. Comparing different values of $K$ shows how the results change with the number of patterns. Repeating a fit at the same $K$ helps us check whether important findings recur across runs [@johnson2023cogapsWorkflow].
 
-- whether the interferon-related signal is recovered consistently,
-- whether top genes are stable across seeds,
-- whether non-interferon structure is preserved,
-- whether patterns appear redundant or fragmented,
-- how runtime changes as `K` increases, and
-- whether the eventual model is interpretable for the biological question.
+In this case study, those models have already been fitted. You will inspect saved summaries to consider four questions:
 
-This is a good example of a broader modeling principle: model choice should be tied to the scientific question. A rank that maximizes one metric may not be the best teaching or biological model if it collapses other important structure.
+- **Is there a recognizable interferon response?** Look for a pattern whose activity is higher in stimulated cells and whose contributing genes include known interferon-response genes.
+- **Does that response recur across runs?** Compare its association with stimulation and its highest-weight genes across repeated fits at the same $K$.
+- **What else can the model distinguish?** Examine whether the other patterns help describe differences among immune-cell types, rather than combining those differences into a few broad patterns.
+- **What do additional patterns add?** Consider whether a larger $K$ makes useful differences easier to interpret, whether patterns describe similar features, and how much longer fitting takes.
+
+These comparisons help us weigh consistency, biological detail and computing time together. A model with the strongest association with stimulation is not necessarily the most useful model for examining both the shared response and differences among immune-cell types.
 
 ## How pattern evidence will be interpreted later
 
-Later sections will use CoGAPS outputs, but the interpretation logic starts here. A pattern becomes biologically meaningful only after several kinds of evidence agree.
+Once a model has been selected, you will ask what its patterns might represent. For each pattern, you will connect three kinds of information:
 
-You will ask:
+1. **Which cells show the pattern?** Compare {{< glossary "Cell activity" display="cell activities" >}} between control and stimulated samples from the same donor, and examine activities within the recorded cell types. This helps distinguish a response shared across several immune-cell types from a pattern concentrated in one type. A pattern can also reflect both cell type and stimulation.
 
-1. **Where is the pattern active?** Cell activities show which cells use the pattern strongly.
-1. **Does activity track the experimental condition?** Stimulation-associated activity should differ between control and IFN-beta-stimulated cells.
-1. **Which genes define the pattern?** Gene weights identify genes that contribute strongly to the pattern.
-1. **Do the top genes fit known biology?** Interferon-associated genes provide literature-guided expectations.
-1. **Which direction do the genes move?** Directionality checks ask whether genes are higher or lower after stimulation.
-1. **Does the pattern respect cell identity?** Cell-type summaries help distinguish broad stimulation activity from cell-type-linked structure.
-1. **Did the model run sensibly?** Diagnostics help evaluate convergence, stability, and fit.
+2. **Which genes contribute most strongly?** Examine the genes with the largest {{< glossary "Gene weight" display="gene weights" >}} and consider their known functions. Several genes associated with the same biological process can suggest an interpretation, but a familiar gene alone is not enough to name the pattern [@johnson2023cogapsWorkflow].
 
-These evidence types are intentionally separate. A pattern can have plausible genes but weak condition association. A pattern can correlate with stimulation but include genes that require careful directionality checks. A pattern can be strong in one cell type but weaker in another. The case study will teach you to combine these pieces rather than rely on one plot or one statistic.
+3. **How does gene expression differ between conditions?** Compare expression in stimulated and control samples from the same donor. These {{< glossary "Directionality" display="directionality" >}} checks show whether relative expression is higher or lower after stimulation. A large CoGAPS gene weight does not provide that direction.
 
-## Interpretive boundaries before analysis
+For example, high weights for IFIT1 and OAS1 would make an interferon-response interpretation worth investigating. Higher pattern activity in stimulated samples across several cell types and donors would strengthen that interpretation. The expression comparisons would then show which contributing genes are higher or lower after stimulation.
 
-The Context section should give you expectations, not conclusions. The source data come from donors with SLE, but the main analysis studies an in vitro IFN-beta stimulation response. The case study does not test an SLE therapy, predict patient outcomes, or prove a disease mechanism. Those limitations are discussed in [Limitations](#limitations).
+```{r}
+#| label: fig-context-pattern-evidence
+#| echo: false
+#| fig-cap: "Interpreting a CoGAPS pattern involves comparing cell activities across conditions and cell types, examining contributing genes, and checking expression direction separately. Control and stimulated samples are paired by donor, not by individual cell. The diagrams illustrate the reasoning process rather than fitted results. Researcher illustration adapted from Avataaars (Pablo Stanley; Fang-Pen Lin). See Acknowledgments for artwork credits."
+#| fig-alt: "Four-panel conceptual comic following one unnamed CoGAPS pattern. First, different control and IFN-beta-stimulated cells from the same donor show lower and higher pattern activity within T cells, B cells and monocytes. Second, gene-weight bars for IFIT1 and OAS1 are considered alongside their known interferon-response functions. Third, lines connect relative-expression summaries from control and stimulated samples from the same donor, not individual cells. Finally, the clues support a possible shared interferon response, with a reminder to keep the interpretation open if they disagree. All values are schematic, not fitted results."
+#| out-width: "900px"
+#| out-extra: '.lightbox title=""'
+ottrpal::include_slide(
+  "https://docs.google.com/presentation/d/1TnWgyP9Xi9s3kknD5V7rz8YYJnsQAByQYz4pCNF0erk/edit#slide=id.p1"
+)
+```
 
-For now, carry forward a narrower and more useful question: can a latent-pattern model help separate a broad interferon-response signal from immune-cell identity in a mixed PBMC single-cell dataset?
+You will also inspect saved diagnostic plots and {{< glossary "Posterior uncertainty" display="uncertainty estimates" >}} to look for problems in the fit and uncertainty in the estimated values. These checks assess the model; they do not establish what a pattern means biologically.
+
+Together, these observations support an interpretation without requiring every pattern to have a definitive biological label. When the clues do not agree, the interpretation should remain tentative.
 
 :::{.definition_box}
 ::::{.definition_box_header}
@@ -229,14 +238,15 @@ Core distinctions to carry forward
 ::::
 ::::{.inner_block}
 
-- **PBMC identity versus stimulation response:** A cell can retain immune-cell identity while also responding to IFN-beta.
-- **Cell cluster versus latent pattern:** A cluster groups similar cells; a latent pattern can be shared across cells in different groups.
-- **Gene weight versus expression direction:** A high-weight gene helps define a pattern; directionality asks whether that gene rises or falls after stimulation.
-- **Rank `K` versus pattern label:** `K` controls how many patterns the model learns; pattern labels are names assigned within one run.
-- **Literature expectation versus analysis result:** Interferon biology tells you what to look for; the CoGAPS analysis tests whether the data support that interpretation.
+- **Cell type and response:** A cell can respond to IFN-beta while retaining expression features associated with its cell type.
+- **Clusters and patterns:** Clustering groups cells with similar expression profiles. A latent pattern can appear in cells from several clusters.
+- **Gene weights and expression changes:** A large gene weight indicates a strong contribution to a pattern. A separate comparison shows whether the gene's relative expression is higher or lower after stimulation.
+- **`K` and pattern numbers:** `K` is the number of patterns fitted. Labels such as `Pattern1` identify patterns within a particular fit and can refer to different patterns in another fit.
 ::::
 :::
 
-[What are the data?](#what-are-the-data) turns this background into concrete files. You will see which processed data objects are included in the case study, which saved CoGAPS artifacts support the main learner path, and which larger files are optional for full reproduction. With the biological and modeling vocabulary in place, those files should read less like a list of artifacts and more like the evidence chain you will use to answer the main questions.
+These comparisons describe a laboratory response to IFN-beta. [Limitations](#limitations) explains why they cannot establish how SLE develops or predict patient outcomes.
+
+Next, [What are the data?](#what-are-the-data) introduces the prepared dataset and saved CoGAPS outputs you will use to investigate the main questions.
 
 ***
