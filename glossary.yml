@@ -26,6 +26,8 @@ Cell-type-linked pattern: |
   A learned pattern whose activity mainly follows annotated immune-cell groups rather than the stimulation condition.
 Chi-square: |
   A model-fit diagnostic that summarizes reconstruction error. Lower values generally indicate better reconstruction, but values can fluctuate during CoGAPS sampling.
+Clustering: |
+  Grouping observations, such as cells, according to similarities in their measured features.
 CoGAPS: |
   A Bayesian nonnegative matrix factorization method used to learn overlapping gene-expression patterns and cell activities.
 Coefficient of variation: |
@@ -104,6 +106,8 @@ Log transformation: |
   A transformation that compresses large expression values and makes expression differences easier to summarize after normalization.
 Long format: |
   A table layout where each row stores one measurement for one observational unit, such as one cell-pattern activity value.
+Matrix: |
+  A rectangular arrangement of numbers in rows and columns.
 Matrix orientation: |
   The meaning assigned to matrix rows and columns. For CoGAPS input in this case study, rows should represent genes and columns should represent cells.
 Metadata join: |
@@ -133,13 +137,15 @@ Plasmacytoid dendritic cell: |
 Pseudobulk: |
   A summary that combines single-cell counts within a group, such as donor and condition, so expression differences can be compared at a grouped-sample level.
 Posterior uncertainty: |
-  Variation in sampled model summaries that helps indicate how stable a pattern, activity, or gene weight is.
+  Uncertainty in estimated quantities after accounting for the observed data and the model's assumptions. In CoGAPS, it can be summarized by the spread of sampled gene weights and cell activities.
 Proxy measure: |
   An observed quantity used as a stand-in for a concept that is difficult to measure directly. A proxy can mislead when it does not represent that concept equally across people or settings.
 Quality control: |
   Checks and filters used to remove measurements that are too unreliable for the intended analysis.
 Rank sweep: |
   A planned set of model runs that compares several values of K, usually across multiple seeds or iteration counts, before selecting one model resolution.
+RNA (ribonucleic acid): |
+  A molecule that cells make from DNA when they use the information in a gene. Measuring how much RNA comes from a gene gives researchers a clue about that gene's activity.
 Selected-model outputs: |
   Saved files from the CoGAPS model used for the main case-study analysis, such as metrics, pattern activities, gene weights, and top-gene tables.
 Sign test: |
@@ -148,6 +154,8 @@ SingleCellExperiment: |
   A Bioconductor data structure for annotated single-cell data, commonly used in R workflows.
 Single-cell RNA-seq: |
   A sequencing approach that measures gene expression separately for many individual cells.
+Single-cell transcriptomics: |
+  The study of which genes are expressed, and at what levels, in individual cells. It lets researchers compare gene expression across cells rather than seeing only an average for a whole sample.
 Sampling phase: |
   The phase of a CoGAPS run used to summarize the final pattern matrices after equilibration.
 Secondary data: |
@@ -156,6 +164,8 @@ Sparse optimization: |
   A CoGAPS implementation option that uses a sparse data representation to improve runtime on sparse single-cell RNA-seq matrices.
 Spearman correlation: |
   A rank-based correlation that compares whether two measurements order observations similarly.
+Standard deviation: |
+  A measure of how spread out values are around their mean. Here, posterior standard deviations summarize the spread of sampled gene weights or cell activities.
 Stimulation-associated activity: |
   Pattern activity that differs between stimulated cells and control cells.
 Systemic lupus erythematosus: |

@@ -1,159 +1,151 @@
 # **Context**
 ***
 
-The Motivation section introduced the biological puzzle for this case study: a mixed population of blood immune cells is exposed to {{< glossary "IFN-beta" display="IFN-beta" >}}, and the resulting single-cell data contain both immune-cell identity and stimulation-response information. This Context section gives you the background needed to read those signals carefully.
+{{< glossary "Interferon" display="Interferons" >}} are proteins that cells use to send signals to other cells. {{< glossary "IFN-beta" display="Interferon beta" >}} (IFN-beta) belongs to a family called {{< glossary "Type I interferon" display="type I interferons" >}}, which also includes IFN-alpha. These signals can change the expression of many genes in responding cells [@platanitis2019interferon].
 
-The section has two jobs. First, it gives a short immunology primer: what systemic lupus erythematosus is, why interferon biology is relevant, why PBMCs are useful but mixed, and what the Kang et al. source study measured. Second, it introduces the modeling frame: why clustering alone is not enough for this question, how latent patterns and non-negative matrix factorization work, and how CoGAPS turns a genes-by-cells matrix into evidence you can interpret later.
+In the Kang study, researchers used {{< glossary "Single-cell RNA-seq" display="single-cell RNA sequencing" >}} to measure {{< glossary "RNA (ribonucleic acid)" display="RNA" >}} in individual cells from the stimulated and untreated samples [@kang2018multiplexed]. This is an example of **{{< glossary "Single-cell transcriptomics" display="single-cell transcriptomics" >}}**: studying gene expression one cell at a time rather than averaging it across a mixture of cells. The researchers measured RNA, not the amount of interferon itself.
 
-By the end of this section, you should be ready to enter Data Import with a map in mind. You will know what biological signals the literature suggests you might see, what the source study already established, and why later sections focus on pattern activity, gene weights, directionality, rank choice, and diagnostics.
+So what would a response to IFN-beta look like in the data? One clue would be finding higher levels of RNA from the same group of genes in stimulated cells than in untreated cells of the same type. In this experiment, we know the researchers added IFN-beta. In blood samples from people with SLE, however, an interferon-related gene expression pattern does not tell us exactly which signal caused it. Understanding how researchers recognize an interferon response will help us interpret both kinds of evidence.
 
-## What is systemic lupus erythematosus?
+## Recognizing an interferon response in blood cells {#interferon-beta-and-its-role-in-lupus}
 
-{{< glossary "Systemic lupus erythematosus" display="Systemic lupus erythematosus" >}}, or SLE, is a systemic {{< glossary "Autoimmune disease" display="autoimmune disease" >}}. In an autoimmune disease, the immune system can respond to the body's own cells or molecules. In SLE, that immune activity can affect several organ systems, and symptoms may include fatigue, fever, joint pain or swelling, skin rashes, mouth sores, blood abnormalities, kidney involvement, neurologic symptoms, or inflammation around the heart or lungs [@niams_lupus_overview].
+In blood samples from some people with SLE, researchers have found that several genes known to respond to interferon are more active together. This pattern is called an {{< glossary "Interferon gene signature" display="interferon gene signature" >}} [@catalina2019interferonSLE].
 
-The word **systemic** matters. SLE is not limited to one tissue or one immune-cell type. A person with SLE can have immune signals in blood that relate to inflammation elsewhere in the body. That is one reason blood immune-cell data are useful for teaching this case study: PBMCs are accessible, contain multiple immune-cell populations, and can carry molecular evidence of immune activation.
+The Kang experiment lets us ask a related but different question: when researchers add IFN-beta to blood immune cells in the lab, which cell types show a similar response? The experiment can tell us how those cells respond to IFN-beta, but not how active lupus was in any individual donor.
 
-SLE is also heterogeneous. Two people with the same diagnosis may have different symptoms, affected tissues, autoantibodies, treatment histories, and immune-cell composition. That heterogeneity is part of what makes lupus difficult to study. It also explains why this case study will avoid overclaiming. We are not trying to diagnose SLE, predict disease activity, or prove a clinical mechanism. We are using a lupus PBMC perturbation dataset to learn how an interpretable interferon-associated signal can be separated from immune-cell identity in single-cell RNA-seq data.
+Different type I interferons can affect many of the same genes [@catalina2019interferonSLE].
 
-## Interferon-beta and its role in lupus
+How does a cell respond to that signal? IFN-beta binds to a protein on the cell surface called the {{< glossary "IFNAR" display="type I interferon receptor" >}} (IFNAR). Proteins inside the cell relay the signal to the nucleus, where they help the cell make more RNA from a group of genes [@platanitis2019interferon]. This relay is called {{< glossary "JAK-STAT signaling" >}}, and the genes whose expression increases are called {{< glossary "Interferon-stimulated gene" display="interferon-stimulated genes" >}} (ISGs). That helps explain why we look for several of these genes to change together rather than relying on just one.
 
-{{< glossary "Interferon" display="Interferons" >}} are cytokines: signaling proteins that help immune cells coordinate responses to infection, tissue damage, and other danger signals. {{< glossary "Type I interferon" display="Type I interferons" >}} include IFN-alpha, IFN-beta, IFN-omega, IFN-epsilon, and IFN-kappa [@chyuan2019interferons]. This case study focuses on IFN-beta because IFN-beta is the controlled stimulation used in the source dataset.
+```{r}
+#| label: fig-context-interferon-signaling
+#| echo: false
+#| fig-cap: "IFN-beta binds to a receptor on the cell surface. JAK-STAT signaling relays the signal to the nucleus, where the cell can make more RNA from interferon-stimulated genes. In the Kang study, researchers measured RNA in individual cells six hours after stimulation, not the signaling proteins themselves."
+#| fig-alt: "Continuous cell cross-section. Outside the cell, interferon beta binds IFNAR. On the inner membrane, TYK2 and JAK1 activate STAT1 and STAT2. The STAT proteins move to the nucleus, where they work with IRF9 at DNA to increase transcription of interferon-stimulated genes. Wavy strands represent new RNA, not measured counts."
+#| out-width: "900px"
+#| out-extra: '.lightbox title=""'
+ottrpal::include_slide(
+  "https://docs.google.com/presentation/d/12zD5D9qLNHgo_3mc6OFsZqY-D8aCrnKh0l_jXt6dP_8/edit#slide=id.p1"
+)
+```
 
-A useful way to understand interferon signaling is to follow the signal from outside the cell to the genome. Type I interferons bind the type I interferon receptor, also called {{< glossary "IFNAR" display="IFNAR" >}}. That receptor activates the {{< glossary "JAK-STAT signaling" display="JAK-STAT signaling" >}} pathway, including JAK1, TYK2, STAT1, STAT2, and IRF9. These proteins help turn on many {{< glossary "Interferon-stimulated gene" display="interferon-stimulated genes" >}}, often abbreviated ISGs [@chyuan2019interferons]. In plain language, interferon signaling can leave a recognizable gene-expression footprint.
-
-In lupus, this footprint is often called an {{< glossary "Interferon gene signature" display="interferon gene signature" >}}. Several lupus studies have reported interferon-associated gene-expression signatures in blood, PBMCs, purified immune-cell populations, and affected tissues [@chyuan2019interferons; @catalina2019interferonSLE]. Catalina and colleagues found that interferon signatures in SLE datasets can include prominent IFNB1-like signatures and can be strongly related to monocyte-associated transcripts [@catalina2019interferonSLE]. That observation is important for this case study because it points to a recurring interpretive issue: an interferon signal may be broad, but it may also vary by cell type.
-
-The immune-cell players are worth naming. {{< glossary "Plasmacytoid dendritic cell" display="Plasmacytoid dendritic cells" >}} are known for producing large amounts of type I interferon in response to nucleic-acid sensing. Monocytes and macrophages can participate in inflammatory responses and antigen presentation. Dendritic cells can help connect innate sensing to T-cell and B-cell responses. B cells can contribute to antibody responses, including autoantibody-related processes. T cells help coordinate or carry out adaptive immune responses. Natural killer cells contribute to cytotoxic responses. Neutrophils can release neutrophil extracellular traps, which may provide nucleic-acid material that stimulates interferon pathways in lupus [@chyuan2019interferons].
-
-The main idea is not that every cell type does the same thing. The main idea is that interferon biology connects several immune-cell populations. That makes it plausible that a single-cell analysis could contain both a shared interferon-response signal and cell-type-linked structure at the same time.
+A shared response need not look the same in every cell type. For example, in the SLE datasets that Catalina and colleagues studied, more interferon-stimulated genes showed elevated expression in monocytes than in T cells or B cells [@catalina2019interferonSLE]. That finding gives us a reason to look at the cell types separately in the Kang data, without assuming we'll find the same differences.
 
 ## PBMCs as a mixed immune-cell system
 
-{{< glossary "Peripheral blood mononuclear cell" display="Peripheral blood mononuclear cells" >}}, or PBMCs, are blood immune cells with round nuclei. They include lymphocytes, such as T cells, B cells, and natural killer cells, as well as monocytes and some dendritic cells. PBMCs do not include every immune cell in blood; for example, mature neutrophils are usually not part of the PBMC fraction. Still, PBMCs are widely used because they are accessible and contain many immune populations relevant to systemic immune activity.
+{{< glossary "Peripheral blood mononuclear cell" display="Peripheral blood mononuclear cells" >}}, or PBMCs, are a mixture of blood immune cells, including T cells, B cells, {{< glossary "Natural killer cell" display="natural killer cells" >}}, {{< glossary "Monocyte" display="monocytes" >}} and some {{< glossary "Dendritic cell" display="dendritic cells" >}}. They represent several, but not all, of the immune-cell types found in blood.
 
-For this case study, PBMCs are useful for the same reason they are challenging. A PBMC sample is not one cell type. It is a mixture. A stimulated monocyte can still have monocyte-like expression. A stimulated B cell can still have B-cell-like expression. A stimulated natural killer cell can still have cytotoxic-cell features. At the same time, all of those cells may share some response to IFN-beta.
+These cell types have different roles and characteristic {{< glossary "Gene expression profile" display="gene-expression profiles" >}}. A monocyte, for example, can respond to IFN-beta while retaining expression features that distinguish it from a T cell. Both cell types may increase expression of some of the same interferon-stimulated genes, but their responses need not be equally strong. {{< glossary "Immune-cell identity" display="Cell identity" >}} and response to stimulation can therefore contribute to the same cell's expression profile [@kang2018multiplexed; @kotliar2019identityActivity].
 
-This creates a layered interpretation problem. Each cell can carry:
+Single-cell measurements let you examine these differences separately. You can compare control and stimulated cells of the same type, then ask whether other cell types show similar changes. This matters because an average across all cells can change simply because a sample contains different proportions of cell types, even without expression changes within those types [@kang2018multiplexed].
 
-1. an immune-cell identity signal,
-1. a stimulation-associated signal,
-1. donor-specific variation,
-1. technical variation, and
-1. noise from sparse single-cell measurement.
-
-No single metadata label captures all of these layers. A cell-type label tells you what a cell most resembles, but not everything that cell is doing. A condition label tells you whether a cell came from control or stimulated culture, but not which genes drove its response. A latent-variable approach is useful because it can represent cells as mixtures of several signals rather than forcing each cell into one explanatory box.
+Not every difference reflects stimulation. Cells can also differ between {{< glossary "Donor" display="donors" >}}, and the measurements capture only part of the RNA present in each cell. Later, you will use the recorded cell type, donor and condition alongside the expression data to help interpret the patterns you find.
 
 ## Summary of the Kang et al. study
 
-The source study for this case study is Kang et al. 2018, which introduced demuxlet and used multiplexed droplet single-cell RNA-seq to study PBMC responses to IFN-beta [@kang2018multiplexed]. The original paper's main methodological contribution was demuxlet: a computational approach that uses natural genetic variation to assign each droplet to a donor and detect droplets that likely contain cells from more than one person.
+In the experiment used here, Kang and colleagues studied PBMCs from eight donors with SLE. Each donor's sample was divided into two portions, or {{< glossary "Aliquot" display="aliquots" >}}: one exposed to IFN-beta and one left untreated. RNA was measured in individual cells after six hours [@kang2018multiplexed].
 
-The IFN-beta part of that study used PBMCs from eight lupus patients. For each donor, the researchers split PBMCs into two matched portions, or {{< glossary "Aliquot" display="aliquots" >}}. One aliquot was left untreated as a control. The other was stimulated with recombinant IFN-beta for six hours. After stimulation, cells were pooled by condition and profiled using droplet single-cell RNA-seq [@kang2018multiplexed].
+This is a {{< glossary "Perturbation experiment" display="perturbation experiment" >}} because researchers deliberately changed the cells' environment to study their response. It also uses a {{< glossary "Paired design" display="paired design" >}}: each donor contributes samples to both conditions. Comparing conditions within donors helps account for differences between people. The pairing is between samples from the same donor, not the same cells measured before and after stimulation.
 
-That design has two features that matter for the rest of the case study.
+After incubation, cells were combined into two pools, one per condition, and captured in tiny droplets for RNA sequencing. The researchers developed **demuxlet** to use genetic differences between donors to assign cells back to their source, a process called {{< glossary "Demultiplexing" display="demultiplexing" >}}. It also helped identify droplets containing cells from two different donors, a type of {{< glossary "Doublet" display="doublet" >}}, so those mixed observations could be excluded [@kang2018multiplexed].
 
-First, it is a {{< glossary "Perturbation experiment" display="perturbation experiment" >}}. The experiment deliberately changes one condition, IFN-beta exposure, so that the transcriptional response can be measured. This gives the analysis a clear contrast: control versus IFN-beta stimulated cells.
-
-Second, it is a {{< glossary "Paired design" display="paired design" >}}. Control and stimulated cells come from the same donors. That matters because immune profiles can differ substantially across people. A paired design lets the source study compare stimulation responses while keeping donor background more visible.
-
-Kang et al. also used {{< glossary "Demultiplexing" display="demultiplexing" >}} and {{< glossary "Doublet" display="doublet" >}} detection. In droplet single-cell RNA-seq, a droplet ideally contains RNA from one cell. A doublet occurs when material from two cells is captured together and treated as one observation. Demuxlet helped assign cells back to donors and remove likely doublets, improving confidence that later summaries reflected singlet cells rather than mixed droplets [@kang2018multiplexed].
-
-The exact files and teaching data objects used in this case study are described in the next section, **What are the data?** Here, the important source-study point is conceptual: the dataset was designed to compare matched control and IFN-beta-stimulated PBMCs from lupus donors while retaining single-cell and cell-type information.
+Next, we will look at what the original study found. The files used in our analysis are described later in [**What are the data?**](#what-are-the-data).
 
 ## Source-study findings to carry forward
 
-Kang et al. did not use CoGAPS. The original paper used the dataset to demonstrate multiplexed droplet single-cell RNA-seq, demuxlet, cell-type-specific response analysis, and genetic analyses. This case study reuses the source dataset for a different teaching goal: learning how CoGAPS can recover and interpret latent transcriptional patterns.
+Kang and colleagues reported three findings that are especially useful for interpreting this experiment [@kang2018multiplexed]:
 
-Several source-study findings should guide your expectations before you see the CoGAPS results:
+- **Responses were partly shared and partly cell-type-specific.** Thousands of genes differed in {{< glossary "Gene expression" display="expression" >}} between stimulated and untreated cells in at least one cell type. Some changes occurred across several cell types; others were limited to particular types.
+- **Cell types remained recognizable.** The researchers could still identify the major immune-cell groups in both conditions, despite the changes in gene expression.
+- **Donors differed too.** Some expression differences between {{< glossary "Donor" display="donors" >}} were related to the proportions of cell types in their samples. Other differences remained when the researchers compared cells of the same type.
 
-- IFN-beta stimulation produced broad transcriptional changes across PBMCs.
-- The source study identified thousands of genes with differential expression in at least one cell type after IFN-beta stimulation [@kang2018multiplexed].
-- The IFN-beta response included antiviral, chemokine, and lupus-related pathway signals.
-- IFN-beta stimulation did not erase cell identity. The original analysis still recovered major immune-cell groups after stimulation.
-- Cell-type composition and donor-to-donor variation both mattered, which is why the case study keeps cell type and donor metadata visible.
+These are findings from the original study, which did not use CoGAPS. Here, you will examine whether CoGAPS reveals similar features in the prepared data. The next subsection introduces genes that can help you recognize an interferon response.
 
-These findings are expectations, not answers. They tell you what kinds of signals would be biologically plausible. Later sections ask whether the CoGAPS patterns support those expectations in the teaching data.
+## Recognizing interferon-response genes {#interferon-genes-learners-should-recognize}
 
-## Interferon genes learners should recognize
+Later tables will contain gene symbols such as `ISG15`, `IFIT1` and `MX1`. These symbols are short names for genes. Recognizing a few will help you connect the results to the interferon response described above.
 
-You do not need to memorize a long list of interferon genes. You do need enough vocabulary to recognize why a later top-gene list might support an interferon-associated interpretation.
+{{< glossary "Interferon-stimulated gene" display="Interferon-stimulated genes" >}} can have different roles. Some encode proteins that help defend against viruses, while others help regulate the response or communicate with other cells. Examples you will encounter include:
 
-Several gene families often appear in interferon-response analyses:
+- **`IFIT1`: antiviral defense.** Its protein can interfere with the production of viral proteins [@habjan2013ifit1].
+- **`OAS1`: antiviral defense through RNA breakdown.** Its protein can activate a process that breaks down RNA [@wickenhagen2021oas1].
+- **`IRF7`: regulation.** Its protein helps control the expression of interferon genes [@honda2005irf7].
+- **`CXCL10`: communication.** Its protein helps attract immune cells [@taub1993cxcl10].
 
-- **ISG genes**, such as `ISG15` and `ISG20`, are named as interferon-stimulated genes and often appear in interferon-response signatures.
-- **IFIT and IFITM genes**, such as `IFIT1`, `IFIT2`, `IFIT3`, and `IFITM` family members, are commonly associated with antiviral interferon responses.
-- **IFI genes**, such as `IFI6`, are part of a broad set of interferon-inducible genes.
-- **MX and OAS genes**, such as `MX1`, `OAS1`, and `OASL`, are classic antiviral-response genes that often appear downstream of interferon signaling.
-- **IRF and STAT-related genes**, such as `IRF7` and `STAT1`, connect to transcriptional regulation and interferon pathway signaling.
-- **Nucleic-acid sensing genes**, such as `DDX58` and `IFIH1`, relate to sensing viral or self nucleic acids and can connect upstream danger sensing to interferon responses.
-- **Chemokine and immune-regulatory genes**, such as `CXCL10`, `TNFSF10`, and `SOCS1`, can reflect downstream immune communication or regulation.
+These descriptions come from studies of the genes and their proteins. Here, we measure RNA, so we cannot directly determine whether each protein is carrying out its known function.
 
-These gene names are anchors for interpretation, not shortcuts. A top-gene list that includes several canonical interferon-related genes is consistent with an interferon-associated pattern. But you still need to ask where the pattern is active, whether it tracks stimulation, and whether the genes are higher or lower in stimulated cells.
-
-This last point is important. CoGAPS gene weights identify genes that help define a pattern. They do not, by themselves, tell you whether a gene is upregulated or downregulated. Later, you will pair pattern weights with condition-based directionality checks.
+When several genes associated with interferon responses appear together in a pattern, they give you a reason to investigate that interpretation. You will also check whether the pattern is more prominent in stimulated cells and whether those genes have higher or lower expression than in untreated cells. A large CoGAPS {{< glossary "Gene weight" display="gene weight" >}} alone does not tell you the {{< glossary "Directionality" display="direction of that change" >}}.
 
 ## From cell clusters to latent patterns
 
-Clustering is often one of the first useful tools in single-cell RNA-seq analysis. A clustering workflow groups cells with similar expression profiles, and those groups can help analysts assign cell-type labels. Reviews of single-cell clustering emphasize that clustering is central to identifying putative cell types, but also that interpretation is challenging because single-cell data are high-dimensional, sparse, and sensitive to preprocessing choices [@kiselev2019singleCellClustering].
+One way to explore single-cell data is to group cells with similar {{< glossary "Gene expression profile" display="gene-expression profiles" >}}. This is called {{< glossary "Clustering" display="clustering" >}}. Researchers examine the genes expressed in each group to help interpret it; a cluster is not automatically a cell type [@kiselev2019singleCellClustering].
 
-For this case study, clustering is helpful but not sufficient. Clustering asks which cells are similar overall. The research questions ask something more layered: which transcriptional signals are present, which signals are shared across immune-cell types, and which signals are most associated with IFN-beta stimulation.
+A cluster label does not describe every response within a cell. For example, a stimulated monocyte may retain expression features associated with monocytes while increasing expression of interferon-stimulated genes. A stimulated T cell may show some of those same changes. The cells need not belong to the same cluster for part of their response to be shared [@kotliar2019identityActivity].
 
-Kotliar and colleagues describe this as a distinction between cell-type identity programs and cellular activity programs [@kotliar2019identityActivity]. An identity program reflects what a cell is, such as a T cell, B cell, monocyte, or dendritic cell. An activity program reflects what a cell is doing, such as responding to stimulation, cycling, producing cytokines, or activating an antiviral pathway.
+CoGAPS offers another way to describe these data. It looks for gene-expression patterns and estimates how strongly each pattern is represented in each cell. These are called {{< glossary "Latent pattern" display="latent patterns" >}} because the model infers them from the expression measurements rather than receiving them as recorded labels. A cell can have contributions from several patterns [@steinobrien2019transferLearning].
 
-The difficult part is that a single cell can express both kinds of programs. A monocyte can have monocyte identity genes and interferon-response genes. A T cell can have T-cell markers and stimulation-response genes. A B cell can retain B-cell identity while also responding to IFN-beta. That is why a one-cell, one-cluster view can be too restrictive for this case study.
+Two linked outputs help you examine each pattern: {{< glossary "Gene weight" display="gene weights" >}}, which describe how strongly genes contribute to it, and {{< glossary "Cell activity" display="cell activities" >}}, which describe how strongly it is represented in each cell. Here, activity is a model estimate, not a direct measurement of a protein's activity.
 
-A {{< glossary "Latent pattern" display="latent pattern" >}} is an inferred signal learned from the expression matrix. It is not a metadata column recorded by the experiment. A useful latent pattern might be identity-like, stimulation-associated, donor-linked, technical, or mixed. The analysis task is not simply to name every pattern. The task is to evaluate each pattern using evidence.
+The prepared dataset already includes cell-type labels. You will compare these labels with the pattern activities to ask whether a pattern is more prominent in a particular cell type, in stimulated cells across several types, or both. The contributing genes will help you interpret that pattern. Differences between donors or in how samples were measured can also influence the results, so a learned pattern is not automatically a distinct biological process.
+
+::: {.callout-note collapse="true" title="Optional: UMAP, PCA and CoGAPS"}
+
+UMAP, principal component analysis (PCA), and CoGAPS offer different ways to explore expression data. Here, we use UMAP as a two-dimensional display of the cells, which we can color by cell type, condition, or pattern activity. PCA produces gene loadings and cell scores along perpendicular directions that explain variation in the data; those loadings and scores can be positive or negative. CoGAPS instead represents expression using nonnegative, additive gene weights and cell activities. This lets us investigate overlapping candidate programs, such as cell identity and an interferon response within the same cell. Neither PCA nor CoGAPS automatically assigns biological meaning to its components.
+
+:::
 
 :::{.think_question}
 ::::{.think_question_header}
 Stop and think
 ::::
 ::::{.inner_block}
-Why might a stimulated monocyte be hard to interpret with only one label?
+If a pattern is more prominent in stimulated monocytes and stimulated T cells, what might it represent, and what would you check next?
 
 <details><summary>Answer</summary>
-A stimulated monocyte carries at least two interpretable signals: it still has monocyte-like expression, and it may also activate interferon-response genes. A single label can name the cell identity, but it does not describe every transcriptional program active in that cell.
+It might reflect a response shared across those cell types. Examine its contributing genes and compare its activity in stimulated and untreated cells within each type before interpreting it as an interferon response.
 </details>
 ::::
 :::
 
+The next subsection explains how gene weights and cell activities work together to represent the expression data.
+
 ## NMF: the mathematical shape of the problem
 
-Single-cell RNA-seq data can be organized as a matrix. In this case study, the modeling input is a genes-by-cells matrix. Each row represents a gene, each column represents a cell, and each entry is a non-negative expression value.
+How do gene weights and cell activities combine to describe expression? Start with a {{< glossary "Matrix" display="matrix" >}}, a rectangular arrangement of numbers. In the modeling input used here, each row represents a gene and each column represents a cell. An entry therefore describes one gene's expression in one cell.
 
-{{< glossary "Non-negative matrix factorization" display="Non-negative matrix factorization" >}}, or NMF, asks whether a large non-negative matrix can be approximated as the product of two smaller non-negative matrices. At the intuition level:
+These entries are prepared expression values, not original RNA counts. The counts have been {{< glossary "Library-size normalization" display="scaled" >}} to account for differences in the total counts measured per cell, then {{< glossary "Log transformation" display="log-transformed" >}} to compress large values. The original counts are retained separately for later comparisons.
 
-```text
-observed expression matrix ~= gene weights x cell activities
-```
+{{< glossary "Non-negative matrix factorization" display="Non-negative matrix factorization" >}}, or NMF, represents this input using two linked matrices: {{< glossary "Gene weight" display="gene weights" >}} and {{< glossary "Cell activity" display="cell activities" >}}. For a chosen number of patterns, written as $K$, the model estimates values in these matrices whose product approximates the input. In the notation used here, this is written as $D \approx AP$ [@steinobrien2019transferLearning].
 
-In a compact mathematical form:
+| Matrix | Rows | Columns | Meaning |
+|---|---|---|---|
+| $D$ | Genes | Cells | Prepared expression values supplied to the model |
+| $A$ | Genes | Patterns | Each gene's weight in each pattern |
+| $P$ | Patterns | Cells | Each pattern's activity in each cell |
 
-$$
-D \approx A P
-$$
+The pattern columns of $A$ correspond to the pattern rows of $P$. Both contain the same $K$ patterns. In the saved activity tables you will inspect later, cells appear in rows and patterns in columns instead; the arrangement is reversed.
 
-Here:
+To estimate the expression value for one gene in one cell, multiply that gene's weight in each pattern by the pattern's activity in the cell. Then add those contributions.
 
-| Object | What it represents | How to read it |
-|---|---|---|
-| `D` | the observed expression matrix | genes by cells |
-| `A` | the gene-by-pattern matrix | which genes contribute to each pattern |
-| `P` | the pattern-by-cell matrix | which cells use each pattern strongly |
-| `K` | the number of patterns requested | the model resolution |
+**Illustrative example:** suppose there are two patterns. For one gene, the weights are 2 and 1; in one cell, the corresponding activities are 0.5 and 0.2. The estimated expression value is $(2 \times 0.5) + (1 \times 0.2) = 1.2$.
 
-For one gene and one cell, the model approximates expression by adding up contributions from all `K` patterns:
+**Non-negative** means that the weights and activities are zero or positive, so their contributions add rather than subtract. This does not mean that expression must increase after stimulation: expression can still be lower in one condition than another. The restriction concerns how the model represents each cell [@lee1999nmf].
+
+::: {.callout-note collapse="true" title="Optional: reading the equation for one gene and cell"}
 
 $$
 D_{g,c} \approx \sum_{k=1}^{K} A_{g,k} P_{k,c}
 $$
 
-In plain language, a cell's expression profile is represented as a mixture of learned patterns. The non-negative constraint matters because patterns add together rather than cancel each other out. That additive structure fits the PBMC problem: a cell can be monocyte-like and interferon-response-like at the same time.
+Here, $g$ identifies a gene, $c$ identifies a cell, and $k$ identifies a pattern. $A_{g,k}P_{k,c}$ is that pattern's contribution to the estimated expression value. The summation symbol means to add these contributions across all $K$ patterns.
 
-NMF is not magic. It does not know biology by itself. It produces matrices that must be interpreted using genes, cell metadata, experimental design, diagnostics, and prior biological knowledge.
+:::
 
-## How CoGAPS extends vanilla NMF
+The symbol $\approx$ means "approximately equal." The combined patterns summarize the input rather than reproduce every value exactly. Their biological meaning still needs to be investigated. The next subsection introduces CoGAPS, the particular NMF approach used in this case study.
 
-{{< glossary "CoGAPS" display="CoGAPS" >}} is the NMF-family method used in this case study. The name stands for Coordinated Gene Activity in Pattern Sets. CoGAPS was introduced as an R/C++ package for identifying patterns and biological process activity in transcriptomic data [@fertig2010cogaps]. Later single-cell CoGAPS work extended this latent-pattern framework to sparse single-cell RNA-seq data [@steinobrien2019transferLearning]. The official [CoGAPS User Guide](https://fertiglab.github.io/CoGAPSGuide/){target="_blank"} introduces the method and software workflows for R and Python users.
+## How CoGAPS estimates patterns and uncertainty {#how-cogaps-extends-vanilla-nmf}
+
+{{< glossary "CoGAPS" display="CoGAPS" >}}, short for Coordinated Gene Activity in Pattern Sets, is the method we use to estimate gene weights and cell activities. It follows the non-negative matrix representation introduced above and also estimates uncertainty in those values. The method was introduced by Fertig and colleagues and subsequently developed for single-cell data [@fertig2010cogaps; @steinobrien2019transferLearning].
 
 :::: {.columns}
 ::: {.column width="22%"}
@@ -167,63 +159,78 @@ NMF is not magic. It does not know biology by itself. It produces matrices that 
 
 *Image credit: CoGAPS logo and schematic from the [Fertig Lab CoGAPS User Guide](https://fertiglab.github.io/CoGAPSGuide/){target="_blank"}.*
 
-The schematic above shows the same basic matrix idea introduced in the NMF section: a large gene-expression matrix is represented by a smaller set of learned patterns. CoGAPS keeps that additive, non-negative structure, but fits the model using a Bayesian, sampling-based approach. Instead of treating one numerical factorization as the whole answer, CoGAPS samples plausible factorizations and summarizes them. This gives the method a natural connection to diagnostics, uncertainty, and stability checks.
+How does CoGAPS estimate the weights and activities? It uses a {{< glossary "Bayesian model" display="Bayesian model" >}}, which combines information from the expression data with assumptions about the values being estimated. During fitting, it repeatedly samples possible values for the gene weights and cell activities according to this model. Here, "sampling" refers to exploring model values, not collecting more cells or donors [@fertig2010cogaps].
 
-You do not need to understand every sampling detail to use the case study. The learner-facing interpretation rests on four ideas:
+CoGAPS summarizes these sampled values in two useful ways. The **means** provide estimates of the gene weights and cell activities. Their {{< glossary "Standard deviation" display="standard deviations" >}} describe how spread out the sampled values are around those means. These are summaries of uncertainty in the model estimates, not measurements of how much gene expression varies between cells [@johnson2023cogapsWorkflow].
 
-1. **Patterns are overlapping.** A cell can use more than one pattern.
-1. **Pattern numbers are run-specific.** A biological signal should be identified by evidence, not by assuming one pattern label is universal.
-1. **Gene weights are not directionality.** A high-weight gene helps define a pattern, but a separate condition comparison is needed to determine whether the gene is higher or lower after stimulation.
-1. **Diagnostics matter.** A biologically tempting pattern still needs evidence that the model ran sensibly and that the interpretation is stable enough to use.
+{{< glossary "Posterior uncertainty" display="Uncertainty estimates" >}} do not replace checks of the model run. Later, you will inspect saved diagnostic plots to examine how the estimates changed during fitting. You will also compare results from separate runs to see whether important features recur. Separate runs can produce different pattern orders and sometimes different patterns, so a pattern number is not a fixed biological name [@johnson2023cogapsWorkflow].
 
-The case study uses the R/Bioconductor CoGAPS workflow as the primary implementation. Python/PyCoGAPS-compatible outputs are provided as a secondary implementation path in later tabbed examples. That implementation detail matters for reproducibility, but the interpretation frame is the same: connect pattern activity, gene weights, source-study design, and biological expectations.
+These checks help you judge the model's behavior. Interpreting its patterns still requires examining the contributing genes and comparing cell activities with the recorded cell types and stimulation conditions.
+
+The main interpretation in this case study uses the saved R CoGAPS model. Parallel Python examples are provided in the language tabs. The [CoGAPS User Guide](https://fertiglab.github.io/CoGAPSGuide/){target="_blank"} provides further information about both workflows.
+
+::: {.callout-note collapse="true" title="Optional: Gene weights and pattern-specific markers"}
+
+Ranking gene weights identifies the largest weights within one pattern. A gene can have a large weight in several patterns, so this ranking does not establish that it is specific to one pattern. **PatternMarkers** instead compares a gene's relative weights across patterns. Neither comparison determines whether expression increases or decreases after stimulation. The main analysis uses gene-weight-ranked lists [@steinobrien2017patternMarkers].
+
+:::
+
+Before fitting the model, we must choose how many patterns it can learn. This number, $K$, affects how broadly or finely the model describes the data. The next subsection explains that choice.
 
 ## What choosing `K` means
 
-The rank, written as `K`, is the number of latent patterns CoGAPS is asked to learn. Choosing `K` is a model-resolution decision.
+**$K$ sets the number of patterns CoGAPS will estimate.** This setting is also called the model's rank or {{< glossary "Model resolution" display="model resolution" >}}. In the two-pattern example above, $K = 2$: each gene has two weights, and each cell has two activities. $K$ does not specify how many cell types are present or how many biological processes truly occur.
 
-If `K` is too small, distinct biological signals can be compressed together. For example, one pattern might blend an interferon response with cell-type identity. If `K` is too large, a signal can fragment across several patterns, making the model harder to interpret and less stable. Neither extreme is automatically better.
+With fewer patterns, the model has fewer ways to describe differences in gene expression. For example, a small model might capture a broad interferon response while combining expression features associated with different immune-cell types in its other patterns. Those cell-type differences could then be harder to examine separately.
 
-This is why the case study does not treat `K` as a purely technical setting. The useful value of `K` depends on the analysis goal. Here, the goal is not only to find a strong interferon-response signal. The goal is to find a model that also preserves enough non-interferon structure to respect the mixed PBMC system.
+Allowing more patterns may help distinguish those features. However, additional patterns can also describe similar features without providing a more useful explanation. A larger $K$ is therefore not automatically better. Each choice requires a new model fit; increasing $K$ does not simply preserve the existing patterns and add another one [@johnson2023cogapsWorkflow].
 
-The value of `K` used for the main analysis is introduced in Data Import after you inspect model-selection evidence. Context gives you the idea; the next sections provide the evidence.
+For this case study, a useful choice should help us examine both the response to IFN-beta and differences among immune-cell types. We therefore compare results from several values of $K$ rather than choosing from the number alone.
+
+The next subsection explains how that comparison works. In [Data Import](#compare-k4-k5-and-k6-candidate-models), you will inspect the saved comparisons and the evidence supporting the model used for the main analysis.
 
 ## Why run a rank sweep?
 
-A rank sweep means fitting or evaluating CoGAPS models across several candidate values of `K`. The purpose is to ask how model interpretation changes as the requested number of patterns changes.
+A {{< glossary "Rank sweep" display="rank sweep" >}} compares models fitted with different values of $K$. For example, comparing $K = 4$, $K = 5$ and $K = 6$ means examining separate CoGAPS fits with four, five and six patterns.
 
-For self-guided learners, the important point is that the sweep is precomputed. You will not need to rerun the full sweep during the main learner path. Instead, you will inspect saved summaries that compare candidate ranks using evidence such as:
+Some settings are also fitted more than once using different **random seeds**, numbers that control the random choices made during fitting. Comparing different values of $K$ shows how the results change with the number of patterns. Repeating a fit at the same $K$ helps us check whether important findings recur across runs [@johnson2023cogapsWorkflow].
 
-- whether the interferon-related signal is recovered consistently,
-- whether top genes are stable across seeds,
-- whether non-interferon structure is preserved,
-- whether patterns appear redundant or fragmented,
-- how runtime changes as `K` increases, and
-- whether the eventual model is interpretable for the biological question.
+In this case study, those models have already been fitted. You will inspect saved summaries to consider four questions:
 
-This is a good example of a broader modeling principle: model choice should be tied to the scientific question. A rank that maximizes one metric may not be the best teaching or biological model if it collapses other important structure.
+- **Is there a recognizable interferon response?** Look for a pattern whose activity is higher in stimulated cells and whose contributing genes include known interferon-response genes.
+- **Does that response recur across runs?** Compare its association with stimulation and its highest-weight genes across repeated fits at the same $K$.
+- **What else can the model distinguish?** Examine whether the other patterns help describe differences among immune-cell types, rather than combining those differences into a few broad patterns.
+- **What do additional patterns add?** Consider whether a larger $K$ makes useful differences easier to interpret, whether patterns describe similar features, and how much longer fitting takes.
+
+These comparisons help us weigh consistency, biological detail and computing time together. A model with the strongest association with stimulation is not necessarily the most useful model for examining both the shared response and differences among immune-cell types.
 
 ## How pattern evidence will be interpreted later
 
-Later sections will use CoGAPS outputs, but the interpretation logic starts here. A pattern becomes biologically meaningful only after several kinds of evidence agree.
+Once a model has been selected, you will ask what its patterns might represent. For each pattern, you will connect three kinds of information:
 
-You will ask:
+1. **Which cells show the pattern?** Compare {{< glossary "Cell activity" display="cell activities" >}} between control and stimulated samples from the same donor, and examine activities within the recorded cell types. This helps distinguish a response shared across several immune-cell types from a pattern concentrated in one type. A pattern can also reflect both cell type and stimulation.
 
-1. **Where is the pattern active?** Cell activities show which cells use the pattern strongly.
-1. **Does activity track the experimental condition?** Stimulation-associated activity should differ between control and IFN-beta-stimulated cells.
-1. **Which genes define the pattern?** Gene weights identify genes that contribute strongly to the pattern.
-1. **Do the top genes fit known biology?** Interferon-associated genes provide literature-guided expectations.
-1. **Which direction do the genes move?** Directionality checks ask whether genes are higher or lower after stimulation.
-1. **Does the pattern respect cell identity?** Cell-type summaries help distinguish broad stimulation activity from cell-type-linked structure.
-1. **Did the model run sensibly?** Diagnostics help evaluate convergence, stability, and fit.
+2. **Which genes contribute most strongly?** Examine the genes with the largest {{< glossary "Gene weight" display="gene weights" >}} and consider their known functions. Several genes associated with the same biological process can suggest an interpretation, but a familiar gene alone is not enough to name the pattern [@johnson2023cogapsWorkflow].
 
-These evidence types are intentionally separate. A pattern can have plausible genes but weak condition association. A pattern can correlate with stimulation but include genes that require careful directionality checks. A pattern can be strong in one cell type but weaker in another. The case study will teach you to combine these pieces rather than rely on one plot or one statistic.
+3. **How does gene expression differ between conditions?** Compare expression in stimulated and control samples from the same donor. These {{< glossary "Directionality" display="directionality" >}} checks show whether relative expression is higher or lower after stimulation. A large CoGAPS gene weight does not provide that direction.
 
-## Interpretive boundaries before analysis
+For example, high weights for IFIT1 and OAS1 would make an interferon-response interpretation worth investigating. Higher pattern activity in stimulated samples across several cell types and donors would strengthen that interpretation. The expression comparisons would then show which contributing genes are higher or lower after stimulation.
 
-The Context section should give you expectations, not conclusions. The source data come from lupus donors, but the main analysis studies an in vitro IFN-beta stimulation response. The case study does not test a lupus therapy, predict patient outcomes, or prove a disease mechanism. Those limitations are discussed more fully later.
+```{r}
+#| label: fig-context-pattern-evidence
+#| echo: false
+#| fig-cap: "Interpreting a CoGAPS pattern involves comparing cell activities across conditions and cell types, examining contributing genes, and checking expression direction separately. Control and stimulated samples are paired by donor, not by individual cell. The diagrams illustrate the reasoning process rather than fitted results. Researcher illustration adapted from Avataaars (Pablo Stanley; Fang-Pen Lin). See Acknowledgments for artwork credits."
+#| fig-alt: "Four-panel conceptual comic following one unnamed CoGAPS pattern. First, different control and IFN-beta-stimulated cells from the same donor show lower and higher pattern activity within T cells, B cells and monocytes. Second, gene-weight bars for IFIT1 and OAS1 are considered alongside their known interferon-response functions. Third, lines connect relative-expression summaries from control and stimulated samples from the same donor, not individual cells. Finally, the clues support a possible shared interferon response, with a reminder to keep the interpretation open if they disagree. All values are schematic, not fitted results."
+#| out-width: "900px"
+#| out-extra: '.lightbox title=""'
+ottrpal::include_slide(
+  "https://docs.google.com/presentation/d/1TnWgyP9Xi9s3kknD5V7rz8YYJnsQAByQYz4pCNF0erk/edit#slide=id.p1"
+)
+```
 
-For now, carry forward a narrower and more useful question: can a latent-pattern model help separate a broad interferon-response signal from immune-cell identity in a mixed PBMC single-cell dataset?
+You will also inspect saved diagnostic plots and {{< glossary "Posterior uncertainty" display="uncertainty estimates" >}} to look for problems in the fit and uncertainty in the estimated values. These checks assess the model; they do not establish what a pattern means biologically.
+
+Together, these observations support an interpretation without requiring every pattern to have a definitive biological label. When the clues do not agree, the interpretation should remain tentative.
 
 :::{.definition_box}
 ::::{.definition_box_header}
@@ -231,14 +238,15 @@ Core distinctions to carry forward
 ::::
 ::::{.inner_block}
 
-- **PBMC identity versus stimulation response:** A cell can retain immune-cell identity while also responding to IFN-beta.
-- **Cell cluster versus latent pattern:** A cluster groups similar cells; a latent pattern can be shared across cells in different groups.
-- **Gene weight versus expression direction:** A high-weight gene helps define a pattern; directionality asks whether that gene rises or falls after stimulation.
-- **Rank `K` versus pattern label:** `K` controls how many patterns the model learns; pattern labels are names assigned within one run.
-- **Literature expectation versus analysis result:** Interferon biology tells you what to look for; the CoGAPS analysis tests whether the data support that interpretation.
+- **Cell type and response:** A cell can respond to IFN-beta while retaining expression features associated with its cell type.
+- **Clusters and patterns:** Clustering groups cells with similar expression profiles. A latent pattern can appear in cells from several clusters.
+- **Gene weights and expression changes:** A large gene weight indicates a strong contribution to a pattern. A separate comparison shows whether the gene's relative expression is higher or lower after stimulation.
+- **`K` and pattern numbers:** `K` is the number of patterns fitted. Labels such as `Pattern1` identify patterns within a particular fit and can refer to different patterns in another fit.
 ::::
 :::
 
-The next section turns this background into concrete files. You will see which processed data objects are included in the case study, which saved CoGAPS artifacts support the main learner path, and which larger files are optional for full reproduction. With the biological and modeling vocabulary in place, those files should read less like a list of artifacts and more like the evidence chain you will use to answer the main questions.
+These comparisons describe a laboratory response to IFN-beta. [Limitations](#limitations) explains why they cannot establish how SLE develops or predict patient outcomes.
+
+Next, [What are the data?](#what-are-the-data) introduces the prepared dataset and saved CoGAPS outputs you will use to investigate the main questions.
 
 ***
